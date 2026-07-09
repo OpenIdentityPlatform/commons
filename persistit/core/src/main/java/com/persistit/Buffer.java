@@ -13,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -2672,9 +2673,9 @@ public class Buffer extends SharedResource {
      * ebc value will the ebc encoded in that key block.
      * </p>
      * <p>
-     * This method returns a long which encoded these two values as <code><pre>
+     * This method returns a long which encoded these two values as <pre>
      *     (minimumEbc << 32) | totalDeallocatedSize
-     * </pre></code>
+     * </pre>
      * </p>
      * <p>
      * DOES NOT MODIFY BUFFER

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.authz.filter.api;
@@ -25,7 +26,7 @@ package org.forgerock.authz.filter.api;
  *     rolesAttr.set(context, Collections.singleton("someRole"));
  *     ...
  *     Set<String> roles = rolesAttr.get(context);
- * }</pre></p>
+ * }</pre>
  *
  * <p>Note that due to the dynamic nature of request attributes, it is not possible to make this completely
  * type-safe.</p>

@@ -13,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -274,7 +275,6 @@ public interface Management extends Remote, ManagementMXBean {
      * <dd>Buffers on the invalid buffer queue. These buffers will be consumed
      * first whenever a new page is copied into the pool.</dd>
      * </dl>
-     * </p>
      * <p>
      * The <code>includeMask</code> and <code>excludeMask</code> are applied to
      * each buffer's state to determine whether that buffer should be included
@@ -296,8 +296,8 @@ public interface Management extends Remote, ManagementMXBean {
      * <dd>Buffer must have a READER claim</dd>
      * <dt>p</dt>
      * <dd>Buffer must be PERMANENT. The head page for each {@link Volume}
-     * occupies a PERMANENT buffer.</dd> </dd>
-     * </p>
+     * occupies a PERMANENT buffer.</dd>
+     * </dl>
      * <p>
      * If Persistit is not initialized then this method returns an empty array.
      * </p>
@@ -398,7 +398,6 @@ public interface Management extends Remote, ManagementMXBean {
      * <dd>Buffers on the invalid buffer queue. These buffers will be consumed
      * first whenever a new page is copied into the pool.</dd>
      * </dl>
-     * </p>
      * <p>
      * The <code>includeMask</code> and <code>excludeMask</code> are applied to
      * each buffer's state to determine whether that buffer should be included
@@ -421,7 +420,7 @@ public interface Management extends Remote, ManagementMXBean {
      * <dt>p</dt>
      * <dd>Buffer must be PERMANENT. The head page for each {@link Volume}
      * occupies a PERMANENT buffer.</dd>
-     * </dd>
+     * </dl>
      * <p>
      * If Persistit is not initialized then this method returns an empty array.
      * </p>
@@ -446,7 +445,7 @@ public interface Management extends Remote, ManagementMXBean {
     /**
      * Return an array containing a <code>VolumeInfo</code> element for each
      * open volume. If Persistit is not initialized then this method returns an
-     * empty array. </p>
+     * empty array.
      * 
      * @return The array
      */
@@ -703,17 +702,17 @@ public interface Management extends Remote, ManagementMXBean {
      * within the JMX framework. For most of the MXBean instance you can
      * construct the ObjectName from a constant in the interface. for example
      * 
-     * <code><pre>
-     *    ObjectName on = 
+     * <pre>
+     *    ObjectName on =
      *        new ObjectName(JournalManagerMXBean.MXBEAN_NAME);
-     * </pre></code>
+     * </pre>
      * 
      * For BufferPoolMXBean instances, use
      * 
-     * <code><pre>
-     *    ObjectName on = 
+     * <pre>
+     *    ObjectName on =
      *        new ObjectName(BufferPoolMXBean.MXBEAN_NAME + "." + bufferSize);
-     * </pre></code>
+     * </pre>
      * 
      * 
      * @return Map of ObjectName to Object for all registered MXBeans
@@ -1569,7 +1568,7 @@ public interface Management extends Remote, ManagementMXBean {
          * Return the alias if one was assigned in the system configuration.
          * 
          * @return the alias for this volume, or
-         *         <code>null<code> if there is none
+         *         <code>null</code> if there is none
          */
         public String getName() {
             return name;
@@ -1656,7 +1655,7 @@ public interface Management extends Remote, ManagementMXBean {
          * Return the number of physical read operations performed against pages
          * in this <code>Volume</code>. The read occurs only when Persistit
          * requires the content of a page that has not already been copied into
-         * the </code>BufferPool</code> or which has become invalid.
+         * the <code>BufferPool</code> or which has become invalid.
          * 
          * @return the read counter
          */
@@ -2356,6 +2355,7 @@ public interface Management extends Remote, ManagementMXBean {
         /**
          * Return one of the following values:
          * <table>
+         * <caption>Summary</caption>
          * <tr>
          * <td>Long.MINVALUE</td>
          * <td>if recovery has not begun yet</td>
@@ -2618,6 +2618,7 @@ public interface Management extends Remote, ManagementMXBean {
         /**
          * Return one of the following values:
          * <table>
+         * <caption>Summary</caption>
          * <tr>
          * <td>Long.MINVALUE</td>
          * <td>if recovery has not begun yet</td>
@@ -2722,7 +2723,6 @@ public interface Management extends Remote, ManagementMXBean {
          * was initialized
          * 
          * @return total number of transactions committed
-         * @throws RemoteException
          */
         public long getCommitCount() {
             return commitCount;
@@ -2733,7 +2733,6 @@ public interface Management extends Remote, ManagementMXBean {
          * Persistit was initialized
          * 
          * @return total number of transactions rolled back
-         * @throws RemoteException
          */
         public long getRollbackCount() {
             return rollbackCount;
@@ -2744,7 +2743,6 @@ public interface Management extends Remote, ManagementMXBean {
          * last commit
          * 
          * @return number of transactions rolled back since the last commit
-         * @throws RemoteException
          */
         public long getRollbackSinceCommitCount() {
             return rollbackSinceCommitCount;

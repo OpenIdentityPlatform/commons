@@ -13,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -51,7 +52,7 @@ import com.persistit.util.Util;
  * the final "destination trees." Each sort tree is constrained to be small
  * enough to fit in the {@link BufferPool}.
  * </p>
- * <h3>Background</h3>
+ * <h2>Background</h2>
  * <p>
  * In general, Persistit can store records very quickly, even when the keys of
  * those records arrive in random order, as long as all the pages of the
@@ -74,7 +75,6 @@ import com.persistit.util.Util;
  * positions and therefore may each require random seeks. As a result, inserting
  * one key can take orders of magnitude longer once the tree no longer fits in
  * the buffer pool.
- * </p>
  * <p>
  * <code>TreeBuilder</code> mitigates that degradation by sorting the keys
  * before inserting them into their final destination trees. To do so it builds
@@ -92,10 +92,10 @@ import com.persistit.util.Util;
  * pool. In general it is faster to insert the keys directly into the
  * destination trees unless both of these conditions are true.
  * </p>
- * <h3>Using TreeBuilder</h3>
+ * <h2>Using TreeBuilder</h2>
  * <p>
  * The following example demonstrates the fundamental operation of
- * <code>TreeBuilder</code>: <code><pre>
+ * <code>TreeBuilder</code>: <pre>
  *   Exchange exchange = db.getExchange("myVolume", "myTree", true);
  *   TreeBuilder tb = new TreeBuilder(db);
  *   //
@@ -109,13 +109,12 @@ import com.persistit.util.Util;
  *   // Merge the data into myTree
  *   // 
  *   tb.merge();
- * </pre></code> Note that a TreeBuilder can pre-sort data for multiple
+ * </pre> Note that a TreeBuilder can pre-sort data for multiple
  * destination trees. For example, it is possible to load and merge records for
  * a table and its corresponding indexes in one pass using TreeBuilder. During
  * the merge operation the final destination <code>Tree</code> are built in
  * sequence. By default that sequence is by alphabetical order of tree name, but
  * it is possible to customize TreeBuilder to change that order.
- * </p>
  * <p>
  * Loading a large data set may take a long time under the best of
  * circumstances. Therefore this class is designed to be extended by
@@ -139,8 +138,7 @@ import com.persistit.util.Util;
  * <li>{@link #getTreeComparator()} - return a custom Comparator to determine
  * sequence in which trees are populated within the {@link #merge()} method
  * </ul>
- * </p>
- * 
+ *
  * @author peter
  * 
  */
@@ -392,7 +390,7 @@ public class TreeBuilder {
 
     /**
      * @return List of destination
-     *         <code>Tree<code> instances. This list is built as keys are stored.
+     *         <code>Tree</code> instances. This list is built as keys are stored.
      */
     public synchronized final List<Tree> getTrees() {
         final List<Tree> list = new ArrayList<Tree>(_allTrees);
