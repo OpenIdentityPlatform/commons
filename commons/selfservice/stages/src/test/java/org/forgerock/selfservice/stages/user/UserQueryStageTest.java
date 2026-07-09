@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions copyright 2020-2026 3A Systems, LLC
  */
 package org.forgerock.selfservice.stages.user;
 
@@ -22,8 +23,9 @@ import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_ID_FIELD;
 import static org.forgerock.selfservice.stages.CommonStateFields.USERNAME_FIELD;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -179,7 +181,7 @@ public final class UserQueryStageTest {
                 ((QueryResourceHandler) invocation.getArguments()[2]).handleResource(resourceResponse);
                 return null;
             }
-        }).when(connection).query(any(Context.class), any(QueryRequest.class), any(QueryResourceHandler.class));
+        }).when(connection).query(nullable(Context.class), any(QueryRequest.class), any(QueryResourceHandler.class));
 
         // When
         userQueryStage.advance(context, config);
@@ -197,7 +199,7 @@ public final class UserQueryStageTest {
                 ((QueryResourceHandler) invocation.getArguments()[2]).handleResource(resourceResponse);
                 return null;
             }
-        }).when(connection).query(any(Context.class), any(QueryRequest.class), any(QueryResourceHandler.class));
+        }).when(connection).query(nullable(Context.class), any(QueryRequest.class), any(QueryResourceHandler.class));
 
         // When
         userQueryStage.advance(context, config);
@@ -215,7 +217,7 @@ public final class UserQueryStageTest {
                 ((QueryResourceHandler) invocation.getArguments()[2]).handleResource(resourceResponse);
                 return null;
             }
-        }).when(connection).query(any(Context.class), any(QueryRequest.class), any(QueryResourceHandler.class));
+        }).when(connection).query(nullable(Context.class), any(QueryRequest.class), any(QueryResourceHandler.class));
 
         // When
         userQueryStage.advance(context, config);
@@ -241,7 +243,7 @@ public final class UserQueryStageTest {
                 ((QueryResourceHandler) invocation.getArguments()[2]).handleResource(resourceResponse);
                 return null;
             }
-        }).when(connection).query(any(Context.class), any(QueryRequest.class), any(QueryResourceHandler.class));
+        }).when(connection).query(nullable(Context.class), any(QueryRequest.class), any(QueryResourceHandler.class));
 
         // When
         userQueryStage.advance(context, config);

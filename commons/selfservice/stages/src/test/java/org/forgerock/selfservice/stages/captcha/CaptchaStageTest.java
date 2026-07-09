@@ -12,13 +12,15 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions copyright 2020-2026 3A Systems, LLC
  */
 package org.forgerock.selfservice.stages.captcha;
 
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 
 import org.forgerock.http.Client;
 import org.forgerock.http.Handler;
@@ -112,7 +114,7 @@ public final class CaptchaStageTest {
         config.setRecaptchaSecretKey("6Le4og4TAAAAAFPprcsXlHE9bYYPAMX794A6R3Mv");
         config.setRecaptchaUri("https://www.google.com/recaptcha/api/siteverify");
         given(context.getInput()).willReturn(newEmptyJsonValue());
-        given(handler.handle(any(Context.class), any(Request.class))).willReturn(newPromiseFailure());
+        given(handler.handle(nullable(Context.class), any(Request.class))).willReturn(newPromiseFailure());
         // When
         captchaStage.advance(context, config);
     }
@@ -126,7 +128,7 @@ public final class CaptchaStageTest {
         config.setRecaptchaSecretKey("6Le4og4TAAAAAFPprcsXlHE9bYYPAMX794A6R3Mv");
         config.setRecaptchaUri("https://www.google.com/recaptcha/api/siteverify");
         given(context.getInput()).willReturn(getInputCaptchaResponse());
-        given(handler.handle(any(Context.class), any(Request.class))).willReturn(newPromiseFailure());
+        given(handler.handle(nullable(Context.class), any(Request.class))).willReturn(newPromiseFailure());
         // When
         captchaStage.advance(context, config);
     }
@@ -137,7 +139,7 @@ public final class CaptchaStageTest {
         config.setRecaptchaSecretKey("6Le4og4TAAAAAFPprcsXlHE9bYYPAMX794A6R3Mv");
         config.setRecaptchaUri("https://www.google.com/recaptcha/api/siteverify");
         given(context.getInput()).willReturn(getInputCaptchaResponse());
-        given(handler.handle(any(Context.class), any(Request.class))).willReturn(newPromiseSuccess());
+        given(handler.handle(nullable(Context.class), any(Request.class))).willReturn(newPromiseSuccess());
         // When
         captchaStage.advance(context, config);
     }
