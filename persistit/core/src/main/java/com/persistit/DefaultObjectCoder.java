@@ -13,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -138,9 +139,7 @@ import com.persistit.exception.ConversionException;
  *      }
  * </code>
  * </pre>
- * 
- * </p>
- * 
+ *
  * @author peter
  * @version 1.1
  */
@@ -281,7 +280,6 @@ public class DefaultObjectCoder extends DefaultValueCoder implements KeyRenderer
      * value that the getXyz method might return. If multiple setXyz methods
      * meet this requirement, the method with the most specific argument type is
      * selected.
-     * </p>
      * <p>
      * If both setXyz and either getXyz or isXyz methods meeting these criteria
      * are found then the accessor is a property accessor, and will be stored

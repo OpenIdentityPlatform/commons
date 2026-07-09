@@ -19,6 +19,7 @@
  * Portions Copyright 2014-2015 ForgeRock AS.
  * Copied from commons-lang:commons-lang:2.6 org.apache.commons.lang.reflect.ConstructUtils with un-required methods
  * removed.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.guice.core.internal.commons.lang.reflect;
 
@@ -26,10 +27,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 
 /**
- * <p> Utility reflection methods focussed on constructors, modelled after {@link MethodUtils}. </p>
+ * <p> Utility reflection methods focussed on constructors, modelled after {@code MethodUtils}. </p>
  *
- * <h3>Known Limitations</h3>
- * <h4>Accessing Public Constructors In A Default Access Superclass</h4>
+ * <h2>Known Limitations</h2>
+ * <h3>Accessing Public Constructors In A Default Access Superclass</h3>
  * <p>There is an issue when invoking public constructors contained in a default access superclass.
  * Reflection locates these constructors fine and correctly assigns them as public.
  * However, an <code>IllegalAccessException</code> is thrown if the constructors is invoked.</p>

@@ -14,6 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -104,7 +105,7 @@ import static com.persistit.util.ThreadSequencer.sequence;
  * <code>Key</code>.
  * </p>
  * <p>
- * <h3>Exchange is Not Threadsafe</h3>
+ * <h2>Exchange is Not Threadsafe</h2>
  * <em>Important:</em> an <code>Exchange</code> and its associated
  * <code>Key</code> and <code>Value</code> instances are <i>not</i> thread-safe.
  * Generally each <code>Thread</code> should allocate and use its own
@@ -116,9 +117,8 @@ import static com.persistit.util.ThreadSequencer.sequence;
  * Persistit is designed to allow multiple threads, using <em>multiple</em>
  * <code>Exchange</code> instances, to access and update the underlying database
  * in a highly concurrent fashion.
- * </p>
  * <p>
- * <h3>Exchange Pools</h3>
+ * <h2>Exchange Pools</h2>
  * Normally each thread should allocate its own <code>Exchange</code> instances.
  * However, depending on the garbage collection performance characteristics of a
  * particular JVM it may be desirable to maintain a pool of
@@ -133,7 +133,6 @@ import static com.persistit.util.ThreadSequencer.sequence;
  * {@link Persistit#releaseExchange(Exchange, boolean)} to relinquish an
  * <code>Exchange</code> once it is no longer needed, thereby placing it in the
  * pool for subsequent reuse.
- * </p>
  *
  * @version 1.0
  */
@@ -328,7 +327,7 @@ public class Exchange implements ReadOnlyExchange {
    * throws a {@link com.persistit.exception.TreeNotFoundException}.
    * </p>
    * <p>
-   * The <code>volumeName</tt< you supply must match exactly one open
+   * The <code>volumeName</code> you supply must match exactly one open
    * <code>Volume</code>. The name matches if either (a) the
    * <code>Volume</code> has an optional alias that is equal to the supplied
    * name, or (b) if the supplied name matches a substring of the
@@ -405,7 +404,6 @@ public class Exchange implements ReadOnlyExchange {
    *
    * @param tree
    *            The <code>Tree</code> to access.
-   * @throws BufferSizeUnavailableException
    */
   public Exchange(final Tree tree) {
     this(tree._persistit);
@@ -659,14 +657,14 @@ public class Exchange implements ReadOnlyExchange {
      * {@link Exchange#traverse(Key.Direction, boolean, int, TraverseVisitor)}
      * . This method will be called once for each key encountered in the
      * traversal. This method may return <code>false</code> to stop
-     * traversing additional keys. </p>
+     * traversing additional keys.
      * <p>
      * The implementation of this method:
      * <ul>
      * <li>Must return quickly, especially in a multi-threaded environment,
      * to avoid blocking other threads that may attempt to update records in
      * the same <code>Buffer</code>,
-     * <li>Must not perform update operations on any <codeExchange</code>,
+     * <li>Must not perform update operations on any <code>Exchange</code>,
      * especially in a multi-threaded environment, to prevent deadlocks,
      * <li>May read and modify the <code>Key</code> and <code>Value</code>
      * fields of the supplied <code>ReadOnlyExchange</code>. Note, however,
@@ -1095,7 +1093,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Search for a data record by key. Uses and maintains level cache. This
    * method returns a foundAt location within a Buffer.
-   * <p />
+   * <p>
    * As a side effect, this method populates the root LevelCache instance
    * (_levelCache[0]) and establishes a claim on a Buffer at that level to
    * which the foundAt value refers. The caller of this method MUST release
@@ -1162,7 +1160,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Searches for the current key from top down and populates the level cache
    * while doing so.
-   * <p />
+   * <p>
    * As a side effect, this method populates the root LevelCache instance
    * (_levelCache[0]) and establishes a claim on a Buffer at that level to
    * which the foundAt value refers. The caller of this method MUST release
@@ -1251,7 +1249,7 @@ public class Exchange implements ReadOnlyExchange {
    * the right sibling page and then releasing the original page. This pattern
    * implements the B-link-tree semantic that allows searches to proceed while
    * inserts are adjusting the index structure.
-   * <p />
+   * <p>
    * As a side effect, this method populates the LevelCache instance for the
    * specified <code>currentLevel</code> and establishes a claim on a Buffer
    * at that level. The caller of this method MUST release that Buffer when
@@ -1983,7 +1981,6 @@ public class Exchange implements ReadOnlyExchange {
    * <dd>If the supplied key exists in the database, return that key;
    * otherwise find the next smaller key and return it.</dd>
    * </dl>
-   * </p>
    *
    * @param direction
    *            One of Key.GT, Key.GTEQ, Key.EQ, Key.LT or Key.LTEQ.
@@ -2040,7 +2037,6 @@ public class Exchange implements ReadOnlyExchange {
    * <dd>If the supplied key exists in the database, return that key;
    * otherwise find the next smaller key and return it.</dd>
    * </dl>
-   * </p>
    *
    * @param direction
    *            One of Key.GT, Key.GTEQ, Key.EQ, Key.LT or Key.LTEQ.
@@ -2415,7 +2411,6 @@ public class Exchange implements ReadOnlyExchange {
    * <dd>If the supplied key exists in the database, return that key;
    * otherwise find the next smaller key and return it.</dd>
    * </dl>
-   * </p>
    *
    * @param direction
    *            One of Key.GT, Key.GTEQ, Key.EQ, Key.LT or Key.LTEQ.
@@ -2470,7 +2465,6 @@ public class Exchange implements ReadOnlyExchange {
    * <dd>If the supplied key exists in the database, return that key;
    * otherwise find the next smaller key and return it.</dd>
    * </dl>
-   * </p>
    *
    * @param direction
    *            One of Key.GT, Key.GTEQ, Key.EQ, Key.LT or Key.LTEQ.
@@ -2794,7 +2788,7 @@ public class Exchange implements ReadOnlyExchange {
    * execution of transactions that could otherwise experience write skew. A
    * key specified in this method is local to the <code>Exchange</code>'s
    * current {@link Tree}. Two concurrent threads locking the same key in
-   * different trees do not have a write-write dependency. </p>
+   * different trees do not have a write-write dependency.
    * <p>
    * This method does not actually use any locking mechanism; rather, it
    * creates a write-write conflict with another transaction when both
@@ -3268,7 +3262,7 @@ public class Exchange implements ReadOnlyExchange {
    * associated with the current key, its logical children, or both.
    * </p>
    * <p>
-   * Following are valid values for selection: <br />
+   * Following are valid values for selection: <br>
    * <dl>
    * <dt>Key.EQ</dt>
    * <dd>Remove the record associated with the current key if it exists.</dd>
@@ -3283,7 +3277,7 @@ public class Exchange implements ReadOnlyExchange {
    * @param direction
    *            One of Key.EQ, Key.GT, Key.GTEQ
    * @return <code>true</code> if one or more records were actually removed,
-   *         else </i>false</i>.
+   *         else <i>false</i>.
    * @throws PersistitException
    */
   public boolean remove(final Direction direction) throws PersistitException {

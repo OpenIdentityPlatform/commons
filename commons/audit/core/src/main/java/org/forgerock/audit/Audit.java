@@ -13,7 +13,7 @@
  *
  * Copyright 2013 Cybernetica AS
  * Portions copyright 2014-2015 ForgeRock AS.
- * Portions copyright 2024 3A Systems LLC.
+ * Portions copyright 2024-2026 3A Systems LLC.
  */
 package org.forgerock.audit;
 
@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
 
 /**
  * Denotes audit dependencies.
- * <p/>
+ * <p>
  * This annotation can be added to injected parameters to help dependency injection frameworks identify the instance
  * of the parameter type that should be injected.
  */

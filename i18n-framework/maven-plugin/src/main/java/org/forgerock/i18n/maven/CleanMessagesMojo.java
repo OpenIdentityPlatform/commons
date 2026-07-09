@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  *      Copyright 2011 ForgeRock AS
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.i18n.maven;
 
@@ -40,7 +41,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 /**
  * Goal which cleans unused messages files from a property file.
  *
- * @Checkstyle:ignore
  * @goal clean-messages
  * @threadSafe
  */

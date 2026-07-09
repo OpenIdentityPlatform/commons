@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.audit.handlers.syslog;
 
@@ -142,7 +143,7 @@ public class SyslogAuditEventHandlerConfiguration extends EventHandlerConfigurat
 
     /**
      * Returns the timeout after which attempts to connect to the Syslog daemon will be abandoned.
-     * <p/>
+     * <p>
      * Only applies when {@link TransportProtocol#TCP} is active.
      *
      * @return the connect timeout.
@@ -153,7 +154,7 @@ public class SyslogAuditEventHandlerConfiguration extends EventHandlerConfigurat
 
     /**
      * Sets the timeout after which attempts to connect to the Syslog daemon will be abandoned.
-     * <p/>
+     * <p>
      * Only applies when {@link TransportProtocol#TCP} is active.
      *
      * @param connectTimeout
@@ -267,7 +268,7 @@ public class SyslogAuditEventHandlerConfiguration extends EventHandlerConfigurat
 
         /**
          * Returns the name of the event topic field to which this mapping applies.
-         * <p/>
+         * <p>
          * If the chosen field is nested, JsonPointer notation should be used.
          *
          * @return the event topic field name.

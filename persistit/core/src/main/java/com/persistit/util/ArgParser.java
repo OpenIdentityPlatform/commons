@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit.util;
@@ -57,7 +58,7 @@ public class ArgParser {
      * Command line arguments are specified by name, not by position. Each
      * argument must either be a flag in the form <code>-<i>X</i></code> (where
      * <i>X</i> is letter) or a name-value pair in the form
-     * <code><i>argname</i>=</i>value</i></code>. The permissible flags and
+     * <code><i>argname</i>=<i>value</i></code>. The permissible flags and
      * argument names are specified by the array of template strings, each of
      * which must have the form:
      * 
@@ -70,7 +71,6 @@ public class ArgParser {
      * </pre>
      * 
      * </blockquote>
-     * </p>
      * <p>
      * where
      * <dl>
@@ -80,7 +80,6 @@ public class ArgParser {
      * <code>_flags|x|Enable the x option</code>.</dd>
      * <dt><code><i>argname</i></code></dt>
      * <dd>Parameter name.</dd>
-     * </dd>
      * <dt><code><i>argtype</i></code></dt>
      * <dd>
      * One of:
@@ -93,7 +92,6 @@ public class ArgParser {
      * 
      * </dd>
      * </dl>
-     * </p>
      */
     public ArgParser(final String progName, final String[] args, final String[] template) {
         _progName = progName;
