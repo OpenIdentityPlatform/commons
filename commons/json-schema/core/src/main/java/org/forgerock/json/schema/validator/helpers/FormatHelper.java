@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.schema.validator.helpers;
@@ -24,7 +25,7 @@ import org.forgerock.json.schema.validator.validators.SimpleValidator;
 /**
  * This class implements "format" validation on primitive types of objects as defined in
  * the paragraph 5.23 of the JSON Schema specification.
- * <p/>
+ * <p>
  * Additional custom formats MAY be created.  These custom formats MAY
  * be expressed as an URI, and this URI MAY reference a schema of that
  * format.

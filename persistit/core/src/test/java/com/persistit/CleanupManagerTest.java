@@ -1,6 +1,8 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
  * 
+ * Portions Copyrighted 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,12 +26,14 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class CleanupManagerTest extends PersistitUnitTestCase {
 
     volatile int _counter = 0;
     volatile int _last = 0;
+    volatile boolean _outOfOrder = false;
 
     private CleanupManager cm() {
         return _persistit.getCleanupManager();
@@ -52,9 +56,16 @@ public class CleanupManagerTest extends PersistitUnitTestCase {
         public void performAction(final Persistit persistit, final List<CleanupAction> consequentActions)
                 throws PersistitException {
             synchronized (this) {
-        		 assertEquals(_last + 1, _sequence);
-                 _last = _sequence;
-			}
+                // Record ordering instead of asserting here: this runs on the
+                // background CLEANUP_MANAGER thread, where a thrown AssertionError
+                // is swallowed rather than failing the test. testCleanupHappens
+                // verifies _outOfOrder on the test thread; testOverflow legitimately
+                // performs actions out of order once the queue overflows.
+                if (_sequence != _last + 1) {
+                    _outOfOrder = true;
+                }
+                _last = _sequence;
+            }
             _counter++;
             if (_sequence == 123) {
                 throw new ExpectedException();
@@ -86,6 +97,7 @@ public class CleanupManagerTest extends PersistitUnitTestCase {
         assertEquals(500, _counter);
         assertEquals(1, cm().getErrorCount());
         assertEquals(499, cm().getPerformedCount());
+        assertFalse("cleanup actions did not run in sequence order", _outOfOrder);
     }
 
     @Test

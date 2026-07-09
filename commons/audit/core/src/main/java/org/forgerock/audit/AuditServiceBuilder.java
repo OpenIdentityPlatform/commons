@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.audit;
@@ -65,7 +66,7 @@ public final class AuditServiceBuilder {
 
     /**
      * Sets the AuditServiceConfiguration that is to be passed to the AuditService.
-     * <p/>
+     * <p>
      * AuditServiceConfiguration embodies the configuration state that can be set by system administrators.
      *
      * @param auditServiceConfiguration
@@ -170,25 +171,25 @@ public final class AuditServiceBuilder {
 
     /**
      * Creates a new AuditService instance.
-     * <p/>
+     * <p>
      * Instances receive their configuration when constructed and cannot be reconfigured. Where "hot-swappable"
      * reconfiguration is required, an instance of {@link AuditServiceProxy} should be used as a proxy. The old
      * AuditService should fully shutdown before the new instance is started. Care must be taken to ensure that
      * no other threads can interact with this object while {@link AuditService#startup()} and
      * {@link AuditService#shutdown()} methods are running.
-     * <p/>
+     * <p>
      * After construction, the AuditService will be in the 'STARTING' state until {@link AuditService#startup()}
      * is called. When in the 'STARTING' state, a call to any method other than {@link AuditService#startup()}
      * will lead to {@link ServiceUnavailableException}.
-     * <p/>
+     * <p>
      * After {@link AuditService#startup()} is called, assuming startup succeeds, the AuditService will then be in
      * the 'RUNNING' state and further calls to {@link AuditService#startup()} will be ignored.
-     * <p/>
+     * <p>
      * Calling {@link AuditService#shutdown()} will put the AuditService into the 'SHUTDOWN' state; once shutdown, the
      * AuditService will remain in this state and cannot be restarted. Further calls to {@link AuditService#shutdown()}
      * will be ignored. When in the 'SHUTDOWN' state, a call to any method other than {@link AuditService#shutdown()}
      * will lead to {@link ServiceUnavailableException}.
-     * <p/>
+     * <p>
      * When instances are no longer needed, {@link AuditService#shutdown()} should be called to ensure that any
      * buffered audit events are flushed and that all open file handles or connections are closed.
      *
@@ -225,7 +226,7 @@ public final class AuditServiceBuilder {
 
     /**
      * Captures details of a handler registration request.
-     * <p/>
+     * <p>
      * Calls to {@link AuditServiceBuilder#withAuditEventHandler} are lazily-processed when
      * {@link AuditServiceBuilder#build()} is called so that all event topic schema meta-data
      * is available for validation of the mapping from topics to handlers without constraining

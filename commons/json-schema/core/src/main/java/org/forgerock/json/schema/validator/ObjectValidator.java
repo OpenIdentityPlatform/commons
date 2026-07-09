@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.schema.validator;
@@ -22,7 +23,7 @@ import java.util.Map;
 
 /**
  * The ObjectValidator is a sample implementation of how to use the validator.
- * <p/>
+ * <p>
  * The validators was designed to keep in the memory or other cache and validate multiple instances.
  * This implementation creates a new {@link Validator} each time
  * and uses the {@link FailFastErrorHandler} to validate the instance object.
@@ -30,7 +31,7 @@ import java.util.Map;
 public final class ObjectValidator {
     /**
      * Validate the given <code>node</code> against the <code>schema</code>
-     * <p/>
+     * <p>
      * This implementation is pessimistic and returns false if any exception was thrown.
      *
      * @param node   instance to validate

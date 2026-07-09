@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.audit.handlers.elasticsearch;
 
@@ -21,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 /**
  * A configuration for Elasticsearch audit event handler.
- * <p/>
+ * <p>
  * This configuration object can be created from JSON. Example of valid JSON configuration:
  * <pre>
  *  {

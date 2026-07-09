@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.fluent;
@@ -46,7 +47,7 @@ public class JsonPointer implements Iterable<String> {
      * Constructs a JSON pointer, identifying the specified pointer value.
      *
      * @param pointer a string containing the JSON pointer of the value to identify.
-     * @throws JsonPointerException if the pointer is malformed.
+     * @throws JsonException if the pointer is malformed.
      */
     public JsonPointer(String pointer) throws JsonException {
         String[] split = pointer.split("/", -1);
@@ -165,26 +166,27 @@ public class JsonPointer implements Iterable<String> {
      * reference tokens.
      * <p>
      * This method yields the following results: <blockquote>
-     * <table cellpadding=1 cellspacing=0 summary="Examples illustrating usage of relativePointer">
+     * <table>
+     * <caption>Examples illustrating usage of relativePointer</caption>
      * <tr>
      * <th>Input</th>
      * <th>Output</th>
      * </tr>
      * <tr>
-     * <td align=left>/</td>
-     * <td align=left><tt>/</tt></td>
+     * <td>/</td>
+     * <td><code>/</code></td>
      * </tr>
      * <tr>
-     * <td align=left>/a</td>
-     * <td align=left><tt>/</tt></td>
+     * <td>/a</td>
+     * <td><code>/</code></td>
      * </tr>
      * <tr>
-     * <td align=left>/a/b</td>
-     * <td align=left>/b</td>
+     * <td>/a/b</td>
+     * <td>/b</td>
      * </tr>
      * <tr>
-     * <td align=left>/a/b/c</td>
-     * <td align=left>/b/c</td>
+     * <td>/a/b/c</td>
+     * <td>/b/c</td>
      * </tr>
      * </table>
      * </blockquote>
@@ -201,31 +203,32 @@ public class JsonPointer implements Iterable<String> {
      * contained in this pointer.
      * <p>
      * This method yields the following results: <blockquote>
-     * <table cellpadding=1 cellspacing=0 summary="Examples illustrating usage of relativePointer">
+     * <table>
+     * <caption>Examples illustrating usage of relativePointer</caption>
      * <tr>
      * <th>Input</th>
      * <th>sz</th>
      * <th>Output</th>
      * </tr>
      * <tr>
-     * <td align=left>/a/b/c</td>
-     * <td align=center>0</td>
-     * <td align=left>/</td>
+     * <td>/a/b/c</td>
+     * <td>0</td>
+     * <td>/</td>
      * </tr>
      * <tr>
-     * <td align=left>/a/b/c</td>
-     * <td align=center>1</td>
-     * <td align=left>/c</td>
+     * <td>/a/b/c</td>
+     * <td>1</td>
+     * <td>/c</td>
      * </tr>
      * <tr>
-     * <td align=left>/a/b/c</td>
-     * <td align=center>2</td>
-     * <td align=left>/b/c</td>
+     * <td>/a/b/c</td>
+     * <td>2</td>
+     * <td>/b/c</td>
      * </tr>
      * <tr>
-     * <td align=left>/a/b/c</td>
-     * <td align=center>3</td>
-     * <td align=left>/a/b/c</td>
+     * <td>/a/b/c</td>
+     * <td>3</td>
+     * <td>/a/b/c</td>
      * </tr>
      * </table>
      * </blockquote>

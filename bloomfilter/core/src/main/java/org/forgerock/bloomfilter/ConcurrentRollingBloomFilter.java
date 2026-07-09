@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.bloomfilter;
@@ -27,7 +28,7 @@ import java.util.Collection;
  * A thread-safe implementation of a Bloom Filter that can expand over time to accommodate arbitrary numbers of
  * elements, while also allowing old elements to be deleted after they have expired. Rolling bloom filters are useful
  * for maintaining on-going blacklists of short-lived elements.
- * <p/>
+ * <p>
  * This implementation is optimised for concurrent read performance. Concurrent writes performance is likely to be
  * considerably slower than reads, so this implementation is only suitable for situations where read performance is
  * critical and writes are relatively rare. Write performance may be improved by batching writes via the

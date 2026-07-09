@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.audit.util;
@@ -68,7 +69,7 @@ public final class ElasticsearchUtil {
      * Regex pattern that matches JSON keys that contain at least one period.  This is useful, because Elasticsearch
      * does not allow period characters in JSON keys
      * [<a href="https://discuss.elastic.co/t/field-name-cannot-contain/33251/29">ref</a>].
-     * <p/>
+     * <p>
      * The following regex matches anything after an open-curly-brace, or comma, that is within double-quotes and
      * followed by a semi-colon. Furthermore, positive-lookahead requires at least one period-character within the
      * double-quotes.

@@ -21,6 +21,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.script.engine;
@@ -75,7 +76,7 @@ public class Utils {
     }
 
     /**
-     * Read large > 5Mb text files to String.
+     * Read large &gt; 5Mb text files to String.
      *
      * @param file
      *            source file
@@ -92,7 +93,7 @@ public class Utils {
     }
 
     /**
-     * Read small < 5Mb text files to String.
+     * Read small &lt; 5Mb text files to String.
      *
      * @param file
      *            source file

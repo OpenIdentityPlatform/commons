@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit.encoding;
@@ -52,7 +53,6 @@ import com.persistit.Key;
  * <code>Value</code>, the registered <code>MyClassValueCoder</code> will be
  * used to encode it. Persistit uses the {@link #lookupKeyCoder} and
  * {@link #lookupValueCoder} methods to acquire the appropriate coder.
- * </p>
  * <p>
  * An application may replace the default implementation provided by
  * <code>DefaultCoderManager</code>. Such a custom implementation might, for
@@ -75,16 +75,14 @@ import com.persistit.Key;
  * {@link #lookupKeyCoder} and {@link #lookupValueCoder} should delegate any
  * lookups not handled by the customized <code>CoderManager</code> back to the
  * parent.
- * </p>
- * <h3>Key Ordering</h3>
+ * <h2>Key Ordering</h2>
  * <p>
  * The encoding of key values determines the ordering of traversal for
  * {@link Exchange#traverse} and associated methods. See {@link Key} for
  * definition of the ordering among the types for which built-in encoding
  * exists. The ordering of key values based on objects that are encoded by
  * custom <code>KeyCoder</code>s is determined by the implementation of each
- * </code>KeyCoder</code>.
- * </p>
+ * <code>KeyCoder</code>.
  * This leaves the question of how keys that may contain encoded objects of
  * different classes are ordered. For example, consider the code fragment shown
  * here: <blockquote>
@@ -106,7 +104,6 @@ import com.persistit.Key;
  * <code>a</code> and <code>b</code> into Persistit, and will then traverse the
  * resulting tree and print the names of the classes of the key values. The
  * question is whether "MyClass2" will be printed before or after "MyClass2".
- * </p>
  * <p>
  * The answer depends on the order in which MyClass1 and MyClass2 were first
  * registered within Persistit. At the time a new class is first registered,

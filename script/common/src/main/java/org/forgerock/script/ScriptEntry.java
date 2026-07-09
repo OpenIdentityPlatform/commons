@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.script;
@@ -86,13 +87,13 @@ public interface ScriptEntry extends Scope {
     Visibility getVisibility();
 
     /**
-     * Returns <tt>true</tt> if this script can be evaluated.
-     * <p/>
+     * Returns <code>true</code> if this script can be evaluated.
+     * <p>
      * This method checks the availability of the required
      * {@link org.forgerock.script.engine.ScriptEngine} and the
      * {@link org.forgerock.script.source.SourceUnit}.
      *
-     * @return <tt>true</tt> if this script can be evaluated
+     * @return <code>true</code> if this script can be evaluated
      */
     boolean isActive();
 

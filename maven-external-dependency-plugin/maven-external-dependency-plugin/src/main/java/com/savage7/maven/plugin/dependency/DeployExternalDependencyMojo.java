@@ -10,6 +10,7 @@
  * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  **/
 
 package com.savage7.maven.plugin.dependency;
@@ -34,10 +35,8 @@ import org.apache.maven.project.artifact.ProjectArtifactMetadata;
  *
  * @goal deploy-external
  * @author <a href="mailto:robert@savage7.com">Robert Savage</a>
- * @see http://code.google.com/p/maven-external-dependency-plugin/
+ * @see <a href="http://code.google.com/p/maven-external-dependency-plugin/">http://code.google.com/p/maven-external-dependency-plugin/</a>
  * @version 0.1
- * @category Maven Plugin
- * @ThreadSafe
  */
 public class DeployExternalDependencyMojo extends
         AbstractExternalDependencyMojo
@@ -72,7 +71,7 @@ public class DeployExternalDependencyMojo extends
     public void execute() throws MojoExecutionException, MojoFailureException
     {
         // update base configuration parameters
-        // (not sure why this is needed, but doesn't see to work otherwise?)
+        // (not sure why this is needed, but doesn't seem to work otherwise?)
         super.localRepository = this.localRepository;
 
         getLog()
@@ -83,7 +82,7 @@ public class DeployExternalDependencyMojo extends
         for (ArtifactItem artifactItem : artifactItems)
         {
             getLog().info(
-                    "resolving artifact in locale repository for deployment: "
+                    "resolving artifact in local repository for deployment: "
                             + artifactItem.toString());
 
             //
@@ -235,7 +234,7 @@ public class DeployExternalDependencyMojo extends
                 catch (IOException e)
                 {
                     throw new MojoExecutionException(
-                            "Unable to resolve dependency path in locale repository.",
+                            "Unable to resolve dependency path in local repository.",
                             e);
                 }
             }
@@ -257,12 +256,7 @@ public class DeployExternalDependencyMojo extends
     private ArtifactRepository getDeploymentRepository()
             throws MojoExecutionException, MojoFailureException
     {
-        ArtifactRepository repo = null;
-
-        if (repo == null)
-        {
-            repo = project.getDistributionManagementArtifactRepository();
-        }
+        ArtifactRepository repo = project.getDistributionManagementArtifactRepository();
 
         if (repo == null)
         {
