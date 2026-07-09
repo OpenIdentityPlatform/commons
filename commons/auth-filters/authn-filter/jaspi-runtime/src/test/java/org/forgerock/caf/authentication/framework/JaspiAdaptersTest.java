@@ -20,7 +20,7 @@ package org.forgerock.caf.authentication.framework;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.caf.authentication.framework.JaspiAdapters.MESSAGE_INFO_CONTEXT_KEY;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import javax.security.auth.Subject;
