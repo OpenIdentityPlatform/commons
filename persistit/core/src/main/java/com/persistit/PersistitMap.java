@@ -679,7 +679,6 @@ public class PersistitMap<K, V> extends AbstractMap<K, V> implements SortedMap<K
      * This implementation iterates over the specified map's
      * <code>entrySet()</code> collection, and calls this map's <code>put</code>
      * operation once for each entry returned by the iteration.
-     * <p>
      * 
      * @param t
      *            mappings to be stored in this map.
@@ -1349,7 +1348,6 @@ public class PersistitMap<K, V> extends AbstractMap<K, V> implements SortedMap<K
      * as the key followed by an equals sign (<code>"="</code>) followed by the
      * associated value. Keys and values are converted to strings as by
      * <code>String.valueOf(Object)</code>.
-     * <p>
      * 
      * @return a String representation of this map.
      */

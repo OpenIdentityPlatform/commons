@@ -42,6 +42,15 @@ public class DeployExternalDependencyMojo extends
         AbstractExternalDependencyMojo
 {
     /**
+     * Creates a new instance.
+     */
+    public DeployExternalDependencyMojo()
+    {
+    }
+
+    /**
+     * The local repository into which the artifact is deployed.
+     *
      * @parameter expression="${localRepository}"
      * @required
      * @readonly

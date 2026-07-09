@@ -640,8 +640,6 @@ public class Configuration {
          * </pre>
          * reserves 128M from available memory and then allocates
          * 75% of the remainder up to 8Gb, but not less than 64Mb.
-         * <p>
-         * </p>
          * 
          * @param bufferSize
          * @param propertyName

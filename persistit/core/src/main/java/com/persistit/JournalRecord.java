@@ -50,7 +50,6 @@ import com.persistit.util.Util;
  * </table>
  * <p>
  * Type: two ASCII bytes:
- * <p>
  * <table border="1">
  * <caption>Summary</caption>
  * 

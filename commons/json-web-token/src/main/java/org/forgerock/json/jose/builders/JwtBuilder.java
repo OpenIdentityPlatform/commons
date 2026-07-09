@@ -35,7 +35,6 @@ public interface JwtBuilder {
 
     /**
      * Builds the JWT into a <code>String</code> by calling the <code>build</code> method on the JWT object.
-     * <p>
      * @see org.forgerock.json.jose.jwt.Jwt#build()
      *
      * @return The base64url encoded UTF-8 parts of the JWT.
