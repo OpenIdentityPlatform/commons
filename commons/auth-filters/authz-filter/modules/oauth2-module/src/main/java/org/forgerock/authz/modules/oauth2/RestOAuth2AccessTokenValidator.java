@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.authz.modules.oauth2;
@@ -44,7 +45,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Access Token Validator for validating OAuth2 tokens issued by an OAuth2 Provider using REST requests.
- * <br/>
+ * <br>
  * This validator requires the configuration given at construction to contain the following entries:
  * <ul>
  *     <li>token-info-endpoint - the URI of OAuth2 Provider's tokeninfo endpoint (not including the access_token query

@@ -13,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -78,12 +79,12 @@ import com.persistit.util.Util;
  * following loads a Persistit database located in directory /var/lib/data,
  * selects a volume named xyz, and displays page 42 of that volume:
  * 
- * <code><pre>
+ * </p>
+ * <pre>
  * load datapath=/var/lib/data
  * select volume=xyz
  * view page=42
- * </pre></code>
- * </p>
+ * </pre>
  * <p>
  * CLI operates in one of two modes: "live" and "standalone".
  * </p>
@@ -110,31 +111,50 @@ import com.persistit.util.Util;
  * including piping the output to tools such as grep and more.
  * </p>
  * <p>
- * To run the CLI in standalone mode, simply execute <blockquote><code><pre>
+ * To run the CLI in standalone mode, simply execute
+ * </p>
+ * <blockquote>
+ * <pre>
  * java -cp persisit.jar com.persistit.Persistit cliport=9999
- * </pre></code></blockquote> or <blockquote><code><pre>
+ * </pre>
+ * </blockquote>
+ * <p>
+ * or
+ * </p>
+ * <blockquote>
+ * <pre>
  * java -cp persisit.jar com.persistit.Persistit script=pathname
- * </pre></code></blockquote> where persistit.jar contains the Persistit
+ * </pre>
+ * </blockquote>
+ * <p>
+ * where persistit.jar contains the Persistit
  * library. The first option specifies a port on which CLI will listen for
  * commands. (Use a port number larger than 1024 to avoid permissions problems.)
  * The second option executes commands from a text file in batch mode.
  * </p>
  * <p>
  * The following *nix client script works with the network server facility:
- * <blockquote><code><pre>
+ * </p>
+ * <blockquote>
+ * <pre>
  *   #!/bin/sh
  *   java -cp persistit.jar com.persistit.CLI 9999 $*
- * </pre></code></blockquote> (Substitute the port number assigned to the
+ * </pre>
+ * </blockquote>
+ * <p>
+ * (Substitute the port number assigned to the
  * cliport parameter above.)
  * </p>
  * <p>
  * With this script you can then enter command such as this at the shell:
- * <blockquote><code><pre>
+ * </p>
+ * <blockquote>
+ * <pre>
  * pcli init datapath=/var/lib/data
  * pcli select volume=xyz
  * pcli view page=42
- * </pre></code></blockquote>
- * </p>
+ * </pre>
+ * </blockquote>
  * <p>
  * Commands are defined below in methods annotated with @Cmd having parameters
  * annotated with @Arg. The format of the argument annotation is specified in
