@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.commons.launcher;
@@ -55,7 +56,7 @@ public class ConfigurationUtil {
     }
 
     /**
-     * <p/>
+     * <p>
      * Retrieve a list of filepaths from a given directory within a jar file. If
      * filtered results are needed, you can supply a |filter| regular expression
      * which will match each entry.
@@ -146,7 +147,7 @@ public class ConfigurationUtil {
     	} : null);
     }
     /**
-     * <p/>
+     * <p>
      * Retrieve a list of filepaths from a given directory within a jar file. If
      * filtered results are needed, you can supply a |filter| regular expression
      * which will match each entry.
@@ -242,7 +243,7 @@ public class ConfigurationUtil {
      * <p>
      * This method performs property variable substitution on the specified
      * value. If the specified value contains the syntax
-     * <tt>&{&lt;prop-name&gt;}</tt>, where <tt>&lt;prop-name&gt;</tt> refers to
+     * <code>&amp;{&lt;prop-name&gt;}</code>, where <code>&lt;prop-name&gt;</code> refers to
      * either a configuration property or a system property, then the
      * corresponding property value is substituted for the variable placeholder.
      * Multiple variable placeholders may exist in the specified value as well

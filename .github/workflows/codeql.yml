@@ -14,7 +14,7 @@ on:
 # Cancel superseded runs on the same ref to avoid the long-running,
 # eventually-cancelled analyses seen with the previous default setup.
 concurrency:
-  group: codeql-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -56,6 +56,14 @@ jobs:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
           queries: security-and-quality
+          # Exclude test and integration-test sources. With build-mode 'none'
+          # CodeQL extracts straight from source, so paths-ignore reliably
+          # scopes the analysis (it is honored for compiled languages only when
+          # build-mode is 'none').
+          config: |
+            paths-ignore:
+              - '**/src/test/**'
+              - '**/src/it/**'
 
       # --- Manual build (only used when build-mode is 'manual') -------------
       # - name: Set up JDK 11

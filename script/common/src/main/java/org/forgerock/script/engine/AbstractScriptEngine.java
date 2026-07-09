@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.script.engine;
@@ -125,7 +126,7 @@ public abstract class AbstractScriptEngine implements ScriptEngine {
         this.errorWriter = writer;
     }
 
-    /** {@inheritDoc  */
+    /** {@inheritDoc} */
     // public Map<String, Object> compileBindings(final Context context,
     // final Map<String, Object> request, Map<String, Object>... scopes) {
 
@@ -162,7 +163,7 @@ public abstract class AbstractScriptEngine implements ScriptEngine {
     // return new SimpleBindings(new JsonValueMap(requestScope));
     // }
 
-    /** {@inheritDoc  */
+    /** {@inheritDoc} */
     public Object compileObject(final Context context, Object value) {
         // JsonValue temp = new JsonValue(value);
         // temp.getTransformers().add(getOperationParameter(context));
@@ -174,7 +175,7 @@ public abstract class AbstractScriptEngine implements ScriptEngine {
 
     /**
      * Gets the {@code null} object representation.
-     * <p/>
+     * <p>
      * If the {@code null} object has special representation in the script scope
      * this method returns with that object.
      *

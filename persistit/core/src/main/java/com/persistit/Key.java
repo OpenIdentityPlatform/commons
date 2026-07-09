@@ -13,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -45,12 +46,13 @@ import com.persistit.util.Util;
  * backing byte array directly. However, <code>Key</code> provides a recommended
  * higher-level API that simplifies encoding and decoding Java values.
  * </p>
- * <a name="_keyOrdering"> <h3>Key Ordering</h3> </a>
+ * <h2>Key Ordering</h2>
  * <p>
  * Within a <code>Tree</code>, keys are ordered in lexicographic order, by
  * unsigned byte value. Thus keys encoded physically as shown will be stored in
  * the following order:
  * 
+ * </p>
  * <pre>
  *   1st: {0x01, 0x01}
  *   2nd: {0x01, 0x01, 0x02, 0x01}
@@ -63,6 +65,7 @@ import com.persistit.util.Util;
  *   9th: {0xF9}
  * </pre>
  * 
+ * <p>
  * The ordering is important because it governs the order in which the
  * {@link Exchange#traverse} operations visit records, and the set of keys/value
  * pairs that will be removed by the range {@link Exchange#remove} operations.
@@ -85,18 +88,20 @@ import com.persistit.util.Util;
  * There is also an implicit ordering between different encoded types. The
  * ordering of key values with differing types is as follows:
  * 
+ * </p>
  * <pre>
- *  BEFORE &lt; null &lt; boolean &lt; byte &lt; short &lt; 
- *  char &lt; int &lt; long &lt; float &lt; double &lt; 
- *  java.math.BigInteger &lt; java.math.BigDecimal &lt; 
- *  byte[] &lt; java.lang.String &lt; java.util.Date &lt; 
+ *  BEFORE &lt; null &lt; boolean &lt; byte &lt; short &lt;
+ *  char &lt; int &lt; long &lt; float &lt; double &lt;
+ *  java.math.BigInteger &lt; java.math.BigDecimal &lt;
+ *  byte[] &lt; java.lang.String &lt; java.util.Date &lt;
  *  <i>custom-encoded types</i> &lt; AFTER
  * </pre>
  * 
+ * <p>
  * (Note: {@link #BEFORE} and {@link #AFTER} are special pseudo-values that
  * allow traversal from the first and last keys in a tree.)
  * </p>
- * <h4>Equivalence of Wrapped and Primitive Types</h3>
+ * <h3>Equivalence of Wrapped and Primitive Types</h3>
  * <p>
  * By default <code>Key</code> encodes objects of type <code>Boolean</code>,
  * <code>Byte</code>, <code>Short</code>, <code>Character</code>,
@@ -106,9 +111,7 @@ import com.persistit.util.Util;
  * decode values that were appended as either primitives or their wrapped
  * equivalents.
  * </p>
- * <a name="_keyStringEncoding">
- * <h3>String Encoding</h3>
- * </a>
+ * <h2>String Encoding</h2>
  * <p>
  * By default Strings are encoded in a modified UTF-8 format. This encoding
  * preserves alphabetic ordering of all 7-bit ASCII strings. Character codes
@@ -123,13 +126,12 @@ import com.persistit.util.Util;
  * The default string-encoding algorithm does not support localized collation.
  * TODO - add collation information here - TODO
  * </p>
- * <a name="_ObjectEncoding">
- * <h3>Object Encoding</h3>
- * </a>
+ * <h2>Object Encoding</h2>
  * <p>
  * Persistit offers built-in support for encoding and decoding of a few commonly
  * used Object types. These include:
  * 
+ * </p>
  * <pre>
  *      java.lang.String
  *      java.math.BigInteger
@@ -138,6 +140,7 @@ import com.persistit.util.Util;
  *      byte[]
  * </pre>
  * 
+ * <p>
  * (Note that for byte array, a zero-valued bytes are converted to two-byte
  * sequences, as described above for strings.)
  * </p>
@@ -148,20 +151,20 @@ import com.persistit.util.Util;
  * should register all custom <code>KeyCoder</code> objects immediately after
  * initializing Persistit, for example:
  * 
- * <code><pre>
+ * </p>
+ * <pre>
  *      Persistit.initialize();
  *      KeyCoder coder = new MyKeyCoder();
  *      Persistit.getInstance().getCoderManager()
  *          .registerKeyCoder(MyClass.class, coder);
- * </pre></code>
+ * </pre>
  * 
+ * <p>
  * All overridden object types sort <i>after</i> all other value types. Ordering
  * among various custom types is determined by the custom encoding algorithm's
  * implementation. See {@link com.persistit.encoding.CoderManager} for details.
  * </p>
- * <a name="_keySegments">
- * <h3>Key Segments</h3>
- * </a>
+ * <h2>Key Segments</h2>
  * <p>
  * An application may append multiple values to a <code>Key</code>, each of
  * which is called a key <i>segment</i>. Applications use multiple segments to
@@ -170,6 +173,7 @@ import com.persistit.util.Util;
  * number of segments in a Persistit concatenated key is bounded only by the
  * architectural limitation on the length of the underlying byte array.
  * </p>
+ * <p>
  * Each key segment is encoded as a sequence of non-zero bytes. Segments are
  * separated by zero-valued bytes. A <code>Key</code> encodes strings, byte
  * arrays, and all other data types that might naturally contain a zero- valued
@@ -185,24 +189,25 @@ import com.persistit.util.Util;
  * 0x43, 0x00), respectively. The two encodings differ in the third byte (the
  * zero that terminates the shorter string) which correctly causes the shorter
  * string to collate before the longer one.
+ * </p>
  * <p>
  * Segments fall naturally into the ordering scheme. If two keys are different,
  * then the first segment that differs between the two keys controls their
  * ordering. For example, the code fragment
  * 
- * <code><pre>
+ * </p>
+ * <pre>
  *      key1.clear().append(1).append(1);
  *      key2.clear().append(1).append(2);
  *      key3.clear().append(2).append(1);
  *      key4.clear().append(2).append(1).append(0);
- * </pre></code>
+ * </pre>
  * 
+ * <p>
  * sets the four keys so that their ordering sequence is
  * <code>key1 &lt; key2 &lt; key3 &lt; key4.</code>
  * </p>
- * <a name="_keyChildren">
- * <h3>Logical Key Children and Siblings</h3>
- * </a>
+ * <h2>Logical Key Children and Siblings</h2>
  * <p>
  * The ability to append multiple key segments to a <code>Key</code> supports a
  * method of grouping records logically by hierarchical key values. Much as a
@@ -214,7 +219,8 @@ import com.persistit.util.Util;
  * children of the purchase order number, as suggested in this code snippet:
  * 
  * 
- * <code><pre>
+ * </p>
+ * <pre>
  *  PurchaseOrderSummary poSummary = ...
  *  List poLineItems = ...
  *  ...
@@ -230,8 +236,9 @@ import com.persistit.util.Util;
  *      exchange.clear().to(item.getLineItemId()).store();
  *  }
  *  ...
- * </pre></code>
+ * </pre>
  * 
+ * <p>
  * This example would store the PurchaseOrderSummary under a key containing just
  * the purchase order number, and then store each of the line items from the
  * poLineItems List in a key containing the purchase order number and the line
@@ -239,6 +246,7 @@ import com.persistit.util.Util;
  * convenience method that replaces the final segment of the key with a new
  * value.)
  * </p>
+ * <p>
  * A key value is a <i>logical child</i> of another key value if it can be
  * formed by appending one or more key segments to that other key. For example,
  * the key value containing purchase order number and line item number is a
@@ -261,6 +269,7 @@ import com.persistit.util.Util;
  * <p>
  * Two families of methods of methods in {@link Exchange} incorporate logic to
  * handle logical child keys in a special way:
+ * </p>
  * <ul>
  * <li>
  * The {@link Exchange#traverse(Key.Direction, boolean)} method, and its
@@ -278,10 +287,7 @@ import com.persistit.util.Util;
  * <code>remove</code> method can remove just the line items, just the purchase
  * order summary, or both.</li>
  * </ul>
- * </p>
- * <a name="_stringRepresentation">
- * <h3>String Representation of a Key value</h3>
- * </a>
+ * <h2>String Representation of a Key value</h2>
  * <p>
  * At times it is convenient to represent a Key value as a String, for example,
  * to display it or enter it for editing. This class provides an implementation
@@ -292,11 +298,14 @@ import com.persistit.util.Util;
  * <p>
  * The String representation is of the form:
  * 
+ * </p>
  * <pre>
  *  { <i>segment</i>,... }
  * </pre>
  * 
+ * <p>
  * where each segment value is one of the following:
+ * </p>
  * <ul>
  * <li>
  * <code>null</code></li>
@@ -313,31 +322,35 @@ import com.persistit.util.Util;
  * a <i>cast segment value</i> consisting of a parenthesized class name followed
  * by a String representation of a value of that class.</li>
  * </ul>
+ * <p>
  * For example, the following code excerpt
  * 
- * <code><pre>
+ * </p>
+ * <pre>
  *   Key key = new Key();
  *   key.append("xyz").append(1.23).append((long)456).append(new Date());
  *   System.out.println(key.toString());
- * </pre></code>
+ * </pre>
  * 
+ * <p>
  * would produce a string representation such as
  * 
+ * </p>
  * <pre>
  * { &quot;xyz&quot;, 1.23, (long) 456, (java.util.Date) 20040901114722.563 + 0500 }
  * </pre>
  * 
+ * <p>
  * All numeric types other than <code>double</code> and <code>int</code> use a
  * cast segment representation so to permit exact translation to and from the
  * String representation and the underlying internal key value. The canonical
  * representation of a Date is designed to allow exact translation to and from
  * the internal segment value while being somewhat legible.
  * </p>
- * <a name="_puttingTogether">
- * <h3>Putting It All Together - How to Use the Key API</h3>
- * </a>
+ * <h2>Putting It All Together - How to Use the Key API</h2>
  * <p>
  * Applications do two fundamental things with <code>Key</code>s:
+ * </p>
  * <ol>
  * <li>
  * Applications <i>construct</i> key values when fetching, storing or removing
@@ -345,7 +358,6 @@ import com.persistit.util.Util;
  * <li>
  * Applications <i>decode</i> key values when traversing key/value pairs.</li>
  * </ol>
- * </p>
  * <p>
  * Methods used to construct key values are {@link #clear}, {@link #setDepth},
  * {@link #cut}, {@link #append(boolean)}, {@link #append(byte)},
@@ -363,9 +375,7 @@ import com.persistit.util.Util;
  * <code>Object</code>. The <code>reset</code> and <code>indexTo</code> control
  * which segment the next value will be decoded from.
  * </p>
- * <a name="_lowLevelAPI">
- * <h3>Low-Level API</h3>
- * </a>
+ * <h2>Low-Level API</h2>
  * <p>
  * The low-level API allows an application to bypass the encoding and decoding
  * operations described above and instead to operate directly on the byte array
@@ -378,13 +388,13 @@ import com.persistit.util.Util;
  * <p>
  * The low-level API methods are:
  * 
+ * </p>
  * <pre>
  *      byte[] {@link #getEncodedBytes}
  *      int {@link #getEncodedSize}
  *      void {@link #setEncodedSize(int)}
  * </pre>
  * 
- * </p>
  * 
  * @version 1.0
  */
@@ -925,9 +935,9 @@ public final class Key implements Comparable<Object> {
      * preferred mechanism for use outside of this package is this the copy
      * constructor:
      * 
-     * <code><pre>
+     * <pre>
      *     Key copiedKey = new Key(originalKey);
-     * </pre></code>
+     * </pre>
      * 
      * @param key
      *            The <code>Key</code> to copy.
@@ -1051,9 +1061,9 @@ public final class Key implements Comparable<Object> {
      * code
      * 
      * 
-     * <code><pre>
+     * <pre>
      *     key.clear().append(&quot;a&quot;).append(&quot;b&quot;).append(&quot;c&quot;);
-     * </pre></code>
+     * </pre>
      * 
      * results in a depth of 3.
      * 
@@ -1355,9 +1365,9 @@ public final class Key implements Comparable<Object> {
      * <code>depth</code> is negative, then up to <code>-depth</code> segments
      * are removed from the end. For example,
      * 
-     * <code><pre>
+     * <pre>
      *     key.clear().append(&quot;a&quot;).append(&quot;b&quot;).append(&quot;c&quot;).setDepth(-1);
-     * </pre></code>
+     * </pre>
      * 
      * results in a key with two segment, "a" and "b".
      * 
@@ -1401,10 +1411,10 @@ public final class Key implements Comparable<Object> {
      * from the end. For example,
      * 
      * 
-     * <code><pre>
+     * <pre>
      *     key.clear().append(&quot;a&quot;).append(&quot;b&quot;).append(&quot;c&quot;);
      *     return key.indexTo(-1).decode();
-     * </pre></code>
+     * </pre>
      * 
      * returns "c".
      * 
@@ -1461,11 +1471,11 @@ public final class Key implements Comparable<Object> {
      * Remove up to <code>count</code> key segment values from the end of this
      * <code>Key</code>. For example, the code fragment
      * 
-     * <code><pre>
+     * <pre>
      *     key.clear();
      *     key.append(&quot;a&quot;).append(&quot;b&quot;).append(&quot;c&quot;);
      *     key.cut(2).append(&quot;d&quot;);
-     * </pre></code>
+     * </pre>
      * 
      * leaves a key with the just the segment values {"a","d"}.
      * 
@@ -2853,7 +2863,7 @@ public final class Key implements Comparable<Object> {
      * <code>Value</code> is supported by a registered {@link KeyRenderer}, then
      * the target object will be returned after the <code>KeyRenderer</code> has
      * populated its state. Otherwise the target object will be ignored and this
-     * method will return a newly created object instance. </p>
+     * method will return a newly created object instance.
      * 
      * @param target
      *            A mutable object into which this method may attempt to decode
@@ -2878,7 +2888,7 @@ public final class Key implements Comparable<Object> {
      * <code>Value</code> is supported by a registered {@link KeyRenderer}, then
      * the target object will be returned after the <code>KeyRenderer</code> has
      * populated its state. Otherwise the target object will be ignored and this
-     * method will return a newly created object instance. </p>
+     * method will return a newly created object instance.
      * 
      * @param target
      *            A mutable object into which this method may attempt to decode
@@ -3398,7 +3408,7 @@ public final class Key implements Comparable<Object> {
     /**
      * Encode a String value into this Key using a modified UTF-8 format.
      * Character values 0x0000 and 0x0001 in the String are represented by a two
-     * byte sequence. For character value c <= 0x0001, the encoding is the two
+     * byte sequence. For character value c &lt;= 0x0001, the encoding is the two
      * byte sequence (0x01, 0x20 + (byte)c) This ensures that all bytes in the
      * encoded form of the String are non-zero but still collate correctly.
      * <p>
