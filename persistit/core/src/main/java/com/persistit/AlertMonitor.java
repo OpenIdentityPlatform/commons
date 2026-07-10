@@ -283,8 +283,6 @@ public final class AlertMonitor extends NotificationBroadcasterSupport implement
          * 
          * @param event
          *            the <code>Event</code> to add
-         * @param level
-         *            the <code>AlertLevel</code> that should be assigned to it
          */
         private void addEvent(final Event event) {
             trim(_historyLength - 1);

@@ -13,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -850,8 +851,6 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      *
      * @param address
      *            journal address
-     * @param _bb
-     *            ByteBuffer in which to return the result
      * @return pageAddress of the page at the specified location, or -1 if the
      *         address does not reference a valid page
      * @throws PersistitException
@@ -1623,7 +1622,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      * @param address
      *            the journal address of a record in the journal for which the
      *            corresponding channel will be returned
-     * @throws PersistitException
+     * @throws PersistitIOException
      *             if the <code>MediatedFileChannel</code> cannot be created
      */
     synchronized FileChannel getFileChannel(final long address) throws PersistitIOException {
@@ -2980,7 +2979,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
     /**
      * For use only by unit tests that test page maps, etc.
      *
-     * @param handleToVolumeMap
+     * @param pageMap
      */
     void unitTestInjectPageMap(final Map<PageNode, PageNode> pageMap) {
         _pageMap.putAll(pageMap);

@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -950,7 +951,7 @@ class TransactionIndex implements TransactionIndexMXBean {
      * bucket. This method is called during recovery processing to register
      * transactions that were
      * 
-     * @param timestamp
+     * @param ts
      * @throws InterruptedException
      */
     void injectAbortedTransaction(final long ts) throws InterruptedException {

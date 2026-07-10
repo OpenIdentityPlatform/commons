@@ -757,8 +757,6 @@ public class IntegrityCheck extends Task {
     /**
      * Resets this <code>IntegrityCheck</code> to handle a new volume.
      * 
-     * @param initCounts
-     *            <code>true</code> to reset all counters to zero.
      */
     private void reset() {
         _currentVolume = null;
@@ -891,7 +889,6 @@ public class IntegrityCheck extends Task {
      * 
      * @param page
      * @param level
-     * @param work
      * @throws PersistitException
      */
     private void checkTree(final Key parentKey, final long parent, final long page, final int level, final Tree tree)

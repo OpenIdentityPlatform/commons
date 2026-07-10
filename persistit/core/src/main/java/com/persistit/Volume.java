@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -406,7 +407,7 @@ public class Volume {
      * Return a TreeInfo structure for a tree by the specified name. If there is
      * no such tree, then return <code>null</code>.
      * 
-     * @param tree
+     * @param name
      *            name
      * @return an information structure for the Management interface.
      */

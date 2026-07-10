@@ -1395,7 +1395,7 @@ public class Buffer extends SharedResource {
      *
      * @param key
      *            The key on under which the value will be stored
-     * @param value
+     * @param valueHelper
      *            The value, converted to a byte array
      * @throws PersistitInterruptedException
      */
@@ -1411,7 +1411,7 @@ public class Buffer extends SharedResource {
      *
      * @param key
      *            The key under which the value will be stored
-     * @param value
+     * @param valueHelper
      *            The value to be stored
      * @param foundAt
      *            The keyblock before which this record will be inserted
@@ -1894,7 +1894,7 @@ public class Buffer extends SharedResource {
      *            The buffer containing the new right sibling page
      * @param key
      *            The key being inserted or replaced
-     * @param value
+     * @param valueHelper
      *            The new value
      * @param foundAt
      *            Offset to keyblock where insertion will occur
@@ -2769,11 +2769,6 @@ public class Buffer extends SharedResource {
      * @param adjustmentForNewEbc
      *            amount by which the tail block of the record at foundAt2 must
      *            increase to allow for a reduced ebc value
-     * @param indexKey
-     *            Key in which the newly elected edge key will be returned
-     * @param spareKey
-     *            A spare Key in which intermediate key values can be
-     *            accumulated
      * @param policy
      *            JoinPolicy used to choose optimal rebalance point
      * @return the join offset as described above
@@ -3590,7 +3585,6 @@ public class Buffer extends SharedResource {
      * new checkpoint has been proposed.
      *
      * @param tree
-     * @param spareKey
      * @return <code>true</code> if this method changed the contents of the
      *         buffer
      * @throws PersistitException

@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -190,7 +191,7 @@ class ManagementImpl implements Management {
      * requested it to close so that the final state of the Persistit
      * environment can be examined.
      * 
-     * @param enabled
+     * @param suspended
      *            <code>true</code> to specify that Persistit will wait when
      *            attempting to close; otherwise <code>false</code>.
      */
@@ -206,7 +207,6 @@ class ManagementImpl implements Management {
      * 
      * @return <code>true</code> if Persistit will suspend any attempt to update
      *         a <code>Volume</code>; otherwise <code>false</code>.
-     * @throws RemoteException
      */
     @Override
     public boolean isUpdateSuspended() {
@@ -219,7 +219,6 @@ class ManagementImpl implements Management {
      * update operation indefinitely.
      * 
      * @param suspended
-     * @throws RemoteException
      */
     @Override
     public void setUpdateSuspended(final boolean suspended) {
@@ -1025,11 +1024,6 @@ class ManagementImpl implements Management {
      *            Readable description of this task
      * @param owner
      *            Hostname or username of the user who requested this task
-     * @param className
-     *            Class name of task to run, e.g.,
-     *            <code>com.persistit.IntegrityCheck</code>.
-     * @param args
-     *            Task-specific parameters
      * @param maximumTime
      *            Maximum wall-clock time (in milliseconds) this Task will be
      *            allowed to run, or 0 for unbounded time
@@ -1072,7 +1066,6 @@ class ManagementImpl implements Management {
      * @param clearMessages
      *            <code>true</code> to clear all received messages from the
      *            task.
-     * @throws RemoteException
      */
     @Override
     public synchronized TaskStatus[] queryTaskStatus(final long taskId, final boolean details,
@@ -1097,7 +1090,6 @@ class ManagementImpl implements Management {
      * @param clearTasks
      *            <code>true</code> to remove the task's status if it has
      *            finished, failed or expired.
-     * @throws RemoteException
      */
     @Override
     public synchronized TaskStatus[] queryTaskStatus(final long taskId, final boolean details,
@@ -1140,7 +1132,6 @@ class ManagementImpl implements Management {
      * @param suspend
      *            <code>true</code> to suspend the task, <code>false</code> to
      *            allow it to resume.
-     * @throws RemoteException
      */
     @Override
     public synchronized void setTaskSuspended(final long taskId, final boolean suspend) {
@@ -1172,7 +1163,6 @@ class ManagementImpl implements Management {
      * 
      * @param taskId
      *            Task ID for a selected Task.
-     * @throws RemoteException
      */
     @Override
     public synchronized void stopTask(final long taskId, final boolean remove) {
@@ -1202,7 +1192,6 @@ class ManagementImpl implements Management {
      * @param taskId
      *            Task ID for a selected task, or -1 for all tasks.
      * 
-     * @throws RemoteException
      */
     @Override
     public synchronized void removeFinishedTasks(final long taskId) {

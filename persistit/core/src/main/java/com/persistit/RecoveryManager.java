@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -684,7 +685,7 @@ public class RecoveryManager implements RecoveryManagerMXBean, VolumeHandleLooku
     }
 
     /**
-     * @param recoverDisabledForTestMode
+     * @param recoveryDisabledForTestMode
      *            Set this to <code>true</code> to disable the
      *            {@link #applyAllCommittedTransactions()} method. (Lets unit
      *            tests look at the plan before executing it.)
@@ -917,7 +918,7 @@ public class RecoveryManager implements RecoveryManagerMXBean, VolumeHandleLooku
      *         {@link com.persistit.JournalRecord}), 0 if the journal file has
      *         fewer than 16 bytes remaining or -t where t is an invalid type.
      * @throws CorruptJournalException
-     * @throws PersistitException
+     * @throws PersistitIOException
      * @throws JournalNotClosedException
      */
     private int scanOneRecord() throws PersistitIOException {
@@ -1434,7 +1435,6 @@ public class RecoveryManager implements RecoveryManagerMXBean, VolumeHandleLooku
      * Called during Phase 2 to record the FileAddress of a Transaction Update
      * record in the journal.
      * 
-     * @param ja
      * @throws CorruptJournalException
      */
     void scanOneTransaction(final long address, final long startTimestamp, final int recordSize)
@@ -1567,8 +1567,6 @@ public class RecoveryManager implements RecoveryManagerMXBean, VolumeHandleLooku
      *            displaying error messages
      * @param timestamp
      *            timestamp of the transaction
-     * @param page
-     * 
      * @throws PersistitException
      */
     void convertToLongRecord(final Value value, final int treeHandle, final long from, final long timestamp)

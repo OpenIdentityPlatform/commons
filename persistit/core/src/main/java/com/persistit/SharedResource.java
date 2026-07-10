@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -411,7 +412,7 @@ abstract class SharedResource {
      * Sets bits in the state. This method does not change the bits used by the
      * synchronizer to maintain lock state.
      * 
-     * @param mask
+     * @param resource
      */
     void setStatus(final SharedResource resource) {
         final int mask = resource.getStatus();
