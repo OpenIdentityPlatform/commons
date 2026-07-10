@@ -238,15 +238,17 @@ public class TreeTransactionalLifetimeTest extends PersistitUnitTestCase {
             _persistit = new Persistit(_config);
             _persistit.initialize();
             /*
-             * Recovery and the pruning of timely tree resources run
-             * asynchronously after initialize(). If the next helper iteration
-             * starts a transaction before that settles, residual tree-version
-             * state from this iteration's crash/restart can leak into its
-             * step-based MVCC visibility -- e.g. a tree created at step 1 shows
-             * up at step 0 -- producing an intermittent ComparisonFailure
-             * ("expected:<0[]...> but was:<0[:]...>") seen on CI. Settle the
-             * active-transaction cache and prune timely resources here, the same
-             * way the sibling tests quiesce MVCC state before asserting.
+             * Recovery itself completes synchronously inside initialize(), but
+             * two maintenance tasks are asynchronous after it: the
+             * TransactionIndex's active-transaction-cache updater thread and
+             * the CleanupManager's timer-driven pruneTimelyResources(). If the
+             * next helper iteration starts a transaction before those settle,
+             * residual tree-version state from this iteration's crash/restart
+             * can leak into its step-based MVCC visibility -- e.g. a tree
+             * created at step 1 shows up at step 0 -- producing an intermittent
+             * ComparisonFailure ("expected:<0[]...> but was:<0[:]...>") seen on
+             * CI. Force both here, the same way the sibling tests quiesce MVCC
+             * state before asserting.
              */
             _persistit.getTransactionIndex().updateActiveTransactionCache();
             _persistit.pruneTimelyResources();
