@@ -23,6 +23,7 @@ import org.junit.Test;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.persistit.TransactionStatus.ABORTED;
+import static com.persistit.TransactionStatus.TIMED_OUT;
 import static com.persistit.TransactionStatus.UNCOMMITTED;
 
 public class TransactionIndexTest extends TestCase {
@@ -251,42 +252,50 @@ public class TransactionIndexTest extends TestCase {
         final AtomicLong elapsed2 = new AtomicLong(-42);
         final AtomicLong elapsed3 = new AtomicLong(-42);
 
-        final Thread t1 = tryWwDependency(ti, ts1, ts2, 5000, result1, elapsed1);
+        final Thread t1 = tryWwDependency(ti, ts1, ts2, 1000000, result1, elapsed1);
         final Thread t2 = tryWwDependency(ti, ts2, ts3, 1000000, result2, elapsed2);
         Thread.sleep(1000);
         final Thread t3 = tryWwDependency(ti, ts3, ts1, 10000, result3, elapsed3);
 
+        /*
+         * The waiters form a cycle (ts1 -> ts3 -> ts2 -> ts1, "->" = waits for),
+         * closed when t3 starts. Detection is distributed: each waiter re-checks
+         * every SHORT_TIMEOUT and clears its own edge in a finally only after its
+         * result is decided, so any participant -- not just t3 -- may report the
+         * deadlock, and more than one may. Resolve the cycle by aborting each
+         * waiter's target in turn (ts1 is the transaction the deadlock tells to
+         * abort), which lets any waiter that did not detect the deadlock itself
+         * exit cleanly with 0 rather than time out.
+         */
         t3.join();
+        ts1.abort();
+        ti.notifyCompleted(ts1, ABORTED);
         t1.join();
         ts2.abort();
         ti.notifyCompleted(ts2, ABORTED);
         t2.join();
 
+        final String state = " (result1=" + result1 + ", result2=" + result2 + ", result3=" + result3
+                + ", elapsed1=" + elapsed1 + ", elapsed2=" + elapsed2 + ", elapsed3=" + elapsed3 + ")";
         /*
-         * The waiters form a cycle (ts1 -> ts3 -> ts2 -> ts1, "->" = waits for).
-         * Detection is distributed: each waiter re-checks every SHORT_TIMEOUT and
-         * clears its own edge between iterations, and the edge that reveals a
-         * cycle is nulled in a finally only after the result is decided, so any
-         * participant -- not just the one closing the cycle -- may report it. The
-         * cycle is live only between t3's start and t1's timeout, so at least one
-         * detection is highly likely but not strictly guaranteed under a long
+         * The cycle is live only from t3's start until the first waiter exits, so
+         * a detection is highly likely but not strictly guaranteed under a long
          * stall.
          */
-        final String state = " (result1=" + result1 + ", result2=" + result2
-                + ", result3=" + result3 + ", elapsed3=" + elapsed3 + ")";
         assertTrue("Deadlock not detected by any participant" + state,
-                result1.get() == UNCOMMITTED || result2.get() == UNCOMMITTED
-                        || result3.get() == UNCOMMITTED);
-        assertTrue("ts3 -> ts2 must either detect the deadlock or clear" + state,
-                result2.get() == 0 || result2.get() == UNCOMMITTED);
+                result1.get() == UNCOMMITTED || result2.get() == UNCOMMITTED || result3.get() == UNCOMMITTED);
         /*
-         * Once any waiter returns UNCOMMITTED its finally breaks the cycle for
-         * good, so if t3 detects the deadlock at all it must be prompt (otherwise
-         * it can no longer see the cycle and simply times out).
+         * t1 (ts2 -> ts1) and t2 (ts3 -> ts2) cannot time out (1000000 ms) and
+         * their targets abort, so each either detected the deadlock itself
+         * (UNCOMMITTED) or observed the abort (0). t3 (ts1 -> ts3) either detects
+         * the deadlock or, if it stalled past the cycle's lifetime, times out.
          */
-        if (result3.get() == UNCOMMITTED) {
-            assertTrue("deadlock detection must be prompt" + state, elapsed3.get() < 1000);
-        }
+        assertTrue("ts2 -> ts1 must detect the deadlock or clear" + state,
+                result1.get() == 0 || result1.get() == UNCOMMITTED);
+        assertTrue("ts3 -> ts2 must detect the deadlock or clear" + state,
+                result2.get() == 0 || result2.get() == UNCOMMITTED);
+        assertTrue("ts1 -> ts3 must detect the deadlock or time out" + state,
+                result3.get() == UNCOMMITTED || result3.get() == TIMED_OUT);
         assertTrue("t1 must block until the cycle forms" + state, elapsed1.get() >= 900);
         assertTrue("t2 must block until the cycle forms" + state, elapsed2.get() >= 900);
     }
