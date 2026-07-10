@@ -448,6 +448,15 @@ public class Persistit {
       flush();
       _checkpointManager.checkpoint();
       _journalManager.pruneObsoleteTransactions();
+      /*
+       * Settle MVCC state left over from recovery before returning: without
+       * this, step-based visibility (e.g. Volume#getTree(String, boolean))
+       * can return stale answers until the CleanupManager timer fires. The
+       * active-transaction cache must be updated first because pruning
+       * consults it.
+       */
+      _transactionIndex.updateActiveTransactionCache();
+      pruneTimelyResources();
       startCheckpointManager();
       startCleanupManager();
       _initialized.set(true);
