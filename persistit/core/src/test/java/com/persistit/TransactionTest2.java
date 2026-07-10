@@ -306,8 +306,11 @@ public class TransactionTest2 extends PersistitUnitTestCase {
                 exception.printStackTrace();
                 _failedTransactionCount.incrementAndGet();
             }
-        } catch (final Exception exception) {
-            exception.printStackTrace();
+        } catch (final Throwable throwable) {
+            // Catch Throwable, not Exception: an internal Error such as an
+            // AssertionError must be reported and counted rather than
+            // silently killing the worker thread (see issue #265).
+            throwable.printStackTrace();
             _failedTransactionCount.incrementAndGet();
         }
     }
