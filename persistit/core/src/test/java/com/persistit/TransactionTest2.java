@@ -246,28 +246,38 @@ public class TransactionTest2 extends PersistitUnitTestCase {
 
     @Test
     public void transactionsConcurrentWithPersistitClose() throws Exception {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                final Thread[] threadArray = new Thread[_threadCount];
-                for (int index = 0; index < _threadCount; index++) {
-                    threadArray[index] = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            runIt(Integer.MAX_VALUE);
-                        }
-                    }, "TransactionThread_" + index);
+        _strandedThreads.set(0);
+        final Thread[] threadArray = new Thread[_threadCount];
+        for (int index = 0; index < _threadCount; index++) {
+            threadArray[index] = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    runIt(Integer.MAX_VALUE);
                 }
-                for (int index = 0; index < _threadCount; index++) {
-                    threadArray[index].start();
-                }
-            }
-        }).start();
+            }, "TransactionThread_" + index);
+        }
+        for (int index = 0; index < _threadCount; index++) {
+            threadArray[index].start();
+        }
         /*
          * Let the threads crank up
          */
         Thread.sleep(1000);
         _persistit.close();
+        /*
+         * Closing Persistit makes the worker threads unwind by throwing one of
+         * the expected exceptions, but that unwinding is asynchronous. Give the
+         * threads a bounded amount of time to observe the closure and exit
+         * before checking that none were left stranded; otherwise a worker that
+         * has not yet caught its exception produces a spurious failure.
+         */
+        final long deadline = System.currentTimeMillis() + TIMEOUT;
+        for (final Thread thread : threadArray) {
+            final long remaining = deadline - System.currentTimeMillis();
+            if (remaining > 0) {
+                thread.join(remaining);
+            }
+        }
         assertEquals("All threads should have exited correctly", 0, _strandedThreads.get());
     }
 
