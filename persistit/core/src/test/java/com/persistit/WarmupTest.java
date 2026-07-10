@@ -39,6 +39,13 @@ public class WarmupTest extends PersistitUnitTestCase {
 
   @Test
   public void testWarmup() throws Exception {
+    /*
+     * Disable background cleanup/pruning on both the pre-shutdown and the
+     * post-restart instance so the pool is not mutated concurrently while
+     * residentPages() takes its unsynchronized getBufferCopy() snapshots.
+     */
+    disableBackgroundCleanup();
+
     Exchange ex = _persistit.getExchange("persistit", "WarmupTest", true);
     BufferPool pool = ex.getBufferPool();
     for (int i = 1; i <= 1000; i++) {
@@ -51,28 +58,31 @@ public class WarmupTest extends PersistitUnitTestCase {
      * resident in the pool at shutdown are read back into the pool on restart.
      * It does not guarantee that a page returns to the same buffer slot:
      * preloadBufferInventory() sorts the recorded pages by read order and
-     * reallocates buffers via the clock algorithm, so the slot index is not
-     * preserved. The old per-slot assertion depended on the exact interleaving
-     * of the preload order and background eviction/cleanup between shutdown and
-     * the snapshot, which is why it passed on most JVMs but failed on the JDK 17
-     * runner (expected:<0> but was:<2> -- an empty slot where the page was still
-     * resident, just relocated). Compare the set of resident pages instead.
+     * reallocates buffers via the clock algorithm, so the slot index depends on
+     * timing in both runs. The old per-slot assertion (expected:<0> but was:<2>
+     * -- an empty slot where the page was resident, just relocated) only matched
+     * by coincidence; warmup provides no slot-stability property. Compare the
+     * set of resident pages instead.
      */
     final Set<String> before = residentPages(pool);
     assertFalse("Test setup should leave pages resident in the pool", before.isEmpty());
     /*
-     * The set comparison below is only valid while the pool stays under-filled:
-     * with no eviction the live snapshot equals what recordBufferInventory
-     * persists at shutdown, and an unlocked buffer copy is stable. Fail loudly
-     * if a future dataset change fills the pool and invalidates that.
+     * The subset comparison below is only meaningful while the pool stays
+     * under-filled: while free buffers remain the pool never evicts, so a
+     * buffer's (volume, page) identity does not change under it and the
+     * unsynchronized getBufferCopy() reads in residentPages() cannot tear. Fail
+     * loudly if a future dataset change fills the pool.
      */
     assertTrue("Pool must stay under-filled for this comparison to be meaningful",
-        before.size() < pool.getBufferCount());
+        validPageCount(pool) < pool.getBufferCount());
 
     _persistit.close();
 
     _persistit = new Persistit(_config);
+    disableBackgroundCleanup();
     pool = _persistit.getVolume(VOLUME_NAME).getStructure().getPool();
+    assertTrue("Restarted pool must also stay under-filled for the comparison",
+        validPageCount(pool) < pool.getBufferCount());
 
     /*
      * One-way invariant (before is a subset of after): warmup must reload every
@@ -91,10 +101,11 @@ public class WarmupTest extends PersistitUnitTestCase {
    * Identity ({@code volume:page:type}) of every valid, recordable buffer
    * resident in the pool, applying the same volume filter as
    * {@link BufferPool#recordBufferInventory} (temporary and lock volumes are
-   * skipped) so the set is exactly what warmup is expected to reload. The pool
-   * is under-filled and quiescent at both call sites, so an unlocked
-   * {@link BufferPool#getBufferCopy(int)} is stable here and the torn-read spin
-   * guard that recordBufferInventory needs is unnecessary.
+   * skipped) so the set is exactly what warmup is expected to reload. Callers
+   * disable background cleanup and assert the pool is under-filled, so no
+   * eviction reallocates a buffer while it is read; a buffer's identity is
+   * therefore stable and the unlocked {@link BufferPool#getBufferCopy(int)}
+   * needs no torn-read spin guard.
    */
   private static Set<String> residentPages(final BufferPool pool) {
     final Set<String> pages = new HashSet<String>();
@@ -106,6 +117,22 @@ public class WarmupTest extends PersistitUnitTestCase {
       }
     }
     return pages;
+  }
+
+  /**
+   * Number of buffers currently holding a page. The pool is full (and starts
+   * evicting) once this reaches {@link BufferPool#getBufferCount()}; counting
+   * valid buffers directly keeps the under-fill guard independent of the
+   * filtered/deduplicated {@link #residentPages} set.
+   */
+  private static int validPageCount(final BufferPool pool) {
+    int count = 0;
+    for (int i = 0; i < pool.getBufferCount(); i++) {
+      if (pool.getBufferCopy(i).isValid()) {
+        count++;
+      }
+    }
+    return count;
   }
 
   @Test
