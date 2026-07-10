@@ -1,6 +1,8 @@
 /**
  * Copyright 2013 Akiban Technologies, Inc.
- * 
+ *
+ * Portions Copyrighted 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -235,6 +237,19 @@ public class TreeTransactionalLifetimeTest extends PersistitUnitTestCase {
         if (crash || restart) {
             _persistit = new Persistit(_config);
             _persistit.initialize();
+            /*
+             * Recovery and the pruning of timely tree resources run
+             * asynchronously after initialize(). If the next helper iteration
+             * starts a transaction before that settles, residual tree-version
+             * state from this iteration's crash/restart can leak into its
+             * step-based MVCC visibility -- e.g. a tree created at step 1 shows
+             * up at step 0 -- producing an intermittent ComparisonFailure
+             * ("expected:<0[]...> but was:<0[:]...>") seen on CI. Settle the
+             * active-transaction cache and prune timely resources here, the same
+             * way the sibling tests quiesce MVCC state before asserting.
+             */
+            _persistit.getTransactionIndex().updateActiveTransactionCache();
+            _persistit.pruneTimelyResources();
         }
         assertEquals("Expected contents at steps", expected2, computeCreateRemoveState(treeName, 1));
     }
