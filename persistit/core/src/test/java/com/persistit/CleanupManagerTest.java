@@ -91,8 +91,17 @@ public class CleanupManagerTest extends PersistitUnitTestCase {
             cm().offer(new CleanupMockAction(i));
         }
         cm().setPollInterval(100);
-        for (int i = 0; i < 10 && cm().getEnqueuedCount() > 0; i++) {
-            Thread.sleep(1000);
+        /*
+         * Wait until the actions have actually been performed. getEnqueuedCount()
+         * drops to 0 as soon as the background CLEANUP_MANAGER thread dequeues the
+         * batch -- before performAction runs -- so looping on it can exit with the
+         * actions not yet run and _counter still 0 on a slow runner
+         * (expected:<500> but was:<0>). Poll the manager's own performed/error
+         * counters, which advance only after each action completes.
+         */
+        final long expires = System.currentTimeMillis() + 30000;
+        while (cm().getPerformedCount() + cm().getErrorCount() < 500 && System.currentTimeMillis() < expires) {
+            Thread.sleep(50);
         }
         assertEquals(500, _counter);
         assertEquals(1, cm().getErrorCount());
