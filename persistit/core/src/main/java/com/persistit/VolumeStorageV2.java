@@ -507,7 +507,24 @@ class VolumeStorageV2 extends VolumeStorage {
         }
 
         try {
-            _channel.write(bb, page * _volume.getStructure().getPageSize());
+            /*
+             * FileChannel#write may report partial progress instead of
+             * throwing - observed empirically on disk-full, and possible for
+             * transfers aborted by a concurrent interrupt-driven channel
+             * close. Accepting a short count here would silently tear the
+             * page in the volume file, so write until every byte has been
+             * transferred, mirroring the read loop in readPage.
+             */
+            final int size = bb.remaining();
+            final long position = page * _volume.getStructure().getPageSize();
+            int written = 0;
+            while (written < size) {
+                final int bytesWritten = _channel.write(bb, position + written);
+                if (bytesWritten <= 0) {
+                    throw new IOException("Unable to write bytes at position " + (position + written) + " in " + this);
+                }
+                written += bytesWritten;
+            }
         } catch (final IOException ioe) {
             _persistit.getAlertMonitor().post(
                     new Event(AlertLevel.ERROR, _persistit.getLogBase().writeException, ioe, _volume, page),
