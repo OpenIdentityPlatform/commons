@@ -894,8 +894,14 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
 
     private void advance(final int recordSize) {
         Debug.$assert1.t(recordSize > 0 && recordSize + _writeBuffer.position() <= _writeBuffer.capacity());
-        _currentAddress += recordSize;
+        /*
+         * The position update validates against the buffer limit and may
+         * throw; it must happen before the _currentAddress update so that a
+         * failure cannot tear the invariant _writeBufferAddress +
+         * _writeBuffer.position() == _currentAddress.
+         */
         _writeBuffer.position(_writeBuffer.position() + recordSize);
+        _currentAddress += recordSize;
     }
 
     /**
@@ -933,8 +939,16 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
         if (_writeBufferAddress != Long.MAX_VALUE) {
             //
             // prepareWriteBuffer contract guarantees there's always room in
-            // the write buffer for this record.
+            // the write buffer for this record. However, a rollover abandoned
+            // by an exception - e.g. an interrupt during flush, truncate or
+            // force - may have consumed the reserve already, leaving
+            // _currentAddress closer than JE.OVERHEAD to the block end. Skip
+            // the JE record then, so the retried rollover can complete;
+            // recovery treats the missing JE as a dirty shutdown.
             //
+            if (_writeBuffer.remaining() < JE.OVERHEAD) {
+                return;
+            }
             JE.putType(_writeBuffer);
             JournalRecord.putTimestamp(_writeBuffer, epochalTimestamp());
             JournalRecord.putLength(_writeBuffer, JE.OVERHEAD);

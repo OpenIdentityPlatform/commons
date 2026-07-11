@@ -12,10 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
 
+import com.persistit.JournalRecord.JE;
+import com.persistit.JournalRecord.TX;
 import com.persistit.Transaction.CommitPolicy;
 import com.persistit.exception.CorruptJournalException;
 import com.persistit.exception.CorruptVolumeException;
@@ -26,6 +29,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Properties;
 import java.util.Timer;
@@ -412,6 +416,82 @@ public class IOFailureTest extends PersistitUnitTestCase {
     _persistit.checkAllVolumes();
     _persistit.flush();
 
+  }
+
+  /**
+   * Issue #265. An IOException thrown inside rollover() - for example an
+   * InterruptedIOException when the rolling thread is interrupted during
+   * truncate or force - after writeJournalEnd() has already advanced
+   * _currentAddress to within JE.OVERHEAD bytes of the block end used to
+   * leave the JournalManager permanently broken: the retried
+   * writeJournalEnd() wrote past the buffer limit and tore the bookkeeping
+   * invariant _writeBufferAddress + position == _currentAddress, after which
+   * every journal write failed.
+   */
+  @Test
+  public void testRolloverRecoversAfterFailureNearBlockEnd() throws Exception {
+    final JournalManager jman = _persistit.getJournalManager();
+    /*
+     * Keep the copier from moving journal addresses while the test
+     * positions _currentAddress near the block end.
+     */
+    jman.setAppendOnly(true);
+    final ErrorInjectingFileChannel eifc = errorInjectingChannel(jman.getFileChannel(jman.getCurrentAddress()));
+    final ByteBuffer payload = ByteBuffer.allocate(65536);
+    synchronized (jman) {
+      /*
+       * Write TX records sized to land _currentAddress exactly
+       * JE.OVERHEAD + 2 bytes before the end of the current block - the
+       * geometry observed in issue #265.
+       */
+      final long target = JE.OVERHEAD + 2;
+      long distance = BLOCKSIZE - jman.getCurrentJournalSize();
+      while (distance > target) {
+        long recordSize = Math.min(50000, distance - target);
+        final long rest = distance - target - recordSize;
+        if (rest > 0 && rest < TX.OVERHEAD + 8) {
+          recordSize -= TX.OVERHEAD + 8;
+        }
+        payload.clear();
+        payload.position((int) recordSize - TX.OVERHEAD);
+        jman.writeTransactionToJournal(payload, _persistit.getTimestampAllocator().updateTimestamp(),
+          TransactionStatus.ABORTED, 0);
+        distance = BLOCKSIZE - jman.getCurrentJournalSize();
+      }
+      assertEquals("Current address should sit just above the JE reserve", target, distance);
+      /*
+       * Fail the truncate() call so that rollover() aborts after
+       * writeJournalEnd() has consumed the JE reserve, as an interrupt
+       * would.
+       */
+      eifc.injectTestIOException(new IOException("injected"), "t");
+      try {
+        jman.rollover();
+        fail("rollover should have failed on the injected truncate error");
+      } catch (final PersistitIOException e) {
+        assertEquals("injected", e.getCause().getMessage());
+      }
+      assertEquals("Abandoned rollover should stop just below the block end", BLOCKSIZE - 2,
+        jman.getCurrentJournalSize());
+      /*
+       * With the failure cleared the retried rollover must complete and
+       * move to the next block.
+       */
+      eifc.injectTestIOException(null, "");
+      jman.rollover();
+      assertEquals("Retried rollover should reach the next block boundary", 0, jman.getCurrentJournalSize());
+    }
+    jman.setAppendOnly(false);
+    /*
+     * Journal writes must work again and the bookkeeping must stay
+     * consistent.
+     */
+    store1(0);
+    synchronized (jman) {
+      jman.force();
+      assertEquals("Write buffer address should agree with the current address", jman.getCurrentAddress(),
+        jman.getWriteBufferAddress());
+    }
   }
 
   private int storeUntilDiskFull() throws Exception {
