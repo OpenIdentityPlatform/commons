@@ -127,7 +127,7 @@
         <findbugsPluginVersion>3.0.1</findbugsPluginVersion>
 
         <!-- maven-javadoc-plugin -->
-        <javadocPluginVersion>3.10.1</javadocPluginVersion>
+        <javadocPluginVersion>3.12.0</javadocPluginVersion>
         <!-- build-tools stylesheet org/forgerock/javadoc/javadoc.css
              does not work with JDK7 -->
         <javadocStylesheet />
@@ -1066,12 +1066,17 @@
                              warnings surfaced as CI annotations; keep the accessibility, html,
                              reference and syntax checks that guard against real javadoc errors. -->
                         <doclint>all,-missing</doclint>
+                        <!-- Treat any remaining javadoc warning (html, syntax, reference,
+                             accessibility) as a build error so regressions cannot slip in. -->
+                        <failOnWarnings>true</failOnWarnings>
                         <author>false</author>
                         <quiet>true</quiet>
                         <windowtitle>${javadocWindowTitle}</windowtitle>
                         <doctitle>${javadocDocTitle}</doctitle>
                         <header><![CDATA[<b>${javadocDocTitle}</b>]]></header>
-                        <footer><![CDATA[<b>${javadocDocTitle}</b>]]></footer>
+                        <!-- No <footer>: the underlying -footer javadoc option was removed
+                             in modern JDKs and only emits a deprecation warning. The header
+                             already carries the same title. -->
                         <show>protected</show>
 <!--                         <excludePackageNames>com.*</excludePackageNames> -->
                         <stylesheetfile>${javadocStylesheet}</stylesheetfile>
