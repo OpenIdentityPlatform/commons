@@ -137,7 +137,6 @@ public class WarmupTest extends PersistitUnitTestCase {
 
   @Test
   public void readOrderIsSequential() throws Exception {
-
     Exchange ex = _persistit.getExchange("persistit", "WarmupTest", true);
     BufferPool pool = ex.getBufferPool();
 
@@ -178,11 +177,24 @@ public class WarmupTest extends PersistitUnitTestCase {
     _persistit.copyBackPages();
     _persistit.close();
 
-    _persistit = new Persistit();
+    /*
+     * recordBufferInventory() at the close above interleaves its own tree stores
+     * with the buffer scan, so some recorded pages are the inventory tree's own
+     * pages; the closing checkpoint flushes those to the journal with no
+     * copyBack(), and on restart they would be served from the journal
+     * (VolumeStorageV2.readPage consults readPageFromJournal first), bypassing
+     * the injected volume channel. Reopen with inventory recording disabled,
+     * drain the journal into the volume, and close again so every recorded page
+     * lives in the volume file; the preload below then reads them through the
+     * tracked channel deterministically instead of racing the journal.
+     */
     _config.setBufferInventoryEnabled(false);
     _config.setBufferPreloadEnabled(false);
-    _persistit.setConfiguration(_config);
-    _persistit.initialize();
+    _persistit = new Persistit(_config);
+    _persistit.copyBackPages();
+    _persistit.close();
+
+    _persistit = new Persistit(_config);
 
     final Volume volume = _persistit.getVolume("persistit");
     final MediatedFileChannel mfc = (MediatedFileChannel) volume.getStorage().getChannel();
@@ -190,7 +202,14 @@ public class WarmupTest extends PersistitUnitTestCase {
     mfc.injectChannelForTests(tfc);
     pool = volume.getStructure().getPool();
     pool.preloadBufferInventory();
-    assertTrue("Preload should have loaded pages from journal file", tfc.getReadPositionList().size() > 0);
+    /*
+     * With the recorded pages copied back to the volume above, preload reads
+     * them through the injected volume channel rather than the journal, so the
+     * channel sees a non-empty, strictly ascending sequence of reads (warmup
+     * issues them in page order via PageNode.READ_COMPARATOR).
+     */
+    assertTrue("Preload should have read the recorded pages from the volume file",
+        tfc.getReadPositionList().size() > 0);
     tfc.assertOrdered(true, true);
   }
 }
