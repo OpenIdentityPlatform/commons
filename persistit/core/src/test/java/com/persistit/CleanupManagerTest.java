@@ -87,6 +87,16 @@ public class CleanupManagerTest extends PersistitUnitTestCase {
 
     @Test
     public void testCleanupHappens() throws Exception {
+        /*
+         * The manager's performed/error counters are cumulative for the
+         * Persistit instance, and startup maintenance may already have
+         * performed cleanup actions before this test enqueues its own (e.g.
+         * the pruneTimelyResources() call at the end of
+         * Persistit.initialize()). Compare against a baseline taken before
+         * enqueueing rather than against absolute values.
+         */
+        final long performedBefore = cm().getPerformedCount();
+        final long errorsBefore = cm().getErrorCount();
         for (int i = 1; i <= 500; i++) {
             cm().offer(new CleanupMockAction(i));
         }
@@ -100,12 +110,13 @@ public class CleanupManagerTest extends PersistitUnitTestCase {
          * counters, which advance only after each action completes.
          */
         final long expires = System.currentTimeMillis() + 30000;
-        while (cm().getPerformedCount() + cm().getErrorCount() < 500 && System.currentTimeMillis() < expires) {
+        while (cm().getPerformedCount() - performedBefore + cm().getErrorCount() - errorsBefore < 500
+                && System.currentTimeMillis() < expires) {
             Thread.sleep(50);
         }
         assertEquals(500, _counter);
-        assertEquals(1, cm().getErrorCount());
-        assertEquals(499, cm().getPerformedCount());
+        assertEquals(1, cm().getErrorCount() - errorsBefore);
+        assertEquals(499, cm().getPerformedCount() - performedBefore);
         assertFalse("cleanup actions did not run in sequence order", _outOfOrder);
     }
 
