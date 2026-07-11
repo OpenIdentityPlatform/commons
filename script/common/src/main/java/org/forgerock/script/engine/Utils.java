@@ -211,10 +211,13 @@ public class Utils {
      * Executes the given script with the appropriate context information.
      *
      * @param context
+     *            the context information used to evaluate the script.
      * @param scriptPair
      *            The script to execute
-     * @return
+     * @return the result of evaluating the script, or {@code null} if no script
+     *         was provided.
      * @throws ResourceException
+     *             if the script is inactive or its evaluation fails.
      */
     public static Object evaluateScript(final Context context,
             final Pair<JsonPointer, ScriptEntry> scriptPair) throws ResourceException {

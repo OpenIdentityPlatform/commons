@@ -1,6 +1,7 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
- * 
+ * Portions Copyrighted 2026 3A Systems, LLC
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -118,7 +119,7 @@ public class DefaultPersistitLogger implements PersistitLogger {
     /**
      * Closes the log file.
      * 
-     * @throws InterruptedException
+     * @throws InterruptedException if the thread is interrupted while waiting
      */
     @Override
     public void close() throws InterruptedException {

@@ -344,7 +344,7 @@ public class Exchange implements ReadOnlyExchange {
    *            <code>true</code> to create a new Tree if one by the specified
    *            name does not already exist.
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public Exchange(final Persistit persistit, final String volumeName, final String treeName, final boolean create)
     throws PersistitException {
@@ -368,7 +368,7 @@ public class Exchange implements ReadOnlyExchange {
    * @param create
    *            <code>true</code> to create a new Tree if one by the specified
    *            name does not already exist.
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public Exchange(final Persistit persistit, final Volume volume, final String treeName, final boolean create)
     throws PersistitException {
@@ -674,7 +674,7 @@ public class Exchange implements ReadOnlyExchange {
      *            <code>Key</code> and <code>Value</code> may be read
      * @return <code>true</code> to continue traversing keys, or
      *         <code>false</code> to stop
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     public boolean visit(final ReadOnlyExchange ex) throws PersistitException;
   }
@@ -1127,11 +1127,11 @@ public class Exchange implements ReadOnlyExchange {
    * determines whether information cached in the LevelCache is still valid;
    * if so the previous result is still valid.
    *
-   * @param buffer
-   * @param key
-   * @param lc
+   * @param buffer the <code>Buffer</code> to search
+   * @param key the <code>Key</code> to find
+   * @param lc the <code>LevelCache</code> providing cached lookup state
    * @return foundAt value
-   * @throws PersistitInterruptedException
+   * @throws PersistitInterruptedException if the thread is interrupted while waiting
    */
   private int findKey(final Buffer buffer, final Key key, final LevelCache lc) throws PersistitInterruptedException {
     //
@@ -1990,7 +1990,7 @@ public class Exchange implements ReadOnlyExchange {
    *            Siblings</a>).
    * @return <code>true</code> if there is a key to traverse to, else
    *         <code>false</code>.
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean traverse(final Direction direction, final boolean deep) throws PersistitException {
     final boolean result = traverse(direction, deep, Integer.MAX_VALUE);
@@ -2051,7 +2051,7 @@ public class Exchange implements ReadOnlyExchange {
    * @return <code>true</code> if there is a key to traverse to, else
    *         <code>false</code>.
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean traverse(final Direction direction, final boolean deep, final int minimumBytes)
     throws PersistitException {
@@ -2428,7 +2428,7 @@ public class Exchange implements ReadOnlyExchange {
    * @return <code>true</code> if additional keys remaining in the traversal
    *         set, or <code>false</code> to indicate that keys are exhausted.
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
 
   public boolean traverse(final Direction direction, final boolean deep, final int minimumBytes,
@@ -2477,7 +2477,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    * @return <code>true</code> if there is a key to traverse to, else null.
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean traverse(final Direction direction, final KeyFilter keyFilter, final int minBytes)
     throws PersistitException {
@@ -2530,7 +2530,7 @@ public class Exchange implements ReadOnlyExchange {
    * <code>traverse(Key.GT, false)</code>.
    *
    * @return <code>true</code> if there is a key to traverse to, else null.
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean next() throws PersistitException {
     return traverse(GT, false);
@@ -2541,7 +2541,7 @@ public class Exchange implements ReadOnlyExchange {
    * <code>traverse(Key.LT, false)</code>.
    *
    * @return <code>true</code> if there is a key to traverse to, else null.
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean previous() throws PersistitException {
     return traverse(LT, false);
@@ -2559,7 +2559,7 @@ public class Exchange implements ReadOnlyExchange {
    *            Siblings</a>).
    *
    * @return <code>true</code> if there is a key to traverse to, else null.
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean next(final boolean deep) throws PersistitException {
     return traverse(GT, deep);
@@ -2578,7 +2578,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    * @return <code>true</code> if there is a key to traverse to, else null.
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean previous(final boolean deep) throws PersistitException {
     return traverse(LT, deep);
@@ -2590,7 +2590,7 @@ public class Exchange implements ReadOnlyExchange {
    * are included in the result is determined by the <code>KeyFilter</code>.
    *
    * @return <code>true</code> if there is a key to traverse to, else null.
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean next(final KeyFilter filter) throws PersistitException {
     return traverse(GT, filter, Integer.MAX_VALUE);
@@ -2603,7 +2603,7 @@ public class Exchange implements ReadOnlyExchange {
    * <code>KeyFilter</code>.
    *
    * @return <code>true</code> if there is a key to traverse to, else null.
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean previous(final KeyFilter filter) throws PersistitException {
     return traverse(LT, filter, Integer.MAX_VALUE);
@@ -2617,7 +2617,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    * @return <code>true</code> if the key has a successor
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean hasNext() throws PersistitException {
     return traverse(GT, false, -1);
@@ -2630,7 +2630,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    * @return <code>true</code> if the key has a successor
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean hasNext(final KeyFilter filter) throws PersistitException {
     if (filter == null)
@@ -2656,7 +2656,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    * @return <code>true</code> if the key has a successor
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean hasNext(final boolean deep) throws PersistitException {
     return traverse(GT, deep, -1);
@@ -2669,7 +2669,7 @@ public class Exchange implements ReadOnlyExchange {
    * changed.
    *
    * @return <code>true</code> if the key has a predecessor
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean hasPrevious() throws PersistitException {
     return traverse(LT, false, -1);
@@ -2690,7 +2690,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    * @return <code>true</code> if the key has a predecessor
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean hasPrevious(final boolean deep) throws PersistitException {
     return traverse(LT, deep, -1);
@@ -2703,7 +2703,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    * @return <code>true</code> if the key has a successor
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean hasPrevious(final KeyFilter filter) throws PersistitException {
     if (filter == null)
@@ -2722,7 +2722,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    * @return <code>true</code> if the key has an associated value
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean isValueDefined() throws PersistitException {
     return traverse(EQ, true, -1);
@@ -2734,7 +2734,7 @@ public class Exchange implements ReadOnlyExchange {
    * associated with the current key, then replace it.
    *
    * @return This <code>Exchange</code> to permit method call chaining
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public Exchange store() throws PersistitException {
     return store(_key, _value);
@@ -2745,7 +2745,7 @@ public class Exchange implements ReadOnlyExchange {
    * timeout value of
    * {@value com.persistit.SharedResource#DEFAULT_MAX_WAIT_TIME} milliseconds.
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public void lock() throws PersistitException {
     lock(_key, SharedResource.DEFAULT_MAX_WAIT_TIME);
@@ -2758,7 +2758,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    * @param key
    *            The key to lock
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public void lock(final Key key) throws PersistitException {
     lock(key, SharedResource.DEFAULT_MAX_WAIT_TIME);
@@ -2825,7 +2825,7 @@ public class Exchange implements ReadOnlyExchange {
    *            the source Key
    * @param timeout
    *            timeout interval in milliseconds, zero for default timeout
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    * @throws RollbackException
    *             in the specific case that another concurrent transaction has
    *             also locked the same key
@@ -2873,7 +2873,7 @@ public class Exchange implements ReadOnlyExchange {
    * need for external synchronization.
    *
    * @return This <code>Exchange</code> to permit method call chaining
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public Exchange fetchAndStore() throws PersistitException {
     assertCorrectThread(true);
@@ -2899,7 +2899,7 @@ public class Exchange implements ReadOnlyExchange {
    * .
    *
    * @return This <code>Exchange</code> to permit method call chaining
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public Exchange fetch() throws PersistitException {
     return fetch(_value, Integer.MAX_VALUE);
@@ -2929,7 +2929,7 @@ public class Exchange implements ReadOnlyExchange {
    *            returned value.
    *
    * @return This <code>Exchange</code> to permit method call chaining
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public Exchange fetch(final int minimumBytes) throws PersistitException {
     return fetch(_value, minimumBytes);
@@ -2948,7 +2948,7 @@ public class Exchange implements ReadOnlyExchange {
    *            fetched.
    *
    * @return This <code>Exchange</code> to permit method call chaining
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public Exchange fetch(final Value value) throws PersistitException {
     return fetch(value, Integer.MAX_VALUE);
@@ -3035,7 +3035,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    *
    * @return This <code>Exchange</code> to permit method call chaining
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public Exchange fetch(final Value value, int minimumBytes) throws PersistitException {
     assertCorrectThread(true);
@@ -3174,7 +3174,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    * @return <code>true</code> if the current <code>Key</code> has logical
    *         children
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean hasChildren() throws PersistitException {
     _key.copyTo(_spareKey2);
@@ -3193,7 +3193,7 @@ public class Exchange implements ReadOnlyExchange {
    * is, the value of {@link Value#isDefined} becomes <code>false</code>.
    *
    * @return <code>true</code> if there was a key/value pair to remove
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean fetchAndRemove() throws PersistitException {
     assertCorrectThread(true);
@@ -3212,7 +3212,7 @@ public class Exchange implements ReadOnlyExchange {
    * <code>Exchange</code> will no longer be usable. Attempts to perform
    * operations on it will result in an <code>IllegalStateException</code>.
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public void removeTree() throws PersistitException {
     assertCorrectThread(true);
@@ -3234,7 +3234,7 @@ public class Exchange implements ReadOnlyExchange {
    * <code>Tree</code>.
    *
    * @return <code>true</code> if there was a key/value pair to remove
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean remove() throws PersistitException {
     return removeInternal(EQ, false);
@@ -3244,7 +3244,7 @@ public class Exchange implements ReadOnlyExchange {
    * Remove all keys in this <code>Exchange</code>'s <code>Tree</code>.
    *
    * @return <code>true</code> if there were key/value pairs removed
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean removeAll() throws PersistitException {
     clear();
@@ -3273,7 +3273,7 @@ public class Exchange implements ReadOnlyExchange {
    *            One of Key.EQ, Key.GT, Key.GTEQ
    * @return <code>true</code> if one or more records were actually removed,
    *         else <i>false</i>.
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean remove(final Direction direction) throws PersistitException {
     return removeInternal(direction, false);
@@ -3370,7 +3370,7 @@ public class Exchange implements ReadOnlyExchange {
    *            Control whether to copy the existing value for the first key
    *            into _spareValue before deleting the record.
    * @return <code>true</code> if any records were removed.
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   private boolean removeKeyRangeInternal(final Key key1, final Key key2, final boolean fetchFirst)
     throws PersistitException {
@@ -3462,7 +3462,7 @@ public class Exchange implements ReadOnlyExchange {
    *            being identified and removes it only if it is a primordial
    *            AntiValue.
    * @return <code>true</code> if any records were removed.
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   boolean raw_removeKeyRangeInternal(final Key key1, final Key key2, final boolean fetchFirst,
     final boolean removeOnlyAntiValue) throws PersistitException {
@@ -3876,7 +3876,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    * @param lc
    *            LevelCache set up by raw_removeKeyRangeInternal
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   private void rebalanceSplit(final LevelCache lc) throws PersistitException {
     //

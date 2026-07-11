@@ -1,6 +1,7 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
- * 
+ * Portions Copyrighted 2026 3A Systems, LLC
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -179,8 +180,9 @@ public abstract class Task implements Runnable {
 
     /**
      * Set the Persistit instance to be accessed by this Task.
-     * 
+     *
      * @param persistit
+     *            the Persistit instance to be accessed by this Task
      */
     public void setPersistit(final Persistit persistit) {
         _persistit = persistit;
@@ -188,8 +190,9 @@ public abstract class Task implements Runnable {
 
     /**
      * Called by a newly created <code>Thread</code> to perform the task.
-     * 
+     *
      * @throws Exception
+     *             if the task encounters an error while running
      */
     protected abstract void runTask() throws Exception;
 
@@ -299,6 +302,7 @@ public abstract class Task implements Runnable {
      *            Level at which messages posted by the running task will be
      *            retained in the message log.
      * @throws Exception
+     *             if the task cannot be set up
      */
     public void setup(final long taskId, final String description, final String owner, final long maxTime,
             final int verbosity) throws Exception {

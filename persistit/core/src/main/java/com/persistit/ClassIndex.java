@@ -404,7 +404,7 @@ final class ClassIndex {
      * For unit tests only. Next class ID handle will be at least as large as
      * this.
      * 
-     * @param id
+     * @param id the minimum value for the next assigned class ID handle
      */
     void setTestIdFloor(final int id) {
         _testIdFloor = id;
@@ -413,7 +413,7 @@ final class ClassIndex {
     /**
      * For unit tests only. Clears all entries.
      * 
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     void clearAllEntries() throws PersistitException {
         getExchange().removeAll();

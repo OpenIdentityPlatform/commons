@@ -92,8 +92,8 @@ class VolumeStorageV2 extends VolumeStorage {
     /**
      * Generate a random positive (non-zero) long value to be used as a
      * validation of a Volume's identity.
-     * 
-     * @return
+     *
+     * @return a random positive (non-zero) long value identifying the volume
      */
 
     VolumeStorageV2(final Persistit persistit, final Volume volume) {
@@ -142,7 +142,7 @@ class VolumeStorageV2 extends VolumeStorage {
      * Create a new <code>Volume</code> backing file according to the
      * {@link Volume}'s volume specification.
      * 
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     @Override
     synchronized void create() throws PersistitException {
@@ -177,7 +177,7 @@ class VolumeStorageV2 extends VolumeStorage {
     /**
      * Open an existing <code>Volume</code> backing file.
      * 
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     @Override
     synchronized void open() throws PersistitException {
@@ -250,7 +250,7 @@ class VolumeStorageV2 extends VolumeStorage {
 
     /**
      * @return <code>true</code> if a backing file exists on the specified path.
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     @Override
     boolean exists() throws PersistitException {
@@ -263,7 +263,7 @@ class VolumeStorageV2 extends VolumeStorage {
      * 
      * @return <code>true</code> if there was a file and it was successfully
      *         deleted
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     @Override
     boolean delete() throws PersistitException {
@@ -274,7 +274,7 @@ class VolumeStorageV2 extends VolumeStorage {
     /**
      * Force all file system buffers to disk.
      * 
-     * @throws PersistitIOException
+     * @throws PersistitIOException if an I/O error occurs
      */
     @Override
     void force() throws PersistitIOException {
@@ -289,7 +289,7 @@ class VolumeStorageV2 extends VolumeStorage {
      * Close the file resources held by this <code>Volume</code>. After this
      * method is called no further file I/O is possible.
      * 
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     @Override
     void close() throws PersistitException {

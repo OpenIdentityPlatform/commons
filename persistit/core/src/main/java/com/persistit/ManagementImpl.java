@@ -218,7 +218,7 @@ class ManagementImpl implements Management {
      * enabled, Persistit will delay each Thread that attempts to perform an
      * update operation indefinitely.
      * 
-     * @param suspended
+     * @param suspended <code>true</code> to suspend all update operations; otherwise <code>false</code>
      */
     @Override
     public void setUpdateSuspended(final boolean suspended) {
@@ -263,7 +263,7 @@ class ManagementImpl implements Management {
      * 
      * @param fast
      *            <code>true</code> to copy pages at maximum speed.
-     * @throws RemoteException
+     * @throws RemoteException if a remote error occurs
      */
     @Override
     public void setJournalCopyingFast(final boolean fast) throws RemoteException {
@@ -295,7 +295,7 @@ class ManagementImpl implements Management {
      * 
      * @return <code>true</code> if the attempt to close Persistit was
      *         successful; otherwise <code>false</code>
-     * @throws RemoteException
+     * @throws RemoteException if a remote error occurs
      */
     @Override
     public boolean close() throws RemoteException {
@@ -311,7 +311,7 @@ class ManagementImpl implements Management {
      * Attempts to flush and force all dirty data in Persistit by invoking
      * {@link Persistit#flush} and {@link Persistit#force}.
      * 
-     * @throws RemoteException
+     * @throws RemoteException if a remote error occurs
      */
     @Override
     public void flushAndForce() throws RemoteException {
@@ -491,10 +491,10 @@ class ManagementImpl implements Management {
      * causes the attempt to retrieve records to fail, then this method returns
      * an empty array.
      * 
-     * @param volumeName
-     * 
-     * @param pageAddress
-     * 
+     * @param volumeName the name of the volume
+     *
+     * @param pageAddress the page address within the volume
+     *
      * @return the array
      */
     @Override
@@ -646,7 +646,7 @@ class ManagementImpl implements Management {
      *            having depth d.
      * @return a <code>BufferInfo</code> object reflecting the selected page, or
      *         <code>null</code> if the specified tree does not exist.
-     * @throws RemoteException
+     * @throws RemoteException if a remote error occurs
      */
     @Override
     public BufferInfo getBufferInfo(final String volumeName, final String treeName, final KeyState key, final int level)
@@ -809,8 +809,8 @@ class ManagementImpl implements Management {
      * is no unique volume corresponding with the supplied name, then this
      * method returns <code>null</code>.
      * 
-     * @param volumeName
-     * 
+     * @param volumeName the name of the volume
+     *
      * @return the <code>VolumeInfo</code>
      */
     @Override
@@ -911,7 +911,7 @@ class ManagementImpl implements Management {
      *            Fully qualified class name.
      * @return The <code>Class</code>, or <code>null</code> if an exception
      *         occurred while attempting to acquire the Class.
-     * @throws RemoteException
+     * @throws RemoteException if a remote error occurs
      */
     @Override
     public Class getRemoteClass(final String className) throws RemoteException {
@@ -961,7 +961,7 @@ class ManagementImpl implements Management {
      * 
      * @return              Array of zero or more Objects encoded
      *                      in the <code>ValueState</code>
-     * @throws RemoteException
+     * @throws RemoteException if a remote error occurs
      */
     @Override
     public Object[] decodeValueObjects(final ValueState valueState, final CoderContext context) throws RemoteException {
@@ -992,10 +992,12 @@ class ManagementImpl implements Management {
      *            Representation of an encoded {@link Key}.
      * 
      * @param context
-     * 
-     * @return
-     * 
-     * @throws RemoteException
+     *            Object passed to any {@link ValueCoder} used in decoding the
+     *            key segments. May be <code>null</code>
+     *
+     * @return Array of Objects, one per key segment
+     *
+     * @throws RemoteException if a remote error occurs
      */
     @Override
     public Object[] decodeKeyObjects(final KeyState keyState, final CoderContext context) throws RemoteException {
@@ -1031,7 +1033,7 @@ class ManagementImpl implements Management {
      *            Verbosity level, one of {@link Task#LOG_NORMAL} or
      *            {@link Task#LOG_NORMAL}.
      * @return Task identifier Unique ID for the running task
-     * @throws RemoteException
+     * @throws RemoteException if a remote error occurs
      */
     @Override
     public synchronized long startTask(final String description, final String owner, final String commandLine,

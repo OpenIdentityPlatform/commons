@@ -1,6 +1,7 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
- * 
+ * Portions Copyrighted 2026 3A Systems, LLC
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,7 +71,7 @@ public interface ValueDisplayer extends ValueCoder {
      *            operation. (See {@link CoderContext}.) The default value is
      *            <code>null</code>.
      * 
-     * @throws ConversionException
+     * @throws ConversionException if the value cannot be converted
      */
     public void display(Value value, StringBuilder target, Class<?> clazz, CoderContext context)
             throws ConversionException;

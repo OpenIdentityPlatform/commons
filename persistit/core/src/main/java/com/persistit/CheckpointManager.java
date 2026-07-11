@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -219,7 +220,7 @@ class CheckpointManager extends IOTaskRunnable implements CheckpointManagerMXBea
      * checkpoints.
      * 
      * @return The newly created Checkpoint
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     synchronized Checkpoint createCheckpoint() throws PersistitException {
         /*

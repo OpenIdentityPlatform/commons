@@ -166,7 +166,7 @@ public class VolumeSpecification {
      * 
      * @param specification
      *            the specification String
-     * @throws InvalidVolumeSpecificationException
+     * @throws InvalidVolumeSpecificationException if the specification string is invalid
      */
 
     public VolumeSpecification(final String specification) throws InvalidVolumeSpecificationException {

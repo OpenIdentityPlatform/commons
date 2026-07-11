@@ -50,7 +50,7 @@ interface Version {
          * Called after the last known <code>Version</code> managed by a
          * <code>TimelyResource</code> has been pruned.
          * 
-         * @throws PersistitException
+         * @throws PersistitException if a persistence error occurs
          */
         void vacate() throws PersistitException;
 
@@ -61,7 +61,7 @@ interface Version {
      * 
      * @author peter
      * 
-     * @param <V>
+     * @param <V> the type of <code>Version</code> created by this factory
      */
     interface VersionCreator<V> {
         V createVersion(final TimelyResource<? extends V> resource) throws PersistitException;

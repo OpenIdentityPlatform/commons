@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit.ref;
@@ -66,7 +67,7 @@ public abstract class AbstractReference implements PersistitReference {
      * subsequent invocation of the <code>get</code> method will cause the
      * object to be looked up and instantiated.
      * 
-     * @param id
+     * @param id the persistent identifier
      */
     protected AbstractReference(final Object id) {
         _id = id;
