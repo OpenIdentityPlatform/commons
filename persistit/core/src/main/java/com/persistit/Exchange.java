@@ -4072,12 +4072,49 @@ public class Exchange implements ReadOnlyExchange {
       return false;
     }
     try {
+      /*
+       * This action was enqueued by rebalanceSplit() when the page was
+       * reachable only through its sibling chain, and may be arbitrarily
+       * stale by the time the background CleanupManager runs it: a covering
+       * removeKeyRange may since have unlinked the page onto a garbage chain
+       * (leaving its content and type intact, or retyping it PAGE_TYPE_GARBAGE
+       * if it became a chain root), or the page may have been reused by an
+       * unrelated allocation. Blindly inserting a key-pointer pair for such a
+       * page plants a dangling index entry to a garbage or reused page -- the
+       * bug 1017957 failure mode, observed as transient
+       * CorruptVolumeExceptions ("invalid page type 30") under concurrent
+       * structural stress. Structure deletes hold the tree writer claim, so
+       * under the reader claim held here the page's reachability cannot
+       * change; validate it before inserting the pointer.
+       */
       buffer = _pool.get(_volume, page, false, true);
+      if (buffer.getPageType() != level + PAGE_TYPE_DATA
+        || buffer.getKeyBlockEnd() <= buffer.getKeyBlockStart()) {
+        // Retyped (garbage-chain root or reused elsewhere) or empty: the
+        // index hole this action was created for no longer exists.
+        return true;
+      }
       buffer.nextKey(_spareKey2, buffer.toKeyBlock(0));
       _value.setPointerValue(page);
       _value.setPointerPageType(buffer.getPageType());
       buffer.release();
       buffer = null;
+      /*
+       * A page sitting on a garbage chain keeps its old type and content, so
+       * the type check above is not sufficient. Verify the page is still
+       * reachable in this tree: a search for its current first key at this
+       * level must land on the page itself (via the B-link right-walk, since
+       * the hole means it has no parent entry yet). If the search lands
+       * elsewhere the action is stale and inserting the pointer would corrupt
+       * the index, so drop it.
+       */
+      searchTree(_spareKey2, level, false);
+      final LevelCache lc = _levelCache[level];
+      final long landedOn = lc._page;
+      lc._buffer.releaseTouched();
+      if (landedOn != page) {
+        return true;
+      }
       storeInternal(_spareKey2, _value, level + 1, StoreOptions.NONE);
       return true;
     } finally {
