@@ -486,8 +486,22 @@ public class Buffer extends SharedResource {
                 _slack = 0;
                 _rightSibling = 0;
             } else {
-                Debug.$assert0.t(getByte(BUFFER_LENGTH_OFFSET) * 256 == _bufferSize);
-                Debug.$assert0.t(getLong(PAGE_ADDRESS_OFFSET) == _page);
+                /*
+                 * Hard checks, not Debug asserts: a page whose stored length
+                 * or address does not match holds stale or torn content
+                 * (e.g. from a partially transferred write) and must fail
+                 * loudly here rather than surface later as silently wrong
+                 * data.
+                 */
+                if (getByte(BUFFER_LENGTH_OFFSET) * 256 != _bufferSize) {
+                    throw new InvalidPageStructureException("Invalid buffer length "
+                            + (getByte(BUFFER_LENGTH_OFFSET) * 256) + " in content of page " + _page + ": expected "
+                            + _bufferSize);
+                }
+                if (getLong(PAGE_ADDRESS_OFFSET) != _page) {
+                    throw new InvalidPageStructureException("Invalid page address " + getLong(PAGE_ADDRESS_OFFSET)
+                            + " in content of page " + _page);
+                }
                 _alloc = getChar(FREE_OFFSET);
                 _slack = getChar(SLACK_OFFSET);
                 _rightSibling = getLong(RIGHT_SIBLING_OFFSET);

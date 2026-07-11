@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -280,6 +281,43 @@ public class IOFailureTest extends PersistitUnitTestCase {
     volume.getPool().invalidate(volume);
   }
 
+  /**
+   * Issue #268. FileChannel#write may report partial progress instead of
+   * throwing - observed empirically on disk-full, and suspected for
+   * transfers aborted by a concurrent interrupt-driven channel close on
+   * Windows. VolumeStorageV2.writePage used to ignore the returned count,
+   * so a short write during copyback silently tore the page in the volume
+   * file: intact header, stale tail. The journal copy was then dropped by
+   * cleanupForCopy, the pool evicted the page, and a later read served the
+   * torn page with no error - resurrecting stale record versions.
+   */
+  @Test
+  public void testVolumeShortWriteMustNotTearPage() throws Exception {
+    store1(0);
+    final Volume volume = _persistit.getVolume(_volumeName);
+    final ErrorInjectingFileChannel eifc = errorInjectingChannel(volume.getStorage().getChannel());
+    /*
+     * The next volume write that spans the middle of page 6 - a tree page
+     * after store1 - transfers only half the page and returns the short
+     * count without an exception, exactly once. Subsequent writes are
+     * normal, so the copyback cycle completes and cleanupForCopy drops the
+     * journal copies, making the volume file authoritative.
+     */
+    final int pageSize = volume.getPageSize();
+    eifc.injectShortWriteOnce(6L * pageSize + pageSize / 2);
+    _persistit.copyBackPages();
+    /*
+     * Force every subsequent read to come from the volume file.
+     */
+    volume.getPool().flush(Long.MAX_VALUE);
+    _persistit.getJournalManager().force();
+    volume.getPool().invalidate(volume);
+    /*
+     * All records must read back intact through the volume channel.
+     */
+    checkStore1(0);
+  }
+
   @Test
   public void testJournalEOFonRecovery() throws Exception {
     final JournalManager jman = _persistit.getJournalManager();
@@ -461,6 +499,21 @@ public class IOFailureTest extends PersistitUnitTestCase {
       exchange.clear().append(at).append(sb);
       exchange.getValue().put("Record #" + at + "_" + i);
       exchange.store();
+    }
+    _persistit.releaseExchange(exchange);
+  }
+
+  private void checkStore1(final int at) throws PersistitException {
+    final Exchange exchange = _persistit.getExchange(_volumeName, "IOFailureTest", false);
+    final StringBuilder sb = new StringBuilder();
+
+    for (int i = 1; i <= 5000; i++) {
+      sb.setLength(0);
+      sb.append((char) (i / 20 + 64));
+      sb.append((char) (i % 20 + 64));
+      exchange.clear().append(at).append(sb).fetch();
+      assertEquals("Record " + at + "_" + i + " should read back intact", "Record #" + at + "_" + i, exchange
+        .getValue().isDefined() ? exchange.getValue().getString() : null);
     }
     _persistit.releaseExchange(exchange);
   }
