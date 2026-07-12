@@ -70,7 +70,7 @@ public interface Management extends Remote, ManagementMXBean {
      * 
      * @param fast
      *            <code>true</code> to copy pages at maximum speed.
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public void setJournalCopyingFast(boolean fast) throws RemoteException;
 
@@ -79,7 +79,7 @@ public interface Management extends Remote, ManagementMXBean {
      * 
      * @return <code>true</code> if the attempt to close Persistit was
      *         successful; otherwise <code>false</code>
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public boolean close() throws RemoteException;
 
@@ -172,7 +172,7 @@ public interface Management extends Remote, ManagementMXBean {
      * 
      * @return Array of LogicalRecord objects
      * 
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public LogicalRecord[] getLogicalRecordArray(String volumeName, String treeName, String keyFilterString,
             KeyState fromKey, Key.Direction direction, int maxRecordCount, int maxValueBytes, boolean decodeStrings)
@@ -183,7 +183,7 @@ public interface Management extends Remote, ManagementMXBean {
      * the Journal.
      * 
      * @return the JournalInfo
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public JournalInfo getJournalInfo() throws RemoteException;
 
@@ -192,7 +192,7 @@ public interface Management extends Remote, ManagementMXBean {
      * the recovery process.
      * 
      * @return the JournalInfo
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public RecoveryInfo getRecoveryInfo() throws RemoteException;
 
@@ -201,7 +201,7 @@ public interface Management extends Remote, ManagementMXBean {
      * and rollback information.
      * 
      * @return the TransactionInfo
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public TransactionInfo getTransactionInfo() throws RemoteException;
 
@@ -247,7 +247,7 @@ public interface Management extends Remote, ManagementMXBean {
      * @return The traversed count, and a value of the key associated with the
      *         last record traversed.
      * 
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
 
     public LogicalRecordCount getLogicalRecordCount(String volumeName, String treeName, String keyFilterString,
@@ -361,7 +361,7 @@ public interface Management extends Remote, ManagementMXBean {
      *            having depth d.
      * @return a <code>BufferInfo</code> object reflecting the selected page, or
      *         <code>null</code> if the specified tree does not exist.
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public BufferInfo getBufferInfo(String volumeName, String treeName, KeyState key, int level) throws RemoteException;
 
@@ -462,7 +462,7 @@ public interface Management extends Remote, ManagementMXBean {
      *            Fully qualified class name.
      * @return The <code>Class</code>, or <code>null</code> if an exception
      *         occurred while attempting to acquire the Class.
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public Class<?> getRemoteClass(String className) throws RemoteException;
 
@@ -472,8 +472,8 @@ public interface Management extends Remote, ManagementMXBean {
      * is no unique volume corresponding with the supplied name, then this
      * method returns <code>null</code>.
      * 
-     * @param volumeName
-     * 
+     * @param volumeName The name (or unique partial name) of the volume
+     *
      * @return the <code>VolumeInfo</code>
      */
     public VolumeInfo getVolumeInfo(String volumeName) throws RemoteException;
@@ -514,12 +514,12 @@ public interface Management extends Remote, ManagementMXBean {
      * character in the supplied String, or -1 if the string is a valid String
      * representation of a KeyFilter.
      * 
-     * @param keyFilterString
-     * 
+     * @param keyFilterString The String representation of a <code>KeyFilter</code> to validate
+     *
      * @return index of first invalid character in the supplied
      *         <code>keyFilterString</code>, or -1 if the string is valid.
      * 
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public int parseKeyFilterString(String keyFilterString) throws RemoteException;
 
@@ -548,7 +548,7 @@ public interface Management extends Remote, ManagementMXBean {
      *            used in decoding the value. May be <code>null</code>.
      * 
      * @return Array of zero or more decoded objects
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public Object[] decodeValueObjects(ValueState valueState, CoderContext context) throws RemoteException;
 
@@ -565,7 +565,7 @@ public interface Management extends Remote, ManagementMXBean {
      * 
      * @return Array of decoded key segments
      * 
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public Object[] decodeKeyObjects(KeyState keyState, CoderContext context) throws RemoteException;
 
@@ -590,7 +590,7 @@ public interface Management extends Remote, ManagementMXBean {
      *            Verbosity level, one of {@link Task#LOG_NORMAL} or
      *            {@link Task#LOG_VERBOSE}.
      * @return Task identifier Unique ID for the running task
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public long startTask(String description, String owner, String commandLine, long maximumTime, int verbosity)
             throws RemoteException;
@@ -603,7 +603,7 @@ public interface Management extends Remote, ManagementMXBean {
      * @param description
      *            description identifying what the task is doing
      * @return the taskId as a String, or other status information
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public String launch(final Task task, final String description) throws RemoteException;
 
@@ -625,7 +625,7 @@ public interface Management extends Remote, ManagementMXBean {
      * 
      * @return Array of <code>TaskStatus</code> objects indicating status of
      *         selected task(s).
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public TaskStatus[] queryTaskStatus(long taskId, boolean details, boolean clearMessages) throws RemoteException;
 
@@ -648,7 +648,7 @@ public interface Management extends Remote, ManagementMXBean {
      *            status
      * @return Array of <code>TaskStatus</code> objects indicating status of
      *         selected task(s).
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public TaskStatus[] queryTaskStatus(long taskId, boolean details, boolean clearMessages, boolean clearTasks)
             throws RemoteException;
@@ -662,7 +662,7 @@ public interface Management extends Remote, ManagementMXBean {
      * @param suspend
      *            <code>true</code> to suspend the task, <code>false</code> to
      *            allow it to resume.
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public void setTaskSuspended(long taskId, boolean suspend) throws RemoteException;
 
@@ -676,7 +676,7 @@ public interface Management extends Remote, ManagementMXBean {
      * 
      * @param taskId
      *            Task ID for a selected Task, or -1 for all Tasks.
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public void stopTask(long taskId, boolean remove) throws RemoteException;
 
@@ -687,7 +687,7 @@ public interface Management extends Remote, ManagementMXBean {
      * @param taskId
      *            Task ID for a selected task, or -1 for all tasks.
      * 
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public void removeFinishedTasks(long taskId) throws RemoteException;
 

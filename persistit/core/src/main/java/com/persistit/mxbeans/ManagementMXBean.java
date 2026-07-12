@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit.mxbeans;
@@ -79,7 +80,7 @@ public interface ManagementMXBean {
      * not registered.
      * 
      * @return the port
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     int getRmiPort() throws RemoteException;
 
@@ -88,7 +89,7 @@ public interface ManagementMXBean {
      * initialized
      * 
      * @return total number of transactions committed
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     long getCommittedTransactionCount() throws RemoteException;
 
@@ -97,7 +98,7 @@ public interface ManagementMXBean {
      * Persistit was initialized
      * 
      * @return total number of transactions rolled back
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     long getRollbackCount() throws RemoteException;
 
@@ -106,7 +107,7 @@ public interface ManagementMXBean {
      * or null if there are none.
      * 
      * @return array of volumes
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     Management.VolumeInfo[] getVolumes() throws RemoteException;
 
@@ -114,7 +115,7 @@ public interface ManagementMXBean {
      * @param max
      *            Maximum number of transactions to report on.
      * @return Report on the <code>max</code> longest-running transactions.
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     String transactionReport(int max) throws RemoteException;
 
@@ -165,7 +166,7 @@ public interface ManagementMXBean {
      * 
      * @return <code>true</code> if Persistit will suspend any attempt to update
      *         a <code>Volume</code>; otherwise <code>false</code>.
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     boolean isUpdateSuspended() throws RemoteException;
 
@@ -174,8 +175,8 @@ public interface ManagementMXBean {
      * enabled, Persistit will delay each Thread that attempts to perform an
      * update operation indefinitely.
      * 
-     * @param suspended
-     * @throws RemoteException
+     * @param suspended <code>true</code> to suspend all update operations; otherwise <code>false</code>
+     * @throws RemoteException if a remote communication error occurs
      */
     void setUpdateSuspended(boolean suspended) throws RemoteException;
 
@@ -183,7 +184,7 @@ public interface ManagementMXBean {
      * Flush and sync all dirty data in Persistit by invoking
      * {@link Persistit#flush} and {@link Persistit#force}.
      * 
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     void flushAndForce() throws RemoteException;
 
@@ -194,9 +195,9 @@ public interface ManagementMXBean {
      * {@link #launch(String)} method initiates the task in a new thread and
      * returns immediately.
      * 
-     * @param commandLine
+     * @param commandLine the command line specifying the task to execute
      * @return The final status of the Task, as a String
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     String execute(final String commandLine) throws RemoteException;
 
@@ -206,9 +207,9 @@ public interface ManagementMXBean {
      * starts the task in a new thread and returns immediately. In contrast, the
      * {@link #execute(String)} method completes the task before returning.
      * 
-     * @param commandLine
+     * @param commandLine the command line specifying the task to start
      * @return The taskId, as a String
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     String launch(final String commandLine) throws RemoteException;
 
@@ -218,7 +219,7 @@ public interface ManagementMXBean {
      * @param volumeName
      *            name of the volume to lookup
      * @return information about the volume, or null if none found
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     Management.VolumeInfo volumeByName(final String volumeName) throws RemoteException;
 }

@@ -391,7 +391,7 @@ public class IntegrityCheck extends Task {
      * Control output format. When CSV mode is enabled, the output is organized
      * as comma-separated-variable text that can be imported into a spreadsheet.
      * 
-     * @param csvMode
+     * @param csvMode <code>true</code> to enable CSV output mode
      */
     public void setCsvMode(final boolean csvMode) {
         _csv = csvMode;
@@ -773,7 +773,7 @@ public class IntegrityCheck extends Task {
      * @param volume
      *            The {@link Volume} to check.
      * @return <i>true</i> if the volume is clean (has no Faults).
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     public boolean checkVolume(final Volume volume) throws PersistitException {
         reset();
@@ -819,7 +819,7 @@ public class IntegrityCheck extends Task {
      * @param tree
      *            The <code>Tree</code> to check.
      * @return <i>true</i> if the volume is clean (has no Faults).
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     public boolean checkTree(final Tree tree) throws PersistitException {
         final String messageStart;
@@ -887,9 +887,9 @@ public class IntegrityCheck extends Task {
      * page is a data page, then we are at the bottom of the tree. Else we
      * recursively checkTree on each of the subordinate pages.
      * 
-     * @param page
-     * @param level
-     * @throws PersistitException
+     * @param page the page address of the subtree root to check
+     * @param level the level of the page within the tree
+     * @throws PersistitException if a persistence error occurs
      */
     private void checkTree(final Key parentKey, final long parent, final long page, final int level, final Tree tree)
             throws PersistitException {

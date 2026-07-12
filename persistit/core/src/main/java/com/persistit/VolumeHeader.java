@@ -176,7 +176,7 @@ class VolumeHeader {
      * +1 because the stored form of volumes created before 2.6.1 recorded
      * "highestUsedPage" rather than "nextAvailablePage" in this slot.
      * 
-     * @param bytes
+     * @param bytes the volume header bytes
      * @return page address of the next available page
      */
     static long getNextAvailablePage(final byte[] bytes) {
@@ -187,7 +187,7 @@ class VolumeHeader {
      * -1 because the stored form of volumes created before 2.6.1 recorded
      * "highestUsedPage" rather than "nextAvailablePage" in this slot.
      * 
-     * @param bytes
+     * @param bytes the volume header bytes
      * @param value
      *            next available page
      * @return whether the supplied value is different from the previously
@@ -293,9 +293,9 @@ class VolumeHeader {
      * 
      * @return <code>true</code> if and only if there already exists a Volume
      *         file.
-     * @throws InvalidVolumeSpecificationException
-     * @throws CorruptVolumeException
-     * @throws PersistitIOException
+     * @throws InvalidVolumeSpecificationException if the volume specification is invalid
+     * @throws CorruptVolumeException if the volume file is corrupt
+     * @throws PersistitIOException if an I/O error occurs
      */
     public static boolean verifyVolumeHeader(final VolumeSpecification specification, final long systemTimestamp)
             throws CorruptVolumeException, InvalidVolumeSpecificationException, PersistitIOException {

@@ -284,8 +284,8 @@ public class DefaultValueCoder implements ValueRenderer, HandleCache {
     /**
      * Performs unprivileged initialization logic common to both constructors.
      * 
-     * @param clientClass
-     * @param mustBeSerializable
+     * @param clientClass the client class to be encoded and decoded
+     * @param mustBeSerializable whether the client class is required to be serializable
      */
     private void init(final Persistit persistit, final Class clientClass, final boolean mustBeSerializable) {
         _clazz = clientClass;
@@ -1012,7 +1012,7 @@ public class DefaultValueCoder implements ValueRenderer, HandleCache {
      * @param object
      *            The object whose fields are to be serialized
      * 
-     * @throws ConversionException
+     * @throws ConversionException if the value cannot be converted
      */
     public void putDefaultFields(final Value value, final Object object) throws ConversionException {
         Accessor accessor = null;
@@ -1054,7 +1054,7 @@ public class DefaultValueCoder implements ValueRenderer, HandleCache {
      * @return An <code>Object</code> having the same class as the suppled
      *         <code>clazz</code> parameter.
      * 
-     * @throws ConversionException
+     * @throws ConversionException if the value cannot be converted
      */
     @Override
     public Object get(final Value value, final Class clazz, final CoderContext context) throws ConversionException {
@@ -1110,7 +1110,7 @@ public class DefaultValueCoder implements ValueRenderer, HandleCache {
      *            operation. (See {@link CoderContext}.) The default value is
      *            <code>null</code>.
      * 
-     * @throws ConversionException
+     * @throws ConversionException if the value cannot be converted
      */
     @Override
     public void render(final Value value, final Object target, final Class clazz, final CoderContext context)
@@ -1145,7 +1145,7 @@ public class DefaultValueCoder implements ValueRenderer, HandleCache {
      * @param target
      *            The object whose fields will be set
      * 
-     * @throws ConversionException
+     * @throws ConversionException if the value cannot be converted
      */
     void renderDefaultFields(final Value value, final Object target) throws ConversionException {
         Accessor accessor = null;

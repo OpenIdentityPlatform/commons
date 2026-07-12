@@ -409,8 +409,8 @@ public class KeyFilter {
      * <code>KeyFilter</code> if and only if each of the first min(<i>M</i>,
      * <i>N</i>) segments of <i>K</i> is selected by the corresponding member of
      * the <code>terms</code> array.
-     * 
-     * @param terms
+     *
+     * @param terms The <code>Term</code> array
      */
     public KeyFilter(final Term[] terms) {
         this(terms, 0, Integer.MAX_VALUE);
@@ -1507,11 +1507,13 @@ public class KeyFilter {
      * Process the a Term in the KeyFilter. The first <code>level</code> terms
      * of the KeyFilter have already been satisfied.
      * 
-     * @param key
-     * @param index
-     * @param level
-     * @param forward
-     * @param eq
+     * @param key the key being advanced to the next matching value
+     * @param index the byte offset within the key's encoded bytes at which the
+     *            current term begins
+     * @param level the index of the term being processed
+     * @param forward <code>true</code> to find a successor key,
+     *            <code>false</code> to find a predecessor
+     * @param eq whether an exact match at the current position is acceptable
      * @return whether there may be more matching keys
      */
     private boolean next(final Key key, final int index, final int level, final boolean forward, final boolean eq) {

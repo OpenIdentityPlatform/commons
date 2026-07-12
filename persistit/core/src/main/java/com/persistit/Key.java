@@ -962,8 +962,8 @@ public final class Key implements Comparable<Object> {
     /**
      * Construct a <code>Key</code> with a maximum length of
      * {@value #MAX_KEY_LENGTH}.
-     * 
-     * @param persistit
+     *
+     * @param persistit the Persistit instance
      */
     public Key(final Persistit persistit) {
         this(persistit, MAX_KEY_LENGTH);
@@ -1079,8 +1079,8 @@ public final class Key implements Comparable<Object> {
      * The index is the next position in the backing byte array from which a
      * segment value will be decoded. Applications should usually use the
      * {@link #indexTo} method to set the index to a valid location.
-     * 
-     * @param index
+     *
+     * @param index the position in the backing byte array from which the next segment value will be decoded
      * @return This <code>Key</code>, to permit method call chaining
      */
     public Key setIndex(final int index) {
@@ -1221,8 +1221,8 @@ public final class Key implements Comparable<Object> {
      * positive integer if the next segment of this <code>Key</code> is larger
      * than the next segment of the supplied <code>Key</code>, a negative
      * integer if it is smaller, or zero if the segments are equal.
-     * 
-     * @param key
+     *
+     * @param key the <code>Key</code> whose next segment is compared to this key's next segment
      * @return the comparison result
      */
     public int compareKeySegment(final Key key) {
@@ -1331,8 +1331,8 @@ public final class Key implements Comparable<Object> {
      * {@value #MAX_KEY_LENGTH_UPPER_BOUND}. As a side-effect, this method also
      * calls the {@link #clear()} method.
      * </p>
-     * 
-     * @param size
+     *
+     * @param size the size in bytes of the new backing byte array
      * @throws IllegalArgumentException
      *             if the specified size is not valid.
      */
@@ -1818,8 +1818,8 @@ public final class Key implements Comparable<Object> {
 
     /**
      * Encodes an int into a supplied byte array.
-     * 
-     * @param v
+     *
+     * @param v the int value to encode
      * @return size of appended segment
      */
     private int appendIntInternal(final int v) {
@@ -2166,8 +2166,8 @@ public final class Key implements Comparable<Object> {
      * Append the next key segment of the supplied <code>Key</code> to this
      * <code>Key</code>. The next key segment is determined by the current index
      * of the key and can be set using the {@link #setIndex(int)} method.
-     * 
-     * @param key
+     *
+     * @param key the <code>Key</code> whose next segment is appended to this key
      */
     public Key appendKeySegment(final Key key) {
         final int save = _size;
@@ -3690,9 +3690,9 @@ public final class Key implements Comparable<Object> {
 
     /**
      * Implementation of String decoding
-     * 
-     * @param quoted
-     * @param sb
+     *
+     * @param quoted <code>true</code> to emit a quoted, displayable representation of the string
+     * @param sb the <code>Appendable</code> to which the decoded string is written
      */
     private Appendable decodeString(final boolean quoted, final Appendable sb) {
         int index = _index;
@@ -3919,8 +3919,8 @@ public final class Key implements Comparable<Object> {
      * Converts a key segment in quoted form to raw form. In quoted form, the
      * bytes NUL and SOH (0 and 1) are represented by the two-byte sequence (1,
      * C) where C is 32 for NUL or 33 for SOH.
-     * 
-     * @param index
+     *
+     * @param index the starting offset within the backing byte array of the segment to unquote
      * @return The unquoted length of the array.
      */
     private int unquoteNulls(final int index, final boolean zeroByteFree) {

@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -306,14 +307,14 @@ class TransactionPlayer {
      * new tree is determined by the
      * {@link TransactionPlayerListener#createTree(long)} method.
      * 
-     * @param treeHandle
-     * @param from
-     * @param timestamp
-     * @param listener
+     * @param treeHandle the handle identifying the tree to which the operation applies
+     * @param from the journal address from which the operation is read
+     * @param timestamp the timestamp of the recovery operation
+     * @param listener the listener that decides whether a missing tree should be created
      * @return the <code>Exchange</code> on which a recovery operation should be
      *         applied, or <code>null</code> if there is no backing
      *         <code>Tree</code>.
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     private Exchange getExchange(final int treeHandle, final long from, final long timestamp,
             final TransactionPlayerListener listener) throws PersistitException {

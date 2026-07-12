@@ -452,12 +452,12 @@ public class Buffer extends SharedResource {
      *
      * Extract fields from the buffer.
      *
-     * @throws PersistitIOException
-     * @throws InvalidPageAddressException
-     * @throws InvalidPageStructureException
-     * @throws VolumeClosedException
-     * @throws InUseException
-     * @throws PersistitInterruptedException
+     * @throws PersistitIOException if an I/O error occurs
+     * @throws InvalidPageAddressException if the page address is invalid
+     * @throws InvalidPageStructureException if the page structure is invalid
+     * @throws VolumeClosedException if the volume is closed
+     * @throws InUseException if the resource is currently in use
+     * @throws PersistitInterruptedException if the thread is interrupted while waiting
      */
     void load(final Volume vol, final long page) throws PersistitIOException, InvalidPageAddressException,
             InvalidPageStructureException, VolumeClosedException, InUseException, PersistitInterruptedException {
@@ -614,7 +614,7 @@ public class Buffer extends SharedResource {
      * Clears all tailblock bytes that are no longer in use. This makes sure we
      * don't retain data that has been deleted or moved in this page.
      *
-     * @throws InvalidPageStructureException
+     * @throws InvalidPageStructureException if the page structure is invalid
      */
     void clearSlack() throws InvalidPageStructureException {
         if (isGarbagePage()) {
@@ -828,7 +828,7 @@ public class Buffer extends SharedResource {
      * @return An encoded result (see above). Returns 0 if the supplied key
      *         precedes the first key in the page. Returns Integer.MAX_VALUE if
      *         it follows the last key in the page.
-     * @throws PersistitInterruptedException
+     * @throws PersistitInterruptedException if the thread is interrupted while waiting
      */
     int findKey(final Key key) throws PersistitInterruptedException {
         final FastIndex fastIndex = getFastIndex();
@@ -1119,7 +1119,7 @@ public class Buffer extends SharedResource {
      * Given a foundAt position, return a long value that encodes the offset and
      * size of the associated value field
      *
-     * @param foundAt
+     * @param foundAt the encoded position of the key within the page
      * @return (offset << 32) | size;
      */
     long at(final int foundAt) {
@@ -1227,9 +1227,9 @@ public class Buffer extends SharedResource {
      * Internal implementation of getKey using a previously computed result from
      * the findKey() method.
      *
-     * @param key
-     * @param mode
-     * @param foundAt
+     * @param key the <code>Key</code> being sought and updated with the result
+     * @param mode the traversal direction
+     * @param foundAt the result previously computed by {@link #findKey}
      * @return foundAt value
      */
     int traverse(final Key key, final Key.Direction mode, final int foundAt) {
@@ -1248,8 +1248,8 @@ public class Buffer extends SharedResource {
     /**
      * Helper method to compute the actual bytes in the previous key.
      *
-     * @param key
-     * @param foundAt
+     * @param key the <code>Key</code> to populate with the previous key
+     * @param foundAt the result previously computed by {@link #findKey}
      * @return foundAt value
      */
     int previousKey(final Key key, final int foundAt) {
@@ -1321,8 +1321,8 @@ public class Buffer extends SharedResource {
     /**
      * Helper method to compute the actual bytes in the successor key.
      *
-     * @param key
-     * @param foundAt
+     * @param key the <code>Key</code> to populate with the successor key
+     * @param foundAt the result previously computed by {@link #findKey}
      * @return foundAt value
      */
     int nextKey(final Key key, final int foundAt) {
@@ -1356,8 +1356,8 @@ public class Buffer extends SharedResource {
     /**
      * Helper method for IntegrityCheck to find next long record key block
      *
-     * @param value
-     * @param foundAt
+     * @param value the <code>Value</code> to receive the long record data
+     * @param foundAt the position at which to begin searching
      * @return foundAt value
      */
     int nextLongRecord(final Value value, final int foundAt) {
@@ -1411,7 +1411,7 @@ public class Buffer extends SharedResource {
      *            The key on under which the value will be stored
      * @param valueHelper
      *            The value, converted to a byte array
-     * @throws PersistitInterruptedException
+     * @throws PersistitInterruptedException if the thread is interrupted while waiting
      */
     int putValue(final Key key, final ValueHelper valueHelper) throws PersistitInterruptedException {
         final int p = findKey(key);
@@ -1577,7 +1577,7 @@ public class Buffer extends SharedResource {
      * This method is for debugging only. It should be asserted after a key has
      * been inserted or removed.
      *
-     * @param p
+     * @param p the offset of the keyblock to check
      * @return when key is adjacent
      */
     private boolean adjacentKeyCheck(int p) {
@@ -1922,7 +1922,7 @@ public class Buffer extends SharedResource {
      * @return offset of the inserted key block. If positive, this value denotes
      *         a location in this Buffer. If negative, it denotes a location in
      *         the right sibling Buffer.
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     final int split(final Buffer rightSibling, final Key key, final ValueHelper valueHelper, int foundAt,
             final Key indexKey, final Sequence sequence, final SplitPolicy policy) throws PersistitException {
@@ -2961,11 +2961,11 @@ public class Buffer extends SharedResource {
     /**
      * Move records from buffer2 to this buffer. The
      *
-     * @param buffer
-     * @param p1
-     * @param p2
-     * @param insertAt
-     * @param includesRightEdge
+     * @param buffer the source buffer from which records are moved
+     * @param p1 the offset of the first keyblock to move
+     * @param p2 the offset just past the last keyblock to move
+     * @param insertAt the offset in this buffer at which the records are inserted
+     * @param includesRightEdge whether the right edge keyblock is also moved
      */
     void moveRecords(final Buffer buffer, final int p1, final int p2, int insertAt, final boolean includesRightEdge) {
         if (p2 - p1 + _keyBlockEnd > _alloc) {
@@ -3195,7 +3195,7 @@ public class Buffer extends SharedResource {
      * Determines whether supplied index points to the left of the first key in
      * the page.
      *
-     * @param foundAt
+     * @param foundAt the keyblock index
      */
     boolean isBeforeLeftEdge(final int foundAt) {
         return (((foundAt & EXACT_MASK) == 0 && (foundAt & P_MASK) <= KEY_BLOCK_START) || (foundAt & P_MASK) < KEY_BLOCK_START);
@@ -3598,10 +3598,10 @@ public class Buffer extends SharedResource {
      * pruning the page can be saved with the preceding checkpoint even though a
      * new checkpoint has been proposed.
      *
-     * @param tree
+     * @param tree the <code>Tree</code> to which this buffer belongs
      * @return <code>true</code> if this method changed the contents of the
      *         buffer
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     boolean pruneMvvValues(final Tree tree, final boolean pruneLongMVVs, final List<CleanupAction> cleanupActions)
             throws PersistitException {
@@ -3876,7 +3876,7 @@ public class Buffer extends SharedResource {
     }
 
     /**
-     * @param findPointer
+     * @param findPointer the page pointer to locate, or a negative value to show all records
      * @return a human-readable representation of a page; if it is an index page
      *         and findPointer >= 0, then only show the records that surround
      *         the one that points to findPointer. This provides a way to
@@ -4234,7 +4234,7 @@ public class Buffer extends SharedResource {
      *            A set of Volumes for which IV records have already been
      *            written. This method adds a volume to this set whenever it
      *            writes an IV record.
-     * @throws Exception
+     * @throws Exception if an error occurs while dumping the buffer
      */
     void dump(final ByteBuffer bb, final boolean secure, final boolean verbose, final Set<Volume> identifiedVolumes)
             throws Exception {

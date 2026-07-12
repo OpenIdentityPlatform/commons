@@ -321,7 +321,8 @@ public class ThreadSequencer implements SequencerConstants {
          * MAX_LOCATIONS possible locations in code where a join point can
          * occur.
          * 
-         * @param location
+         * @param location the location at which the calling thread reaches a
+         *            join point
          */
         public void sequence(final int location);
 

@@ -140,7 +140,7 @@ class VolumeStructure {
      * page and all the index and data pages pointed to by that root page.
      * 
      * @return newly create NewTree object
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     private long createTreeRoot(final Tree tree) throws PersistitException {
         _persistit.checkSuspended();
@@ -181,7 +181,7 @@ class VolumeStructure {
      *         <code>createIfNecessary</code> is false and there is no such tree
      *         in this <code>Volume</code>.
      * 
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     public synchronized Tree getTree(final String name, final boolean createIfNecessary) throws PersistitException {
         if (DIRECTORY_TREE_NAME.equals(name)) {
@@ -235,9 +235,9 @@ class VolumeStructure {
     /**
      * Helper method used by pruning. Allows access to directory tree by name.
      * 
-     * @param name
-     * @return
-     * @throws PersistitException
+     * @param name the tree name
+     * @return the <code>Tree</code> with the specified name, or <code>null</code> if none exists
+     * @throws PersistitException if a persistence error occurs
      */
     Tree getTreeInternal(final String name) throws PersistitException {
         if (DIRECTORY_TREE_NAME.equals(name)) {
@@ -345,8 +345,8 @@ class VolumeStructure {
     /**
      * Called by Exchange to recreate a Tree after a volume has been truncated.
      * 
-     * @param tree
-     * @throws PersistitException
+     * @param tree the <code>Tree</code> to recreate
+     * @throws PersistitException if a persistence error occurs
      */
     void recreateTree(final Tree tree) throws PersistitException {
         Debug.$assert1.t(tree.getDepth() == -1);
@@ -361,7 +361,7 @@ class VolumeStructure {
      * Flush dirty {@link TreeStatistics} instances. Called periodically on the
      * PAGE_WRITER thread from {@link Persistit#cleanup()}.
      * 
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     void flushStatistics() throws PersistitException {
         final List<Tree> trees = new ArrayList<Tree>();
@@ -384,7 +384,7 @@ class VolumeStructure {
      * 
      * @return The array
      * 
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     public String[] getTreeNames() throws PersistitException {
         final List<String> list = new ArrayList<String>();
