@@ -63,6 +63,7 @@ import static com.persistit.Key.LTEQ;
 import static com.persistit.Key.RIGHT_GUARD_KEY;
 import static com.persistit.Key.maxStorableKeySize;
 import static com.persistit.util.SequencerConstants.DEALLOCATE_CHAIN_A;
+import static com.persistit.util.SequencerConstants.STORE_PENDING_SPLIT_A;
 import static com.persistit.util.SequencerConstants.WRITE_WRITE_STORE_A;
 import static com.persistit.util.ThreadSequencer.sequence;
 
@@ -1399,6 +1400,8 @@ public class Exchange implements ReadOnlyExchange {
     boolean treeWriterClaimRequired = false;
     boolean committed = false;
     boolean incrementMVVCount = false;
+    final int startLevel = level;
+    boolean revalidateSplitPointer = false;
 
     final int maxSimpleValueSize = maxValueSize(key.getEncodedSize());
     final Value spareValue = _persistit.getThreadLocalValue();
@@ -1470,6 +1473,32 @@ public class Exchange implements ReadOnlyExchange {
         }
 
         checkLevelCache();
+
+        /*
+         * A prior iteration committed a split at level - 1 and the
+         * RetryException handler below then released the tree claim before
+         * re-acquiring it. While no claim was held a concurrent structure
+         * delete may have unlinked the page the pending key-pointer pair
+         * refers to and put it on a garbage chain; blindly inserting the
+         * pointer would plant a dangling index entry to a garbage page --
+         * the bug 1017957 failure mode. Re-validate under the re-acquired
+         * claim: a search for the pending key at the child level must land
+         * on the pending page itself (through the B-link right-walk, since
+         * the page has no parent entry yet). If it lands elsewhere the page
+         * is gone, along with its keys, and the deferred insertion must be
+         * abandoned.
+         */
+        if (revalidateSplitPointer) {
+          revalidateSplitPointer = false;
+          searchTree(key, level - 1, false);
+          final Buffer childBuffer = _levelCache[level - 1]._buffer;
+          final long landedOn = childBuffer.getPageAddress();
+          childBuffer.releaseTouched();
+          if (landedOn != valueToStore.getPointerValue()) {
+            break mainRetryLoop;
+          }
+        }
+
         final List<PrunedVersion> prunedVersions = new ArrayList<PrunedVersion>();
 
         try {
@@ -1716,6 +1745,9 @@ public class Exchange implements ReadOnlyExchange {
             _treeHolder.release();
             treeClaimAcquired = false;
           }
+          if (level > startLevel) {
+            revalidateSplitPointer = true;
+          }
           try {
             sequence(WRITE_WRITE_STORE_A);
             final long depends = _persistit.getTransactionIndex().wwDependency(re.getVersionHandle(),
@@ -1740,6 +1772,16 @@ public class Exchange implements ReadOnlyExchange {
           if (treeClaimAcquired) {
             _treeHolder.release();
             treeClaimAcquired = false;
+          }
+          if (level > startLevel) {
+            /*
+             * A split committed at a lower level and its key-pointer pair
+             * has not been inserted yet. The claim release above opens a
+             * window for a concurrent structure delete, so the pending
+             * insertion must be re-validated at the top of the loop.
+             */
+            revalidateSplitPointer = true;
+            sequence(STORE_PENDING_SPLIT_A);
           }
           final boolean doWait = (options & StoreOptions.WAIT) != 0;
           treeClaimAcquired = _treeHolder.claim(true, doWait ? _timeoutMillis : 0);
@@ -4114,6 +4156,37 @@ public class Exchange implements ReadOnlyExchange {
       lc._buffer.releaseTouched();
       if (landedOn != page) {
         return true;
+      }
+      /*
+       * Both checks above can pass legitimately for the wrong incarnation of
+       * the page: since this action was enqueued, the page may have been
+       * unlinked, garbage-collected and reused as a live page of this tree at
+       * the same level (ABA). A reused page is already indexed, so the search
+       * lands on it through its own parent entry rather than through the
+       * B-link right-walk from its left sibling, and the insert below would
+       * target a page that has no index hole. That insert is a harmless
+       * same-key replace only while every parent entry key equals its page's
+       * first key -- a global invariant this repair action has no business
+       * depending on; were the keys ever to diverge it would plant a second
+       * parent entry for the page, and a later covering removeKeyRange could
+       * unlink the page while deleting only one of the two entries, leaving
+       * a dangling pointer. Repair the hole only if the parent level really
+       * has no entry for this page: the entry covering the page's first key
+       * must be non-exact and point elsewhere (to the left sibling the
+       * right-walk came through).
+       */
+      if (level + 1 < _cacheDepth) {
+        final int foundAtParent = searchTree(_spareKey2, level + 1, false);
+        final Buffer parentBuffer = _levelCache[level + 1]._buffer;
+        boolean indexed = (foundAtParent & EXACT_MASK) != 0;
+        if (!indexed) {
+          final int p = parentBuffer.previousKeyBlock(foundAtParent & P_MASK);
+          indexed = p == -1 || parentBuffer.getPointer(p) == page;
+        }
+        parentBuffer.releaseTouched();
+        if (indexed) {
+          return true;
+        }
       }
       storeInternal(_spareKey2, _value, level + 1, StoreOptions.NONE);
       return true;
