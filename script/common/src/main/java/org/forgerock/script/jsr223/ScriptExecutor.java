@@ -2,6 +2,7 @@
  * DO NOT REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2012 ForgeRock AS. All rights reserved.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -109,7 +110,7 @@ public abstract class ScriptExecutor {
             } else {
                 ScriptEngine scriptEngine = this.scriptEngineManager.getEngineByName(this.language);
                 if (null == scriptEngine) {
-                    /* error */
+                    throw new ScriptException("No script engine available for language: " + this.language);
                 }
                 return postProcess(scriptEngine.eval(scriptSource, newContext));
             }

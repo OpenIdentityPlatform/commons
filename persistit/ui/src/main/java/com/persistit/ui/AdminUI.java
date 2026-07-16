@@ -1,6 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
- * Portions copyright 2026 3A Systems LLC.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -607,8 +607,8 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
             newPanel.setIsShowing(true);
             changeMenuMap(newPanel.getMenuMap(), true);
             scheduleRefresh(-1);
+            newPanel.setDefaultButton();
         }
-        newPanel.setDefaultButton();
     }
 
     void changeMenuMap(final Map menuMap, final boolean add) {
@@ -959,9 +959,9 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
         public void removeButton(final AbstractButton button) {
             if (_buttonList != null) {
                 _buttonList.remove(button);
+                if (_buttonList.size() == 0)
+                    _buttonList = null;
             }
-            if (_buttonList.size() == 0)
-                _buttonList = null;
         }
 
         public void stateChanged(final boolean selected) {

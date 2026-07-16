@@ -4340,7 +4340,7 @@ public class Exchange implements ReadOnlyExchange {
         checkPageType(buffer, treeDepth + 1, false);
       }
 
-      while (foundAt != -1) {
+      while (foundAt != -1 && buffer != null) {
         foundAt = buffer.traverse(_key, direction, foundAt);
         direction = GT;
         if (buffer.isAfterRightEdge(foundAt)) {

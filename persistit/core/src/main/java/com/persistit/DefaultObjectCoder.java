@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -450,7 +451,7 @@ public class DefaultObjectCoder extends DefaultValueCoder implements KeyRenderer
                 accessor.toKey(object, key);
             }
         } catch (final Exception e) {
-            throw new ConversionException("Encoding " + accessor.toString() + " for " + getClientClass(), e);
+            throw new ConversionException("Encoding " + String.valueOf(accessor) + " for " + getClientClass(), e);
         }
     }
 
@@ -524,7 +525,7 @@ public class DefaultObjectCoder extends DefaultValueCoder implements KeyRenderer
                 accessor.fromKey(target, key);
             }
         } catch (final Exception e) {
-            throw new ConversionException("Decoding " + accessor.toString() + " for " + getClientClass(), e);
+            throw new ConversionException("Decoding " + String.valueOf(accessor) + " for " + getClientClass(), e);
         }
     }
 
