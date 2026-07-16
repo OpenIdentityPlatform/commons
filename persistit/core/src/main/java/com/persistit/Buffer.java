@@ -1,6 +1,7 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
  * Copyright 2015 ForgeRock AS
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -4392,9 +4393,6 @@ public class Buffer extends SharedResource {
                 keep = TAILBLOCK_HDR_SIZE_DATA + tbKLength;
                 if (tbSize - keep >= LONGREC_PREFIX_SIZE && Util.getByte(bytes, tail + keep) == LONGREC_TYPE) {
                     keep += LONGREC_PREFIX_OFFSET;
-                }
-                if (keep < TAILBLOCK_HDR_SIZE_DATA && keep > tbSize) {
-                    keep = tbSize;
                 }
             } else {
                 keep = TAILBLOCK_HDR_SIZE_DATA;

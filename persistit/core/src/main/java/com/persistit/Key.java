@@ -1,6 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
- * Portions Copyrighted 2026 3A Systems, LLC
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -3263,7 +3263,7 @@ public final class Key implements Comparable<Object> {
             index = 0;
         for (int i = index; i < _size; i++) {
             if (_bytes[i] == 0) {
-                return i < _size ? i + 1 : -1;
+                return i + 1;
             }
         }
         // return index < _size ? _size : -1;

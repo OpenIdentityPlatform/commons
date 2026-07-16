@@ -1,6 +1,7 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
- * 
+ * Portions Copyrighted 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -275,7 +276,6 @@ class FastIndex {
         int ebc0;
         int ebc = -1;
         int ebc2 = Buffer.decodeKeyBlockEbc(_buffer.getInt(start));
-        int faultAt = -1;
 
         for (int i = 0, p = start; p < end; i++, p += Buffer.KEYBLOCK_LENGTH) {
             ebc0 = ebc;
@@ -284,16 +284,10 @@ class FastIndex {
                     + Buffer.KEYBLOCK_LENGTH)) : 0;
             if (ebc2 > ebc) {
                 if (getRunCount(i) >= 0) {
-                    if (faultAt < 0) {
-                        faultAt = i;
-                    }
                     return false;
                 }
             } else if (ebc > ebc0) {
                 if (getRunCount(i) < 0) {
-                    if (faultAt < 0) {
-                        faultAt = i;
-                    }
                     return false;
                 }
             }

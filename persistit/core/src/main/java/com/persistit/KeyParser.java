@@ -1,6 +1,7 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
- * 
+ * Portions Copyrighted 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -523,9 +524,7 @@ public class KeyParser {
                 _sb.append((char) c);
                 escape = false;
             } else {
-                if (c == '\\')
-                    escape = true;
-                else if (c == '\"') {
+                if (c == '\"') {
                     return true;
                 } else
                     _sb.append((char) c);

@@ -258,7 +258,7 @@ public final class Main {
         Validator validator = schemaCache.get(schemaId);
         if (null != validator) {
             if (verbose) {
-                final boolean[] valid = new boolean[1];
+                final boolean[] valid = { true };
                 validator.validate(value.getObject(), null, new ErrorHandler() {
                     @Override
                     public void error(ValidationException exception) throws SchemaException {
@@ -271,7 +271,7 @@ public final class Main {
                     public void assembleException() throws ValidationException {
                     }
                 });
-                if (valid.length == 0) {
+                if (valid[0]) {
                     System.out.println("OK - Object is valid!");
                 }
             } else {
