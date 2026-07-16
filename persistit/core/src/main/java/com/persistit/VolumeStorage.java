@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -40,8 +41,8 @@ abstract class VolumeStorage extends SharedResource {
     /**
      * Generate a random positive (non-zero) long value to be used as a
      * validation of a Volume's identity.
-     * 
-     * @return
+     *
+     * @return a random positive (non-zero) long identity value
      */
     protected static long generateId() {
         return (ID_GENERATOR.nextLong() & 0x0FFFFFFFFFFl) + 1;
@@ -79,7 +80,7 @@ abstract class VolumeStorage extends SharedResource {
 
     /**
      * @return the channel used to read and write pages of this volume.
-     * @throws PersistitIOException
+     * @throws PersistitIOException if an I/O error occurs
      */
     abstract FileChannel getChannel() throws PersistitIOException;
 
@@ -87,20 +88,20 @@ abstract class VolumeStorage extends SharedResource {
      * Create a new <code>Volume</code> backing file according to the
      * {@link Volume}'s volume specification.
      * 
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     abstract void create() throws PersistitException;
 
     /**
      * Open an existing <code>Volume</code> backing file.
      * 
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     abstract void open() throws PersistitException;
 
     /**
      * @return <code>true</code> if a backing file exists on the specified path.
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     abstract boolean exists() throws PersistitException;
 
@@ -109,14 +110,14 @@ abstract class VolumeStorage extends SharedResource {
      * 
      * @return <code>true</code> if there was a file and it was successfully
      *         deleted
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     abstract boolean delete() throws PersistitException;
 
     /**
      * Force all file system buffers to disk.
      * 
-     * @throws PersistitIOException
+     * @throws PersistitIOException if an I/O error occurs
      */
     abstract void force() throws PersistitIOException;
 
@@ -124,14 +125,14 @@ abstract class VolumeStorage extends SharedResource {
      * Close the file resources held by this <code>Volume</code>. After this
      * method is called no further file I/O is possible.
      * 
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     abstract void close() throws PersistitException;
 
     /**
      * Flush metadata to the volume backing store.
      * 
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     abstract void flush() throws PersistitException;
 

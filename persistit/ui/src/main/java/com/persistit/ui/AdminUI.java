@@ -893,6 +893,15 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
         }
 
         @Override
+        public AdminAction clone() {
+            try {
+                return (AdminAction) super.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new AssertionError(e);
+            }
+        }
+
+        @Override
         public void actionPerformed(final ActionEvent ae) {
             if (!_refreshing) {
                 _command.actionPerformed(this, ae);

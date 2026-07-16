@@ -203,9 +203,9 @@ public final class Main {
      * Files found; the List is sorted using File.compareTo().
      *
      * @param aStartingDir is a valid directory, which can be read.
-     * @param filter
-     * @return
-     * @throws java.io.FileNotFoundException
+     * @param filter the filter used to select which files to include.
+     * @return the list of files found beneath the starting directory.
+     * @throws java.io.FileNotFoundException if the starting directory does not exist or cannot be read.
      */
     private List<File> getFileListingNoSort(File aStartingDir, FileFilter filter) throws FileNotFoundException {
         List<File> result = new ArrayList<>();
@@ -226,8 +226,8 @@ public final class Main {
     /**
      * Directory is valid if it exists, does not represent a file, and can be read.
      *
-     * @param aDirectory
-     * @throws java.io.FileNotFoundException
+     * @param aDirectory the directory to validate.
+     * @throws java.io.FileNotFoundException if the directory does not exist.
      */
     private void validateDirectory(File aDirectory) throws FileNotFoundException {
         if (aDirectory == null) {

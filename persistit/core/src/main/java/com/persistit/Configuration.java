@@ -439,6 +439,7 @@ public class Configuration {
          * Set the minimum and maximum buffer count.
          * 
          * @param count
+         *            the buffer count to set as both the minimum and maximum
          */
         public void setCount(final int count) {
             setMinimumCount(count);
@@ -612,8 +613,11 @@ public class Configuration {
          * {@value com.persistit.Configuration#GIGA} as a multiplier.
          * 
          * @param bufferSize
+         *            the buffer (page) size to which this count applies
          * @param propertyName
+         *            the name of the property being parsed
          * @param propertyValue
+         *            the property value to parse as a buffer count
          * @throws IllegalArgumentException
          *             if the propertyValue is not in the form of a valid
          *             Integer
@@ -641,12 +645,13 @@ public class Configuration {
          * </pre>
          * reserves 128M from available memory and then allocates
          * 75% of the remainder up to 8Gb, but not less than 64Mb.
-         * <p>
-         * </p>
          * 
          * @param bufferSize
+         *            the buffer (page) size to which this configuration applies
          * @param propertyName
+         *            the name of the property being parsed
          * @param propertyValue
+         *            the property value to parse as memory constraints
          */
         public void parseBufferMemory(final int bufferSize, final String propertyName, final String propertyValue) {
             checkBufferSize(bufferSize, propertyName);
@@ -1188,7 +1193,10 @@ public class Configuration {
      * case-insensitive.
      * 
      * @param propName
+     *            Name of the property, used in formatting the Exception if the
+     *            value is invalid.
      * @param str
+     *            The string representation, either "true" or "false".
      * @return the boolean value
      */
     public static boolean parseBooleanValue(final String propName, final String str) {
@@ -1268,6 +1276,7 @@ public class Configuration {
      *            {@link VolumeSpecification#VolumeSpecification(String)}.
      * @return a <code>VolumeSpecification</code>
      * @throws InvalidVolumeSpecificationException
+     *             if the supplied string is not a valid volume specification
      * @see #getProperty(String)
      */
     public VolumeSpecification volumeSpecification(final String vstring) throws InvalidVolumeSpecificationException {
@@ -1318,6 +1327,8 @@ public class Configuration {
      * supplied string.
      * 
      * @param string
+     *            the buffer pool configuration string, one specification per
+     *            buffer size separated by ';'
      */
     public void setBufferPoolConfiguration(final String string) {
         for (final BufferPoolConfiguration bpc : bufferPoolMap.values()) {

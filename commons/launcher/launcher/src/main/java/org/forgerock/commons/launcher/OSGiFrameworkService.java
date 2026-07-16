@@ -48,6 +48,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -481,7 +482,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
                     for (BundleHandler handler : result) {
                         if (newHandler.getBundleUrl().equals(handler.getBundleUrl())) {
                             if (newHandler.getActions().equals(handler.getActions())
-                                    && newHandler.getStartLevel() == newHandler.getStartLevel()) {
+                                    && Objects.equals(newHandler.getStartLevel(), handler.getStartLevel())) {
                                 // Do not duplicate
                                 newHandler = null;
                                 break;

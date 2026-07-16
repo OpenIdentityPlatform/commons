@@ -81,7 +81,7 @@ public abstract class AbstractWeakReference implements PersistitReference {
      * subsequent invocation of the <code>get</code> method will cause the
      * object to be looked up and instantiated.
      * 
-     * @param id
+     * @param id the persistent identifier of the referent object
      */
     protected AbstractWeakReference(final Object id) {
         _id = id;

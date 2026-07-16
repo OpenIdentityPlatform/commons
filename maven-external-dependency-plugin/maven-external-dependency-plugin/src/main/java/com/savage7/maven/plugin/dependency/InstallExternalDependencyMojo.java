@@ -38,6 +38,15 @@ public class InstallExternalDependencyMojo extends
     AbstractExternalDependencyMojo
 {
     /**
+     * Creates a new instance.
+     */
+    public InstallExternalDependencyMojo()
+    {
+    }
+
+    /**
+     * The local repository into which the artifact is installed.
+     *
      * @parameter expression="${localRepository}"
      * @required
      * @readonly
@@ -45,6 +54,8 @@ public class InstallExternalDependencyMojo extends
     protected ArtifactRepository localRepository;
 
     /**
+     * The artifact installer used to install artifacts.
+     *
      * @component
      */
     protected ArtifactInstaller installer;

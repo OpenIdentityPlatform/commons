@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 package org.forgerock.util;
@@ -149,5 +150,14 @@ public class RangeSet extends AbstractSet<Integer> implements Cloneable, Seriali
                 throw new UnsupportedOperationException();
             }
         };
+    }
+
+    @Override
+    public RangeSet clone() {
+        try {
+            return (RangeSet) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(e);
+        }
     }
 }

@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions copyright 2026 3A Systems LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -271,6 +272,12 @@ public class TreeAndVolumeSelector extends AdminPanel implements AdminCommand {
                 return false;
             final TreeItem ti = (TreeItem) obj;
             return ti._treeName.equals(_treeName) && ti._volumeName.equals(_volumeName);
+        }
+
+        @Override
+        public int hashCode() {
+            return (_treeName == null ? 0 : _treeName.hashCode())
+                    ^ (_volumeName == null ? 0 : _volumeName.hashCode());
         }
     }
 

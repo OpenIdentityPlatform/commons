@@ -25,6 +25,7 @@
 
 /*
  * Portions Copyrighted 2012-2014 ForgeRock AS
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 package org.forgerock.script.javascript;
@@ -54,7 +55,7 @@ public class RhinoScriptEngineFactory implements ScriptEngineFactory {
     private static List<String> mimeTypes;
     private static List<String> extensions;
 
-    private RhinoScriptEngine engine = null;
+    private volatile RhinoScriptEngine engine = null;
 
     static {
         names = new ArrayList(6);

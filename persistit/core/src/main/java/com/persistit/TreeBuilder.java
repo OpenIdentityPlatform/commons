@@ -1,5 +1,6 @@
 /**
  * Copyright 2012 Akiban Technologies, Inc.
+ * Portions copyright 2026 3A Systems LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,9 +179,10 @@ public class TreeBuilder {
          * added to the _allTrees list - in other words, sorting should leave
          * the list unchanged.
          * 
-         * @param a
-         * @param b
-         * @return
+         * @param a the first tree to compare
+         * @param b the second tree to compare
+         * @return a negative integer, zero, or a positive integer as the first
+         *         tree precedes, is equal to, or follows the second tree
          */
         @Override
         public int compare(final Tree a, final Tree b) {
@@ -193,6 +195,11 @@ public class TreeBuilder {
         @Override
         public boolean equals(final Object obj) {
             return this == obj;
+        }
+
+        @Override
+        public int hashCode() {
+            return System.identityHashCode(this);
         }
     };
 
@@ -346,7 +353,8 @@ public class TreeBuilder {
      * Set the count of keys inserted or merged per call to
      * {@link #reportSorted(long)} or {@link #reportMerged(long)}.
      * 
-     * @param multiple
+     * @param multiple the number of keys to insert or merge between successive
+     *            report callbacks
      */
     public final void setReportKeyCountMultiple(final long multiple) {
         _reportKeyCountMultiple = Util.rangeCheck(multiple, 1, Long.MAX_VALUE);
@@ -472,7 +480,7 @@ public class TreeBuilder {
      * 
      * @param exchange
      *            The Exchange
-     * @throws Exception
+     * @throws Exception if an error occurs while storing the key-value pair
      */
     public final void store(final Exchange exchange) throws Exception {
         store(exchange.getTree(), exchange.getKey(), exchange.getValue());
@@ -488,7 +496,7 @@ public class TreeBuilder {
      *            the Key
      * @param value
      *            the Value
-     * @throws Exception
+     * @throws Exception if an error occurs while storing the key-value pair
      */
     public final void store(final Tree tree, final Key key, final Value value) throws Exception {
         final Map<Tree, Exchange> map = _sortExchangeMapThreadLocal.get();
@@ -547,8 +555,8 @@ public class TreeBuilder {
     /**
      * Merge the record previously stored in sort volumes into their destination
      * <code>Tree</code>s.
-     * 
-     * @throws Exception
+     *
+     * @throws Exception if an error occurs during the merge
      */
     public synchronized void merge() throws Exception {
         finishSortVolume();
@@ -715,7 +723,7 @@ public class TreeBuilder {
      *            The temporary <code>Volume</code> that has been filled
      * @param file
      *            the file to which the sorted key-value pairs will be written
-     * @throws Exception
+     * @throws Exception if the overriding implementation fails
      */
     protected void beforeSortVolumeClosed(final Volume volume, final File file) throws Exception {
 
@@ -733,7 +741,7 @@ public class TreeBuilder {
      *            The temporary <code>Volume</code> that has been filled
      * @param file
      *            the file to which the sorted key-value pairs have been written
-     * @throws Exception
+     * @throws Exception if the overriding implementation fails
      */
     protected void afterSortVolumeClose(final Volume volume, final File file) throws Exception {
 
@@ -762,7 +770,7 @@ public class TreeBuilder {
      * @throws DuplicateKeyException
      *             if a key being inserted or merged matches a key already
      *             exists
-     * @throws Exception
+     * @throws Exception if the overriding implementation fails
      */
     protected boolean duplicateKeyDetected(final Tree tree, final Key key, final Value v1, final Value v2)
             throws Exception {
@@ -780,7 +788,7 @@ public class TreeBuilder {
      * @param exchange
      *            represents the key-value pair proposed for merging
      * @return <code>true</code> to allow the record to be merged
-     * @throws Exception
+     * @throws Exception if the overriding implementation fails
      */
     protected boolean beforeMergeKey(final Exchange exchange) throws Exception {
         return true;
@@ -794,7 +802,7 @@ public class TreeBuilder {
      * 
      * @param exchange
      *            represents the key-value pair that was merged.
-     * @throws Exception
+     * @throws Exception if the overriding implementation fails
      */
     protected void afterMergeKey(final Exchange exchange) throws Exception {
 

@@ -40,12 +40,15 @@ public interface Function<R> extends Serializable {
      * Computes a result, or throws an exception if unable to do so.
      *
      * @param scope
+     *            the parameter providing the scope available to the function.
      * @param callback
+     *            the callback function that may be invoked by this function.
      * @param arguments could be a single value or a List of values
      * @return computed result
      * @throws ResourceException
      *             if unable to compute a result
      * @throws NoSuchMethodException
+     *             if the requested method cannot be found.
      */
     R call(Parameter scope, Function<?> callback, Object... arguments)
             throws ResourceException, NoSuchMethodException;

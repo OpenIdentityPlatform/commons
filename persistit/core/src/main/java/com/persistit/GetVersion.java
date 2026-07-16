@@ -1,6 +1,7 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
- * 
+ * Portions Copyrighted 2026 3A Systems, LLC
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,8 +37,8 @@ public class GetVersion {
     /**
      * Write the build version string to {@link System#out}
      * 
-     * @param a
-     * @throws Exception
+     * @param a the command-line arguments (ignored)
+     * @throws Exception if an error occurs while reading the version string
      */
     public static void main(final String[] a) throws Exception {
         System.out.println(getVersionString());
