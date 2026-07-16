@@ -172,7 +172,7 @@ public interface ValueCoder {
      *            <code>null</code>.
      * @return An <code>Object</code> having the same class as the suppled
      *         <code>clazz</code> parameter.
-     * @throws ConversionException
+     * @throws ConversionException if the value cannot be converted
      */
     public Object get(Value value, Class<?> clazz, CoderContext context) throws ConversionException;
 

@@ -331,8 +331,7 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
                 }
                 if (propFileName == null)
                     propFileName = DEFAULT_CONFIG_FILE;
-                try {
-                    final FileInputStream fis = new FileInputStream(propFileName);
+                try (final FileInputStream fis = new FileInputStream(propFileName)) {
                     _properties = new Properties();
                     _properties.load(fis);
                 } catch (final Exception e) {
@@ -891,6 +890,15 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
             _name = actionName;
             _caption = caption;
             _command = command;
+        }
+
+        @Override
+        public AdminAction clone() {
+            try {
+                return (AdminAction) super.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new AssertionError(e);
+            }
         }
 
         @Override

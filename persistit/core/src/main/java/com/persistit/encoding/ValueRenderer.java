@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit.encoding;
@@ -79,7 +80,7 @@ public interface ValueRenderer extends ValueCoder {
      *            operation. (See {@link CoderContext}.) The default value is
      *            <code>null</code>.
      * 
-     * @throws ConversionException
+     * @throws ConversionException if the value cannot be converted
      */
     public void render(Value value, Object target, Class<?> clazz, CoderContext context) throws ConversionException;
 }

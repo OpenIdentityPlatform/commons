@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.doc.maven;
@@ -64,7 +65,7 @@ abstract public class AbstractDocbkxMojo extends AbstractMojo {
         InputStream inputStream = null;
 
         try {
-            inputStream = getClass().getResourceAsStream("/versions.properties");
+            inputStream = AbstractDocbkxMojo.class.getResourceAsStream("/versions.properties");
             if (inputStream == null) {
                 throw new IOException("Could not read properties resource");
             }

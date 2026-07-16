@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.jose.jws;
@@ -25,7 +26,6 @@ import java.security.Key;
 
 /**
  * An implementation of a JWS with a nested JWE as its payload.
- * <p>
  * @see SignedJwt
  * @see EncryptedJwt
  *

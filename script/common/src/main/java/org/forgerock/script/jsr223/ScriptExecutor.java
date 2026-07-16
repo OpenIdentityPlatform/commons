@@ -21,6 +21,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.script.jsr223;
@@ -142,7 +143,7 @@ public abstract class ScriptExecutor {
     /**
      * Subclasses may implement this to provide any special handling required
      *
-     * @return
+     * @return the post-processed result.
      */
     protected abstract Object postProcess(Object result);
 

@@ -42,6 +42,15 @@ public class DeployExternalDependencyMojo extends
         AbstractExternalDependencyMojo
 {
     /**
+     * Creates a new instance.
+     */
+    public DeployExternalDependencyMojo()
+    {
+    }
+
+    /**
+     * The local repository into which the artifact is deployed.
+     *
      * @parameter expression="${localRepository}"
      * @required
      * @readonly
@@ -250,8 +259,8 @@ public class DeployExternalDependencyMojo extends
      * section
      *
      * @return deployment repository defined in distribution management
-     * @throws MojoExecutionException
-     * @throws MojoFailureException
+     * @throws MojoExecutionException if the repository is not defined in the POM's distribution management section
+     * @throws MojoFailureException if the deployment goal fails
      */
     private ArtifactRepository getDeploymentRepository()
             throws MojoExecutionException, MojoFailureException
@@ -273,7 +282,7 @@ public class DeployExternalDependencyMojo extends
      * Checks for offline mode; throws exception if offline, deploy goal cannot
      * proceed
      *
-     * @throws MojoFailureException
+     * @throws MojoFailureException if Maven is running in offline mode
      */
     private void failIfOffline() throws MojoFailureException
     {

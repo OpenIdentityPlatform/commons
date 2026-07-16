@@ -704,9 +704,9 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
         } else if (unit instanceof SourceContainer) {
             sourceCacheLock.writeLock().lock();
             try {
-                sourceCache.remove(unit);
+                sourceCache.remove(unit.getName());
             } finally {
-                sourceCacheLock.writeLock().lock();
+                sourceCacheLock.writeLock().unlock();
             }
 
             for (LibraryRecord cacheRecord : cache.values()) {

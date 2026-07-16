@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2015 ForgeRock AS
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.doc.maven.utils;
@@ -91,7 +92,7 @@ public final class BootstrapCopier {
     private void addBootstrapResources(final String[] resources) throws IOException {
 
         for (String resource : resources) {
-            URL resourceUrl = getClass().getResource(resource);
+            URL resourceUrl = BootstrapCopier.class.getResource(resource);
 
             // The html.stylesheet parameter should probably take URLs.
             // When local files are referenced,

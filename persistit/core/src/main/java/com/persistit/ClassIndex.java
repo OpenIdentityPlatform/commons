@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -95,7 +96,6 @@ final class ClassIndex {
      * 
      * @param persistit
      *            Owning Persistit instance.
-     * @throws PersistitException
      */
     ClassIndex(final Persistit persistit) {
         _persistit = persistit;
@@ -404,7 +404,7 @@ final class ClassIndex {
      * For unit tests only. Next class ID handle will be at least as large as
      * this.
      * 
-     * @param id
+     * @param id the minimum value for the next assigned class ID handle
      */
     void setTestIdFloor(final int id) {
         _testIdFloor = id;
@@ -413,7 +413,7 @@ final class ClassIndex {
     /**
      * For unit tests only. Clears all entries.
      * 
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     void clearAllEntries() throws PersistitException {
         getExchange().removeAll();

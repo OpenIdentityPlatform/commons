@@ -12,6 +12,7 @@
 * information: "Portions copyright [year] [name of copyright owner]".
 *
 * Copyright 2015 ForgeRock AS.
+* Portions Copyrighted 2026 3A Systems, LLC
 */
 
 package org.forgerock.audit.handlers.csv;
@@ -61,7 +62,7 @@ class HmacCalculator {
      *
      * @param data the data used to calculate the HMAC
      * @return the calculated HMAC as a base64 encoded String.
-     * @throws SignatureException
+     * @throws SignatureException if the HMAC cannot be generated.
      */
     public String calculate(byte[] data) throws SignatureException {
         try {

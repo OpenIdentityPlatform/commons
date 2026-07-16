@@ -13,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -594,8 +595,8 @@ public class RecoveryManager implements RecoveryManagerMXBean, VolumeHandleLooku
      * checkpoint to <code>branchMap</code>. Updates in <code>branchMap</code>
      * are used only in recovering certain transactions (insertions with
      * LONG_RECORD values).
-     * 
-     * @param pageMap
+     *
+     * @param pageMap the map that receives PageNodes for updates that occurred before the keystone checkpoint
      */
     void collectRecoveredPages(final Map<PageNode, PageNode> pageMap, final Map<PageNode, PageNode> branchMap) {
         if (_lastValidCheckpoint != null) {
@@ -685,7 +686,7 @@ public class RecoveryManager implements RecoveryManagerMXBean, VolumeHandleLooku
     }
 
     /**
-     * @param recoverDisabledForTestMode
+     * @param recoveryDisabledForTestMode
      *            Set this to <code>true</code> to disable the
      *            {@link #applyAllCommittedTransactions()} method. (Lets unit
      *            tests look at the plan before executing it.)
@@ -917,9 +918,9 @@ public class RecoveryManager implements RecoveryManagerMXBean, VolumeHandleLooku
      * @return The record type: one of the type values specified in
      *         {@link com.persistit.JournalRecord}), 0 if the journal file has
      *         fewer than 16 bytes remaining or -t where t is an invalid type.
-     * @throws CorruptJournalException
-     * @throws PersistitException
-     * @throws JournalNotClosedException
+     * @throws CorruptJournalException if the journal is corrupt
+     * @throws PersistitIOException if an I/O error occurs
+     * @throws JournalNotClosedException if the journal was not cleanly closed
      */
     private int scanOneRecord() throws PersistitIOException {
 
@@ -993,10 +994,10 @@ public class RecoveryManager implements RecoveryManagerMXBean, VolumeHandleLooku
      * Process an IV (identify volume) record in the journal. Adds a handle ->
      * volume descriptor pair to the handle maps.
      * 
-     * @param address
-     * @param timestamp
-     * @param recordSize
-     * @throws PersistitIOException
+     * @param address the journal address of the record
+     * @param timestamp the timestamp of the record
+     * @param recordSize the length of the record in bytes
+     * @throws PersistitIOException if an I/O error occurs
      */
     void scanIdentifyVolume(final long address, final long timestamp, final int recordSize) throws PersistitIOException {
         if (recordSize > IV.MAX_LENGTH) {
@@ -1023,10 +1024,10 @@ public class RecoveryManager implements RecoveryManagerMXBean, VolumeHandleLooku
      * Processes an IT (identify tree) record in the journal. Adds a handle ->
      * TreeDescriptor entry in the handle maps.
      * 
-     * @param address
-     * @param timestamp
-     * @param recordSize
-     * @throws PersistitIOException
+     * @param address the journal address of the record
+     * @param timestamp the timestamp of the record
+     * @param recordSize the length of the record in bytes
+     * @throws PersistitIOException if an I/O error occurs
      */
     void scanIdentifyTree(final long address, final long timestamp, final int recordSize) throws PersistitIOException {
         if (recordSize > IT.MAX_LENGTH) {
@@ -1059,10 +1060,10 @@ public class RecoveryManager implements RecoveryManagerMXBean, VolumeHandleLooku
     /**
      * Process a PA (page) record in the journal. Adds an entry to the Page Map.
      * 
-     * @param address
-     * @param timestamp
-     * @param recordSize
-     * @throws PersistitIOException
+     * @param address the journal address of the record
+     * @param timestamp the timestamp of the record
+     * @param recordSize the length of the record in bytes
+     * @throws PersistitIOException if an I/O error occurs
      */
     void scanLoadPage(final long address, final long timestamp, final int recordSize) throws PersistitIOException {
         if (recordSize > Buffer.MAX_BUFFER_SIZE + PA.OVERHEAD) {
@@ -1304,8 +1305,8 @@ public class RecoveryManager implements RecoveryManagerMXBean, VolumeHandleLooku
      * records are read; these files are needed only to complete committed
      * transactions and to supply pages from the page map.
      * 
-     * @param generation
-     * @throws PersistitIOException
+     * @param generation the journal file generation to validate
+     * @throws PersistitIOException if an I/O error occurs
      */
     private void validateMemberFile(final long generation) throws PersistitIOException {
         final File file = JournalManager.generationToFile(_journalFilePath, generation);
@@ -1436,9 +1437,8 @@ public class RecoveryManager implements RecoveryManagerMXBean, VolumeHandleLooku
     /**
      * Called during Phase 2 to record the FileAddress of a Transaction Update
      * record in the journal.
-     * 
-     * @param ja
-     * @throws CorruptJournalException
+     *
+     * @throws CorruptJournalException if the journal is corrupt
      */
     void scanOneTransaction(final long address, final long startTimestamp, final int recordSize)
             throws PersistitIOException {
@@ -1570,9 +1570,7 @@ public class RecoveryManager implements RecoveryManagerMXBean, VolumeHandleLooku
      *            displaying error messages
      * @param timestamp
      *            timestamp of the transaction
-     * @param page
-     * 
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     void convertToLongRecord(final Value value, final int treeHandle, final long from, final long timestamp)
             throws PersistitException {
@@ -1741,9 +1739,9 @@ public class RecoveryManager implements RecoveryManagerMXBean, VolumeHandleLooku
     /**
      * Read and display information about a journal. Read-only - does not change
      * any file.
-     * 
-     * @param args
-     * @throws Exception
+     *
+     * @param args the command-line arguments
+     * @throws Exception if an error occurs
      */
     public static void main(final String[] args) throws Exception {
         final String[] template = {

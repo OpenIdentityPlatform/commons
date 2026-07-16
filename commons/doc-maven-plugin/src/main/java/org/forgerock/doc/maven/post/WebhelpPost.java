@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.doc.maven.post;
@@ -58,7 +59,7 @@ public class WebhelpPost {
         try {
             // See https://developers.google.com/webmasters/control-crawl-index/docs/robots_meta_tag
             String robots = "<head>" + System.getProperty("line.separator")
-                    + IOUtils.toString(getClass().getResourceAsStream("/robots.txt"), "UTF-8");
+                    + IOUtils.toString(WebhelpPost.class.getResourceAsStream("/robots.txt"), "UTF-8");
             replacements.put("<head>", robots);
             HtmlUtils.updateHtml(webhelpDir.getPath(), replacements);
         } catch (IOException e) {

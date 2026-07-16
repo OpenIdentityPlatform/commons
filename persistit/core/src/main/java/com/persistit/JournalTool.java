@@ -1,6 +1,7 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
- * 
+ * Portions Copyrighted 2026 3A Systems, LLC
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -404,9 +405,9 @@ class JournalTool {
      * @return The record type: one of the type values specified in
      *         {@link com.persistit.JournalRecord}), 0 if the journal file has
      *         fewer than 16 bytes remaining or -t where t is an invalid type.
-     * @throws CorruptJournalException
-     * @throws PersistitException
-     * @throws JournalNotClosedException
+     * @throws CorruptJournalException if the journal contains a corrupt record
+     * @throws PersistitException if a persistence error occurs
+     * @throws JournalNotClosedException if the journal was not closed cleanly
      */
     private int scanOneRecord() throws Exception {
 
