@@ -105,7 +105,7 @@ final class ByteArrayBranchingStream extends BranchingInputStream {
     }
 
     @Override
-    public void mark(int readlimit) {
+    public synchronized void mark(int readlimit) {
         mark = position;
     }
 
