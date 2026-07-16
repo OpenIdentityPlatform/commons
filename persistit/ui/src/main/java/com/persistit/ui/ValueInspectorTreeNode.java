@@ -423,7 +423,7 @@ class ValueInspectorTreeNode implements TreeNode {
         return array;
     }
 
-    private class FieldComparator implements Comparator {
+    private static class FieldComparator implements Comparator {
         @Override
         public int compare(final Object a, final Object b) {
             final Field fieldA = (Field) a;

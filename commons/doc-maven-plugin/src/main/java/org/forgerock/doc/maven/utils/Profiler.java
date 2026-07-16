@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.doc.maven.utils;
@@ -181,7 +182,7 @@ public class Profiler {
     /**
      * Applies an XSL transformation to the matching files.
      */
-    private class Transformer extends XmlTransformer {
+    private static class Transformer extends XmlTransformer {
         /**
          * Constructs an updater to match DocBook XML files.
          * <br>

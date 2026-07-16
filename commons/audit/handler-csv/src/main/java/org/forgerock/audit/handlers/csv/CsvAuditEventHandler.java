@@ -544,7 +544,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
     /**
      * CellProcessor for parsing JsonValue objects from CSV file.
      */
-    public class ParseJsonValue implements CellProcessor {
+    public static class ParseJsonValue implements CellProcessor {
 
         @Override
         public Object execute(final Object value, final CsvContext context) {

@@ -2837,7 +2837,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
         }
     }
 
-    class PruneTransactionPlayer implements TransactionPlayerListener
+    static class PruneTransactionPlayer implements TransactionPlayerListener
     {
 
       @Override

@@ -288,7 +288,7 @@ public class ManagementTableModel extends AbstractTableModel {
      * Default Renderers
      **/
 
-    class AlignedCellRenderer extends DefaultTableCellRenderer {
+    static class AlignedCellRenderer extends DefaultTableCellRenderer {
         AlignedCellRenderer(final int alignment) {
             super();
             setHorizontalAlignment(alignment);
@@ -334,7 +334,7 @@ public class ManagementTableModel extends AbstractTableModel {
         }
     }
 
-    class KeyStateRenderer extends AlignedCellRenderer {
+    static class KeyStateRenderer extends AlignedCellRenderer {
         private final Key _key;
 
         public KeyStateRenderer() {
@@ -352,7 +352,7 @@ public class ManagementTableModel extends AbstractTableModel {
         }
     }
 
-    class ValueStateRenderer extends AlignedCellRenderer {
+    static class ValueStateRenderer extends AlignedCellRenderer {
         private final Value _value;
 
         public ValueStateRenderer() {

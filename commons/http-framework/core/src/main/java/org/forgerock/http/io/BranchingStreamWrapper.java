@@ -13,7 +13,7 @@
  *
  * Copyright 2010–2011 ApexIdentity Inc.
  * Portions Copyright 2011-2016 ForgeRock AS.
- * Portions copyright 2026 3A Systems LLC.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.http.io;
@@ -273,7 +273,7 @@ final class BranchingStreamWrapper extends BranchingInputStream {
     }
 
     /** Object shared by all branches. */
-    private final class Trunk {
+    private static final class Trunk {
         /** Keeps track of all branches on this trunk. */
         private final List<BranchingStreamWrapper> branches = new ArrayList<>();
 

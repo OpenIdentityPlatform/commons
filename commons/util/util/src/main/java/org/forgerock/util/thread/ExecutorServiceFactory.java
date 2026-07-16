@@ -199,7 +199,7 @@ public class ExecutorServiceFactory {
      * have its generated number appended to the end of it, in the form -X, where
      * X is incremented once for each thread created.
      */
-    private class NamedThreadFactory implements ThreadFactory {
+    private static class NamedThreadFactory implements ThreadFactory {
 
         private final AtomicInteger count = new AtomicInteger(0);
         private final String name;
