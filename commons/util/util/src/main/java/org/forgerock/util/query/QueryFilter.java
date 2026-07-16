@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 package org.forgerock.util.query;
@@ -218,10 +219,10 @@ public class QueryFilter<F> {
             return v.visitExtendedMatchFilter(p, field, operator, valueAssertion);
         }
 
-        public int hashCode() {
-            return (field.hashCode() * 31 + operator.hashCode()) * 31
-                    + valueAssertion.hashCode();
-        }
+        // No hashCode() override: ComparatorImpl.equals() is final and ignores
+        // operator, so an operator-aware hashCode would break the equals/hashCode
+        // contract (CodeQL java/inconsistent-equals-and-hashcode). Inherit the
+        // consistent hashCode from ComparatorImpl.
 
         @Override
         public String toString() {

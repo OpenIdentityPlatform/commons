@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions copyright 2026 3A Systems LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1789,6 +1790,11 @@ public interface Management extends Remote, ManagementMXBean {
         }
 
         @Override
+        public int hashCode() {
+            return (name == null ? 0 : name.hashCode()) ^ (int) (id ^ (id >>> 32));
+        }
+
+        @Override
         public int compareTo(final VolumeInfo volumeInfo) {
             return name.compareTo(volumeInfo.name);
         }
@@ -1954,6 +1960,11 @@ public interface Management extends Remote, ManagementMXBean {
         @Override
         public boolean equals(final Object object) {
             return object instanceof TreeInfo && ((TreeInfo) object).getName().equals(name);
+        }
+
+        @Override
+        public int hashCode() {
+            return name == null ? 0 : name.hashCode();
         }
     }
 
@@ -2154,6 +2165,11 @@ public interface Management extends Remote, ManagementMXBean {
         @Override
         public boolean equals(final Object object) {
             return object instanceof TaskStatus && ((TaskStatus) object).getTaskId() == taskId;
+        }
+
+        @Override
+        public int hashCode() {
+            return (int) (taskId ^ (taskId >>> 32));
         }
     }
 

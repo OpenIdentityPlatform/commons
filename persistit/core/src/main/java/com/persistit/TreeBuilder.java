@@ -1,5 +1,6 @@
 /**
  * Copyright 2012 Akiban Technologies, Inc.
+ * Portions copyright 2026 3A Systems LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,6 +195,11 @@ public class TreeBuilder {
         @Override
         public boolean equals(final Object obj) {
             return this == obj;
+        }
+
+        @Override
+        public int hashCode() {
+            return System.identityHashCode(this);
         }
     };
 
