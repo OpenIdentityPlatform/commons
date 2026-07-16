@@ -26,6 +26,7 @@
  * $Id: WindowsDesktopSSO.java,v 1.7 2009/07/28 19:40:45 beomsuk Exp $
  *
  * Portions Copyrighted 2011-2016 ForgeRock AS.
+ * Portions copyright 2020-2026 3A Systems LLC.
  */
 
 package org.forgerock.jaspi.modules.iwa.wdsso;
@@ -47,6 +48,7 @@ import javax.security.auth.login.LoginContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.services.context.AttributesContext;
 import org.forgerock.services.context.Context;
+import org.forgerock.util.crypto.SecretHash;
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
@@ -261,7 +263,10 @@ public class WDSSO {
         String header = req.getHeaders().getFirst("Authorization");
         if ((header != null) && header.startsWith("Negotiate")) {
             header = header.substring("Negotiate".length()).trim();
-            LOG.debug("IWA WDSSO: \"Authorization\" header set, {}", header);
+            // Log only a one-way hash of the SPNEGO/Authorization token, never the value (CWE-532: sensitive data in logs).
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("IWA WDSSO: \"Authorization\" header set, token hash={}", SecretHash.hash(header));
+            }
             try {
                 spnegoToken = Base64.decode(header);
             } catch (Exception e) {
