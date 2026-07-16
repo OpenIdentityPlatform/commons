@@ -12,6 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.http.apache.async;
@@ -128,10 +129,14 @@ public class AsyncHttpClientProvider implements HttpClientProvider {
             throw new HttpApplicationException("Can't create SSL Context", e);
         }
 
-        HostnameVerifier verifier = new DefaultHostnameVerifier();
+        final HostnameVerifier verifier;
         switch (options.get(OPTION_HOSTNAME_VERIFIER)) {
         case ALLOW_ALL:
             verifier = NoopHostnameVerifier.INSTANCE;
+            break;
+        default:
+            // STRICT (and any future policy) uses strict host name verification.
+            verifier = new DefaultHostnameVerifier();
             break;
         }
 
