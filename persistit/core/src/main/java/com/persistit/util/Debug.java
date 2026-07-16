@@ -1,6 +1,7 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
- * 
+ * Portions Copyrighted 2026 3A Systems, LLC
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -135,7 +136,7 @@ public class Debug {
      * Set the suspend flag so that callers to the suspend method either do or
      * do not suspend.
      * 
-     * @param b
+     * @param b <code>true</code> to set the suspend flag, <code>false</code> to clear it
      */
     synchronized static void setSuspended(final boolean b) {
         if (b) {

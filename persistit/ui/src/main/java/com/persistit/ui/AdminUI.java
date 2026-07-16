@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -330,8 +331,7 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
                 }
                 if (propFileName == null)
                     propFileName = DEFAULT_CONFIG_FILE;
-                try {
-                    final FileInputStream fis = new FileInputStream(propFileName);
+                try (final FileInputStream fis = new FileInputStream(propFileName)) {
                     _properties = new Properties();
                     _properties.load(fis);
                 } catch (final Exception e) {
@@ -607,8 +607,8 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
             newPanel.setIsShowing(true);
             changeMenuMap(newPanel.getMenuMap(), true);
             scheduleRefresh(-1);
+            newPanel.setDefaultButton();
         }
-        newPanel.setDefaultButton();
     }
 
     void changeMenuMap(final Map menuMap, final boolean add) {
@@ -705,7 +705,7 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
         JComponent wrappedComponent = component;
         if (component instanceof JTextField) {
             final JTextField textField = (JTextField) component;
-            textField.setColumns(Integer.parseInt(widthStr));
+            textField.setColumns(parseDimension("width", widthStr));
             textField.setHorizontalAlignment(alignment.equals("R") ? SwingConstants.TRAILING
                     : alignment.equals("C") ? SwingConstants.CENTER : SwingConstants.LEADING);
             textField.setEditable(false);
@@ -713,8 +713,8 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
             textField.setBackground(Color.white);
         } else if (component instanceof JTextArea) {
             final JTextArea textArea = (JTextArea) component;
-            textArea.setColumns(Integer.parseInt(widthStr));
-            textArea.setRows(Integer.parseInt(heightStr));
+            textArea.setColumns(parseDimension("width", widthStr));
+            textArea.setRows(parseDimension("height", heightStr));
             textArea.setEditable(false);
             textArea.setEnabled(true);
             textArea.setBackground(Color.white);
@@ -734,6 +734,14 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
 
         component.setMinimumSize(component.getPreferredSize());
         return component;
+    }
+
+    private static int parseDimension(final String name, final String value) {
+        try {
+            return Integer.parseInt(value);
+        } catch (final NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid " + name + " in component specification: " + value, e);
+        }
     }
 
     AdminAction createAction(final AdminCommand command, final String specification) {
@@ -893,6 +901,15 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
         }
 
         @Override
+        public AdminAction clone() {
+            try {
+                return (AdminAction) super.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new AssertionError(e);
+            }
+        }
+
+        @Override
         public void actionPerformed(final ActionEvent ae) {
             if (!_refreshing) {
                 _command.actionPerformed(this, ae);
@@ -950,9 +967,9 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
         public void removeButton(final AbstractButton button) {
             if (_buttonList != null) {
                 _buttonList.remove(button);
+                if (_buttonList.size() == 0)
+                    _buttonList = null;
             }
-            if (_buttonList.size() == 0)
-                _buttonList = null;
         }
 
         public void stateChanged(final boolean selected) {
@@ -1285,7 +1302,7 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
         if (interval >= 0)
             _refreshInterval = interval;
         if (_refreshInterval > 0) {
-            _refreshTimer.schedule(_refreshTimerTask, 0, _refreshInterval * 1000);
+            _refreshTimer.schedule(_refreshTimerTask, 0, _refreshInterval * 1000L);
         } else {
             _refreshTimer.schedule(_refreshTimerTask, 0);
         }

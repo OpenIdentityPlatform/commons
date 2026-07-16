@@ -1,6 +1,7 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
  * Copyright 2015 ForgeRock AS
+ * Portions Copyrighted 2026 3A Systems, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +64,7 @@ import static com.persistit.Key.LTEQ;
 import static com.persistit.Key.RIGHT_GUARD_KEY;
 import static com.persistit.Key.maxStorableKeySize;
 import static com.persistit.util.SequencerConstants.DEALLOCATE_CHAIN_A;
+import static com.persistit.util.SequencerConstants.STORE_PENDING_SPLIT_A;
 import static com.persistit.util.SequencerConstants.WRITE_WRITE_STORE_A;
 import static com.persistit.util.ThreadSequencer.sequence;
 
@@ -103,7 +105,6 @@ import static com.persistit.util.ThreadSequencer.sequence;
  * modify the database and return the former value associated with the current
  * <code>Key</code>.
  * </p>
- * <p>
  * <h2>Exchange is Not Threadsafe</h2>
  * <em>Important:</em> an <code>Exchange</code> and its associated
  * <code>Key</code> and <code>Value</code> instances are <i>not</i> thread-safe.
@@ -116,7 +117,6 @@ import static com.persistit.util.ThreadSequencer.sequence;
  * Persistit is designed to allow multiple threads, using <em>multiple</em>
  * <code>Exchange</code> instances, to access and update the underlying database
  * in a highly concurrent fashion.
- * <p>
  * <h2>Exchange Pools</h2>
  * Normally each thread should allocate its own <code>Exchange</code> instances.
  * However, depending on the garbage collection performance characteristics of a
@@ -346,7 +346,7 @@ public class Exchange implements ReadOnlyExchange {
    *            <code>true</code> to create a new Tree if one by the specified
    *            name does not already exist.
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public Exchange(final Persistit persistit, final String volumeName, final String treeName, final boolean create)
     throws PersistitException {
@@ -370,7 +370,7 @@ public class Exchange implements ReadOnlyExchange {
    * @param create
    *            <code>true</code> to create a new Tree if one by the specified
    *            name does not already exist.
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public Exchange(final Persistit persistit, final Volume volume, final String treeName, final boolean create)
     throws PersistitException {
@@ -676,7 +676,7 @@ public class Exchange implements ReadOnlyExchange {
      *            <code>Key</code> and <code>Value</code> may be read
      * @return <code>true</code> to continue traversing keys, or
      *         <code>false</code> to stop
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     public boolean visit(final ReadOnlyExchange ex) throws PersistitException;
   }
@@ -1129,11 +1129,11 @@ public class Exchange implements ReadOnlyExchange {
    * determines whether information cached in the LevelCache is still valid;
    * if so the previous result is still valid.
    *
-   * @param buffer
-   * @param key
-   * @param lc
+   * @param buffer the <code>Buffer</code> to search
+   * @param key the <code>Key</code> to find
+   * @param lc the <code>LevelCache</code> providing cached lookup state
    * @return foundAt value
-   * @throws PersistitInterruptedException
+   * @throws PersistitInterruptedException if the thread is interrupted while waiting
    */
   private int findKey(final Buffer buffer, final Key key, final LevelCache lc) throws PersistitInterruptedException {
     //
@@ -1401,6 +1401,8 @@ public class Exchange implements ReadOnlyExchange {
     boolean treeWriterClaimRequired = false;
     boolean committed = false;
     boolean incrementMVVCount = false;
+    final int startLevel = level;
+    boolean revalidateSplitPointer = false;
 
     final int maxSimpleValueSize = maxValueSize(key.getEncodedSize());
     final Value spareValue = _persistit.getThreadLocalValue();
@@ -1472,6 +1474,32 @@ public class Exchange implements ReadOnlyExchange {
         }
 
         checkLevelCache();
+
+        /*
+         * A prior iteration committed a split at level - 1 and the
+         * RetryException handler below then released the tree claim before
+         * re-acquiring it. While no claim was held a concurrent structure
+         * delete may have unlinked the page the pending key-pointer pair
+         * refers to and put it on a garbage chain; blindly inserting the
+         * pointer would plant a dangling index entry to a garbage page --
+         * the bug 1017957 failure mode. Re-validate under the re-acquired
+         * claim: a search for the pending key at the child level must land
+         * on the pending page itself (through the B-link right-walk, since
+         * the page has no parent entry yet). If it lands elsewhere the page
+         * is gone, along with its keys, and the deferred insertion must be
+         * abandoned.
+         */
+        if (revalidateSplitPointer) {
+          revalidateSplitPointer = false;
+          searchTree(key, level - 1, false);
+          final Buffer childBuffer = _levelCache[level - 1]._buffer;
+          final long landedOn = childBuffer.getPageAddress();
+          childBuffer.releaseTouched();
+          if (landedOn != valueToStore.getPointerValue()) {
+            break mainRetryLoop;
+          }
+        }
+
         final List<PrunedVersion> prunedVersions = new ArrayList<PrunedVersion>();
 
         try {
@@ -1718,6 +1746,9 @@ public class Exchange implements ReadOnlyExchange {
             _treeHolder.release();
             treeClaimAcquired = false;
           }
+          if (level > startLevel) {
+            revalidateSplitPointer = true;
+          }
           try {
             sequence(WRITE_WRITE_STORE_A);
             final long depends = _persistit.getTransactionIndex().wwDependency(re.getVersionHandle(),
@@ -1742,6 +1773,16 @@ public class Exchange implements ReadOnlyExchange {
           if (treeClaimAcquired) {
             _treeHolder.release();
             treeClaimAcquired = false;
+          }
+          if (level > startLevel) {
+            /*
+             * A split committed at a lower level and its key-pointer pair
+             * has not been inserted yet. The claim release above opens a
+             * window for a concurrent structure delete, so the pending
+             * insertion must be re-validated at the top of the loop.
+             */
+            revalidateSplitPointer = true;
+            sequence(STORE_PENDING_SPLIT_A);
           }
           final boolean doWait = (options & StoreOptions.WAIT) != 0;
           treeClaimAcquired = _treeHolder.claim(true, doWait ? _timeoutMillis : 0);
@@ -1992,7 +2033,7 @@ public class Exchange implements ReadOnlyExchange {
    *            Siblings</a>).
    * @return <code>true</code> if there is a key to traverse to, else
    *         <code>false</code>.
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean traverse(final Direction direction, final boolean deep) throws PersistitException {
     final boolean result = traverse(direction, deep, Integer.MAX_VALUE);
@@ -2053,7 +2094,7 @@ public class Exchange implements ReadOnlyExchange {
    * @return <code>true</code> if there is a key to traverse to, else
    *         <code>false</code>.
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean traverse(final Direction direction, final boolean deep, final int minimumBytes)
     throws PersistitException {
@@ -2430,7 +2471,7 @@ public class Exchange implements ReadOnlyExchange {
    * @return <code>true</code> if additional keys remaining in the traversal
    *         set, or <code>false</code> to indicate that keys are exhausted.
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
 
   public boolean traverse(final Direction direction, final boolean deep, final int minimumBytes,
@@ -2479,7 +2520,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    * @return <code>true</code> if there is a key to traverse to, else null.
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean traverse(final Direction direction, final KeyFilter keyFilter, final int minBytes)
     throws PersistitException {
@@ -2532,7 +2573,7 @@ public class Exchange implements ReadOnlyExchange {
    * <code>traverse(Key.GT, false)</code>.
    *
    * @return <code>true</code> if there is a key to traverse to, else null.
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean next() throws PersistitException {
     return traverse(GT, false);
@@ -2543,7 +2584,7 @@ public class Exchange implements ReadOnlyExchange {
    * <code>traverse(Key.LT, false)</code>.
    *
    * @return <code>true</code> if there is a key to traverse to, else null.
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean previous() throws PersistitException {
     return traverse(LT, false);
@@ -2561,7 +2602,7 @@ public class Exchange implements ReadOnlyExchange {
    *            Siblings</a>).
    *
    * @return <code>true</code> if there is a key to traverse to, else null.
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean next(final boolean deep) throws PersistitException {
     return traverse(GT, deep);
@@ -2580,7 +2621,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    * @return <code>true</code> if there is a key to traverse to, else null.
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean previous(final boolean deep) throws PersistitException {
     return traverse(LT, deep);
@@ -2592,7 +2633,7 @@ public class Exchange implements ReadOnlyExchange {
    * are included in the result is determined by the <code>KeyFilter</code>.
    *
    * @return <code>true</code> if there is a key to traverse to, else null.
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean next(final KeyFilter filter) throws PersistitException {
     return traverse(GT, filter, Integer.MAX_VALUE);
@@ -2605,7 +2646,7 @@ public class Exchange implements ReadOnlyExchange {
    * <code>KeyFilter</code>.
    *
    * @return <code>true</code> if there is a key to traverse to, else null.
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean previous(final KeyFilter filter) throws PersistitException {
     return traverse(LT, filter, Integer.MAX_VALUE);
@@ -2619,7 +2660,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    * @return <code>true</code> if the key has a successor
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean hasNext() throws PersistitException {
     return traverse(GT, false, -1);
@@ -2632,7 +2673,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    * @return <code>true</code> if the key has a successor
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean hasNext(final KeyFilter filter) throws PersistitException {
     if (filter == null)
@@ -2658,7 +2699,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    * @return <code>true</code> if the key has a successor
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean hasNext(final boolean deep) throws PersistitException {
     return traverse(GT, deep, -1);
@@ -2671,7 +2712,7 @@ public class Exchange implements ReadOnlyExchange {
    * changed.
    *
    * @return <code>true</code> if the key has a predecessor
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean hasPrevious() throws PersistitException {
     return traverse(LT, false, -1);
@@ -2692,7 +2733,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    * @return <code>true</code> if the key has a predecessor
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean hasPrevious(final boolean deep) throws PersistitException {
     return traverse(LT, deep, -1);
@@ -2705,7 +2746,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    * @return <code>true</code> if the key has a successor
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean hasPrevious(final KeyFilter filter) throws PersistitException {
     if (filter == null)
@@ -2724,7 +2765,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    * @return <code>true</code> if the key has an associated value
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean isValueDefined() throws PersistitException {
     return traverse(EQ, true, -1);
@@ -2736,7 +2777,7 @@ public class Exchange implements ReadOnlyExchange {
    * associated with the current key, then replace it.
    *
    * @return This <code>Exchange</code> to permit method call chaining
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public Exchange store() throws PersistitException {
     return store(_key, _value);
@@ -2747,7 +2788,7 @@ public class Exchange implements ReadOnlyExchange {
    * timeout value of
    * {@value com.persistit.SharedResource#DEFAULT_MAX_WAIT_TIME} milliseconds.
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public void lock() throws PersistitException {
     lock(_key, SharedResource.DEFAULT_MAX_WAIT_TIME);
@@ -2760,7 +2801,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    * @param key
    *            The key to lock
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public void lock(final Key key) throws PersistitException {
     lock(key, SharedResource.DEFAULT_MAX_WAIT_TIME);
@@ -2778,8 +2819,6 @@ public class Exchange implements ReadOnlyExchange {
    * Isolation. See, for example, http://wikipedia.org/wiki/Snapshot_isolation
    * for a concise explanation of Snapshot Isolation and the write skew
    * anomaly.
-   * <p>
-   * </p>
    * To use this facility an application specifies a key which may or may not
    * be associated with an actual storage location, but which is designed to
    * conflict with any other transaction that could participate in a write
@@ -2829,7 +2868,7 @@ public class Exchange implements ReadOnlyExchange {
    *            the source Key
    * @param timeout
    *            timeout interval in milliseconds, zero for default timeout
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    * @throws RollbackException
    *             in the specific case that another concurrent transaction has
    *             also locked the same key
@@ -2877,7 +2916,7 @@ public class Exchange implements ReadOnlyExchange {
    * need for external synchronization.
    *
    * @return This <code>Exchange</code> to permit method call chaining
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public Exchange fetchAndStore() throws PersistitException {
     assertCorrectThread(true);
@@ -2903,7 +2942,7 @@ public class Exchange implements ReadOnlyExchange {
    * .
    *
    * @return This <code>Exchange</code> to permit method call chaining
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public Exchange fetch() throws PersistitException {
     return fetch(_value, Integer.MAX_VALUE);
@@ -2933,7 +2972,7 @@ public class Exchange implements ReadOnlyExchange {
    *            returned value.
    *
    * @return This <code>Exchange</code> to permit method call chaining
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public Exchange fetch(final int minimumBytes) throws PersistitException {
     return fetch(_value, minimumBytes);
@@ -2952,7 +2991,7 @@ public class Exchange implements ReadOnlyExchange {
    *            fetched.
    *
    * @return This <code>Exchange</code> to permit method call chaining
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public Exchange fetch(final Value value) throws PersistitException {
     return fetch(value, Integer.MAX_VALUE);
@@ -3039,7 +3078,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    *
    * @return This <code>Exchange</code> to permit method call chaining
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public Exchange fetch(final Value value, int minimumBytes) throws PersistitException {
     assertCorrectThread(true);
@@ -3178,7 +3217,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    * @return <code>true</code> if the current <code>Key</code> has logical
    *         children
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean hasChildren() throws PersistitException {
     _key.copyTo(_spareKey2);
@@ -3197,7 +3236,7 @@ public class Exchange implements ReadOnlyExchange {
    * is, the value of {@link Value#isDefined} becomes <code>false</code>.
    *
    * @return <code>true</code> if there was a key/value pair to remove
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean fetchAndRemove() throws PersistitException {
     assertCorrectThread(true);
@@ -3216,7 +3255,7 @@ public class Exchange implements ReadOnlyExchange {
    * <code>Exchange</code> will no longer be usable. Attempts to perform
    * operations on it will result in an <code>IllegalStateException</code>.
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public void removeTree() throws PersistitException {
     assertCorrectThread(true);
@@ -3238,7 +3277,7 @@ public class Exchange implements ReadOnlyExchange {
    * <code>Tree</code>.
    *
    * @return <code>true</code> if there was a key/value pair to remove
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean remove() throws PersistitException {
     return removeInternal(EQ, false);
@@ -3248,7 +3287,7 @@ public class Exchange implements ReadOnlyExchange {
    * Remove all keys in this <code>Exchange</code>'s <code>Tree</code>.
    *
    * @return <code>true</code> if there were key/value pairs removed
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean removeAll() throws PersistitException {
     clear();
@@ -3277,7 +3316,7 @@ public class Exchange implements ReadOnlyExchange {
    *            One of Key.EQ, Key.GT, Key.GTEQ
    * @return <code>true</code> if one or more records were actually removed,
    *         else <i>false</i>.
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   public boolean remove(final Direction direction) throws PersistitException {
     return removeInternal(direction, false);
@@ -3374,7 +3413,7 @@ public class Exchange implements ReadOnlyExchange {
    *            Control whether to copy the existing value for the first key
    *            into _spareValue before deleting the record.
    * @return <code>true</code> if any records were removed.
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   private boolean removeKeyRangeInternal(final Key key1, final Key key2, final boolean fetchFirst)
     throws PersistitException {
@@ -3466,7 +3505,7 @@ public class Exchange implements ReadOnlyExchange {
    *            being identified and removes it only if it is a primordial
    *            AntiValue.
    * @return <code>true</code> if any records were removed.
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   boolean raw_removeKeyRangeInternal(final Key key1, final Key key2, final boolean fetchFirst,
     final boolean removeOnlyAntiValue) throws PersistitException {
@@ -3880,7 +3919,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    * @param lc
    *            LevelCache set up by raw_removeKeyRangeInternal
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   private void rebalanceSplit(final LevelCache lc) throws PersistitException {
     //
@@ -4076,12 +4115,80 @@ public class Exchange implements ReadOnlyExchange {
       return false;
     }
     try {
+      /*
+       * This action was enqueued by rebalanceSplit() when the page was
+       * reachable only through its sibling chain, and may be arbitrarily
+       * stale by the time the background CleanupManager runs it: a covering
+       * removeKeyRange may since have unlinked the page onto a garbage chain
+       * (leaving its content and type intact, or retyping it PAGE_TYPE_GARBAGE
+       * if it became a chain root), or the page may have been reused by an
+       * unrelated allocation. Blindly inserting a key-pointer pair for such a
+       * page plants a dangling index entry to a garbage or reused page -- the
+       * bug 1017957 failure mode, observed as transient
+       * CorruptVolumeExceptions ("invalid page type 30") under concurrent
+       * structural stress. Structure deletes hold the tree writer claim, so
+       * under the reader claim held here the page's reachability cannot
+       * change; validate it before inserting the pointer.
+       */
       buffer = _pool.get(_volume, page, false, true);
+      if (buffer.getPageType() != level + PAGE_TYPE_DATA
+        || buffer.getKeyBlockEnd() <= buffer.getKeyBlockStart()) {
+        // Retyped (garbage-chain root or reused elsewhere) or empty: the
+        // index hole this action was created for no longer exists.
+        return true;
+      }
       buffer.nextKey(_spareKey2, buffer.toKeyBlock(0));
       _value.setPointerValue(page);
       _value.setPointerPageType(buffer.getPageType());
       buffer.release();
       buffer = null;
+      /*
+       * A page sitting on a garbage chain keeps its old type and content, so
+       * the type check above is not sufficient. Verify the page is still
+       * reachable in this tree: a search for its current first key at this
+       * level must land on the page itself (via the B-link right-walk, since
+       * the hole means it has no parent entry yet). If the search lands
+       * elsewhere the action is stale and inserting the pointer would corrupt
+       * the index, so drop it.
+       */
+      searchTree(_spareKey2, level, false);
+      final LevelCache lc = _levelCache[level];
+      final long landedOn = lc._page;
+      lc._buffer.releaseTouched();
+      if (landedOn != page) {
+        return true;
+      }
+      /*
+       * Both checks above can pass legitimately for the wrong incarnation of
+       * the page: since this action was enqueued, the page may have been
+       * unlinked, garbage-collected and reused as a live page of this tree at
+       * the same level (ABA). A reused page is already indexed, so the search
+       * lands on it through its own parent entry rather than through the
+       * B-link right-walk from its left sibling, and the insert below would
+       * target a page that has no index hole. That insert is a harmless
+       * same-key replace only while every parent entry key equals its page's
+       * first key -- a global invariant this repair action has no business
+       * depending on; were the keys ever to diverge it would plant a second
+       * parent entry for the page, and a later covering removeKeyRange could
+       * unlink the page while deleting only one of the two entries, leaving
+       * a dangling pointer. Repair the hole only if the parent level really
+       * has no entry for this page: the entry covering the page's first key
+       * must be non-exact and point elsewhere (to the left sibling the
+       * right-walk came through).
+       */
+      if (level + 1 < _cacheDepth) {
+        final int foundAtParent = searchTree(_spareKey2, level + 1, false);
+        final Buffer parentBuffer = _levelCache[level + 1]._buffer;
+        boolean indexed = (foundAtParent & EXACT_MASK) != 0;
+        if (!indexed) {
+          final int p = parentBuffer.previousKeyBlock(foundAtParent & P_MASK);
+          indexed = p == -1 || parentBuffer.getPointer(p) == page;
+        }
+        parentBuffer.releaseTouched();
+        if (indexed) {
+          return true;
+        }
+      }
       storeInternal(_spareKey2, _value, level + 1, StoreOptions.NONE);
       return true;
     } finally {
@@ -4233,7 +4340,7 @@ public class Exchange implements ReadOnlyExchange {
         checkPageType(buffer, treeDepth + 1, false);
       }
 
-      while (foundAt != -1) {
+      while (foundAt != -1 && buffer != null) {
         foundAt = buffer.traverse(_key, direction, foundAt);
         direction = GT;
         if (buffer.isAfterRightEdge(foundAt)) {
@@ -4356,6 +4463,9 @@ public class Exchange implements ReadOnlyExchange {
       throw new IllegalArgumentException("Tree depth is " + _tree.getDepth());
     }
     final int lvl = level >= 0 ? level : _tree.getDepth() + level;
+    if (lvl < 0 || lvl >= _levelCache.length) {
+      throw new IllegalArgumentException("Tree depth is " + _tree.getDepth());
+    }
     final int foundAt = searchTree(_key, lvl, false);
     final Buffer buffer = _levelCache[lvl]._buffer;
     try {

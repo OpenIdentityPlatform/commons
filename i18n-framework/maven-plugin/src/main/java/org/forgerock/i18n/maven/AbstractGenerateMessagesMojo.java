@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  *      Copyright 2011-2013 ForgeRock AS
+ *      Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.i18n.maven;
 
@@ -341,7 +342,12 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo {
 
             final String[] sa = ws.split(EOL);
             for (final String s : sa) {
-                sb.append(indent(1)).append(" * ").append(s).append(EOL);
+                // Escape HTML metacharacters so that message text (which may contain
+                // '&', '<' or '>' - e.g. LDAP filters or GUI HTML fragments) yields
+                // valid Javadoc. The runtime message is loaded from the property
+                // bundle by key, so escaping this documentation comment is harmless.
+                final String escaped = s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+                sb.append(indent(1)).append(" * ").append(escaped).append(EOL);
             }
             sb.append(indent(1)).append(" */").append(EOL);
             return sb.toString();

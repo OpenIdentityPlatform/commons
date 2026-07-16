@@ -110,7 +110,6 @@ public class EncryptedJwtBuilder extends AbstractJwtBuilder {
 
     /**
      * Builds the JWE into a <code>String</code> by calling the <code>build</code> method on the JWE object.
-     * <p>
      * @see org.forgerock.json.jose.jwe.EncryptedJwt#build()
      *
      * @return The base64url encoded UTF-8 parts of the JWE.

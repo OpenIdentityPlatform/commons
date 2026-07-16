@@ -1,6 +1,7 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
  * Copyright 2015 ForgeRock AS
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -543,6 +544,7 @@ public class BufferPool {
      * @param volume
      *            The volume
      * @throws PersistitInterruptedException
+     *             if the thread was interrupted while waiting for I/O
      */
     boolean invalidate(final Volume volume) throws PersistitException {
         final float ratio = (float) volume.getStorage().getNextAvailablePage() / (float) _bufferCount;
@@ -565,12 +567,12 @@ public class BufferPool {
             _hashLocks[hashIndex % HASH_LOCKS].lock();
             try {
                 for (Buffer buffer = _hashTable[hashIndex]; buffer != null; buffer = buffer.getNext()) {
-                    if ((buffer.getVolume() == volume || volume == null) && !buffer.isFixed() && buffer.isValid()) {
+                    if ((buffer.getVolume() == volume) && !buffer.isFixed() && buffer.isValid()) {
                         if (buffer.claim(true, 0)) {
                             // re-check after claim
                             boolean invalidated = false;
                             try {
-                                if ((buffer.getVolume() == volume || volume == null) && !buffer.isFixed()
+                                if ((buffer.getVolume() == volume) && !buffer.isFixed()
                                         && buffer.isValid()) {
                                     if (mustWrite && buffer.isDirty()) {
                                         buffer.writePage();
@@ -891,12 +893,18 @@ public class BufferPool {
      * Buffer should be used only for display and diagnostic purposes.
      *
      * @param vol
+     *            the <code>Volume</code> containing the page to copy
      * @param page
+     *            the page address of the page to copy
      * @return Copy of the Buffer
      * @throws InvalidPageAddressException
+     *             if the supplied page address is invalid
      * @throws InvalidPageStructureException
+     *             if the page image is corrupt
      * @throws VolumeClosedException
+     *             if the volume has been closed
      * @throws PersistitInterruptedException
+     *             if the thread was interrupted while waiting for I/O
      */
     public Buffer getBufferCopy(final Volume vol, final long page) throws InvalidPageAddressException,
             InvalidPageStructureException, VolumeClosedException, InUseException, PersistitIOException,
@@ -952,6 +960,7 @@ public class BufferPool {
      * @return Buffer An available buffer, or <i>null</i> if no buffer is
      *         currently available. The buffer has a writer claim.
      * @throws PersistitException
+     *             if a persistence error occurs while evicting a page
      * @throws IllegalStateException
      *             if there is no available buffer.
      */
@@ -1327,6 +1336,7 @@ public class BufferPool {
          * Used to sort buffers in ascending page address order by volume.
          *
          * @param buffer
+         *            the <code>BufferHolder</code> to compare with
          * @return -1, 0 or 1 as this <code>Buffer</code> falls before, a, or
          *         after the supplied <code>Buffer</code> in the desired page
          *         address order.
@@ -1336,6 +1346,22 @@ public class BufferPool {
             return _volumeId > buffer._volumeId ? 1 : _volumeId < buffer._volumeId ? -1 : _page > buffer._page ? 1
                     : _page < buffer._page ? -1 : 0;
 
+        }
+
+        /**
+         * Equality is defined by the same (volumeId, page) ordering key used by
+         * {@link #compareTo(BufferHolder)}, so that {@code equals} stays
+         * consistent with the natural ordering.
+         */
+        @Override
+        public boolean equals(final Object object) {
+            return this == object
+                    || (object instanceof BufferHolder && compareTo((BufferHolder) object) == 0);
+        }
+
+        @Override
+        public int hashCode() {
+            return Long.hashCode(_volumeId) * 31 + Long.hashCode(_page);
         }
 
         @Override
@@ -1397,7 +1423,9 @@ public class BufferPool {
 
     /**
      * @param i
+     *            the index of the buffer within this pool
      * @param detail
+     *            <code>true</code> to include detailed buffer state
      * @return toString value for buffer at index <code>i</code>.
      */
     String toString(final int i, final boolean detail) {
@@ -1420,6 +1448,7 @@ public class BufferPool {
      * @param secure
      *            true to obscure data values in the dump
      * @throws Exception
+     *             if an error occurs while writing the dump
      */
     void dump(final DataOutputStream stream, final ByteBuffer bb, final boolean secure, final boolean verbose)
             throws Exception {

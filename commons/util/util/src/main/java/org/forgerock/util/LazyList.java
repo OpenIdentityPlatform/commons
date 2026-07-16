@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 package org.forgerock.util;
@@ -32,7 +33,7 @@ import java.util.ListIterator;
 public class LazyList<E> implements List<E> {
 
     /** The list that this lazy list exposes, once initialized. */
-    private List<E> list;
+    private volatile List<E> list;
 
     /** Factory to create the instance of the list to expose. */
     protected Factory<List<E>> factory;

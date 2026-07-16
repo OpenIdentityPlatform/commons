@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.jose.jwe;
@@ -22,7 +23,6 @@ import org.forgerock.json.jose.exceptions.JweException;
 
 /**
  * An Enum of the possible encryption methods that can be used when encrypting a JWT.
- * <p>
  * @see <a href="http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-11#section-4.2">
  *     JWE Encryption Methods</a>
  *

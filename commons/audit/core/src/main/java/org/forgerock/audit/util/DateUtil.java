@@ -12,7 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2011-2015 ForgeRock AS. All rights reserved.
- * Portions Copyrighted 2026 3A Systems, LLC
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 package org.forgerock.audit.util;
 
@@ -211,6 +211,9 @@ public final class DateUtil {
             if (includeDay) {
                 result++;
             }
+        }
+        if (result == null) {
+            throw new IllegalArgumentException("start and end dates must not be null");
         }
         return result;
     }

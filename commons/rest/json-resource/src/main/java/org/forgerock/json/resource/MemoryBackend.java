@@ -69,10 +69,15 @@ public final class MemoryBackend implements CollectionResourceProvider {
             this.lastResultIndex = lastResultIndex;
         }
 
-        static Cookie valueOf(String base64) {
+        static Cookie valueOf(String base64) throws ResourceException {
             final String decoded = new String(Base64.decode(base64));
             final String[] split = decoded.split(":");
-            final int lastOffset = Integer.parseInt(split[0]);
+            final int lastOffset;
+            try {
+                lastOffset = Integer.parseInt(split[0]);
+            } catch (final NumberFormatException e) {
+                throw new BadRequestException("Invalid paged results cookie", e);
+            }
             final List<SortKey> sortKeys = new ArrayList<>();
             final String[] splitKeys = split[1].split(",");
 
@@ -597,7 +602,11 @@ public final class MemoryBackend implements CollectionResourceProvider {
                     return new BadRequestException("Cookies and offsets are mutually exclusive").asPromise();
                 }
 
-                firstResultIndex = Cookie.valueOf(pagedResultsCookie).getLastResultIndex();
+                try {
+                    firstResultIndex = Cookie.valueOf(pagedResultsCookie).getLastResultIndex();
+                } catch (final ResourceException e) {
+                    return e.asPromise();
+                }
             } else {
                 if (request.getPagedResultsOffset() > 0) {
                     firstResultIndex = request.getPagedResultsOffset();

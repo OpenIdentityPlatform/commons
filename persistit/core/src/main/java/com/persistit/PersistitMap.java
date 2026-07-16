@@ -192,12 +192,12 @@ public class PersistitMap<K, V> extends AbstractMap<K, V> implements SortedMap<K
      * Construct a PersistitMap over the range of keys from fromKey (inclusive)
      * to toKey (exclusive)
      * 
-     * @param pm
-     * @param useFrom
-     * @param fromKey
-     * @param useTo
-     * @param toKey
-     * 
+     * @param pm the base <code>PersistitMap</code> over which this submap is created
+     * @param useFrom <code>true</code> if <code>fromKey</code> bounds the start of the range
+     * @param fromKey the inclusive lower bound of the key range
+     * @param useTo <code>true</code> if <code>toKey</code> bounds the end of the range
+     * @param toKey the exclusive upper bound of the key range
+     *
      * @throws IllegalArgumentException
      *             if fromKey is after toKey or if either fromKey or toKey is
      *             outside the range of the supplied base PersistitMap
@@ -679,7 +679,6 @@ public class PersistitMap<K, V> extends AbstractMap<K, V> implements SortedMap<K
      * This implementation iterates over the specified map's
      * <code>entrySet()</code> collection, and calls this map's <code>put</code>
      * operation once for each entry returned by the iteration.
-     * <p>
      * 
      * @param t
      *            mappings to be stored in this map.
@@ -741,7 +740,7 @@ public class PersistitMap<K, V> extends AbstractMap<K, V> implements SortedMap<K
         }
 
         @Override
-        public Throwable getCause() {
+        public synchronized Throwable getCause() {
             return _exception;
         }
     }
@@ -1349,7 +1348,6 @@ public class PersistitMap<K, V> extends AbstractMap<K, V> implements SortedMap<K
      * as the key followed by an equals sign (<code>"="</code>) followed by the
      * associated value. Keys and values are converted to strings as by
      * <code>String.valueOf(Object)</code>.
-     * <p>
      * 
      * @return a String representation of this map.
      */

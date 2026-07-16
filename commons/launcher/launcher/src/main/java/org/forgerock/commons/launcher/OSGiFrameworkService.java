@@ -48,6 +48,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -334,14 +335,13 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
                             		   );
                 }
             } else {
-                input =
-                        new BufferedReader(new InputStreamReader(Main.class
-                                .getResourceAsStream("/launcher.json")));
-                if (null == input) {
+                final InputStream configStream = Main.class.getResourceAsStream("/launcher.json");
+                if (null == configStream) {
                     throw new IllegalArgumentException(
                             "Boot OSGi configuration file does not exists on CLASSPATH: "
                                     + Main.class.getResource("/").toString() + "/launcher.json");
                 }
+                input = new BufferedReader(new InputStreamReader(configStream));
             }
             launcherConfiguration = new JsonValue((new JSONParser()).parse(input));
             launcherConfiguration.getTransformers().add(transformer);
@@ -481,7 +481,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
                     for (BundleHandler handler : result) {
                         if (newHandler.getBundleUrl().equals(handler.getBundleUrl())) {
                             if (newHandler.getActions().equals(handler.getActions())
-                                    && newHandler.getStartLevel() == newHandler.getStartLevel()) {
+                                    && Objects.equals(newHandler.getStartLevel(), handler.getStartLevel())) {
                                 // Do not duplicate
                                 newHandler = null;
                                 break;

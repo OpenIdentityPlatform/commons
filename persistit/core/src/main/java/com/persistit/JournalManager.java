@@ -1,6 +1,7 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
  * Copyright 2015 ForgeRock AS
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -252,10 +254,10 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      * suffix contains twelve digits.)
      * </p>
      *
-     * @param rman
-     * @param path
-     * @param maximumSize
-     * @throws PersistitException
+     * @param rman the RecoveryManager supplying recovered journal state, or null to start a new journal
+     * @param path the base journal file path (ignored when continuing a recovered journal)
+     * @param maximumSize the maximum size in bytes of each journal file (ignored when continuing a recovered journal)
+     * @throws PersistitException if a persistence error occurs
      */
     public synchronized void init(final RecoveryManager rman, final String path, final long maximumSize)
             throws PersistitException {
@@ -314,7 +316,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
     /**
      * Copy dynamic variables into a {@link Management.JournalInfo} structure.
      *
-     * @param info
+     * @param info the JournalInfo structure to populate
      */
     public synchronized void populateJournalInfo(final Management.JournalInfo info) {
         info.closed = _closed.get();
@@ -585,7 +587,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      * {@link #urgency()}. When that value is {@value #URGENT} then the delay is
      * {@value #URGENT_COMMIT_DELAY_MILLIS} milliseconds.
      *
-     * @throws PersistitInterruptedException
+     * @throws PersistitInterruptedException if the thread is interrupted while waiting
      */
     public void throttle() throws PersistitInterruptedException {
         final long interval = _throttleSleepInterval;
@@ -850,11 +852,9 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      *
      * @param address
      *            journal address
-     * @param _bb
-     *            ByteBuffer in which to return the result
      * @return pageAddress of the page at the specified location, or -1 if the
      *         address does not reference a valid page
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     Buffer readPageBuffer(final long address) throws PersistitException {
         ByteBuffer bb = ByteBuffer.allocate(PA.OVERHEAD);
@@ -895,8 +895,14 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
 
     private void advance(final int recordSize) {
         Debug.$assert1.t(recordSize > 0 && recordSize + _writeBuffer.position() <= _writeBuffer.capacity());
-        _currentAddress += recordSize;
+        /*
+         * The position update validates against the buffer limit and may
+         * throw; it must happen before the _currentAddress update so that a
+         * failure cannot tear the invariant _writeBufferAddress +
+         * _writeBuffer.position() == _currentAddress.
+         */
         _writeBuffer.position(_writeBuffer.position() + recordSize);
+        _currentAddress += recordSize;
     }
 
     /**
@@ -905,7 +911,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      * {@link #prepareWriteBuffer(int)} - the write buffer needs to be ready to
      * receive the JH record.
      *
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     synchronized void writeJournalHeader() throws PersistitException {
         JH.putType(_writeBuffer);
@@ -928,14 +934,22 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      * {@link #prepareWriteBuffer(int)} - the write buffer needs to be ready to
      * receive the JE record.
      *
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     synchronized void writeJournalEnd() throws PersistitException {
         if (_writeBufferAddress != Long.MAX_VALUE) {
             //
             // prepareWriteBuffer contract guarantees there's always room in
-            // the write buffer for this record.
+            // the write buffer for this record. However, a rollover abandoned
+            // by an exception - e.g. an interrupt during flush, truncate or
+            // force - may have consumed the reserve already, leaving
+            // _currentAddress closer than JE.OVERHEAD to the block end. Skip
+            // the JE record then, so the retried rollover can complete;
+            // recovery treats the missing JE as a dirty shutdown.
             //
+            if (_writeBuffer.remaining() < JE.OVERHEAD) {
+                return;
+            }
             JE.putType(_writeBuffer);
             JournalRecord.putTimestamp(_writeBuffer, epochalTimestamp());
             JournalRecord.putLength(_writeBuffer, JE.OVERHEAD);
@@ -1143,9 +1157,9 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
     /**
      * package-private for unit tests only.
      *
-     * @param volume
-     * @param handle
-     * @throws PersistitException
+     * @param volume the volume whose handle mapping is written
+     * @param handle the internal handle assigned to the volume
+     * @throws PersistitException if a persistence error occurs
      */
     synchronized void writeVolumeHandleToJournal(final Volume volume, final int handle) throws PersistitException {
         prepareWriteBuffer(IV.MAX_LENGTH);
@@ -1203,8 +1217,8 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      *            Journal address of previous TX record written by this
      *            transaction, or 0 if there is to previous record
      *
-     * @return
-     * @throws PersistitException
+     * @return the journal address at which the TX record was written
+     * @throws PersistitException if a persistence error occurs
      */
     synchronized long writeTransactionToJournal(final ByteBuffer buffer, final long startTimestamp,
             final long commitTimestamp, final long backchainAddress) throws PersistitException {
@@ -1261,7 +1275,11 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
     static long fileToGeneration(final File file) {
         final Matcher matcher = PATH_PATTERN.matcher(file.getName());
         if (matcher.matches()) {
-            return Long.parseLong(matcher.group(2));
+            try {
+                return Long.parseLong(matcher.group(2));
+            } catch (final NumberFormatException e) {
+                return -1;
+            }
         } else {
             return -1;
         }
@@ -1361,7 +1379,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
     /**
      * Flushes the write buffer
      *
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     synchronized long flush() throws PersistitException {
         _persistit.checkFatal();
@@ -1466,7 +1484,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      * @param size
      *            Size of record to be written
      * @return <code>true</code> if and only if a new journal file was started
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     private boolean prepareWriteBuffer(final int size) throws PersistitException {
         _persistit.checkFatal();
@@ -1623,7 +1641,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      * @param address
      *            the journal address of a record in the journal for which the
      *            corresponding channel will be returned
-     * @throws PersistitException
+     * @throws PersistitIOException
      *             if the <code>MediatedFileChannel</code> cannot be created
      */
     synchronized FileChannel getFileChannel(final long address) throws PersistitIOException {
@@ -1651,7 +1669,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      * <p>
      * Does nothing of the <code>appendOnly</code> is set.
      *
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     @Override
     public void copyBack() throws Exception {
@@ -1672,7 +1690,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      * Remove transactions and PageNode entries when possible due to completion
      * of a new checkpoint.
      *
-     * @param checkpoint
+     * @param checkpoint the checkpoint that has just been written
      */
     private void checkpointWritten(final Checkpoint checkpoint) {
 
@@ -1830,7 +1848,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      *            currently pausing, the pause time may be shortened to try to
      *            complete the I/O when requested. In particular, a value of
      *            zero indicates the I/O should start immediately.
-     * @throws PersistitInterruptedException
+     * @throws PersistitInterruptedException if the thread is interrupted while waiting
      */
 
     void waitForDurability(final long flushedTimestamp, final long leadTime, final long stallTime)
@@ -2158,6 +2176,22 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
             }
         }
 
+        /**
+         * Equality is kept consistent with {@link #compareTo(TransactionMapItem)}:
+         * two items are equal exactly when they order equally (same commit
+         * timestamp for committed items, otherwise same start timestamp).
+         */
+        @Override
+        public boolean equals(final Object object) {
+            return this == object
+                    || (object instanceof TransactionMapItem && compareTo((TransactionMapItem) object) == 0);
+        }
+
+        @Override
+        public int hashCode() {
+            return Long.hashCode(isCommitted() ? _commitTimestamp : _startTimestamp);
+        }
+
         final static Comparator<TransactionMapItem> TRANSACTION_MAP_ITEM_COMPARATOR = new Comparator<TransactionMapItem>() {
 
             @Override
@@ -2268,7 +2302,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
          * General method used to wait for durability. {@See
          * JournalManager#waitForDurability(long, long, long)}.
          *
-         * @throws PersistitInterruptedException
+         * @throws PersistitInterruptedException if the thread is interrupted while waiting
          */
         private void waitForDurability(final long flushedTimestamp, final long leadTime, final long stallTime)
                 throws PersistitException {
@@ -2971,7 +3005,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
     /**
      * For use only by unit tests that test page maps, etc.
      *
-     * @param handleToVolumeMap
+     * @param handleToVolumeMap the handle-to-volume map entries to inject
      */
     synchronized void unitTestInjectVolumes(final Map<Integer, Volume> handleToVolumeMap) {
         _handleToVolumeMap.putAll(handleToVolumeMap);
@@ -2980,7 +3014,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
     /**
      * For use only by unit tests that test page maps, etc.
      *
-     * @param handleToVolumeMap
+     * @param pageMap the page map entries to inject
      */
     void unitTestInjectPageMap(final Map<PageNode, PageNode> pageMap) {
         _pageMap.putAll(pageMap);

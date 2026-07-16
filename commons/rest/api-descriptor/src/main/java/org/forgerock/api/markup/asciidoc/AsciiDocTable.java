@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.api.markup.asciidoc;
@@ -132,7 +133,7 @@ public class AsciiDocTable {
         if (this.columnsPerRow != null) {
             throw new AsciiDocException("columnsPerRow already defined");
         }
-        if (this.columnsPerRow < 1) {
+        if (columnsPerRow < 1) {
             throw new AsciiDocException("columnsPerRow < 1");
         }
         this.columnsPerRow = columnsPerRow;

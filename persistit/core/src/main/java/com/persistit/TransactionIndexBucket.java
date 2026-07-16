@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -542,7 +543,7 @@ class TransactionIndexBucket {
      * @throws RetryException
      *             if a TransactionStatus started but had not finished
      *             committing.
-     * @throws InterruptedException
+     * @throws InterruptedException if the thread is interrupted while waiting
      */
     long getAccumulatorSnapshot(final Accumulator accumulator, final long timestamp, final int step)
             throws RetryException, InterruptedException {

@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyrighted 2020-2026 3A Systems, LLC
  */
 
 package org.forgerock.json.crypto.simple;
@@ -100,13 +101,18 @@ public class SimpleEncryptor implements JsonEncryptor {
      * @throws IOException if an I/O exception occurred.
      */
     private Object asymmetric(Object object) throws GeneralSecurityException, IOException {
-        String symmetricCipher = "AES/ECB/PKCS5Padding"; // no IV required for randomly-generated session key
+        // Use CBC with a random IV rather than ECB; ECB leaks plaintext block
+        // patterns regardless of session-key freshness (CWE-327). The IV is stored
+        // alongside the data and the self-describing "cipher" field keeps this
+        // backward compatible with values previously written using ECB.
+        String symmetricCipher = "AES/CBC/PKCS5Padding";
         KeyGenerator generator = KeyGenerator.getInstance("AES");
         generator.init(128);
         SecretKey sessionKey = generator.generateKey();
         Cipher symmetric = Cipher.getInstance(symmetricCipher);
         symmetric.init(Cipher.ENCRYPT_MODE, sessionKey);
         String data = Base64.encode(symmetric.doFinal(mapper.writeValueAsBytes(object)));
+        byte[] iv = symmetric.getIV();
         Cipher asymmetric = Cipher.getInstance(cipher);
         asymmetric.init(Cipher.ENCRYPT_MODE, key);
         HashMap<String, Object> keyObject = new HashMap<>();
@@ -117,6 +123,9 @@ public class SimpleEncryptor implements JsonEncryptor {
         result.put("cipher", symmetricCipher);
         result.put("key", keyObject);
         result.put("data", data);
+        if (iv != null) {
+            result.put("iv", Base64.encode(iv));
+        }
         return result;
     }
 

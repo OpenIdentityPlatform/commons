@@ -83,8 +83,12 @@ public interface ScriptRegistry extends SourceUnitObserver {
      * @throws NullPointerException
      *             if script is null.
      * @throws org.forgerock.json.JsonValueException
+     *             if the {@code script} JSON value is malformed or missing
+     *             required attributes.
      * @throws IllegalArgumentException
+     *             if the {@code script} value does not identify a valid script.
      * @throws ScriptException
+     *             if the script cannot be compiled or evaluated.
      */
     public ScriptEntry takeScript(JsonValue script) throws ScriptException;
 

@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions copyright 2026 3A Systems LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -349,7 +350,7 @@ public class Persistit {
    * control the creation of a functional <code>Persistit</code> within the
    * {@link #initialize()} method. The configuration may only be set once.
    * 
-   * @param configuration
+   * @param configuration the <code>Configuration</code> to apply to this instance
    * @throws IllegalStateException
    *             if the <code>Configuration</code> has already been set
    */
@@ -418,7 +419,7 @@ public class Persistit {
    * pending updates are written before the JVM exit.
    * </p>
    * 
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error prevents initialization
    */
   public synchronized void initialize() throws PersistitException {
     if (isInitialized()) {
@@ -448,6 +449,15 @@ public class Persistit {
       flush();
       _checkpointManager.checkpoint();
       _journalManager.pruneObsoleteTransactions();
+      /*
+       * Settle MVCC state left over from recovery before returning: without
+       * this, step-based visibility (e.g. Volume#getTree(String, boolean))
+       * can return stale answers until the CleanupManager timer fires. The
+       * active-transaction cache must be updated first because pruning
+       * consults it.
+       */
+      _transactionIndex.updateActiveTransactionCache();
+      pruneTimelyResources();
       startCheckpointManager();
       startCleanupManager();
       _initialized.set(true);
@@ -484,7 +494,7 @@ public class Persistit {
    *
    * @param propertiesFileName
    *            The path to the properties file.
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error prevents initialization
    */
   @Deprecated
   public void initialize(final String propertiesFileName) throws PersistitException {
@@ -522,7 +532,7 @@ public class Persistit {
    * @param properties
    *            The <code>Properties</code> instance from which to build the
    *            configuration
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error prevents initialization
    */
   @Deprecated
   public void initialize(final Properties properties) throws PersistitException {
@@ -558,7 +568,7 @@ public class Persistit {
    * @param configuration
    *            The <code>Configuration</code> from which to initialize
    *            Persistit
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error prevents initialization
    */
   @Deprecated
   public void initialize(final Configuration configuration) throws PersistitException {
@@ -835,7 +845,7 @@ public class Persistit {
    *            <code>true</code> to create a new Tree if one by the specified
    *            name does not already exist.
    * 
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs while acquiring the <code>Exchange</code>
    */
   public Exchange getExchange(final Volume volume, final String treeName, final boolean create)
     throws PersistitException {
@@ -897,7 +907,7 @@ public class Persistit {
    *            <code>true</code> to create a new Tree if one by the specified
    *            name does not already exist.
    * 
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs while acquiring the <code>Exchange</code>
    */
   public Exchange getExchange(final String volumeName, final String treeName, final boolean create)
     throws PersistitException {
@@ -927,7 +937,7 @@ public class Persistit {
    *            The <code>Exchange</code> to release to the pool. If
    *            <code>null</code> , this method returns silently.
    * 
-   * @throws IllegalStateException
+   * @throws IllegalStateException if the <code>Exchange</code> is already in the pool
    */
   public void releaseExchange(final Exchange exchange) {
     releaseExchange(exchange, false);
@@ -959,7 +969,7 @@ public class Persistit {
    *            <code>true</code> to clear all state information;
    *            <code>false</code> to leave the state unchanged.
    * 
-   * @throws IllegalStateException
+   * @throws IllegalStateException if the <code>Exchange</code> is already in the pool
    */
   public void releaseExchange(final Exchange exchange, final boolean secure) {
     if (exchange == null) {
@@ -999,9 +1009,9 @@ public class Persistit {
    * has a Volume-only selector (no tree pattern was specified), then this
    * method adds the Volume's directory Tree to the list.
    * 
-   * @param selector
+   * @param selector the <code>TreeSelector</code> that determines which <code>Tree</code>s are selected
    * @return the List
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs while enumerating <code>Tree</code>s
    */
   public List<Tree> getSelectedTrees(final TreeSelector selector) throws PersistitException {
     final List<Tree> list = new ArrayList<Tree>();
@@ -1036,7 +1046,7 @@ public class Persistit {
    * 
    * @return The <code>Volume</code>
    * 
-   * @throws PersistitException
+   * @throws PersistitException if the volume cannot be opened or created
    */
   public Volume loadVolume(final String vstring) throws PersistitException {
     final VolumeSpecification volumeSpec = _configuration.volumeSpecification(vstring);
@@ -1055,7 +1065,7 @@ public class Persistit {
    * 
    * @return The <code>Volume</code>
    * 
-   * @throws PersistitException
+   * @throws PersistitException if the volume cannot be opened or created
    */
   public Volume loadVolume(final VolumeSpecification volumeSpec) throws PersistitException {
     Volume volume = getVolume(volumeSpec.getName());
@@ -1080,7 +1090,7 @@ public class Persistit {
    * unspecified, the system temporary directory..
    * 
    * @return the temporary <code>Volume</code>.
-   * @throws PersistitException
+   * @throws PersistitException if the temporary volume cannot be created
    */
   public Volume createTemporaryVolume() throws PersistitException {
     return createTemporaryVolume(temporaryVolumePageSize());
@@ -1100,7 +1110,7 @@ public class Persistit {
    *            8192 or 16384, and the volume will be usable only if there are
    *            buffers of the specified size in the {@link BufferPool}.
    * @return the temporary <code>Volume</code>.
-   * @throws PersistitException
+   * @throws PersistitException if the temporary volume cannot be created
    */
   public Volume createTemporaryVolume(final int pageSize) throws PersistitException {
     if (!Volume.isValidPageSize(pageSize)) {
@@ -1131,7 +1141,7 @@ public class Persistit {
    *            the Volume to delete
    * @return <code>true</code> if the volume was previously loaded and has
    *         been successfully deleted.
-   * @throws PersistitException
+   * @throws PersistitException if the volume cannot be closed or deleted
    */
 
   public boolean deleteVolume(final String volumeName) throws PersistitException {
@@ -1296,7 +1306,7 @@ public class Persistit {
 
   /**
    * @return reserved temporary volume for locks
-   * @throws PersistitException
+   * @throws PersistitException if the lock volume cannot be created
    */
   public synchronized Volume getLockVolume() throws PersistitException {
     checkInitialized();
@@ -1404,7 +1414,7 @@ public class Persistit {
    * closed or not yet initialized, do nothing and return <code>null</code>.
    * 
    * @return the Checkpoint allocated by this process.
-   * @throws PersistitInterruptedException
+   * @throws PersistitInterruptedException if the thread is interrupted while waiting for the checkpoint to be written
    */
   public Checkpoint checkpoint() throws PersistitException {
     if (_closed.get() || !_initialized.get()) {
@@ -1434,7 +1444,7 @@ public class Persistit {
    * condenses the total number of journals as much as possible given the
    * current activity in the system.
    * 
-   * @throws Exception
+   * @throws Exception if an error occurs while copying pages back to their volumes
    */
   public void copyBackPages() throws Exception {
     /*
@@ -1522,7 +1532,7 @@ public class Persistit {
    * Reports status of the <code>max</code> longest-running transactions, in
    * order from oldest to youngest.
    * 
-   * @param max
+   * @param max the maximum number of transactions to report
    * @return status of the <code>max</code> longest-running transactions, in
    *         order from oldest to youngest, reported as a String with one line
    *         per transaction.
@@ -1557,7 +1567,7 @@ public class Persistit {
    * Close the Persistit Journal and all {@link Volume}s. This method is
    * equivalent to {@link #close(boolean) close(true)}.
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs while closing
    */
   public void close() throws PersistitException {
     close(true);
@@ -1615,7 +1625,7 @@ public class Persistit {
    *            disk before shutdown completes; <code>false</code> to enable
    *            fast (but incomplete) shutdown.
    *
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs while closing
    */
   public void close(final boolean flush) throws PersistitException {
     if (_initialized.get() && !_closed.get()) {
@@ -1736,12 +1746,10 @@ public class Persistit {
    */
   public void crash() {
     final JournalManager journalManager = _journalManager;
-    if (journalManager != null) {
-      try {
-        journalManager.crash();
-      } catch (final IOException e) {
-        _logBase.exception.log(e);
-      }
+    try {
+      journalManager.crash();
+    } catch (final IOException e) {
+      _logBase.exception.log(e);
     }
     //
     // Even on simulating a crash we need to try to close
@@ -1757,10 +1765,8 @@ public class Persistit {
       }
     }
     final Map<Integer, BufferPool> buffers = _bufferPoolTable;
-    if (buffers != null) {
-      for (final BufferPool pool : buffers.values()) {
-        pool.crash();
-      }
+    for (final BufferPool pool : buffers.values()) {
+      pool.crash();
     }
     _transactionIndex.crash();
     _cleanupManager.crash();
@@ -1856,7 +1862,7 @@ public class Persistit {
    * written.
    * 
    * @return <i>true</i> if any file writes were performed, else <i>false</i>.
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs while flushing
    */
   public boolean flush() throws PersistitException {
     if (_closed.get() || !_initialized.get()) {
@@ -1964,7 +1970,7 @@ public class Persistit {
    * {@link #setUpdateSuspended} method controls whether update operations are
    * currently suspended.
    * 
-   * @throws PersistitInterruptedException
+   * @throws PersistitInterruptedException if the thread is interrupted while waiting
    */
   public void checkSuspended() throws PersistitInterruptedException {
     while (isUpdateSuspended()) {
@@ -1989,7 +1995,7 @@ public class Persistit {
    * extreme care to avoid having two threads with the same SessionId at any
    * time.
    * 
-   * @param sessionId
+   * @param sessionId the <code>SessionId</code> to bind to the current thread
    */
   public void setSessionId(final SessionId sessionId) {
     sessionId.assign();
@@ -1999,7 +2005,7 @@ public class Persistit {
   /**
    * Close the session resources associated with the current thread.
    * 
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs while closing the session
    */
   void closeSession() throws PersistitException {
     final SessionId sessionId = _sessionIdThreadLocal.get();
@@ -2144,7 +2150,7 @@ public class Persistit {
    * instances of {@link com.persistit.encoding.ValueCoder} and
    * {@link com.persistit.encoding.KeyCoder}.
    * 
-   * @param coderManager
+   * @param coderManager the <code>CoderManager</code> to install
    */
   public void setCoderManager(final CoderManager coderManager) {
     _coderManager.set(coderManager);
@@ -2275,7 +2281,7 @@ public class Persistit {
    * <code>Volume</code>s and reports detailed results to
    * {@link java.lang.System#out}.
    * 
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs during the integrity check
    */
   public void checkAllVolumes() throws PersistitException {
     final IntegrityCheck icheck = new IntegrityCheck(this);
@@ -2310,9 +2316,9 @@ public class Persistit {
    *            If <code>true</code>, sets the shutdown suspend flag. Setting
    *            this flag suspends the {@link #close} method to permit
    *            continued use of the diagnostic GUI.
-   * @throws ClassNotFoundException
-   * @throws IllegalAccessException
-   * @throws InstantiationException
+   * @throws ClassNotFoundException if the diagnostic GUI class cannot be found
+   * @throws IllegalAccessException if the diagnostic GUI class cannot be accessed
+   * @throws InstantiationException if the diagnostic GUI class cannot be instantiated
    */
   public void setupGUI(final boolean suspendShutdown) throws IllegalAccessException, InstantiationException,
     ClassNotFoundException, RemoteException {
@@ -2565,8 +2571,8 @@ public class Persistit {
    * </ul>
    * 
    * 
-   * @param args
-   * @throws Exception
+   * @param args the command-line arguments
+   * @throws Exception if an error occurs while performing the requested operation
    */
   public static void main(final String[] args) throws Exception {
     final ArgParser ap = new ArgParser("Persistit", args, ARG_TEMPLATE).strict();
@@ -2595,9 +2601,10 @@ public class Persistit {
       task.runTask();
       task.setPersistit(persistit);
     } else if (!scriptName.isEmpty()) {
-      final BufferedReader reader = new BufferedReader(new FileReader(scriptName));
-      final PrintWriter writer = new PrintWriter(System.out);
-      CLI.runScript(persistit, reader, writer);
+      try (final BufferedReader reader = new BufferedReader(new FileReader(scriptName))) {
+        final PrintWriter writer = new PrintWriter(System.out);
+        CLI.runScript(persistit, reader, writer);
+      }
     } else {
       if (persistit == null) {
         throw new IllegalArgumentException("Must specify a properties file");

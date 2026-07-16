@@ -158,7 +158,7 @@ public class CollectionValueCoder implements ValueRenderer, ValueDisplayer {
      *            <code>null</code>.
      * @return An <code>Object</code> having the same class as the suppled
      *         <code>clazz</code> parameter.
-     * @throws ConversionException
+     * @throws ConversionException if the value cannot be converted
      */
     @Override
     public Object get(final Value value, final Class<?> clazz, final CoderContext context) throws ConversionException {
@@ -202,7 +202,7 @@ public class CollectionValueCoder implements ValueRenderer, ValueDisplayer {
      *            operation. (See {@link CoderContext}.) The default value is
      *            <code>null</code>.
      * 
-     * @throws ConversionException
+     * @throws ConversionException if the value cannot be converted
      */
     @Override
     public void render(final Value value, final Object target, final Class clazz, final CoderContext context)
@@ -274,7 +274,7 @@ public class CollectionValueCoder implements ValueRenderer, ValueDisplayer {
      *            operation. (See {@link CoderContext}.) The default value is
      *            <code>null</code>.
      * 
-     * @throws ConversionException
+     * @throws ConversionException if the value cannot be converted
      */
     @Override
     public void display(final Value value, final StringBuilder target, final Class<?> clazz, final CoderContext context)

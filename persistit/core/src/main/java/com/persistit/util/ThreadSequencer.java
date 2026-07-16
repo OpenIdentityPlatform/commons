@@ -1,5 +1,6 @@
 /**
  * Copyright 2012 Akiban Technologies, Inc.
+ * Portions copyright 2026 3A Systems LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,7 +173,7 @@ public class ThreadSequencer implements SequencerConstants {
     }
 
     public static void addSchedules(final int[][] pairs) {
-        for (int index = 0; index < pairs.length; index += 2) {
+        for (int index = 0; index + 1 < pairs.length; index += 2) {
             addSchedule(pairs[index], pairs[index + 1]);
         }
     }
@@ -321,7 +322,8 @@ public class ThreadSequencer implements SequencerConstants {
          * MAX_LOCATIONS possible locations in code where a join point can
          * occur.
          * 
-         * @param location
+         * @param location the location at which the calling thread reaches a
+         *            join point
          */
         public void sequence(final int location);
 

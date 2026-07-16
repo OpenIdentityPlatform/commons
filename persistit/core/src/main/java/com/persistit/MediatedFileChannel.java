@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -136,7 +137,7 @@ class MediatedFileChannel extends FileChannel {
      * checks the status of the existing channel because multiple threads might
      * receive AsynchronousCloseException
      * 
-     * @throws IOException
+     * @throws IOException if an I/O error occurs
      */
     private synchronized void openChannel() throws IOException {
         if (isOpen() && (_channel == null || !_channel.isOpen())) {
@@ -341,7 +342,7 @@ class MediatedFileChannel extends FileChannel {
      * provided as an argument must implement TestChannelInjector so that this
      * method can hook it up properly.
      * 
-     * @param channel
+     * @param channel the replacement <code>FileChannel</code> to delegate to
      */
     void injectChannelForTests(final FileChannel channel) {
         ((TestChannelInjector) channel).setChannel(_channel);

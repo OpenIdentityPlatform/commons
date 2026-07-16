@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.util.query;
@@ -217,10 +218,18 @@ public abstract class QueryFilterParser<F> {
                     assertionValue = Boolean.parseBoolean(nextToken);
                 } else if (nextToken.indexOf('.') >= 0) {
                     // Floating point number.
-                    assertionValue = Double.parseDouble(nextToken);
+                    try {
+                        assertionValue = Double.parseDouble(nextToken);
+                    } catch (final NumberFormatException e) {
+                        return valueOfIllegalArgument(tokenizer);
+                    }
                 } else {
                     // Must be an integer.
-                    assertionValue = Long.parseLong(nextToken);
+                    try {
+                        assertionValue = Long.parseLong(nextToken);
+                    } catch (final NumberFormatException e) {
+                        return valueOfIllegalArgument(tokenizer);
+                    }
                 }
                 try {
                     return comparisonFilter(pointer, operator, assertionValue);

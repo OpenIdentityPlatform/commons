@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.jose.jwt;
@@ -26,7 +27,6 @@ import java.util.Map;
  * <p>
  * As described in the JWT specification, this Enum class represents all the reserved JWT Claim Names, any other Claim
  * name is deemed as a "custom" Claim name.
- * <p>
  * @see <a href="http://tools.ietf.org/html/draft-jones-json-web-token-10#section-4.1">Reserved Claim Names</a>
  *
  * @since 2.0.0

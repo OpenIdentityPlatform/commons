@@ -20,6 +20,8 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.script.javascript;
@@ -49,14 +51,14 @@ public class SLF4JErrorReporter implements ErrorReporter {
 
     public void warning(String message, String sourceName, int line, String lineSource,
             int lineOffset) {
-        logger.warn("", new Object[] { message, sourceName, line, lineSource, lineOffset });
+        logger.warn("{} ({}#{}): {} [offset {}]", new Object[] { message, sourceName, line, lineSource, lineOffset });
         if (chainedReporter != null) {
             chainedReporter.warning(message, sourceName, line, lineSource, lineOffset);
         }
     }
 
     public void error(String message, String sourceName, int line, String lineSource, int lineOffset) {
-        logger.error("", new Object[] { message, sourceName, line, lineSource, lineOffset });
+        logger.error("{} ({}#{}): {} [offset {}]", new Object[] { message, sourceName, line, lineSource, lineOffset });
         if (chainedReporter != null) {
             chainedReporter.error(message, sourceName, line, lineSource, lineOffset);
         } else {

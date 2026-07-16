@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -253,6 +254,15 @@ public class MVCCPruneTest extends MVCCTestBase {
         storePrimordial(ex1, KEY, VALUE);
 
         for (int i = 0; i < VERSIONS.length; ++i) {
+            /*
+             * The prune that runs inside each store consults the active
+             * transaction cache: a stale cache conservatively keeps the
+             * previous committed version, a fresh one removes it. Settle the
+             * cache before every store so the surviving version count does
+             * not depend on whether the background TXN_UPDATE timer fired
+             * mid-loop (issue #272).
+             */
+            _persistit.getTransactionIndex().updateActiveTransactionCache();
             trx1.begin();
             try {
                 store(ex1, KEY, VALUE + VERSIONS[i] + i);
@@ -265,7 +275,7 @@ public class MVCCPruneTest extends MVCCTestBase {
                 trx1.end();
             }
         }
-        final int VERSIONS_NOW_REMOVED_BY_PRUNING_BEFORE_STORE = 2;
+        final int VERSIONS_NOW_REMOVED_BY_PRUNING_BEFORE_STORE = 4;
         assertEquals("stored versions", VERSIONS.length + 1 - VERSIONS_NOW_REMOVED_BY_PRUNING_BEFORE_STORE,
                 storedVersionCount(ex2, KEY));
 
