@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.jose.jwe;
@@ -29,10 +30,9 @@ import org.forgerock.json.jose.utils.Utils;
 import org.forgerock.util.encode.Base64url;
 
 /**
- * A JWE implementation of the <tt>Jwt</tt> interface.
+ * A JWE implementation of the <code>Jwt</code> interface.
  * <p>
  * JSON Web Encryption (JWE) is a representing encrypted content using JSON based data structures.
- * <p>
  * @see <a href="http://tools.ietf.org/html/draft-ietf-jose-json-web-encryption-11">
  *     JSON Web Encryption Specification</a>
  *

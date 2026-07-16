@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.bloomfilter;
@@ -36,11 +37,11 @@ import java.util.TreeSet;
  * pool will never exceed the desired overall false positive probability, while also ensuring that the capacity of
  * each subsequent bloom filter is increased to avoid creating long chains in cases where the required capacity has
  * been underestimated by orders of magnitude.
- * <p/>
+ * <p>
  * A pool of entries is maintained rather than a simple counter to allow for rolling bloom filter chains, in which
  * older filters in the chain may expire. By re-using the element in the series at that point, we avoid creating
  * excessively large filters unnecessarily.
- * <p/>
+ * <p>
  * As an implementation detail, the current implementation only pools the natural numbers representing elements in
  * the geometric series. The Bloom Filters themselves are created on-demand, with parameters according to the following
  * formulae. To create the <em>i</em>th element in the series we use:
@@ -50,7 +51,7 @@ import java.util.TreeSet;
  * </pre>
  * Where the initialFalsePositiveProbability is given by <code>overallFalsePositiveProbability *
  * (1-fppScaleFactor)</code>
- * <p/>
+ * <p>
  * The strategy used here is described in detail in the paper <a
  * href="http://www.sciencedirect.com/science/article/pii/S0020019006003127">Scalable Bloom Filters</a> by Almeida et
  * al., <em>Information Processing Letters</em>, 101(6), p.255&ndash;261, 2007. We add the ability to remove buckets

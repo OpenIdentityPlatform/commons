@@ -1,6 +1,8 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
  * 
+ * Portions Copyrighted 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +25,6 @@ import com.persistit.exception.PersistitIOException;
 import com.persistit.exception.PersistitInterruptedException;
 import com.persistit.exception.RollbackException;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.InterruptedIOException;
@@ -244,30 +245,39 @@ public class TransactionTest2 extends PersistitUnitTestCase {
     }
 
     @Test
-   @Ignore
     public void transactionsConcurrentWithPersistitClose() throws Exception {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                final Thread[] threadArray = new Thread[_threadCount];
-                for (int index = 0; index < _threadCount; index++) {
-                    threadArray[index] = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            runIt(Integer.MAX_VALUE);
-                        }
-                    }, "TransactionThread_" + index);
+        _strandedThreads.set(0);
+        final Thread[] threadArray = new Thread[_threadCount];
+        for (int index = 0; index < _threadCount; index++) {
+            threadArray[index] = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    runIt(Integer.MAX_VALUE);
                 }
-                for (int index = 0; index < _threadCount; index++) {
-                    threadArray[index].start();
-                }
-            }
-        }).start();
+            }, "TransactionThread_" + index);
+        }
+        for (int index = 0; index < _threadCount; index++) {
+            threadArray[index].start();
+        }
         /*
          * Let the threads crank up
          */
         Thread.sleep(1000);
         _persistit.close();
+        /*
+         * Closing Persistit makes the worker threads unwind by throwing one of
+         * the expected exceptions, but that unwinding is asynchronous. Give the
+         * threads a bounded amount of time to observe the closure and exit
+         * before checking that none were left stranded; otherwise a worker that
+         * has not yet caught its exception produces a spurious failure.
+         */
+        final long deadline = System.currentTimeMillis() + TIMEOUT;
+        for (final Thread thread : threadArray) {
+            final long remaining = deadline - System.currentTimeMillis();
+            if (remaining > 0) {
+                thread.join(remaining);
+            }
+        }
         assertEquals("All threads should have exited correctly", 0, _strandedThreads.get());
     }
 
@@ -306,8 +316,11 @@ public class TransactionTest2 extends PersistitUnitTestCase {
                 exception.printStackTrace();
                 _failedTransactionCount.incrementAndGet();
             }
-        } catch (final Exception exception) {
-            exception.printStackTrace();
+        } catch (final Throwable throwable) {
+            // Catch Throwable, not Exception: an internal Error such as an
+            // AssertionError must be reported and counted rather than
+            // silently killing the worker thread (see issue #265).
+            throwable.printStackTrace();
             _failedTransactionCount.incrementAndGet();
         }
     }

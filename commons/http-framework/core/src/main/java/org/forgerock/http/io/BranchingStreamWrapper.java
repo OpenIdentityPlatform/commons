@@ -13,6 +13,7 @@
  *
  * Copyright 2010–2011 ApexIdentity Inc.
  * Portions Copyright 2011-2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 package org.forgerock.http.io;
@@ -32,7 +33,10 @@ import org.forgerock.util.Factory;
 final class BranchingStreamWrapper extends BranchingInputStream {
 
     /** A shared object by all branches of the same input stream. */
-    private Trunk trunk;
+    private final Trunk trunk;
+
+    /** Whether this branch has been closed. */
+    private volatile boolean closed;
 
     /** This branch's position relative to the trunk buffer. */
     private int position;
@@ -79,7 +83,7 @@ final class BranchingStreamWrapper extends BranchingInputStream {
     }
 
     boolean isClosed() {
-        return trunk == null;
+        return closed;
     }
 
     @Override
@@ -156,8 +160,12 @@ final class BranchingStreamWrapper extends BranchingInputStream {
     @Override
     public void close() throws IOException {
         // multiple calls to close are harmless
-        if (trunk != null) {
+        if (!closed) {
             synchronized (trunk) {
+                if (closed) {
+                    // another thread (e.g. the finalizer) already closed this branch
+                    return;
+                }
                 try {
                     closeBranches();
                     trunk.branches.remove(this);
@@ -169,7 +177,7 @@ final class BranchingStreamWrapper extends BranchingInputStream {
                     }
                 } finally {
                     // if all else fails, this branch thinks it's closed
-                    trunk = null;
+                    closed = true;
                 }
             }
         }
@@ -230,7 +238,7 @@ final class BranchingStreamWrapper extends BranchingInputStream {
      * Throws an {@link IOException} if the stream is closed.
      */
     private void notClosed() throws IOException {
-        if (trunk == null) {
+        if (closed) {
             throw new IOException("stream is closed");
         }
     }

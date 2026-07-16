@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.openidentityplatform.commons</groupId>
     <artifactId>parent</artifactId>
-    <version>3.1.2-SNAPSHOT</version>
+    <version>3.2.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>persistit</artifactId>
@@ -91,12 +91,18 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.18</version>
+          <!-- Version inherited from the parent POM (currently 3.1.2). The old
+               pinned 2.18 mishandled the Class#method test filter and forked-process
+               timeouts on modern JDKs. -->
           <configuration>
             <systemPropertyVariables>
               <buildDirectory>${project.build.directory}</buildDirectory>
+              <!-- Pass rmiport as a system property here instead of via argLine
+                   so that the parent POM's argLine (which supplies the JDK 16+
+                   add-opens flags required for reflective serialization access)
+                   is inherited rather than overridden. -->
+              <rmiport>${rmiport}</rmiport>
             </systemPropertyVariables>
-            <argLine>-Drmiport=${rmiport}</argLine>
             <includes>
               <include>**/*Test.java</include>
               <include>**/*Test?.java</include>

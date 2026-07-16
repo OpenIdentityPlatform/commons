@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.jose.jws;
@@ -25,11 +26,10 @@ import org.forgerock.json.jose.utils.Utils;
 import org.forgerock.util.encode.Base64url;
 
 /**
- * A JWS implementation of the <tt>Jwt</tt> interface.
+ * A JWS implementation of the <code>Jwt</code> interface.
  * <p>
  * JSON Web Signature (JWS) is a means of representing content secured with digital signatures or Message
  * Authentication Codes (MACs) using JSON based data structures.
- * <p>
  * @see <a href="http://tools.ietf.org/html/draft-ietf-jose-json-web-signature-11">JSON Web Signature Specification</a>
  *
  * @since 2.0.0

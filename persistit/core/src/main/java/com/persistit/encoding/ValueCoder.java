@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit.encoding;
@@ -111,8 +112,7 @@ import com.persistit.exception.ConversionException;
  * </pre>
  * 
  * </blockquote>
- * </p>
- * 
+ *
  * @version 1.0
  */
 public interface ValueCoder {
@@ -172,7 +172,7 @@ public interface ValueCoder {
      *            <code>null</code>.
      * @return An <code>Object</code> having the same class as the suppled
      *         <code>clazz</code> parameter.
-     * @throws ConversionException
+     * @throws ConversionException if the value cannot be converted
      */
     public Object get(Value value, Class<?> clazz, CoderContext context) throws ConversionException;
 

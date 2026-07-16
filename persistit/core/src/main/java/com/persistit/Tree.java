@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -284,7 +285,6 @@ public class Tree extends SharedResource {
     /**
      * Save a Tree in the directory
      * 
-     * @param value
      */
     int store(final byte[] bytes, final int index) {
         final byte[] nameBytes = Util.stringToBytes(_name);
@@ -300,7 +300,6 @@ public class Tree extends SharedResource {
     /**
      * Load an existing Tree from the directory
      * 
-     * @param value
      */
     int load(final byte[] bytes, final int index, final int length) {
         final int nameLength = length < 20 ? -1 : Util.getShort(bytes, index + 18);
@@ -321,8 +320,8 @@ public class Tree extends SharedResource {
     /**
      * Initialize a Tree.
      * 
-     * @param rootPageAddr
-     * @throws PersistitException
+     * @param rootPageAddr the root page address to assign to the tree
+     * @throws PersistitException if a persistence error occurs
      */
     void setRootPageAddress(final long rootPageAddr) throws PersistitException {
         final TreeVersion version = version();
@@ -366,7 +365,7 @@ public class Tree extends SharedResource {
     /**
      * @return a <code>TreeStatistics</code> object containing approximate
      *         counts of records added, removed and fetched from this
-     *         </code>Tree</code>
+     *         <code>Tree</code>
      */
     public TreeStatistics getStatistics() {
         return version()._treeStatistics;
@@ -413,7 +412,7 @@ public class Tree extends SharedResource {
      * Assign and set the tree handle. The tree must may not be a member of a
      * temporary volume.
      * 
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     void loadHandle() throws PersistitException {
         assert !_volume.isTemporary() : "Handle allocation for temporary tree " + this;
@@ -556,7 +555,7 @@ public class Tree extends SharedResource {
      * Set the handle used to identify this Tree in the journal. May be invoked
      * only once.
      * 
-     * @param handle
+     * @param handle the handle value to assign
      * @return the handle
      * @throws IllegalStateException
      *             if the handle has already been set

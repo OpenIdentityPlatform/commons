@@ -1,5 +1,6 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
+ * Portions copyright 2026 3A Systems LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +17,7 @@
 
 /**
  * 
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package com.persistit;
 
@@ -118,9 +120,9 @@ public class VolumeSpecification {
 
     /**
      * Construct a <code>VolumeSpecification</code> from the supplied
-     * specification string. The specification has the form: <br />
-     * <i>pathname</i>[,<i>options</i>]... <br />
-     * where options include: <br />
+     * specification string. The specification has the form: <br>
+     * <i>pathname</i>[,<i>options</i>]... <br>
+     * where options include: <br>
      * <dl>
      * <dt><code>name</code></dt>
      * <dd>The Volume name used in looking up the volume within Persistit
@@ -162,11 +164,10 @@ public class VolumeSpecification {
      * extend.</dd>
      * 
      * </dl>
-     * <p>
      * 
      * @param specification
      *            the specification String
-     * @throws InvalidVolumeSpecificationException
+     * @throws InvalidVolumeSpecificationException if the specification string is invalid
      */
 
     public VolumeSpecification(final String specification) throws InvalidVolumeSpecificationException {
@@ -472,6 +473,12 @@ public class VolumeSpecification {
                 && id == v.id && initialPages == v.initialPages && initialSize == v.initialSize
                 && extensionPages == v.extensionPages && extensionSize == v.extensionSize
                 && maximumPages == v.maximumPages && maximumSize == v.maximumSize;
+    }
+
+    @Override
+    public int hashCode() {
+        return (path == null ? 0 : path.hashCode()) ^ (name == null ? 0 : name.hashCode())
+                ^ (int) (id ^ (id >>> 32));
     }
 
     private String ds(final long s) {

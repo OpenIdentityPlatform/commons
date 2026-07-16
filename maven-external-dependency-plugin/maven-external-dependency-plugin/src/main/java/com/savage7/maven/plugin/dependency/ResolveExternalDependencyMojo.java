@@ -10,12 +10,14 @@
  * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  **/
 
 package com.savage7.maven.plugin.dependency;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,15 +47,22 @@ import org.codehaus.plexus.util.FileUtils;
  * 
  * @goal resolve-external
  * @author <a href="mailto:robert@savage7.com">Robert Savage</a>
- * @see http://code.google.com/p/maven-external-dependency-plugin/
+ * @see <a href="http://code.google.com/p/maven-external-dependency-plugin/">http://code.google.com/p/maven-external-dependency-plugin/</a>
  * @version 0.1
- * @category Maven Plugin
- * @ThreadSafe
  */
 public class ResolveExternalDependencyMojo extends
     AbstractExternalDependencyMojo
 {
     /**
+     * Creates a new instance.
+     */
+    public ResolveExternalDependencyMojo()
+    {
+    }
+
+    /**
+     * The local repository used to resolve artifacts.
+     *
      * @parameter expression="${localRepository}"
      * @required
      * @readonly
@@ -78,6 +87,8 @@ public class ResolveExternalDependencyMojo extends
     protected java.util.List remoteRepositories;
 
     /**
+     * The archiver manager used to unpack resolved artifacts.
+     *
      * @component
      * @readonly
      */
@@ -207,10 +218,10 @@ public class ResolveExternalDependencyMojo extends
                             if (!new File(artifactItem.getDownloadUrl()).exists()) {
                             	URL downloadUrl = new URL(artifactItem.getDownloadUrl());
 	                            String endPointUrl = downloadUrl.getProtocol() + "://"+ downloadUrl.getAuthority();
-	                            Repository repository = new Repository("additonal-configs", endPointUrl);
+	                            Repository repository = new Repository("additional-configs", endPointUrl);
 	                            Settings settings = mavenSettingsBuilder.buildSettings();
 	                            ProxyInfo proxyInfo = null;
-	                            if (settings != null&& settings.getActiveProxy() != null)
+	                            if (settings != null && settings.getActiveProxy() != null)
 	                            {
 	                                Proxy settingsProxy = settings.getActiveProxy();
 	                                proxyInfo = new ProxyInfo();
@@ -352,8 +363,7 @@ public class ResolveExternalDependencyMojo extends
                                     + "compressed file: "
                                     + artifactItem.getExtractFile());
 
-                            File tempOutputDir = FileUtils.createTempFile(tempDownloadFile.getName(), ".dir", null);
-                            tempOutputDir.mkdirs();
+                            File tempOutputDir = Files.createTempDirectory(tempDownloadFile.getName() + ".dir").toFile();
                             File extractedFile = new File(tempOutputDir, artifactItem.getExtractFile());
                             
                             UnArchiver unarchiver;
@@ -491,11 +501,12 @@ public class ResolveExternalDependencyMojo extends
 
     /**
      * resolve the artifact in local or remote repository
-     * 
-     * @param artifactItem
+     *
      * @param artifact
-     * @return
+     *            the artifact to resolve
+     * @return <code>true</code> if the artifact was resolved
      * @throws MojoFailureException
+     *             if the artifact cannot be resolved
      */
     protected boolean resolveArtifactItem(Artifact artifact)
         throws MojoFailureException

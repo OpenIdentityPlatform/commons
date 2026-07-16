@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.audit.events.handlers;
 
@@ -92,14 +93,14 @@ public abstract class FileBasedEventHandlerConfiguration extends EventHandlerCon
 
     /**
      * Gets the interval to check time-based file rotation policies. The interval should be set as a {@link Duration}.
-     * <p/>
+     * <p>
      * Examples of valid durations are:
      * <pre>
      *      5 seconds
      *      5 minutes
      *      5 hours
      * </pre>
-     * <p/>
+     * <p>
      * Value of "zero" or "disabled" are not acceptable.
      *
      * @return The interval duration.
@@ -110,14 +111,14 @@ public abstract class FileBasedEventHandlerConfiguration extends EventHandlerCon
 
     /**
      * Sets the interval to check time-based file rotation policies. The interval should be set as a {@link Duration}.
-     * <p/>
+     * <p>
      * Examples of valid durations are:
      * <pre>
      *      5 seconds
      *      5 minutes
      *      5 hours
      * </pre>
-     * <p/>
+     * <p>
      * Value of "zero" or "disabled" are not acceptable.
      *
      * @param rotationRetentionCheckInterval The interval duration.
@@ -229,7 +230,7 @@ public abstract class FileBasedEventHandlerConfiguration extends EventHandlerCon
 
         /**
          * Gets the interval to trigger a file rotation. The interval should be set as a {@link Duration}.
-         * <p/>
+         * <p>
          * Examples of valid durations are:
          * <pre>
          *      5 seconds
@@ -237,7 +238,7 @@ public abstract class FileBasedEventHandlerConfiguration extends EventHandlerCon
          *      5 hours
          *      disabled
          * </pre>
-         * <p/>
+         * <p>
          * A value of "zero" or "disabled" means that time based file rotation is disabled.
          *
          * @return The interval duration.
@@ -248,7 +249,7 @@ public abstract class FileBasedEventHandlerConfiguration extends EventHandlerCon
 
         /**
          * Sets the interval to trigger a file rotation. The interval should be set as a {@link Duration}.
-         * <p/>
+         * <p>
          * Examples of valid durations are:
          * <pre>
          *      5 seconds
@@ -256,7 +257,7 @@ public abstract class FileBasedEventHandlerConfiguration extends EventHandlerCon
          *      5 hours
          *      disabled
          * </pre>
-         * <p/>
+         * <p>
          * A value of "zero" or "disabled" disables time based file rotation.
          *
          * @param rotationInterval A String that can be parsed as a {@link Duration}, specifying rotation interval.
@@ -268,7 +269,7 @@ public abstract class FileBasedEventHandlerConfiguration extends EventHandlerCon
         /**
          * Gets a list of times at which file rotation should be triggered; times should be provided as Strings that can
          * be parsed by {@link Duration} that each specify an offset from midnight.
-         * <p/>
+         * <p>
          * For example the list of [10 milliseconds, 20 milliseconds, 30 milliseconds] will
          * cause a file rotation to happen 10 milliseconds, 20 milliseconds and 30 milliseconds after midnight.
          *
@@ -281,7 +282,7 @@ public abstract class FileBasedEventHandlerConfiguration extends EventHandlerCon
         /**
          * Sets a list of times at which file rotation should be triggered; times should be provided as Strings that can
          * be parsed by {@link Duration} that each specify an offset from midnight.
-         * <p/>
+         * <p>
          * For example the list of [10 milliseconds, 20 milliseconds, 30 milliseconds] will
          * cause a file rotation to happen 10 milliseconds, 20 milliseconds and 30 milliseconds after midnight.
          *

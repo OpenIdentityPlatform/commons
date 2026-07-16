@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -29,67 +30,69 @@ import com.persistit.util.Util;
  * All multi-byte integers are stored in big-endian form. General record format:
  * 
  * <table border="1">
- * <tr valign="top">
+ * <caption>Summary</caption>
+ * <tr>
  * <td>+0</td>
  * <td>length</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+4</td>
  * <td>type</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+8</td>
  * <td>timestamp</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+16</td>
  * <td>payload</td>
  * </tr>
  * </table>
- * <p />
+ * <p>
  * Type: two ASCII bytes:
- * <p />
  * <table border="1">
+ * <caption>Summary</caption>
  * 
- * <tr valign="top">
+ * <tr>
  * <td>JH</td>
  * <td>Journal Header: written as the first record of each journal file.
  * Identifies the version, creation timestamp of the journal, created timestamp
  * of the journal file and path to which journal file was originally written.
  * <table>
- * <tr valign="top">
+ * <caption>Summary</caption>
+ * <tr>
  * <td>+16</td>
  * <td>Version (long)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+24</td>
  * <td>Journal file size (long)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+32</td>
  * <td>Current journal address (long)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+40</td>
  * <td>Base journal address (long)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+48</td>
  * <td>Journal created timestamp (long)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+56</td>
  * <td>Journal file created timestamp (long)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+64</td>
  * <td>Last valid checkpoint timestamp (long)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+72</td>
  * <td>Reserved (8 bytes)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+80</td>
  * <td>Journal File Path (variable - length determined by record length)</td>
  * </tr>
@@ -97,22 +100,23 @@ import com.persistit.util.Util;
  * </td>
  * </tr>
  * 
- * <tr valign="top">
+ * <tr>
  * <td>JE</td>
  * <td>Journal End: written as the last record of each journal file. Indicates
  * that the next valid record is in the next journal file, and confirms that the
  * journal file is complete. Lack of a JE record at the end of a journal file
  * indicates the system did not shut down normally.
  * <table>
- * <tr valign="top">
+ * <caption>Summary</caption>
+ * <tr>
  * <td>+16</td>
  * <td>Current journal address (long)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+24</td>
  * <td>Base journal address (long)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+32</td>
  * <td>Journal created timestamp (long)</td>
  * </tr>
@@ -120,22 +124,23 @@ import com.persistit.util.Util;
  * </td>
  * </tr>
  * 
- * <tr valign="top">
+ * <tr>
  * <td>IV</td>
  * <td>Identify Volume: associates an integer handle to a Volume. This handle is
  * referenced by subsequent log records to identify this Volume. The handle has
  * no meaning beyond the scope of one log file; every new log generation gets
  * new IV records.
  * <table>
- * <tr valign="top">
+ * <caption>Summary</caption>
+ * <tr>
  * <td>+16</td>
  * <td>Volume handle (int)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+20</td>
  * <td>Volume Id (long)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+28</td>
  * <td>Volume Path (variable - length determined by record length)</td>
  * </tr>
@@ -143,22 +148,23 @@ import com.persistit.util.Util;
  * </td>
  * </tr>
  * 
- * <tr valign="top">
+ * <tr>
  * <td>IT</td>
  * <td>Identify Tree: associates an integer handle to a Tree. This handle is
  * referenced by subsequent log records to identify this Tree. The handle has no
  * meaning beyond the scope of one log file; every new log generation gets new
  * IT records.
  * <table>
- * <tr valign="top">
+ * <caption>Summary</caption>
+ * <tr>
  * <td>+16</td>
  * <td>Tree handle (int)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+20</td>
  * <td>Volume handle (int)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+24</td>
  * <td>Tree Name (variable - length determined by record length)</td>
  * </tr>
@@ -166,24 +172,25 @@ import com.persistit.util.Util;
  * </td>
  * </tr>
  * 
- * <tr valign="top">
+ * <tr>
  * <td>PA</td>
  * <td>Page Image
  * <table>
- * <tr valign="top">
+ * <caption>Summary</caption>
+ * <tr>
  * <td>+16</td>
  * <td>Volume handle (int) - refers to a volume defined in a preceding IV record
  * </td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+20</td>
  * <td>page address (long)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+28</td>
  * <td>leftSize (int)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+32</td>
  * <td>bytes: the first leftSize bytes will go into the page at offset 0 the
  * remaining bytes will go to the end of the page; the middle of the page will
@@ -193,31 +200,33 @@ import com.persistit.util.Util;
  * </td>
  * </tr>
  * 
- * <tr valign="top">
+ * <tr>
  * <td>PM</td>
  * <td>Page Map: written once near the top of each journal file. Represents the
  * state of the page map at the time the journal rolled over.
  * <table>
- * <tr valign="top">
+ * <caption>Summary</caption>
+ * <tr>
  * <td>+16</td>
  * <td></td>
  * <td>Instances of the following fixed-length structure (28 bytes), number
  * determined by overall record size
  * <table>
- * <tr valign="top">
+ * <caption>Summary</caption>
+ * <tr>
  * <td>+0</td>
  * <td>Transaction timestamp (long)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+8</td>
  * <td>Journal address (long)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+16</td>
  * <td>Volume handle (int) - refers to a volume defined in a preceding IV record
  * </td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+20</td>
  * <td>Page address (long)</td>
  * </tr>
@@ -228,27 +237,29 @@ import com.persistit.util.Util;
  * </td>
  * </tr>
  * 
- * <tr valign="top">
+ * <tr>
  * <td>TM</td>
  * <td>Transaction Map: written once near the top of each journal file.
  * Represents map of transactions still open (started, but neither rolled back
  * nor committed) at the time the journal rolled over.
  * <table>
- * <tr valign="top">
+ * <caption>Summary</caption>
+ * <tr>
  * <td>+16</td>
  * <td></td>
  * <td>Instances of the following fixed-length structure (24 bytes) number
  * determined by overall record size
  * <table>
- * <tr valign="top">
+ * <caption>Summary</caption>
+ * <tr>
  * <td>+0</td>
  * <td>Transaction timestamp (long)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+8</td>
  * <td>Journal address (long)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+16</td>
  * <td>isCommitted (byte) - indicates whether this transaction committed</td>
  * </tr>
@@ -259,16 +270,17 @@ import com.persistit.util.Util;
  * </td>
  * </tr>
  * 
- * <tr valign="top">
+ * <tr>
  * <td>CP</td>
  * <td>Checkpoint. Specifies a timestamp and a system time in millis at which
  * all pages modified prior to that timestamp are present in the log.
  * <table>
- * <tr valign="top">
+ * <caption>Summary</caption>
+ * <tr>
  * <td>+16</td>
  * <td>System time in milliseconds (long)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+24</td>
  * <td>Base journal address (long)</td>
  * </tr>
@@ -276,21 +288,22 @@ import com.persistit.util.Util;
  * </td>
  * </tr>
  * 
- * <tr valign="top">
+ * <tr>
  * <td>TX</td>
  * <td>Transaction update record - encapsulates a set of updates applied to the
  * database. This record type encapsulates SR, DR, DT, DV, and CU records
  * defined below.
  * <table>
- * <tr valign="top">
+ * <caption>Summary</caption>
+ * <tr>
  * <td>+16</td>
  * <td>Commit timestamp, or -1 if the transaction has not committed.</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+24</td>
  * <td>Previous record journal address (long).</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+32</td>
  * <td>serialized updates as a series of contiguous SR, DR, DT, DV, and CU
  * records</td>
@@ -306,26 +319,28 @@ import com.persistit.util.Util;
  * 
  * 
  * <table border="1">
- * <tr valign="top">
+ * <caption>Summary</caption>
+ * <tr>
  * <td>SR</td>
  * <td>Store Record - specifies a Tree into which a key/value pair should be
  * inserted
  * <table>
- * <tr valign="top">
+ * <caption>Summary</caption>
+ * <tr>
  * <td>+8</td>
  * <td>Tree handle (int) - matches a tree identified in a preceding IT record</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+12</td>
  * <td>Key size (short)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+14</td>
  * <td>Key bytes immediately followed by Value bytes (variable).</td>
  * </tr>
  * </table>
  * 
- * <tr valign="top">
+ * <tr>
  * <td>DR</td>
  * <td>Delete Record - specifies a Tree and two Keys: all key/value pairs
  * between these two keys (inclusive) are deleted. The Key bytes field defines
@@ -334,42 +349,44 @@ import com.persistit.util.Util;
  * bytes define key2. The first Elision_count bytes of Key2 are the same as
  * Key1; only the remaining unique bytes are stored in the record.
  * <table>
- * <tr valign="top">
+ * <caption>Summary</caption>
+ * <tr>
  * <td>+8</td>
  * <td>Tree handle (int) - matches a tree identified in a preceding IT record</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+12</td>
  * <td>Key1_size (short)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+14</td>
  * <td>Key2 Elision_count (short)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+16</td>
  * <td>Key bytes</td>
  * </tr>
  * </table>
  * </tr>
  * 
- * <tr valign="top">
+ * <tr>
  * <td>DT</td>
  * <td>Delete Tree - specifies a Tree to be deleted.
  * <table>
- * <tr valign="top">
+ * <caption>Summary</caption>
+ * <tr>
  * <td>+8</td>
  * <td>Tree handle (int) - matches a tree identified in a preceding IT record</td>
  * </tr>
  * </table>
  * </tr>
- * 
- * </tr>
- * <tr valign="top">
+ *
+ * <tr>
  * <td>DV</td>
  * <td>Delete Volume - specifies a Volume to be deleted.
  * <table>
- * <tr valign="top">
+ * <caption>Summary</caption>
+ * <tr>
  * <td>+8</td>
  * <td>Volume handle (int) - matches a volume identified in a preceding IV
  * record</td>
@@ -377,46 +394,48 @@ import com.persistit.util.Util;
  * </table>
  * </tr>
  * 
- * <tr valign="top">
+ * <tr>
  * <td>D1</td>
  * <td>Delta with 1 long-valued argument - encapsulates an update with argument
  * to a <code>Delta</code> (see @link Accumulator}
  * <table>
- * <tr valign="top">
+ * <caption>Summary</caption>
+ * <tr>
  * <td>+8</td>
- * <td>Tree handle (int) - matches a tree identified in a preceding IT record</td>
+ * <td>Tree handle (int) - matches a tree identified in a preceding IT record
  * instance</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+12</td>
  * <td>index (char) - an Accumulator index</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+14</td>
  * <td>type (char) - type of Accumulator (0=SUM, 1=MAX, 2=MIN, 3=SEQ)</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+16</td>
  * <td>argument (long) - value by which the Delta is to be adjusted</td>
  * </tr>
  * </table>
  * </tr>
  * 
- * <tr valign="top">
+ * <tr>
  * <td>D0</td>
  * <td>Delta with no argument - encapsulates an update with a argument value of
  * 1 to a <code>Delta</code> (see @link Accumulator}
  * <table>
- * <tr valign="top">
+ * <caption>Summary</caption>
+ * <tr>
  * <td>+8</td>
- * <td>Tree handle (int) - matches a tree identified in a preceding IT record</td>
+ * <td>Tree handle (int) - matches a tree identified in a preceding IT record
  * instance</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+12</td>
  * <td>index (char) - an Accumulator index</td>
  * </tr>
- * <tr valign="top">
+ * <tr>
  * <td>+14</td>
  * <td>type (char) - type of Accumulator (0=SUM, 1=MAX, 2=MIN, 3=SEQ)</td>
  * </tr>
@@ -461,8 +480,24 @@ public class JournalRecord {
         }
     }
 
+    /**
+     * The put methods below write into the backing array directly, bypassing
+     * the ByteBuffer bounds checks. This guard makes an attempt to write
+     * beyond the buffer limit fail fast instead of silently scribbling past
+     * it (see issue #265).
+     */
+    private static int checkedPutIndex(final ByteBuffer bb, final int offset, final int size) {
+        final int index = bb.position() + offset;
+        if (index < 0 || index + size > bb.limit()) {
+            throw new IndexOutOfBoundsException(String.format(
+                    "Record write of %d bytes at position %d + offset %d exceeds buffer limit %d", size,
+                    bb.position(), offset, bb.limit()));
+        }
+        return index;
+    }
+
     private static void putByte(final ByteBuffer bb, final int offset, final int value) {
-        Util.putByte(bb.array(), bb.position() + offset, value);
+        Util.putByte(bb.array(), checkedPutIndex(bb, offset, 1), value);
     }
 
     static int getByte(final ByteBuffer bb, final int offset) {
@@ -470,7 +505,7 @@ public class JournalRecord {
     }
 
     static void putChar(final ByteBuffer bb, final int offset, final int value) {
-        Util.putChar(bb.array(), bb.position() + offset, value);
+        Util.putChar(bb.array(), checkedPutIndex(bb, offset, 2), value);
     }
 
     static int getChar(final ByteBuffer bb, final int offset) {
@@ -478,7 +513,7 @@ public class JournalRecord {
     }
 
     static void putInt(final ByteBuffer bb, final int offset, final int value) {
-        Util.putInt(bb.array(), bb.position() + offset, value);
+        Util.putInt(bb.array(), checkedPutIndex(bb, offset, 4), value);
     }
 
     static int getInt(final ByteBuffer bb, final int offset) {
@@ -486,7 +521,7 @@ public class JournalRecord {
     }
 
     static void putLong(final ByteBuffer bb, final int offset, final long value) {
-        Util.putLong(bb.array(), bb.position() + offset, value);
+        Util.putLong(bb.array(), checkedPutIndex(bb, offset, 8), value);
     }
 
     static long getLong(final ByteBuffer bb, final int offset) {
@@ -625,7 +660,8 @@ public class JournalRecord {
 
         public static void putPath(final ByteBuffer bb, final String path) {
             final byte[] stringBytes = path.getBytes(UTF8);
-            System.arraycopy(stringBytes, 0, bb.array(), bb.position() + OVERHEAD, stringBytes.length);
+            System.arraycopy(stringBytes, 0, bb.array(), checkedPutIndex(bb, OVERHEAD, stringBytes.length),
+                    stringBytes.length);
             putLength(bb, OVERHEAD + stringBytes.length);
         }
     }
@@ -759,7 +795,8 @@ public class JournalRecord {
 
         public static void putVolumeSpecification(final ByteBuffer bb, final String volumeSpec) {
             final byte[] stringBytes = volumeSpec.getBytes(UTF8);
-            System.arraycopy(stringBytes, 0, bb.array(), bb.position() + OVERHEAD, stringBytes.length);
+            System.arraycopy(stringBytes, 0, bb.array(), checkedPutIndex(bb, OVERHEAD, stringBytes.length),
+                    stringBytes.length);
             putLength(bb, OVERHEAD + stringBytes.length);
         }
     }
@@ -802,7 +839,8 @@ public class JournalRecord {
 
         public static void putTreeName(final ByteBuffer bb, final String treeName) {
             final byte[] stringBytes = treeName.getBytes(UTF8);
-            System.arraycopy(stringBytes, 0, bb.array(), bb.position() + OVERHEAD, stringBytes.length);
+            System.arraycopy(stringBytes, 0, bb.array(), checkedPutIndex(bb, OVERHEAD, stringBytes.length),
+                    stringBytes.length);
             putLength(bb, OVERHEAD + stringBytes.length);
         }
     }

@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit.util;
@@ -57,7 +58,7 @@ public class ArgParser {
      * Command line arguments are specified by name, not by position. Each
      * argument must either be a flag in the form <code>-<i>X</i></code> (where
      * <i>X</i> is letter) or a name-value pair in the form
-     * <code><i>argname</i>=</i>value</i></code>. The permissible flags and
+     * <code><i>argname</i>=<i>value</i></code>. The permissible flags and
      * argument names are specified by the array of template strings, each of
      * which must have the form:
      * 
@@ -70,7 +71,6 @@ public class ArgParser {
      * </pre>
      * 
      * </blockquote>
-     * </p>
      * <p>
      * where
      * <dl>
@@ -80,7 +80,6 @@ public class ArgParser {
      * <code>_flags|x|Enable the x option</code>.</dd>
      * <dt><code><i>argname</i></code></dt>
      * <dd>Parameter name.</dd>
-     * </dd>
      * <dt><code><i>argtype</i></code></dt>
      * <dd>
      * One of:
@@ -93,7 +92,6 @@ public class ArgParser {
      * 
      * </dd>
      * </dl>
-     * </p>
      */
     public ArgParser(final String progName, final String[] args, final String[] template) {
         _progName = progName;
@@ -233,7 +231,7 @@ public class ArgParser {
      * Return the boolean value of argument specified by its index in the
      * template
      * 
-     * @param index
+     * @param index the index of the argument in the template
      * @return the boolean value for the specified template item
      */
     public boolean booleanValue(final int index) {
@@ -271,7 +269,7 @@ public class ArgParser {
      * Return the integer value of argument specified by its index in the
      * template
      * 
-     * @param index
+     * @param index the index of the argument in the template
      * @return the int value for the specified template item
      */
     public int intValue(final int index) {
@@ -292,7 +290,7 @@ public class ArgParser {
     /**
      * Return the long value of argument specified by its index in the template
      * 
-     * @param index
+     * @param index the index of the argument in the template
      * @return the long value for the specified template item
      */
 
@@ -304,7 +302,7 @@ public class ArgParser {
      * Return the String value of argument specified by its index in the
      * template
      * 
-     * @param index
+     * @param index the index of the argument in the template
      * @return the String value for the specified template item
      */
     public String stringValue(final int index) {
@@ -315,7 +313,7 @@ public class ArgParser {
      * Indicate whether the value returned for the specified field is the
      * default value.
      * 
-     * @param fieldName
+     * @param fieldName the argument name of the field to test
      * @return <code>true</code> if the field contains its default value
      */
     public boolean isSpecified(final String fieldName) {

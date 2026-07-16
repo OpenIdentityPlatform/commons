@@ -14,14 +14,14 @@
 
   Copyright 2010–2011 ApexIdentity Inc.
   Portions Copyright 2011-2016 ForgeRock AS.
-  Portions Copyright 2017-2024 3A Systems, LLC.
+  Portions Copyright 2017-2026 3A Systems, LLC.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
         <groupId>org.openidentityplatform.commons</groupId>
   		<artifactId>http-framework</artifactId>
-        <version>3.1.2-SNAPSHOT</version>
+        <version>3.2.0-SNAPSHOT</version>
   </parent>
   <groupId>org.openidentityplatform.commons.http-framework</groupId>
   <artifactId>core</artifactId>
@@ -55,8 +55,7 @@
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
-      <version>1.10.19</version>
+      <artifactId>mockito-core</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

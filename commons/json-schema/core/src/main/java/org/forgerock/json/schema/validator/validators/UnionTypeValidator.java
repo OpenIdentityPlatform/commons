@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.schema.validator.validators;
@@ -35,11 +36,10 @@ import static org.forgerock.json.schema.validator.Constants.*;
  * The instance value is valid if it is of the same validators as one of
  * the simple validators definitions, or valid by one of the schemas, in
  * the array.
- * <p/>
  * <p>
  * For example, a schema that defines if an instance can be a string or
  * a number would be:</p>
- * <p/>
+ * <p>
  * <code>{"type":["string","number"]}</code>
  *
  * @see <a href="http://tools.ietf.org/html/draft-zyp-json-schema-03#section-5.1">type</a>

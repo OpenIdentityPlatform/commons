@@ -13,6 +13,7 @@
  *
  * Copyright 2010–2011 ApexIdentity Inc.
  * Portions Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2020-2026 3A Systems, LLC
  */
 
 package org.forgerock.http.util;
@@ -416,11 +417,14 @@ public final class Uris {
                     final String hexPair = s.substring(i + 1, i + 3);
                     try {
                         final int octet = Integer.parseInt(hexPair, 16);
-                        if (octet < 0) {
+                        if (octet < 0 || octet > 0xFF) {
                             throw new IllegalArgumentException(
                                     "Path contains an invalid percent encoding '" + hexPair + "'");
                         }
-                        buffer[bufferPos++] = (byte) octet;
+                        // octet is a single unsigned byte (0x00-0xFF); mask the
+                        // low 8 bits so the narrowing to byte is explicit and
+                        // preserves the full 0x80-0xFF range for the UTF-8 decode.
+                        buffer[bufferPos++] = (byte) (octet & 0xFF);
                     } catch (NumberFormatException e) {
                         throw new IllegalArgumentException(
                                 "Path contains an invalid percent encoding '" + hexPair + "'");

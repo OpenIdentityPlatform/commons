@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.schema.validator.validators;
@@ -60,8 +61,7 @@ public abstract class Validator implements SimpleValidator<Object> {
 
     /**
      * Gets the valid JSONPath of the node or the given property.
-     * <p/>
-     * <p/>
+     * <p>
      * Combines the two parameter and generates a valid JSONPath with dot–notation.
      * Simple type: $
      * Array type: $[0]

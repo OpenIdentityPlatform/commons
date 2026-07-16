@@ -13,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -542,6 +543,7 @@ public class BufferPool {
      * @param volume
      *            The volume
      * @throws PersistitInterruptedException
+     *             if the thread was interrupted while waiting for I/O
      */
     boolean invalidate(final Volume volume) throws PersistitException {
         final float ratio = (float) volume.getStorage().getNextAvailablePage() / (float) _bufferCount;
@@ -890,14 +892,18 @@ public class BufferPool {
      * Buffer should be used only for display and diagnostic purposes.
      *
      * @param vol
+     *            the <code>Volume</code> containing the page to copy
      * @param page
+     *            the page address of the page to copy
      * @return Copy of the Buffer
      * @throws InvalidPageAddressException
+     *             if the supplied page address is invalid
      * @throws InvalidPageStructureException
+     *             if the page image is corrupt
      * @throws VolumeClosedException
+     *             if the volume has been closed
      * @throws PersistitInterruptedException
-     * @throws RetryException
-     * @throws IOException
+     *             if the thread was interrupted while waiting for I/O
      */
     public Buffer getBufferCopy(final Volume vol, final long page) throws InvalidPageAddressException,
             InvalidPageStructureException, VolumeClosedException, InUseException, PersistitIOException,
@@ -953,6 +959,7 @@ public class BufferPool {
      * @return Buffer An available buffer, or <i>null</i> if no buffer is
      *         currently available. The buffer has a writer claim.
      * @throws PersistitException
+     *             if a persistence error occurs while evicting a page
      * @throws IllegalStateException
      *             if there is no available buffer.
      */
@@ -1328,6 +1335,7 @@ public class BufferPool {
          * Used to sort buffers in ascending page address order by volume.
          *
          * @param buffer
+         *            the <code>BufferHolder</code> to compare with
          * @return -1, 0 or 1 as this <code>Buffer</code> falls before, a, or
          *         after the supplied <code>Buffer</code> in the desired page
          *         address order.
@@ -1398,7 +1406,9 @@ public class BufferPool {
 
     /**
      * @param i
+     *            the index of the buffer within this pool
      * @param detail
+     *            <code>true</code> to include detailed buffer state
      * @return toString value for buffer at index <code>i</code>.
      */
     String toString(final int i, final boolean detail) {
@@ -1421,6 +1431,7 @@ public class BufferPool {
      * @param secure
      *            true to obscure data values in the dump
      * @throws Exception
+     *             if an error occurs while writing the dump
      */
     void dump(final DataOutputStream stream, final ByteBuffer bb, final boolean secure, final boolean verbose)
             throws Exception {

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.audit;
@@ -40,14 +41,14 @@ import org.forgerock.util.promise.Promise;
 
 /**
  * CREST {@link RequestHandler} responsible for storing and retrieving audit events.
- * <p/>
+ * <p>
  * After construction, the AuditService will be in the 'STARTING' state until {@link #startup()} is called.
  * When in the 'STARTING' state, a call to any method other than {@link #startup()} will lead to
  * {@link ServiceUnavailableException}.
- * <p/>
+ * <p>
  * After {@link #startup()} is called, assuming startup succeeds, the AuditService will then be in the
  * 'RUNNING' state and further calls to {@link #startup()} will be ignored.
- * <p/>
+ * <p>
  * Calling {@link #shutdown()} will put the AuditService into the 'SHUTDOWN' state; once shutdown, the
  * AuditService will remain in this state and cannot be restarted. Further calls to {@link #shutdown()}
  * will be ignored. When in the 'SHUTDOWN' state, a call to any method other than {@link #shutdown()} will
@@ -61,7 +62,7 @@ public interface AuditService extends RequestHandler {
      * <p>
      * The object will contain metadata properties, including object identifier {@code _id},
      * and object version {@code _rev} to enable optimistic concurrency
-     * <p/>
+     * <p>
      * If this {@code AuditService} has been closed, the returned promise will resolve to a
      * {@link ServiceUnavailableException}.
      *
@@ -76,7 +77,7 @@ public interface AuditService extends RequestHandler {
      * <p>
      * This method sets the {@code _id} property to the assigned identifier for the object,
      * and the {@code _rev} property to the revised object version (For optimistic concurrency).
-     * <p/>
+     * <p>
      * If this {@code AuditService} has been closed, the returned promise will resolve to a
      * {@link ServiceUnavailableException}.
      *
@@ -87,7 +88,7 @@ public interface AuditService extends RequestHandler {
 
     /**
      * Audit service does not support changing audit entries.
-     * <p/>
+     * <p>
      * The returned promise will resolve to a {@link NotSupportedException}.
      */
     @Override
@@ -95,7 +96,7 @@ public interface AuditService extends RequestHandler {
 
     /**
      * Audit service does not support changing audit entries.
-     * <p/>
+     * <p>
      * The returned promise will resolve to a {@link NotSupportedException}.
      */
     @Override
@@ -103,7 +104,7 @@ public interface AuditService extends RequestHandler {
 
     /**
      * Audit service does not support changing audit entries.
-     * <p/>
+     * <p>
      * The returned promise will resolve to a {@link NotSupportedException}.
      */
     @Override
@@ -120,7 +121,7 @@ public interface AuditService extends RequestHandler {
      * <li>The top level map contains meta-data about the query, plus an entry with the actual result records.
      * <li>The <code>QueryConstants</code> defines the map keys, including the result records (QUERY_RESULT)
      * </ul>
-     * <p/>
+     * <p>
      * If this {@code AuditService} has been closed, the returned promise will resolve to a
      * {@link ServiceUnavailableException}.
      *
@@ -137,8 +138,8 @@ public interface AuditService extends RequestHandler {
      * <pre>
      * [path-to-audit-service]?_action=XXX : call a global action on audit service
      * [path-to-audit-service/[topic]?_action=XXX : call an action on audit service and a single topic
-     * [path-to-audit-service]?_action=XXX&handler=HHH : call on action on a specific handler
-     * [path-to-audit-service/[topic]?_action=XXX&handler=HHH : call on action on a specific handler and topic
+     * [path-to-audit-service]?_action=XXX&amp;handler=HHH : call on action on a specific handler
+     * [path-to-audit-service/[topic]?_action=XXX&amp;handler=HHH : call on action on a specific handler and topic
      * </pre>
      */
     @Override
@@ -197,17 +198,17 @@ public interface AuditService extends RequestHandler {
 
     /**
      * Closes this {@code AuditService} and all its {@link AuditEventHandler}s.
-     * <p/>
+     * <p>
      * This ensures that any buffered are flushed and all file handles / network connections are closed.
-     * <p/>
+     * <p>
      * Once {@code closed}, any further calls to this {@code AuditService} will throw, or return a promise
      * that will resolve to, {@link ServiceUnavailableException}.
      */
     void shutdown();
 
     /**
-     * Returns <tt>true</tt> if this object is running.
-     * <p/>
+     * Returns <code>true</code> if this object is running.
+     * <p>
      * This object will be in a 'running' state if {@link #startup()} completed successfully and {@link #shutdown()}
      * has not yet been called.
      *

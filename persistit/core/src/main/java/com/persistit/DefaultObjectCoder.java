@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -137,9 +138,7 @@ import com.persistit.exception.ConversionException;
  *      }
  * </code>
  * </pre>
- * 
- * </p>
- * 
+ *
  * @author peter
  * @version 1.1
  */
@@ -190,8 +189,8 @@ public class DefaultObjectCoder extends DefaultValueCoder implements KeyRenderer
      *            of stored instances
      * 
      * @return the newly registered <code>DefaultObjectCoder</code>
-     * 
-     * @throws IntrospectionException
+     *
+     * @throws IntrospectionException if the client class cannot be introspected
      */
     public synchronized DefaultObjectCoder registerObjectCoderFromBean(final Persistit persistit,
             final Class clientClass, final String[] keyPropertyNames) throws IntrospectionException {
@@ -280,7 +279,6 @@ public class DefaultObjectCoder extends DefaultValueCoder implements KeyRenderer
      * value that the getXyz method might return. If multiple setXyz methods
      * meet this requirement, the method with the most specific argument type is
      * selected.
-     * </p>
      * <p>
      * If both setXyz and either getXyz or isXyz methods meeting these criteria
      * are found then the accessor is a property accessor, and will be stored
@@ -506,8 +504,8 @@ public class DefaultObjectCoder extends DefaultValueCoder implements KeyRenderer
      *            application to convey an application-specific context for the
      *            operation. (See {@link CoderContext}.) The default value is
      *            <code>null</code>.
-     * 
-     * @throws ConversionException
+     *
+     * @throws ConversionException if the key segment cannot be converted into the target object
      */
     @Override
     public void renderKeySegment(final Key key, final Object target, final Class clazz, final CoderContext context)

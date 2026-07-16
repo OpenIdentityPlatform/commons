@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -282,8 +283,6 @@ public final class AlertMonitor extends NotificationBroadcasterSupport implement
          * 
          * @param event
          *            the <code>Event</code> to add
-         * @param level
-         *            the <code>AlertLevel</code> that should be assigned to it
          */
         private void addEvent(final Event event) {
             trim(_historyLength - 1);
@@ -392,7 +391,7 @@ public final class AlertMonitor extends NotificationBroadcasterSupport implement
         /**
          * 
          * @return the first element of the argument array, or
-         *         <code>null<code> if the array is empty
+         *         <code>null</code> if the array is empty
          */
         public Object getFirstArg() {
             return _args.length > 0 ? _args[0] : null;
@@ -750,7 +749,7 @@ public final class AlertMonitor extends NotificationBroadcasterSupport implement
      * standard log message. If there have been multiple Events, emit a
      * recurring event message.
      * 
-     * @param history
+     * @param history the event history to log
      */
     private void log(final History history) {
         final Event event = history.getLastEvent();
@@ -766,7 +765,7 @@ public final class AlertMonitor extends NotificationBroadcasterSupport implement
     /**
      * Broadcast a JMX Notification.
      * 
-     * @param history
+     * @param history the event history to broadcast
      */
     private void sendNotification(final History history) {
         final Event event = history.getLastEvent();
@@ -786,15 +785,15 @@ public final class AlertMonitor extends NotificationBroadcasterSupport implement
      * conversion followed by the event arguments concatenated in a
      * comma-limited list. For example,
      * 
-     * <code><pre>
+     * <pre>
      *    2012-01-13 16:52:05 SomeException, SomeInfo1, SomeInfo2
-     * </pre></code>
+     * </pre>
      * 
      * for an event that happened on March 13, 2012 at 4:25:05pm for which there
      * were three argument elements.
      * </p>
      * 
-     * @param event
+     * @param event the event to format
      * @return formatted event
      */
     private String format(final Event event) {

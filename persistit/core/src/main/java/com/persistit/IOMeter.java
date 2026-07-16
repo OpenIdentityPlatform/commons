@@ -1,5 +1,6 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
+ * Portions copyright 2026 3A Systems LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -40,7 +42,7 @@ import com.persistit.util.Util;
  * This class accumulates statistics on file system I/O operations. Each I/O
  * operation is "charged" to a bucket according to the operation being performed
  * (see {@link IOMeterMXBean#OPERATIONS}).
- * <p />
+ * <p>
  * Statistics are kept for recent time intervals so that Persistit can compute
  * I/O rates for the recent past. These are kept in "buckets" with a granularity
  * of about 1 second. Persistit examines the recent I/O history when scheduling
@@ -80,7 +82,7 @@ class IOMeter implements IOMeterMXBean {
 
     private final AtomicReference<DataOutputStream> _logStream = new AtomicReference<DataOutputStream>();
 
-    private String _logFileName;
+    private volatile String _logFileName;
 
     private final Counter[][] _counters = new Counter[ITEM_COUNT][BUCKETS];
 
@@ -407,7 +409,8 @@ class IOMeter implements IOMeterMXBean {
      * how frequently to schedule its own activities without interfering
      * severely with current operational load.
      * 
-     * @return
+     * @return an estimate of the number of bytes read or written per second, or
+     *         -1 if there was no recent activity
      */
     synchronized long recentCharge() {
         final long now = System.nanoTime();
@@ -437,7 +440,7 @@ class IOMeter implements IOMeterMXBean {
      * 
      * @param args
      *            Specify one argument in the form file=<pathname>
-     * @throws Exception
+     * @throws Exception if an error occurs while reading or dumping the log
      */
     public static void main(final String[] args) throws Exception {
         final ArgParser ap = new ArgParser("com.persistit.IOMeter", args, new String[] { "file||log file name",

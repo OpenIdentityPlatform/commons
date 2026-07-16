@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions copyright 2026 3A Systems LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -69,7 +71,7 @@ public interface Management extends Remote, ManagementMXBean {
      * 
      * @param fast
      *            <code>true</code> to copy pages at maximum speed.
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public void setJournalCopyingFast(boolean fast) throws RemoteException;
 
@@ -78,7 +80,7 @@ public interface Management extends Remote, ManagementMXBean {
      * 
      * @return <code>true</code> if the attempt to close Persistit was
      *         successful; otherwise <code>false</code>
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public boolean close() throws RemoteException;
 
@@ -171,7 +173,7 @@ public interface Management extends Remote, ManagementMXBean {
      * 
      * @return Array of LogicalRecord objects
      * 
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public LogicalRecord[] getLogicalRecordArray(String volumeName, String treeName, String keyFilterString,
             KeyState fromKey, Key.Direction direction, int maxRecordCount, int maxValueBytes, boolean decodeStrings)
@@ -182,7 +184,7 @@ public interface Management extends Remote, ManagementMXBean {
      * the Journal.
      * 
      * @return the JournalInfo
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public JournalInfo getJournalInfo() throws RemoteException;
 
@@ -191,7 +193,7 @@ public interface Management extends Remote, ManagementMXBean {
      * the recovery process.
      * 
      * @return the JournalInfo
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public RecoveryInfo getRecoveryInfo() throws RemoteException;
 
@@ -200,7 +202,7 @@ public interface Management extends Remote, ManagementMXBean {
      * and rollback information.
      * 
      * @return the TransactionInfo
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public TransactionInfo getTransactionInfo() throws RemoteException;
 
@@ -246,7 +248,7 @@ public interface Management extends Remote, ManagementMXBean {
      * @return The traversed count, and a value of the key associated with the
      *         last record traversed.
      * 
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
 
     public LogicalRecordCount getLogicalRecordCount(String volumeName, String treeName, String keyFilterString,
@@ -273,7 +275,6 @@ public interface Management extends Remote, ManagementMXBean {
      * <dd>Buffers on the invalid buffer queue. These buffers will be consumed
      * first whenever a new page is copied into the pool.</dd>
      * </dl>
-     * </p>
      * <p>
      * The <code>includeMask</code> and <code>excludeMask</code> are applied to
      * each buffer's state to determine whether that buffer should be included
@@ -295,8 +296,8 @@ public interface Management extends Remote, ManagementMXBean {
      * <dd>Buffer must have a READER claim</dd>
      * <dt>p</dt>
      * <dd>Buffer must be PERMANENT. The head page for each {@link Volume}
-     * occupies a PERMANENT buffer.</dd> </dd>
-     * </p>
+     * occupies a PERMANENT buffer.</dd>
+     * </dl>
      * <p>
      * If Persistit is not initialized then this method returns an empty array.
      * </p>
@@ -361,7 +362,7 @@ public interface Management extends Remote, ManagementMXBean {
      *            having depth d.
      * @return a <code>BufferInfo</code> object reflecting the selected page, or
      *         <code>null</code> if the specified tree does not exist.
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public BufferInfo getBufferInfo(String volumeName, String treeName, KeyState key, int level) throws RemoteException;
 
@@ -397,7 +398,6 @@ public interface Management extends Remote, ManagementMXBean {
      * <dd>Buffers on the invalid buffer queue. These buffers will be consumed
      * first whenever a new page is copied into the pool.</dd>
      * </dl>
-     * </p>
      * <p>
      * The <code>includeMask</code> and <code>excludeMask</code> are applied to
      * each buffer's state to determine whether that buffer should be included
@@ -420,7 +420,7 @@ public interface Management extends Remote, ManagementMXBean {
      * <dt>p</dt>
      * <dd>Buffer must be PERMANENT. The head page for each {@link Volume}
      * occupies a PERMANENT buffer.</dd>
-     * </dd>
+     * </dl>
      * <p>
      * If Persistit is not initialized then this method returns an empty array.
      * </p>
@@ -445,7 +445,7 @@ public interface Management extends Remote, ManagementMXBean {
     /**
      * Return an array containing a <code>VolumeInfo</code> element for each
      * open volume. If Persistit is not initialized then this method returns an
-     * empty array. </p>
+     * empty array.
      * 
      * @return The array
      */
@@ -463,7 +463,7 @@ public interface Management extends Remote, ManagementMXBean {
      *            Fully qualified class name.
      * @return The <code>Class</code>, or <code>null</code> if an exception
      *         occurred while attempting to acquire the Class.
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public Class<?> getRemoteClass(String className) throws RemoteException;
 
@@ -473,8 +473,8 @@ public interface Management extends Remote, ManagementMXBean {
      * is no unique volume corresponding with the supplied name, then this
      * method returns <code>null</code>.
      * 
-     * @param volumeName
-     * 
+     * @param volumeName The name (or unique partial name) of the volume
+     *
      * @return the <code>VolumeInfo</code>
      */
     public VolumeInfo getVolumeInfo(String volumeName) throws RemoteException;
@@ -515,12 +515,12 @@ public interface Management extends Remote, ManagementMXBean {
      * character in the supplied String, or -1 if the string is a valid String
      * representation of a KeyFilter.
      * 
-     * @param keyFilterString
-     * 
+     * @param keyFilterString The String representation of a <code>KeyFilter</code> to validate
+     *
      * @return index of first invalid character in the supplied
      *         <code>keyFilterString</code>, or -1 if the string is valid.
      * 
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public int parseKeyFilterString(String keyFilterString) throws RemoteException;
 
@@ -549,7 +549,7 @@ public interface Management extends Remote, ManagementMXBean {
      *            used in decoding the value. May be <code>null</code>.
      * 
      * @return Array of zero or more decoded objects
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public Object[] decodeValueObjects(ValueState valueState, CoderContext context) throws RemoteException;
 
@@ -566,7 +566,7 @@ public interface Management extends Remote, ManagementMXBean {
      * 
      * @return Array of decoded key segments
      * 
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public Object[] decodeKeyObjects(KeyState keyState, CoderContext context) throws RemoteException;
 
@@ -591,7 +591,7 @@ public interface Management extends Remote, ManagementMXBean {
      *            Verbosity level, one of {@link Task#LOG_NORMAL} or
      *            {@link Task#LOG_VERBOSE}.
      * @return Task identifier Unique ID for the running task
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public long startTask(String description, String owner, String commandLine, long maximumTime, int verbosity)
             throws RemoteException;
@@ -604,7 +604,7 @@ public interface Management extends Remote, ManagementMXBean {
      * @param description
      *            description identifying what the task is doing
      * @return the taskId as a String, or other status information
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public String launch(final Task task, final String description) throws RemoteException;
 
@@ -626,7 +626,7 @@ public interface Management extends Remote, ManagementMXBean {
      * 
      * @return Array of <code>TaskStatus</code> objects indicating status of
      *         selected task(s).
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public TaskStatus[] queryTaskStatus(long taskId, boolean details, boolean clearMessages) throws RemoteException;
 
@@ -649,7 +649,7 @@ public interface Management extends Remote, ManagementMXBean {
      *            status
      * @return Array of <code>TaskStatus</code> objects indicating status of
      *         selected task(s).
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public TaskStatus[] queryTaskStatus(long taskId, boolean details, boolean clearMessages, boolean clearTasks)
             throws RemoteException;
@@ -663,7 +663,7 @@ public interface Management extends Remote, ManagementMXBean {
      * @param suspend
      *            <code>true</code> to suspend the task, <code>false</code> to
      *            allow it to resume.
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public void setTaskSuspended(long taskId, boolean suspend) throws RemoteException;
 
@@ -677,7 +677,7 @@ public interface Management extends Remote, ManagementMXBean {
      * 
      * @param taskId
      *            Task ID for a selected Task, or -1 for all Tasks.
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public void stopTask(long taskId, boolean remove) throws RemoteException;
 
@@ -688,7 +688,7 @@ public interface Management extends Remote, ManagementMXBean {
      * @param taskId
      *            Task ID for a selected task, or -1 for all tasks.
      * 
-     * @throws RemoteException
+     * @throws RemoteException if a remote communication error occurs
      */
     public void removeFinishedTasks(long taskId) throws RemoteException;
 
@@ -702,17 +702,17 @@ public interface Management extends Remote, ManagementMXBean {
      * within the JMX framework. For most of the MXBean instance you can
      * construct the ObjectName from a constant in the interface. for example
      * 
-     * <code><pre>
-     *    ObjectName on = 
+     * <pre>
+     *    ObjectName on =
      *        new ObjectName(JournalManagerMXBean.MXBEAN_NAME);
-     * </pre></code>
+     * </pre>
      * 
      * For BufferPoolMXBean instances, use
      * 
-     * <code><pre>
-     *    ObjectName on = 
+     * <pre>
+     *    ObjectName on =
      *        new ObjectName(BufferPoolMXBean.MXBEAN_NAME + "." + bufferSize);
-     * </pre></code>
+     * </pre>
      * 
      * 
      * @return Map of ObjectName to Object for all registered MXBeans
@@ -1568,7 +1568,7 @@ public interface Management extends Remote, ManagementMXBean {
          * Return the alias if one was assigned in the system configuration.
          * 
          * @return the alias for this volume, or
-         *         <code>null<code> if there is none
+         *         <code>null</code> if there is none
          */
         public String getName() {
             return name;
@@ -1655,7 +1655,7 @@ public interface Management extends Remote, ManagementMXBean {
          * Return the number of physical read operations performed against pages
          * in this <code>Volume</code>. The read occurs only when Persistit
          * requires the content of a page that has not already been copied into
-         * the </code>BufferPool</code> or which has become invalid.
+         * the <code>BufferPool</code> or which has become invalid.
          * 
          * @return the read counter
          */
@@ -1787,6 +1787,11 @@ public interface Management extends Remote, ManagementMXBean {
         public boolean equals(final Object object) {
             return object instanceof VolumeInfo && ((VolumeInfo) object).getId() == id
                     && ((VolumeInfo) object).getName().equals(name);
+        }
+
+        @Override
+        public int hashCode() {
+            return (name == null ? 0 : name.hashCode()) ^ (int) (id ^ (id >>> 32));
         }
 
         @Override
@@ -1955,6 +1960,11 @@ public interface Management extends Remote, ManagementMXBean {
         @Override
         public boolean equals(final Object object) {
             return object instanceof TreeInfo && ((TreeInfo) object).getName().equals(name);
+        }
+
+        @Override
+        public int hashCode() {
+            return name == null ? 0 : name.hashCode();
         }
     }
 
@@ -2156,6 +2166,11 @@ public interface Management extends Remote, ManagementMXBean {
         public boolean equals(final Object object) {
             return object instanceof TaskStatus && ((TaskStatus) object).getTaskId() == taskId;
         }
+
+        @Override
+        public int hashCode() {
+            return (int) (taskId ^ (taskId >>> 32));
+        }
     }
 
     /**
@@ -2340,6 +2355,7 @@ public interface Management extends Remote, ManagementMXBean {
         /**
          * Return one of the following values:
          * <table>
+         * <caption>Summary</caption>
          * <tr>
          * <td>Long.MINVALUE</td>
          * <td>if recovery has not begun yet</td>
@@ -2602,6 +2618,7 @@ public interface Management extends Remote, ManagementMXBean {
         /**
          * Return one of the following values:
          * <table>
+         * <caption>Summary</caption>
          * <tr>
          * <td>Long.MINVALUE</td>
          * <td>if recovery has not begun yet</td>
@@ -2706,7 +2723,6 @@ public interface Management extends Remote, ManagementMXBean {
          * was initialized
          * 
          * @return total number of transactions committed
-         * @throws RemoteException
          */
         public long getCommitCount() {
             return commitCount;
@@ -2717,7 +2733,6 @@ public interface Management extends Remote, ManagementMXBean {
          * Persistit was initialized
          * 
          * @return total number of transactions rolled back
-         * @throws RemoteException
          */
         public long getRollbackCount() {
             return rollbackCount;
@@ -2728,7 +2743,6 @@ public interface Management extends Remote, ManagementMXBean {
          * last commit
          * 
          * @return number of transactions rolled back since the last commit
-         * @throws RemoteException
          */
         public long getRollbackSinceCommitCount() {
             return rollbackSinceCommitCount;

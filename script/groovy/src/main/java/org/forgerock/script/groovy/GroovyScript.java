@@ -36,6 +36,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 /**
@@ -86,7 +87,6 @@ import groovy.util.ResourceException;
  * <p>
  * This implementation pre-compiles the provided script. Any syntax errors in
  * the source code will throw an exception during construction of the object.
- * <p>
  *
  * @author Paul C. Bryan
  * @author aegloff

@@ -15,6 +15,7 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  **/
 
 package com.savage7.maven.plugin.dependency;
@@ -54,14 +55,19 @@ import org.w3c.dom.NodeList;
  * Base class for all goals in this plugin.
  * 
  * @author <a href="mailto:robert@savage7.com">Robert Savage</a>
- * @see http://code.google.com/p/maven-external-dependency-plugin/
+ * @see <a href="http://code.google.com/p/maven-external-dependency-plugin/">http://code.google.com/p/maven-external-dependency-plugin/</a>
  * @version 0.1
- * @category Maven Plugin
- * @ThreadSafe
  */
 public abstract class AbstractExternalDependencyMojo extends
         AbstractInstallMojo
 {
+
+    /**
+     * Creates a new instance.
+     */
+    protected AbstractExternalDependencyMojo()
+    {
+    }
 
     /**
      * Used to look up Artifacts in the remote repository.
@@ -81,6 +87,8 @@ public abstract class AbstractExternalDependencyMojo extends
     protected ArrayList<ArtifactItem> artifactItems;
 
     /**
+     * The Maven project the plugin is operating on.
+     *
      * @parameter default-value="${project}"
      * @required
      * @readonly
@@ -88,6 +96,8 @@ public abstract class AbstractExternalDependencyMojo extends
     protected MavenProject project;
 
     /**
+     * The staging directory where downloaded artifacts are placed.
+     *
      * @parameter default-value="${project.build.directory}"
      */
     protected String stagingDirectory;
@@ -114,6 +124,7 @@ public abstract class AbstractExternalDependencyMojo extends
      * Create Maven Artifact object from ArtifactItem configuration descriptor
      * 
      * @param item
+     *            the artifact item describing the artifact to create
      * @return Artifact
      */
     protected Artifact createArtifact(ArtifactItem item)
@@ -133,6 +144,8 @@ public abstract class AbstractExternalDependencyMojo extends
      * responsibility of the caller to delete the generated file when no longer
      * needed.
      * 
+     * @param artifact
+     *            the artifact item to generate a POM file for
      * @return The path to the generated POM file, never <code>null</code>.
      * @throws MojoExecutionException
      *             If the POM file could not be generated.
@@ -167,6 +180,8 @@ public abstract class AbstractExternalDependencyMojo extends
     /**
      * Generates a minimal model from the user-supplied artifact information.
      * 
+     * @param artifact
+     *            the artifact item to generate a model from
      * @return The generated model, never <code>null</code>.
      */
     protected Model generateModel(ArtifactItem artifact)
@@ -185,6 +200,8 @@ public abstract class AbstractExternalDependencyMojo extends
      * Resolves the file path and returns a file object instance for an artifact
      * item
      * 
+     * @param artifactItem
+     *            the artifact item whose file path is resolved
      * @return File object for artifact item
      */
     protected File getFullyQualifiedArtifactFilePath(ArtifactItem artifactItem)
@@ -207,6 +224,9 @@ public abstract class AbstractExternalDependencyMojo extends
      *            not be <code>null</code>.
      * @param digester
      *            The checksum algorithm to use, must not be <code>null</code>.
+     * @param checksum
+     *            the expected checksum to compare against
+     * @return <code>true</code> if the calculated checksum matches the expected checksum
      * @throws MojoExecutionException
      *             If the checksum could not be installed.
      */
@@ -239,8 +259,11 @@ public abstract class AbstractExternalDependencyMojo extends
      * @param targetFile
      *            to validate checksum against
      * @throws MojoExecutionException
+     *             if the checksum cannot be calculated
      * @throws MojoFailureException
+     *             if checksum verification fails
      * @throws IOException
+     *             if the target file cannot be read
      */
     protected void verifyArtifactItemChecksum(ArtifactItem artifactItem,
             File targetFile) throws MojoExecutionException,
@@ -312,8 +335,11 @@ public abstract class AbstractExternalDependencyMojo extends
      * @param targetFile
      *            to validate checksum against
      * @throws MojoExecutionException
+     *             if the checksum cannot be calculated
      * @throws MojoFailureException
+     *             if checksum verification fails
      * @throws IOException
+     *             if the extracted file cannot be read
      */
     protected void verifyArtifactItemExtractFileChecksum(ArtifactItem artifactItem,
             File targetFile) throws MojoExecutionException,
@@ -390,8 +416,11 @@ public abstract class AbstractExternalDependencyMojo extends
      * @param targetFile
      *            to validate checksum against
      * @throws MojoExecutionException
+     *             if the Sonatype checksum lookup cannot be performed
      * @throws MojoFailureException
+     *             if a matching artifact is found in a public repository
      * @throws IOException
+     *             if the target file cannot be read
      */
     protected void verifyArtifactItemChecksumBySonatypeLookup(ArtifactItem artifactItem,
         File targetFile) throws MojoExecutionException,

@@ -13,7 +13,7 @@
  *
  * Copyright 2010?2011 ApexIdentity Inc.
  * Portions Copyright 2011-2016 ForgeRock AS.
- * Portions copyright 2024 3A Systems LLC.
+ * Portions copyright 2020-2026 3A Systems LLC.
  */
 package org.forgerock.http.servlet;
 
@@ -63,6 +63,7 @@ import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RequestAuditContext;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.Factory;
+import org.forgerock.util.crypto.SecretHash;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
@@ -371,7 +372,11 @@ public final class HttpFrameworkServlet extends HttpServlet {
                     for (String value : response.getHeaders().get(name).getValues()) {
                         if (value != null && value.length() > 0) {
                             servletResponse.addHeader(name, value);
-                            logger.trace("header {}={}",name, value);
+                            // Log the header name in clear and only a one-way hash of the value; values may
+                            // carry secrets such as Set-Cookie / Authorization (CWE-532: sensitive data in logs).
+                            if (logger.isTraceEnabled()) {
+                                logger.trace("header {}={}", name, SecretHash.hash(value));
+                            }
                         }
                     }
                 }

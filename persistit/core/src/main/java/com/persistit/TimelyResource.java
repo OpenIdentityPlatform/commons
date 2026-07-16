@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -162,8 +163,8 @@ public class TimelyResource<V extends Version> {
      * 
      * @return Whether this resource exists only within the context of the
      *         current transaction.
-     * @throws TimeoutException
-     * @throws PersistitInterruptedException
+     * @throws TimeoutException if a timeout occurs while resolving commit status
+     * @throws PersistitInterruptedException if the thread is interrupted while waiting
      */
 
     public boolean isTransactionPrivate(final boolean byStep) throws TimeoutException, PersistitInterruptedException {
@@ -229,8 +230,8 @@ public class TimelyResource<V extends Version> {
      * that implements <code>PrunableVersion</code>, invoke its
      * {@link PrunableVersion#prune()} method.
      * 
-     * @throws TimeoutException
-     * @throws PersistitException
+     * @throws TimeoutException if a timeout occurs while resolving commit status
+     * @throws PersistitException if a persistence error occurs
      */
     void prune() throws TimeoutException, PersistitException {
         final List<Entry> entriesToPrune = new ArrayList<Entry>();
@@ -313,10 +314,10 @@ public class TimelyResource<V extends Version> {
      * information. This method checks for write-write dependencies throws a
      * RollbackException if there is a conflict.
      * 
-     * @param entry
-     * @param txn
-     * @throws PersistitException
-     * @throws RollbackException
+     * @param entry the Entry containing the version to add
+     * @param txn the transaction on whose behalf the version is added
+     * @throws PersistitInterruptedException if the thread is interrupted while waiting
+     * @throws RollbackException if a write-write conflict forces the transaction to roll back
      */
     private void addVersion(final Entry entry, final Transaction txn) throws PersistitInterruptedException,
             RollbackException {
@@ -381,8 +382,8 @@ public class TimelyResource<V extends Version> {
      * @param version
      *            versionHandle
      * @return <code>Version</code> for given version handle
-     * @throws TimeoutException
-     * @throws PersistitInterruptedException
+     * @throws TimeoutException if a timeout occurs while resolving commit status
+     * @throws PersistitInterruptedException if the thread is interrupted while waiting
      */
     V getVersion(final long version) throws TimeoutException, PersistitInterruptedException {
         final Entry e = getEntry(version);

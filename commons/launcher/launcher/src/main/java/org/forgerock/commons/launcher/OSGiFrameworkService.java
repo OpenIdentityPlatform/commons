@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.commons.launcher;
@@ -47,6 +48,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -480,7 +482,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
                     for (BundleHandler handler : result) {
                         if (newHandler.getBundleUrl().equals(handler.getBundleUrl())) {
                             if (newHandler.getActions().equals(handler.getActions())
-                                    && newHandler.getStartLevel() == newHandler.getStartLevel()) {
+                                    && Objects.equals(newHandler.getStartLevel(), handler.getStartLevel())) {
                                 // Do not duplicate
                                 newHandler = null;
                                 break;
@@ -504,10 +506,10 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
     /**
      * <p>
      * Loads the properties in the system property file associated with the
-     * framework installation into <tt>System.setProperty()</tt>. These
+     * framework installation into <code>System.setProperty()</code>. These
      * properties are not directly used by the framework in anyway. By default,
-     * the system property file is located in the <tt>conf/</tt> directory and
-     * is called "<tt>system.properties</tt>".
+     * the system property file is located in the <code>conf/</code> directory and
+     * is called "<code>system.properties</code>".
      * </p>
      */
     protected void loadSystemProperties(JsonValue configuration, URI projectDirectory) {
@@ -545,11 +547,11 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
      * associated with the framework installation; these properties are
      * accessible to the framework and to bundles and are intended for
      * configuration purposes. By default, the configuration property file is
-     * located in the <tt>conf/</tt> directory and is called "
-     * <tt>config.properties</tt>".
+     * located in the <code>conf/</code> directory and is called "
+     * <code>config.properties</code>".
      * </p>
      * 
-     * @return A <tt>Map<String, Object></tt> instance or <tt>null</tt> if there
+     * @return A <code>Map&lt;String, Object&gt;</code> instance or <code>null</code> if there
      *         was an error.
      */
     protected Map<String, String> loadConfigProperties(JsonValue configuration, URI projectDirectory) {
@@ -581,11 +583,11 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
      * Loads the boot properties in the configuration property file associated
      * with the framework installation; these properties are accessible to the
      * framework and to bundles and are intended for configuration purposes. By
-     * default, the configuration property file is located in the <tt>conf/</tt>
-     * directory and is called " <tt>config.properties</tt>".
+     * default, the configuration property file is located in the <code>conf/</code>
+     * directory and is called " <code>config.properties</code>".
      * </p>
      * 
-     * @return A <tt>Map<String, Object></tt> instance or <tt>null</tt> if there
+     * @return A <code>Map&lt;String, Object&gt;</code> instance or <code>null</code> if there
      *         was an error.
      */
     protected Map<String, Object> loadBootProperties(JsonValue configuration, URI projectDirectory) {

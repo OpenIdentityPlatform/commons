@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.jaspi.modules.session.openam;
@@ -63,12 +64,13 @@ import org.forgerock.util.Options;
 import org.forgerock.util.Reject;
 import org.forgerock.util.Utils;
 import org.forgerock.util.annotations.VisibleForTesting;
+import org.forgerock.util.crypto.SecretHash;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 
 /**
  * A JASPI Session Module which uses OpenAM to validate SSO Tokens issued by an OpenAM instance.
- * <br/>
+ * <br>
  * Validates SSO Tokens by making REST calls to a OpenAM instance.
  *
  * @since 1.4.0
@@ -115,8 +117,9 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
 
     /**
      * Will initialise the module with the specified configuration properties.
-     * <br/>
+     * <br>
      * <table>
+     * <caption>Configuration properties</caption>
      * <thead>
      * <tr><th>Property</th><th>Type</th><th>Required</th><th>Default Value</th><th>Description</th><th>Example</th>
      * </tr>
@@ -265,11 +268,11 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
 
     /**
      * Validates whether or not the request contains a valid OpenAM SSO Token Id.
-     * <br/>
+     * <br>
      * Attempts to get the SSO Token Id from the request, if no SSO Token Id exists on the request then SEND_FAILURE is
      * returned. If a SSO Token Id is found a REST call is made to the configured OpenAM URL to validate that the
      * SSO Token Id is valid and has not expired.
-     * <br/>
+     * <br>
      * If the SSO Token Id is valid then SUCCESS is returned. For all other cases (i.e. invalid SSO Token Id,
      * any exceptions) SEND_FAILURE is returned.
      *
@@ -286,7 +289,10 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
 
         final String tokenId = getSsoTokenId(messageInfo.getRequest());
         LOG.debug("SSO Token found.");
-        LOG.trace("SSO Token value, {}", tokenId);
+        // Log only a one-way hash of the SSO token, never the value (CWE-532: sensitive data in logs).
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("SSO Token hash={}", SecretHash.hash(tokenId));
+        }
 
         if (tokenId == null) {
             LOG.trace("SSO Token not found on request.");
@@ -401,7 +407,7 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
 
     /**
      * Gets the SSO Token Id from the request.
-     * <br/>
+     * <br>
      * Firstly the SSO Token Id is attempted to be retrieved from a request header with the configured OpenAM SSO Token
      * name. If no header is found, or the value is empty, then the methods tries to find a cookie on the request
      * with the OpenAM SSO Token name.
@@ -437,7 +443,7 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
 
     /**
      * No action to perform on secure response. Will always return SEND_SUCCESS.
-     * <br/>
+     * <br>
      * As this module uses OpenAM to verify whether a session is valid or not, when a session is valid the only way
      * for the client to gain a session is to authenticate using OpenAM. This will then result in a SSOToken being
      * set on the response as a cookie, hence doing the job of the secureResponse method.

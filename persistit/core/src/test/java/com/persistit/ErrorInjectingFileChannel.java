@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -44,6 +45,7 @@ class ErrorInjectingFileChannel extends FileChannel implements TestChannelInject
     volatile IOException _injectedIOException;
     volatile String _injectedIOExceptionFlags;
     volatile long _injectedDiskFullLimit = Long.MAX_VALUE;
+    volatile long _injectedShortWritePosition = -1;
 
     @Override
     public void setChannel(final FileChannel channel) {
@@ -87,11 +89,25 @@ class ErrorInjectingFileChannel extends FileChannel implements TestChannelInject
     /**
      * Sets a file position at which writes will simulate a disk-full condition
      * by throwing an IOException.
-     * 
+     *
      * @param limit
      */
     void injectDiskFullLimit(final long limit) {
         _injectedDiskFullLimit = limit;
+    }
+
+    /**
+     * Arms a one-shot short write: the next write that spans the supplied
+     * position transfers only the bytes below it and returns the partial
+     * count without throwing. This mimics a transfer aborted mid-flight
+     * (e.g. by a concurrent close of the channel on Windows) and the
+     * empirically observed disk-full behavior of FileChannel#write, both of
+     * which report partial progress instead of failing.
+     *
+     * @param position
+     */
+    void injectShortWriteOnce(final long position) {
+        _injectedShortWritePosition = position;
     }
 
     @Override
@@ -144,6 +160,15 @@ class ErrorInjectingFileChannel extends FileChannel implements TestChannelInject
         injectFailure('w');
         if (byteBuffer.remaining() == 1) {
             injectFailure('e');
+        }
+        final long shortWriteAt = _injectedShortWritePosition;
+        if (shortWriteAt >= 0 && position <= shortWriteAt && position + byteBuffer.remaining() > shortWriteAt) {
+            _injectedShortWritePosition = -1;
+            final int delta = (int) (position + byteBuffer.remaining() - shortWriteAt);
+            byteBuffer.limit(byteBuffer.limit() - delta);
+            final int written = byteBuffer.hasRemaining() ? _channel.write(byteBuffer, position) : 0;
+            byteBuffer.limit(byteBuffer.limit() + delta);
+            return written;
         }
         final long capacity = Math.max(0L, _injectedDiskFullLimit - position);
         final int delta = (int) Math.max(0L, byteBuffer.remaining() - capacity);

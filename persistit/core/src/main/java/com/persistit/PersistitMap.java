@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -40,6 +41,7 @@ import com.persistit.exception.PersistitException;
  * keys inserted into this map are appended to the key within the {@link Tree}
  * originally supplied by the <code>Exchange</code>. For example, the code
  * 
+ * </p>
  * <pre>
  * <code>
  * Exchange ex = new Exchange(&quot;demo&quot;, &quot;composers&quot;, true);
@@ -50,8 +52,10 @@ import com.persistit.exception.PersistitException;
  * </code>
  * </pre>
  * 
+ * <p>
  * is equivalent to
  * 
+ * </p>
  * <pre>
  * <code>
  * Exchange ex = new Exchange(&quot;demo&quot;, &quot;composers&quot;, true);
@@ -62,7 +66,6 @@ import com.persistit.exception.PersistitException;
  * </code>
  * </pre>
  * 
- * </p>
  * <p>
  * By default any <code>Iterator</code>s created by <code>PersistitMap</code>'s
  * collection views implement <i>fail-fast</i> behavior, meaning that methods of
@@ -128,6 +131,7 @@ import com.persistit.exception.PersistitException;
  * expected types. For example, the following will compile correctly but throw a
  * ClassCastException at runtime:
  * 
+ * </p>
  * <pre>
  * <code>
  * Exchange ex = new Exchange(&quot;demo&quot;, &quot;composers&quot;, true);
@@ -188,12 +192,12 @@ public class PersistitMap<K, V> extends AbstractMap<K, V> implements SortedMap<K
      * Construct a PersistitMap over the range of keys from fromKey (inclusive)
      * to toKey (exclusive)
      * 
-     * @param pm
-     * @param useFrom
-     * @param fromKey
-     * @param useTo
-     * @param toKey
-     * 
+     * @param pm the base <code>PersistitMap</code> over which this submap is created
+     * @param useFrom <code>true</code> if <code>fromKey</code> bounds the start of the range
+     * @param fromKey the inclusive lower bound of the key range
+     * @param useTo <code>true</code> if <code>toKey</code> bounds the end of the range
+     * @param toKey the exclusive upper bound of the key range
+     *
      * @throws IllegalArgumentException
      *             if fromKey is after toKey or if either fromKey or toKey is
      *             outside the range of the supplied base PersistitMap
@@ -546,7 +550,7 @@ public class PersistitMap<K, V> extends AbstractMap<K, V> implements SortedMap<K
      * value. In order to return the previous value, <code>put</code> must
      * deserialize it, which can be costly. Applications that don't need that
      * value can benefit from calling <code>putFast</code> instead of
-     * <code>put</code>. </pp>
+     * <code>put</code>. </p>
      * 
      * @param key
      *            key with which the specified value is to be associated.
@@ -675,7 +679,6 @@ public class PersistitMap<K, V> extends AbstractMap<K, V> implements SortedMap<K
      * This implementation iterates over the specified map's
      * <code>entrySet()</code> collection, and calls this map's <code>put</code>
      * operation once for each entry returned by the iteration.
-     * <p>
      * 
      * @param t
      *            mappings to be stored in this map.
@@ -1345,7 +1348,6 @@ public class PersistitMap<K, V> extends AbstractMap<K, V> implements SortedMap<K
      * as the key followed by an equals sign (<code>"="</code>) followed by the
      * associated value. Keys and values are converted to strings as by
      * <code>String.valueOf(Object)</code>.
-     * <p>
      * 
      * @return a String representation of this map.
      */

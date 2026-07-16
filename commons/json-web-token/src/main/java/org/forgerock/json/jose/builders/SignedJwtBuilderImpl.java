@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.jose.builders;
@@ -90,8 +91,7 @@ public class SignedJwtBuilderImpl extends AbstractJwtBuilder implements SignedJw
     }
 
     /**
-     * Builds the JWS into a <code>String</code> by calling the <tt>build</tt> method on the JWS object.
-     * <p>
+     * Builds the JWS into a <code>String</code> by calling the <code>build</code> method on the JWS object.
      * @see org.forgerock.json.jose.jws.SignedJwt#build()
      *
      * @return The base64url encoded UTF-8 parts of the JWS.

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.bloomfilter;
@@ -38,7 +39,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * chain is the sum of the false positive probabilities of the elements in the chain. Subsequent filters ("buckets")
  * in the chain are acquired from a {@link BloomFilterPool} according to a geometric series, ensuring that the overall
  * false positive probability is maintained, while also accommodating massive underestimation of required capacity.
- * <p/>
+ * <p>
  * The chain supports removal of bloom filters from the chain if all elements contained within that Bloom Filter have
  * expired. This forms the basis of <em>Rolling Bloom Filters</em>, which provide a time-limited view of some set.
  * Use-cases include blacklisting user security tokens that will naturally expire after a certain interval anyway and so

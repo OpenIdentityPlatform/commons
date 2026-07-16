@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit.policy;
@@ -67,7 +68,7 @@ public class JoinPolicy {
      * value of this method.
      * 
      * @param leftBuffer
-     *            The left <code>Buffer></code>
+     *            The left <code>Buffer</code>
      * @param rightBuffer
      *            The right <code>Buffer</code>
      * @param kbOffset
@@ -124,8 +125,8 @@ public class JoinPolicy {
      * Determines whether two pages will be permitted to be rejoined during a
      * delete operation.
      * 
-     * @param buffer
-     * @param virtualSize
+     * @param buffer the <code>Buffer</code> that would receive the joined content
+     * @param virtualSize the proposed combined size in bytes of the joined pages
      * @return <code>true</code> if the buffer will accept content of the
      *         specified size
      */

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.util;
 
@@ -56,7 +57,7 @@ package org.forgerock.util;
 public final class Reject {
 
     /**
-     * Throws a {@code NullPointerException} if the <tt>object</tt> parameter is
+     * Throws a {@code NullPointerException} if the <code>object</code> parameter is
      * null, returns the object otherwise.
      *
      * @param <T>
@@ -72,7 +73,7 @@ public final class Reject {
     }
 
     /**
-     * Throws a {@code NullPointerException} if the <tt>object</tt> parameter is
+     * Throws a {@code NullPointerException} if the <code>object</code> parameter is
      * null, returns the object otherwise.
      *
      * @param <T>
@@ -93,7 +94,7 @@ public final class Reject {
     }
 
     /**
-     * Throws an {@code IllegalArgumentException} if the <tt>condition</tt>
+     * Throws an {@code IllegalArgumentException} if the <code>condition</code>
      * parameter is false.
      *
      * @param condition
@@ -107,7 +108,7 @@ public final class Reject {
 
     /**
      * Throws an {@code IllegalArgumentException} with a custom {@code message}
-     * if the <tt>condition</tt> parameter is false.
+     * if the <code>condition</code> parameter is false.
      *
      * @param condition
      *            the condition to test
@@ -124,7 +125,7 @@ public final class Reject {
 
     /**
      * Alias for {@code checkNotNull} to be used in fluent {@code Reject.ifNull}
-     * syntax. Throws a {@code NullPointerException} if the <tt>object</tt>
+     * syntax. Throws a {@code NullPointerException} if the <code>object</code>
      * parameter is null.
      *
      * @param object
@@ -164,7 +165,7 @@ public final class Reject {
 
     /**
      * Alias for {@code checkNotNull} to be used in fluent {@code Reject.ifNull}
-     * syntax. Throws a {@code NullPointerException} if the <tt>object</tt>
+     * syntax. Throws a {@code NullPointerException} if the <code>object</code>
      * parameter is null.
      *
      * @param object
@@ -179,7 +180,7 @@ public final class Reject {
     }
 
     /**
-     * Throws an {@code IllegalArgumentException} if the <tt>condition</tt>
+     * Throws an {@code IllegalArgumentException} if the <code>condition</code>
      * parameter is true.
      *
      * @param condition
@@ -193,7 +194,7 @@ public final class Reject {
 
     /**
      * Throws an {@code IllegalArgumentException} with a custom {@code message}
-     * if the <tt>condition</tt> parameter is true.
+     * if the <code>condition</code> parameter is true.
      *
      * @param condition
      *            the condition to test
@@ -210,7 +211,7 @@ public final class Reject {
 
     /**
      * Throws an {@code IllegalStateException} with a custom {@code message}
-     * if the <tt>condition</tt> parameter is true.
+     * if the <code>condition</code> parameter is true.
      *
      * @param condition
      *            the condition to test

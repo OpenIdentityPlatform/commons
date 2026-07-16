@@ -1,5 +1,6 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
+ * Portions Copyrighted 2026 3A Systems, LLC
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -77,12 +79,12 @@ import com.persistit.util.Util;
  * following loads a Persistit database located in directory /var/lib/data,
  * selects a volume named xyz, and displays page 42 of that volume:
  * 
- * <code><pre>
+ * </p>
+ * <pre>
  * load datapath=/var/lib/data
  * select volume=xyz
  * view page=42
- * </pre></code>
- * </p>
+ * </pre>
  * <p>
  * CLI operates in one of two modes: "live" and "standalone".
  * </p>
@@ -109,31 +111,50 @@ import com.persistit.util.Util;
  * including piping the output to tools such as grep and more.
  * </p>
  * <p>
- * To run the CLI in standalone mode, simply execute <blockquote><code><pre>
+ * To run the CLI in standalone mode, simply execute
+ * </p>
+ * <blockquote>
+ * <pre>
  * java -cp persisit.jar com.persistit.Persistit cliport=9999
- * </pre></code></blockquote> or <blockquote><code><pre>
+ * </pre>
+ * </blockquote>
+ * <p>
+ * or
+ * </p>
+ * <blockquote>
+ * <pre>
  * java -cp persisit.jar com.persistit.Persistit script=pathname
- * </pre></code></blockquote> where persistit.jar contains the Persistit
+ * </pre>
+ * </blockquote>
+ * <p>
+ * where persistit.jar contains the Persistit
  * library. The first option specifies a port on which CLI will listen for
  * commands. (Use a port number larger than 1024 to avoid permissions problems.)
  * The second option executes commands from a text file in batch mode.
  * </p>
  * <p>
  * The following *nix client script works with the network server facility:
- * <blockquote><code><pre>
+ * </p>
+ * <blockquote>
+ * <pre>
  *   #!/bin/sh
  *   java -cp persistit.jar com.persistit.CLI 9999 $*
- * </pre></code></blockquote> (Substitute the port number assigned to the
+ * </pre>
+ * </blockquote>
+ * <p>
+ * (Substitute the port number assigned to the
  * cliport parameter above.)
  * </p>
  * <p>
  * With this script you can then enter command such as this at the shell:
- * <blockquote><code><pre>
+ * </p>
+ * <blockquote>
+ * <pre>
  * pcli init datapath=/var/lib/data
  * pcli select volume=xyz
  * pcli view page=42
- * </pre></code></blockquote>
- * </p>
+ * </pre>
+ * </blockquote>
  * <p>
  * Commands are defined below in methods annotated with @Cmd having parameters
  * annotated with @Arg. The format of the argument annotation is specified in
@@ -171,7 +192,7 @@ public class CLI {
      * annotation, and its arguments must be defined with @Arg annotations. This
      * method allows applications to extend the CLI.
      * 
-     * @param clazz
+     * @param clazz the class whose <code>@Cmd</code>-annotated methods are registered as CLI commands
      */
     public static void registerCommands(final Class<?> clazz) {
         for (final Method method : clazz.getDeclaredMethods()) {
@@ -228,8 +249,8 @@ public class CLI {
      * 
      * To execute the select command on a server on port 9999.
      * 
-     * @param args
-     * @throws Exception
+     * @param args command-line arguments; the first element specifies the host and/or port of the CLI server, and the remaining elements form the CLI command to execute
+     * @throws Exception if an error occurs while connecting to or communicating with the CLI server
      */
     public static void main(final String[] args) throws Exception {
         final StringBuilder sb = new StringBuilder();
@@ -276,10 +297,10 @@ public class CLI {
      * commands and write any generated output to the supplied
      * <code>PrintWriter</code>.
      * 
-     * @param persistit
-     * @param reader
-     * @param writer
-     * @throws Exception
+     * @param persistit the <code>Persistit</code> instance on which the commands operate
+     * @param reader the <code>BufferedReader</code> from which CLI command lines are read
+     * @param writer the <code>PrintWriter</code> to which generated output is written
+     * @throws Exception if an error occurs while reading, executing a command, or writing output
      */
     public static void runScript(final Persistit persistit, final BufferedReader reader, final PrintWriter writer)
             throws Exception {
@@ -304,7 +325,7 @@ public class CLI {
      * name=value parameters, all separate by spaces. Argument values containing
      * spaces can be quoted by a leading backslash.
      * 
-     * @param commandLine
+     * @param commandLine the command line string to split into command and argument tokens
      * @return List of String values, one per command name or argument token.
      */
     public static List<String> pieces(final String commandLine) {
@@ -679,13 +700,13 @@ public class CLI {
      * Open files on disk and attempt to make a read-only Persistit instance.
      * This method does not return a Task and cannot be executed in a live
      * 
-     * @param datapath
-     * @param journalpath
-     * @param volumepath
-     * @param rmiport
-     * @param y
+     * @param datapath the directory path in which the data files are located
+     * @param journalpath the path to the journal files; if empty, the data path is used
+     * @param volumepath the path to the volume file(s); if empty, the data path is used
+     * @param rmiport the RMI management port on which to register the instance
+     * @param y <code>true</code> to recover committed transactions while opening
      * @return Result description
-     * @throws Exception
+     * @throws Exception if the read-only Persistit instance cannot be opened
      */
     @Cmd("open")
     String open(@Arg("datapath|string|Data path") final String datapath,
@@ -1119,7 +1140,7 @@ public class CLI {
             @Override
             protected void runTask() throws Exception {
                 long currentPage = pageAddress;
-                int count = 0;
+                long count = 0;
                 while (currentPage > 0 && count++ < maxcount) {
                     if (_currentVolume == null) {
                         postMessage("Select a volume", LOG_NORMAL);

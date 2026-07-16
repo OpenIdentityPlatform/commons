@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.api.annotations;
@@ -29,7 +30,6 @@ public @interface Handler {
      * <br>
      * Example:
      *
-     * <code>
      *   <pre>
      * "services": {
      *   "users:1.0": {
@@ -48,7 +48,6 @@ public @interface Handler {
      *   }
      * }
      *   </pre>
-     * </code>
      */
     String id() default "";
 

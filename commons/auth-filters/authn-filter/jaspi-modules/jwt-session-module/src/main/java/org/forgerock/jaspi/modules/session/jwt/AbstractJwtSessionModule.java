@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.jaspi.modules.session.jwt;
@@ -190,7 +191,9 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
         Boolean httpOnly = (Boolean) options.get(HTTP_ONLY_COOKIE_KEY);
         this.isHttpOnly = httpOnly == null ? false : httpOnly;
         Boolean secure = (Boolean) options.get(SECURE_COOKIE_KEY);
-        this.isSecure = secure == null ? false : secure;
+        // Secure-by-default: session cookies carry the Secure attribute unless the
+        // deployment explicitly opts out with isSecure=false (CodeQL java/insecure-cookie).
+        this.isSecure = secure == null ? true : secure;
         cookieDomains = (Collection<String>) options.get(COOKIE_DOMAINS_KEY);
         if (cookieDomains == null || cookieDomains.isEmpty()) {
             cookieDomains = Collections.singleton(null);
@@ -553,7 +556,7 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
 
     /**
      * Returns the max age for the cookie, based on whether the cookie should be browser session only.
-     * <br/>
+     * <br>
      * If the cookie is only meant to last the same length the users browser is open, then the max age is set to -1.
      * Otherwise the max age is set to expiry time.
      *

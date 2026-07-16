@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -26,12 +27,12 @@ import com.persistit.util.Debug;
  * maintain a smaller number of FastIndex instances than Buffer indexes. When a
  * Buffer needs a FastIndex, {@link BufferPool#allocFastIndex()} method steals a
  * FastIndex from some other Buffer where it currently isn't needed.
- * <p />
+ * <p>
  * FastIndex is based on the ebc (elided byte count) of keys in the page. Its
  * purpose is to allow the key search algorithm skip over irrelevant keys having
  * larger ebc values, or when a "run" of keys has the same ebc value, to perform
  * a binary search.
- * <p />
+ * <p>
  * An element in the array denotes either one plus the number of successor key
  * blocks with deeper elision (larger ebc values) having the same ebc (elided
  * byte count) or the number of successor key block having the same ebc value.
@@ -41,7 +42,7 @@ import com.persistit.util.Debug;
  * blocks in a run having identical ebc values). To distinguish this cases in
  * the array, cross counts are stored as negative numbers while run counts are
  * positive.
- * <p />
+ * <p>
  * Consider a page having the following sequence of keys. The ebc value for each
  * key indicates the number of bytes in that key which match the preceding key.
  * Non-zero values in the crossCount and runCount fields indicate values
@@ -125,7 +126,7 @@ import com.persistit.util.Debug;
  * <td></td>
  * </tr>
  * </table>
- * <p />
+ * <p>
  * The key search algorithm uses these values to accelerate searching for a key
  * in the page. For example, suppose the key being sought is "D". Then the
  * {@link Buffer#findKey(Key)} starts by comparing "D" with A, determines that
@@ -513,11 +514,11 @@ class FastIndex {
      * Fixes up the elements surrounding insertion of keyblock that causes the
      * successor ebc to get fixed up.
      * 
-     * @param insertIndex
-     * @param runIndex
-     * @param runCount
-     * @param ebc
-     * @param successorEbc
+     * @param insertIndex the index at which the new keyblock is inserted
+     * @param runIndex the index of the first keyblock in the affected run
+     * @param runCount the number of keyblocks in the run
+     * @param ebc the elided byte count at the head of the run
+     * @param successorEbc the elided byte count of the successor keyblock
      */
     private void fixupSuccessor(final int lastIndex, final int insertIndex, final int runIndex, final int runCount,
             final int ebc, final int successorEbc) {

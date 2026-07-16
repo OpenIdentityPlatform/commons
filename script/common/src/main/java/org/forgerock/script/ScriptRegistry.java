@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.script;
@@ -77,13 +78,17 @@ public interface ScriptRegistry extends SourceUnitObserver {
      *
      * @param script
      *            The identifier of the {@code ScriptEntry}.
-     * @return <tt>null</tt> if the registry does not have the script, else the
+     * @return <code>null</code> if the registry does not have the script, else the
      *         {@code ScriptEntry} instance.
      * @throws NullPointerException
      *             if script is null.
      * @throws org.forgerock.json.JsonValueException
+     *             if the {@code script} JSON value is malformed or missing
+     *             required attributes.
      * @throws IllegalArgumentException
+     *             if the {@code script} value does not identify a valid script.
      * @throws ScriptException
+     *             if the script cannot be compiled or evaluated.
      */
     public ScriptEntry takeScript(JsonValue script) throws ScriptException;
 
@@ -92,7 +97,7 @@ public interface ScriptRegistry extends SourceUnitObserver {
      *
      * @param name
      *            The identifier of the {@code ScriptEntry}.
-     * @return <tt>null</tt> if the registry does not have the script, else the
+     * @return <code>null</code> if the registry does not have the script, else the
      *         {@code ScriptEntry} instance.
      * @throws NullPointerException
      *             if script is null.

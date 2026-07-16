@@ -10,6 +10,7 @@
  * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  **/
 
 package com.savage7.maven.plugin.dependency;
@@ -30,15 +31,22 @@ import org.codehaus.plexus.digest.Digester;
  * 
  * @goal install-external
  * @author <a href="mailto:robert@savage7.com">Robert Savage</a>
- * @see http://code.google.com/p/maven-external-dependency-plugin/
+ * @see <a href="http://code.google.com/p/maven-external-dependency-plugin/">http://code.google.com/p/maven-external-dependency-plugin/</a>
  * @version 0.1
- * @category Maven Plugin
- * @ThreadSafe
  */
 public class InstallExternalDependencyMojo extends
     AbstractExternalDependencyMojo
 {
     /**
+     * Creates a new instance.
+     */
+    public InstallExternalDependencyMojo()
+    {
+    }
+
+    /**
+     * The local repository into which the artifact is installed.
+     *
      * @parameter expression="${localRepository}"
      * @required
      * @readonly
@@ -46,6 +54,8 @@ public class InstallExternalDependencyMojo extends
     protected ArtifactRepository localRepository;
 
     /**
+     * The artifact installer used to install artifacts.
+     *
      * @component
      */
     protected ArtifactInstaller installer;
@@ -76,7 +86,7 @@ public class InstallExternalDependencyMojo extends
         try
         {
             // update base configuration parameters
-            // (not sure why this is needed, but doesn't see to work otherwise?)
+            // (not sure why this is needed, but doesn't seem to work otherwise?)
             super.localRepository = this.localRepository;
             super.createChecksum = this.createChecksum;
             super.md5Digester = this.md5Digester;
@@ -266,7 +276,7 @@ public class InstallExternalDependencyMojo extends
                 {
                     getLog()
                         .info(
-                            "this aritifact already exists in the local repository; no download is needed: "
+                            "this artifact already exists in the local repository; no download is needed: "
                                 + artifactItem.toString());
                 }
             }

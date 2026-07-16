@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit.ui;
@@ -60,24 +61,24 @@ public class ManagementTableModel extends AbstractTableModel {
      * structures such as BufferInfo[]. Each column is described by a property
      * defined in the <code>ResourceBundle</code> associated with this class.
      * The property name is constructed from the last "." piece of the name of
-     * the supplied class and the column index as follows: <code><pre>
+     * the supplied class and the column index as follows: <pre>
      * property Name ::= 
      *      <i>classNameTail</i>.column.<i>columnIndex</i>
-     * </pre></code> For example, the specification for the first column of the
-     * {@link com.persistit.Management.BufferInfo} class is <code><pre>
+     * </pre> For example, the specification for the first column of the
+     * {@link com.persistit.Management.BufferInfo} class is <pre>
      *      BufferInfo.column.0
-     * </pre></code> The value associated with this property has the following
-     * structure: <code><pre>
+     * </pre> The value associated with this property has the following
+     * structure: <pre>
      * property Value ::=
      *      <i>accessorMethodName</i>:<i>width</i>:<i>flags</i>:<i>header</i>
-     * </code></pre> For example <code><pre>
+     * </pre> For example <pre>
      *      getRightSiblingAddress:10:A:Right Pointer
-     * </code></pre> where the <i>accessorMethodName</code> is simply a method
+     * </pre> where the <i>accessorMethodName</i> is simply a method
      * name in the supplied class (the method must take no arguments), the
      * <i>width</i> is a percentage of the total table width, and
      * <i>justification</i> is L, C or R.
      * 
-     * @param clazz
+     * @param clazz the management info class whose columns are displayed.
      */
 
     public ManagementTableModel(final Class clazz, String className, final AdminUI ui) throws NoSuchMethodException {
