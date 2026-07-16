@@ -1,7 +1,7 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
  * Portions Copyrighted 2026 3A Systems, LLC.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -295,7 +295,7 @@ public class KeyParser {
                     }
                 } else if (matchExactString(Key.PREFIX_DATE) || matchExactString(Key.PREFIX_DATE0)) {
                     if (matchNumber(true, true)) {
-                        key.append(Key.SDF.parse(_sb.toString()));
+                        key.append(Key.SDF.get().parse(_sb.toString()));
                         result = true;
                     }
                 } else if (matchExactString(Key.PREFIX_BYTE_ARRAY)) {

@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1566,7 +1567,7 @@ public final class Value {
           sb.append("...");
       } else if (cl == Date.class) {
         appendParenthesizedFriendlyClassName(sb, cl);
-        sb.append(Key.SDF.format((Date) value));
+        sb.append(Key.SDF.get().format((Date) value));
       } else if (value instanceof Number) {
         sb.append('(');
         sb.append(className.startsWith("java.lang.") ? className.substring(10) : className);
