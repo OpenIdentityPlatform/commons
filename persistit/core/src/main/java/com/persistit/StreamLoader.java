@@ -51,8 +51,6 @@ public class StreamLoader extends Task {
     protected Tree _lastTree;
     protected int _dataRecordCount = 0;
     protected int _otherRecordCount = 0;
-    protected boolean _stop;
-    protected Exception _lastException;
 
     protected TreeSelector _treeSelector;
     protected boolean _createMissingVolumes;
