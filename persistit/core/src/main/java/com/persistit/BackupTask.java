@@ -13,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -263,8 +264,10 @@ public class BackupTask extends Task {
             final String candidate = k == 0 ? file.getAbsolutePath() + "~" : file.getAbsoluteFile() + "~" + k;
             final File newFile = new File(candidate);
             if (!newFile.exists()) {
-                file.renameTo(newFile);
-                return;
+                if (file.renameTo(newFile)) {
+                    return;
+                }
+                throw new IOException("Unable to rename file " + file + " to " + newFile);
             }
         }
         throw new IOException("Unable to rename file " + file);
