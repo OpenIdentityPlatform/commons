@@ -280,16 +280,17 @@ public class CLI {
             throw new IllegalArgumentException("Invalid host or port specified by " + args[0]);
         }
 
-        final Socket socket = new Socket(host, port);
-        final OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream());
-        writer.write(sb.toString());
-        writer.flush();
-        final InputStreamReader reader = new InputStreamReader(socket.getInputStream());
-        int c;
-        while ((c = reader.read()) != -1) {
-            System.out.print((char) c);
+        try (final Socket socket = new Socket(host, port)) {
+            final OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream());
+            writer.write(sb.toString());
+            writer.flush();
+            final InputStreamReader reader = new InputStreamReader(socket.getInputStream());
+            int c;
+            while ((c = reader.read()) != -1) {
+                System.out.print((char) c);
+            }
+            System.out.println();
         }
-        System.out.println();
     }
 
     /**
@@ -621,71 +622,91 @@ public class CLI {
     }
 
     private void commandLoop() throws Exception {
-        while (!_stop) {
-            final String input;
-            if (!_sourceStack.isEmpty()) {
-                input = _sourceStack.peek().readLine();
-                if (input == null) {
-                    _sourceStack.pop();
-                    continue;
-                }
-            } else {
-                input = _lineReader.readLine();
-            }
-            if (input == null) {
-                break;
-            }
-            _writer = _lineReader.writer();
-            _commandCount++;
-            _lastStatus = input;
-            try {
-                final List<String> list = pieces(input);
-                if (list.isEmpty()) {
-                    continue;
-                }
-                final String commandName = list.get(0);
-                if (commandName.startsWith("#")) {
-                    continue;
-                }
-
-                if ("exit".equals(commandName) || "quit".equals(commandName)) {
-                    _stop = true;
-                    close(false);
-                    _lastStatus = "Done";
-                    _writer.println("Done");
-                    _lineReader.close();
-                }
-
-                // Handle intrinsic commands
-                final Command command = COMMANDS.get(commandName);
-                if (command != null) {
-                    list.remove(0);
-                    try {
-                        final String[] args = list.toArray(new String[list.size()]);
-                        final ArgParser ap = new ArgParser(commandName, args, command.argTemplate).strict();
-                        if (!ap.isUsageOnly()) {
-                            final String result = command.execute(this, ap);
-                            if (result != null) {
-                                _writer.println(result);
-                            }
-                            _lastStatus += " - done";
-                        }
-                    } catch (final InvocationTargetException e) {
-                        _lastStatus += e.getTargetException();
-                        _writer.println(e.getTargetException());
-                    } catch (final RuntimeException e) {
-                        _lastStatus += e;
-                        e.printStackTrace(_writer);
-                    } catch (final Exception e) {
-                        _lastStatus += e;
-                        _writer.println(e);
+        try {
+            while (!_stop) {
+                final String input;
+                if (!_sourceStack.isEmpty()) {
+                    input = _sourceStack.peek().readLine();
+                    if (input == null) {
+                        _sourceStack.pop().close();
+                        continue;
                     }
-                    continue;
+                } else {
+                    input = _lineReader.readLine();
                 }
-                _lastStatus += " - invalid command";
-                _writer.println("No such command " + commandName);
-            } finally {
-                _writer.flush();
+                if (input == null) {
+                    break;
+                }
+                _writer = _lineReader.writer();
+                _commandCount++;
+                _lastStatus = input;
+                try {
+                    final List<String> list = pieces(input);
+                    if (list.isEmpty()) {
+                        continue;
+                    }
+                    final String commandName = list.get(0);
+                    if (commandName.startsWith("#")) {
+                        continue;
+                    }
+
+                    if ("exit".equals(commandName) || "quit".equals(commandName)) {
+                        _stop = true;
+                        close(false);
+                        _lastStatus = "Done";
+                        _writer.println("Done");
+                        _lineReader.close();
+                    }
+
+                    // Handle intrinsic commands
+                    final Command command = COMMANDS.get(commandName);
+                    if (command != null) {
+                        list.remove(0);
+                        try {
+                            final String[] args = list.toArray(new String[list.size()]);
+                            final ArgParser ap = new ArgParser(commandName, args, command.argTemplate).strict();
+                            if (!ap.isUsageOnly()) {
+                                final String result = command.execute(this, ap);
+                                if (result != null) {
+                                    _writer.println(result);
+                                }
+                                _lastStatus += " - done";
+                            }
+                        } catch (final InvocationTargetException e) {
+                            _lastStatus += e.getTargetException();
+                            _writer.println(e.getTargetException());
+                        } catch (final RuntimeException e) {
+                            _lastStatus += e;
+                            e.printStackTrace(_writer);
+                        } catch (final Exception e) {
+                            _lastStatus += e;
+                            _writer.println(e);
+                        }
+                        continue;
+                    }
+                    _lastStatus += " - invalid command";
+                    _writer.println("No such command " + commandName);
+                } finally {
+                    _writer.flush();
+                }
+            }
+        } finally {
+            closeSourceStack();
+        }
+    }
+
+    /**
+     * Closes and discards any command-source readers still on the source stack.
+     * This covers the case where an <code>exit</code>/<code>quit</code> command
+     * (or an error) terminates the command loop before a sourced script has been
+     * read to its end. Best-effort: close failures during cleanup are ignored.
+     */
+    private void closeSourceStack() {
+        while (!_sourceStack.isEmpty()) {
+            try {
+                _sourceStack.pop().close();
+            } catch (final IOException e) {
+                // best-effort cleanup
             }
         }
     }
@@ -891,7 +912,7 @@ public class CLI {
                     postMessage(String.format("Source is %s", fileName), LOG_NORMAL);
                     return;
                 } else {
-                    _sourceStack.clear();
+                    closeSourceStack();
                     postMessage("Source is console", LOG_NORMAL);
                     return;
                 }

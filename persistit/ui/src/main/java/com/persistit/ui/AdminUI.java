@@ -331,8 +331,7 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
                 }
                 if (propFileName == null)
                     propFileName = DEFAULT_CONFIG_FILE;
-                try {
-                    final FileInputStream fis = new FileInputStream(propFileName);
+                try (final FileInputStream fis = new FileInputStream(propFileName)) {
                     _properties = new Properties();
                     _properties.load(fis);
                 } catch (final Exception e) {

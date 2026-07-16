@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions copyright 2026 3A Systems LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -2604,9 +2605,10 @@ public class Persistit {
       task.runTask();
       task.setPersistit(persistit);
     } else if (!scriptName.isEmpty()) {
-      final BufferedReader reader = new BufferedReader(new FileReader(scriptName));
-      final PrintWriter writer = new PrintWriter(System.out);
-      CLI.runScript(persistit, reader, writer);
+      try (final BufferedReader reader = new BufferedReader(new FileReader(scriptName))) {
+        final PrintWriter writer = new PrintWriter(System.out);
+        CLI.runScript(persistit, reader, writer);
+      }
     } else {
       if (persistit == null) {
         throw new IllegalArgumentException("Must specify a properties file");
