@@ -1294,7 +1294,7 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
         if (interval >= 0)
             _refreshInterval = interval;
         if (_refreshInterval > 0) {
-            _refreshTimer.schedule(_refreshTimerTask, 0, _refreshInterval * 1000);
+            _refreshTimer.schedule(_refreshTimerTask, 0, _refreshInterval * 1000L);
         } else {
             _refreshTimer.schedule(_refreshTimerTask, 0);
         }
