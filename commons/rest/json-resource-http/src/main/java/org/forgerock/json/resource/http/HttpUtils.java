@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2016 ForgeRock AS.
- * Portions copyright 2024 3A Systems LLC.
+ * Portions copyright 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.json.resource.http;
@@ -926,18 +926,22 @@ public final class HttpUtils {
             this.request = request;
         }
 
+        @Override
         public InputStream getInputStream() throws IOException {
             return request.getEntity().getRawContentInputStream();
         }
 
+        @Override
         public OutputStream getOutputStream() throws IOException {
             return null;
         }
 
+        @Override
         public String getContentType() {
             return request.getHeaders().getFirst(ContentTypeHeader.class);
         }
 
+        @Override
         public String getName() {
             return "HttpServletRequestDataSource";
         }

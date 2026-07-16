@@ -50,7 +50,6 @@ import com.persistit.util.Util;
  * </table>
  * <p>
  * Type: two ASCII bytes:
- * <p>
  * <table border="1">
  * <caption>Summary</caption>
  * 
@@ -481,8 +480,24 @@ public class JournalRecord {
         }
     }
 
+    /**
+     * The put methods below write into the backing array directly, bypassing
+     * the ByteBuffer bounds checks. This guard makes an attempt to write
+     * beyond the buffer limit fail fast instead of silently scribbling past
+     * it (see issue #265).
+     */
+    private static int checkedPutIndex(final ByteBuffer bb, final int offset, final int size) {
+        final int index = bb.position() + offset;
+        if (index < 0 || index + size > bb.limit()) {
+            throw new IndexOutOfBoundsException(String.format(
+                    "Record write of %d bytes at position %d + offset %d exceeds buffer limit %d", size,
+                    bb.position(), offset, bb.limit()));
+        }
+        return index;
+    }
+
     private static void putByte(final ByteBuffer bb, final int offset, final int value) {
-        Util.putByte(bb.array(), bb.position() + offset, value);
+        Util.putByte(bb.array(), checkedPutIndex(bb, offset, 1), value);
     }
 
     static int getByte(final ByteBuffer bb, final int offset) {
@@ -490,7 +505,7 @@ public class JournalRecord {
     }
 
     static void putChar(final ByteBuffer bb, final int offset, final int value) {
-        Util.putChar(bb.array(), bb.position() + offset, value);
+        Util.putChar(bb.array(), checkedPutIndex(bb, offset, 2), value);
     }
 
     static int getChar(final ByteBuffer bb, final int offset) {
@@ -498,7 +513,7 @@ public class JournalRecord {
     }
 
     static void putInt(final ByteBuffer bb, final int offset, final int value) {
-        Util.putInt(bb.array(), bb.position() + offset, value);
+        Util.putInt(bb.array(), checkedPutIndex(bb, offset, 4), value);
     }
 
     static int getInt(final ByteBuffer bb, final int offset) {
@@ -506,7 +521,7 @@ public class JournalRecord {
     }
 
     static void putLong(final ByteBuffer bb, final int offset, final long value) {
-        Util.putLong(bb.array(), bb.position() + offset, value);
+        Util.putLong(bb.array(), checkedPutIndex(bb, offset, 8), value);
     }
 
     static long getLong(final ByteBuffer bb, final int offset) {
@@ -645,7 +660,8 @@ public class JournalRecord {
 
         public static void putPath(final ByteBuffer bb, final String path) {
             final byte[] stringBytes = path.getBytes(UTF8);
-            System.arraycopy(stringBytes, 0, bb.array(), bb.position() + OVERHEAD, stringBytes.length);
+            System.arraycopy(stringBytes, 0, bb.array(), checkedPutIndex(bb, OVERHEAD, stringBytes.length),
+                    stringBytes.length);
             putLength(bb, OVERHEAD + stringBytes.length);
         }
     }
@@ -779,7 +795,8 @@ public class JournalRecord {
 
         public static void putVolumeSpecification(final ByteBuffer bb, final String volumeSpec) {
             final byte[] stringBytes = volumeSpec.getBytes(UTF8);
-            System.arraycopy(stringBytes, 0, bb.array(), bb.position() + OVERHEAD, stringBytes.length);
+            System.arraycopy(stringBytes, 0, bb.array(), checkedPutIndex(bb, OVERHEAD, stringBytes.length),
+                    stringBytes.length);
             putLength(bb, OVERHEAD + stringBytes.length);
         }
     }
@@ -822,7 +839,8 @@ public class JournalRecord {
 
         public static void putTreeName(final ByteBuffer bb, final String treeName) {
             final byte[] stringBytes = treeName.getBytes(UTF8);
-            System.arraycopy(stringBytes, 0, bb.array(), bb.position() + OVERHEAD, stringBytes.length);
+            System.arraycopy(stringBytes, 0, bb.array(), checkedPutIndex(bb, OVERHEAD, stringBytes.length),
+                    stringBytes.length);
             putLength(bb, OVERHEAD + stringBytes.length);
         }
     }

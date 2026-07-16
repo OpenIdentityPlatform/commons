@@ -107,7 +107,7 @@ class ManagementSlidingTableModel extends ManagementTableModel {
      * <i>width</i> is a percentage of the total table width, and
      * <i>justification</i> is L, C or R.
      * 
-     * @param clazz
+     * @param clazz the management info class whose columns are displayed.
      */
 
     public ManagementSlidingTableModel(final Class clazz, final String className, final AdminUI ui)

@@ -1,5 +1,6 @@
 /**
  * Copyright 2012 Akiban Technologies, Inc.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,12 +88,12 @@ public class JournalManagerBench {
     private void runTest() throws Exception {
         file = new File(ap.getStringValue("datapath"), "JManBench_TestFile");
         fc = new RandomAccessFile(file, "rw").getChannel();
-        preallocateFile(ap.getIntValue("prealloc") * 1024 * 1024);
+        preallocateFile(ap.getIntValue("prealloc") * 1024L * 1024);
         for (int i = 0; i < bytes.length; i++) {
             bytes[i] = (byte) ('-');
         }
         final int align = ap.getIntValue("align");
-        final long extension = ap.getIntValue("extension") * 1024 * 1024;
+        final long extension = ap.getIntValue("extension") * 1024L * 1024;
 
         final long start = System.nanoTime();
         final long expires = start + ap.getIntValue("duration") * NS_PER_S;

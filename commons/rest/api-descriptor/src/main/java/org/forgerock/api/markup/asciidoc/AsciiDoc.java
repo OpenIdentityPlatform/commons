@@ -584,7 +584,6 @@ public final class AsciiDoc {
 
     /**
      * Converts builder content to a {@code String}.
-     * <p>
      *
      * @return Doc builder content
      */

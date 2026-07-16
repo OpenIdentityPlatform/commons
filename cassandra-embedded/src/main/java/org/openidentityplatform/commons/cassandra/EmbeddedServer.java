@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2019 Open Identity Platform Community.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.openidentityplatform.commons.cassandra;
@@ -46,6 +47,7 @@ public class EmbeddedServer implements Runnable, AutoCloseable {
 	final private ExecutorService executor = Executors.newSingleThreadExecutor();
 	private CassandraDaemon cassandraDaemon;
 	    
+	@Override
 	public void run() {
 		try {
 			//check for external cassandra settings
@@ -64,9 +66,9 @@ public class EmbeddedServer implements Runnable, AutoCloseable {
 	        	Files.createDirectory(Paths.get("target"));
 	        }
 	        if (!Files.exists(Paths.get("target"+File.separator+"embedded_keystore"))) {
-	        	Files.copy(this.getClass().getResourceAsStream("/embedded_keystore"),Paths.get("target"+File.separator+"embedded_keystore"),StandardCopyOption.REPLACE_EXISTING);
+	        	Files.copy(EmbeddedServer.class.getResourceAsStream("/embedded_keystore"),Paths.get("target"+File.separator+"embedded_keystore"),StandardCopyOption.REPLACE_EXISTING);
 	        }
-	        Files.copy(this.getClass().getResourceAsStream("/cassandra.yaml"),Paths.get("target"+File.separator+"cassandra.yaml"),StandardCopyOption.REPLACE_EXISTING);
+	        Files.copy(EmbeddedServer.class.getResourceAsStream("/cassandra.yaml"),Paths.get("target"+File.separator+"cassandra.yaml"),StandardCopyOption.REPLACE_EXISTING);
 	        System.setProperty("cassandra.config",""+Paths.get("target"+File.separator+"cassandra.yaml").toUri());
 	        //start
 //	        final CountDownLatch startupLatch = new CountDownLatch(1) ;
@@ -96,7 +98,7 @@ public class EmbeddedServer implements Runnable, AutoCloseable {
 	        }
 	        //load
 	        String dataSetLocation=System.getProperty(EmbeddedServer.class.getPackage().getName()+".import","cassandra/import.cql");
-	        InputStream inputStream=this.getClass().getResourceAsStream("/" + dataSetLocation);
+	        InputStream inputStream=EmbeddedServer.class.getResourceAsStream("/" + dataSetLocation);
 	        if (inputStream!=null) {
 	        	 try (CqlSession session = CqlSession.builder().withApplicationName("load cassandra/import.cql").build()){
 	 	        	for (String statement : Arrays.asList(StringUtils.normalizeSpace(inputStreamToString(inputStream)).split(";"))) {
@@ -115,7 +117,7 @@ public class EmbeddedServer implements Runnable, AutoCloseable {
 	        //load test
 	        dataSetLocation=System.getProperty(EmbeddedServer.class.getPackage().getName()+".import.test");
 	        if (dataSetLocation!=null) {
-		        inputStream=this.getClass().getResourceAsStream("/" + dataSetLocation);
+		        inputStream=EmbeddedServer.class.getResourceAsStream("/" + dataSetLocation);
 		        if (inputStream==null) {
 		        	throw new AssertionError("cannot get resource "+dataSetLocation);
 		        }
@@ -138,6 +140,7 @@ public class EmbeddedServer implements Runnable, AutoCloseable {
 		}
 	}
 
+	@Override
 	public void close() {
 		if (cassandraDaemon!=null) {
 			cassandraDaemon.stop();

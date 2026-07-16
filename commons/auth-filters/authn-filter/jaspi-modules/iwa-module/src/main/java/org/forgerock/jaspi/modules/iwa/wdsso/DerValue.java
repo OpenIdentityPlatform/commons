@@ -1,4 +1,4 @@
-//@Checkstyle:ignoreFor 29
+//@Checkstyle:ignoreFor 30
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -26,12 +26,14 @@
  * $Id: DerValue.java,v 1.2 2008/06/25 05:42:07 qcheng Exp $
  *
  * Portions Copyrighted 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.jaspi.modules.iwa.wdsso;
 
 import static java.lang.Integer.toHexString;
 
 import java.io.ByteArrayInputStream;
+import java.util.Arrays;
 
 /**
  * A dedicated implementation of handling <code>ASN1/DER</code> for the
@@ -88,7 +90,13 @@ public class DerValue {
         tag = (byte) input.read();
         length = getLength(input);
         data = new byte[length];
-        input.read(data, 0, length);
+        final int read = input.read(data, 0, length);
+        if (read > 0 && read < length) {
+            // Truncated DER value: keep only the bytes actually read so that
+            // callers do not treat uninitialised trailing bytes as content.
+            length = read;
+            data = Arrays.copyOf(data, read);
+        }
     }
 
     private int getLength(ByteArrayInputStream input) {

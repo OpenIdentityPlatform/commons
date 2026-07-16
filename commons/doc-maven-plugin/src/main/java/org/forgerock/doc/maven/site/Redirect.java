@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2014 ForgeRock AS
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.doc.maven.site;
@@ -52,7 +53,7 @@ public class Redirect {
         try {
             File file = FileUtils.getFile(m.getSiteDirectory(), "doc", "index.html");
             if (!file.exists()) {
-                String redirect = IOUtils.toString(getClass().getResourceAsStream("/index.html"), "UTF-8");
+                String redirect = IOUtils.toString(Redirect.class.getResourceAsStream("/index.html"), "UTF-8");
                 redirect = redirect.replaceAll("PROJECT", m.getProjectName())
                         .replaceAll("LOWERCASE", m.getProjectName().toLowerCase());
                 FileUtils.write(file, redirect, "UTF-8");

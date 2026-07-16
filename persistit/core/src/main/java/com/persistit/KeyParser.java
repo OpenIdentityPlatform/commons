@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -218,7 +220,7 @@ public class KeyParser {
      * Attempt to parse a chunk of the source string as a key segment. If
      * successful, append the segment to the key.
      * 
-     * @param key
+     * @param key the <code>Key</code> to which the parsed segment is appended
      * @return <code>true</code> a valid key segment was parsed
      */
     private boolean parseKeySegment(final Key key) {
@@ -293,7 +295,7 @@ public class KeyParser {
                     }
                 } else if (matchExactString(Key.PREFIX_DATE) || matchExactString(Key.PREFIX_DATE0)) {
                     if (matchNumber(true, true)) {
-                        key.append(Key.SDF.parse(_sb.toString()));
+                        key.append(Key.SDF.get().parse(_sb.toString()));
                         result = true;
                     }
                 } else if (matchExactString(Key.PREFIX_BYTE_ARRAY)) {
@@ -522,9 +524,7 @@ public class KeyParser {
                 _sb.append((char) c);
                 escape = false;
             } else {
-                if (c == '\\')
-                    escape = true;
-                else if (c == '\"') {
+                if (c == '\"') {
                     return true;
                 } else
                     _sb.append((char) c);
@@ -535,7 +535,12 @@ public class KeyParser {
     private int unicode() {
         if (_index + 4 > _end)
             return -1;
-        final int u = Integer.parseInt(_source.substring(_index, _index + 4), 16);
+        final int u;
+        try {
+            u = Integer.parseInt(_source.substring(_index, _index + 4), 16);
+        } catch (final NumberFormatException e) {
+            return -1;
+        }
         _index += 4;
         return u;
     }

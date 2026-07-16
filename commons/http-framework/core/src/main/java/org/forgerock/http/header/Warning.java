@@ -12,6 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.http.header;
@@ -150,7 +151,12 @@ public class Warning {
     public static Warning valueOf(final String value) {
         final Matcher m = PATTERN.matcher(value);
         if (m.matches()) {
-            final int code = Integer.parseInt(m.group(1));
+            final int code;
+            try {
+                code = Integer.parseInt(m.group(1));
+            } catch (final NumberFormatException e) {
+                return null;
+            }
             final String agent = m.group(2);
             final String tail = m.group(3);
             final String text;

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.jose.jws;
@@ -186,7 +187,6 @@ public abstract class JwtSecureHeader extends JwtHeader {
      * The certificate containing the public key corresponding to the key used to digitally sign the JWS MUST be the
      * first certificate. This MAY be followed by additional certificates, with each subsequent certificate being the
      * one used to certify the previous one.
-     * <p>
      *
      * @param x509CertificateChain The X.509 Certificate Chain.
      */

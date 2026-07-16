@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit.util;
@@ -92,6 +93,18 @@ public interface SequencerConstants {
     int[][] DEALLOCATE_CHAIN_SCHEDULED = new int[][] { array(DEALLOCATE_CHAIN_A, DEALLOCATE_CHAIN_B),
             array(DEALLOCATE_CHAIN_B), array(DEALLOCATE_CHAIN_A, DEALLOCATE_CHAIN_C),
             array(DEALLOCATE_CHAIN_A, DEALLOCATE_CHAIN_C) };
+
+    /*
+     * Used in testing the deferred key-pointer insertion that is left pending
+     * when Exchange#storeInternal releases the tree claim on a RetryException
+     * after a split has already committed, bug 1017957 residual
+     */
+    int STORE_PENDING_SPLIT_A = allocate("STORE_PENDING_SPLIT_A");
+    int STORE_PENDING_SPLIT_B = allocate("STORE_PENDING_SPLIT_B");
+    int STORE_PENDING_SPLIT_C = allocate("STORE_PENDING_SPLIT_C");
+    int[][] STORE_PENDING_SPLIT_SCHEDULE = new int[][] { array(STORE_PENDING_SPLIT_A, STORE_PENDING_SPLIT_B),
+            array(STORE_PENDING_SPLIT_B), array(STORE_PENDING_SPLIT_A, STORE_PENDING_SPLIT_C),
+            array(STORE_PENDING_SPLIT_A, STORE_PENDING_SPLIT_C) };
 
     /*
      * Used in testing delete/deallocate sequence in Bug1064565Test

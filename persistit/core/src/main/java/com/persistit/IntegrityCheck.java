@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions copyright 2026 3A Systems LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -247,13 +248,6 @@ public class IntegrityCheck extends Task {
         }
         final long startTimestamp = _persistit.getTimestampAllocator().updateTimestamp();
         try {
-            final ArrayList<Volume> volumes = new ArrayList<Volume>();
-
-            for (final Volume volume : _persistit.getVolumes()) {
-                if (_treeSelector.isSelected(volume)) {
-                    volumes.add(volume);
-                }
-            }
             Volume previousVolume = null;
             for (final Tree tree : _persistit.getSelectedTrees(_treeSelector)) {
                 final Volume volume = tree.getVolume();
@@ -389,7 +383,7 @@ public class IntegrityCheck extends Task {
      * Control output format. When CSV mode is enabled, the output is organized
      * as comma-separated-variable text that can be imported into a spreadsheet.
      * 
-     * @param csvMode
+     * @param csvMode <code>true</code> to enable CSV output mode
      */
     public void setCsvMode(final boolean csvMode) {
         _csv = csvMode;
@@ -755,8 +749,6 @@ public class IntegrityCheck extends Task {
     /**
      * Resets this <code>IntegrityCheck</code> to handle a new volume.
      * 
-     * @param initCounts
-     *            <code>true</code> to reset all counters to zero.
      */
     private void reset() {
         _currentVolume = null;
@@ -773,7 +765,7 @@ public class IntegrityCheck extends Task {
      * @param volume
      *            The {@link Volume} to check.
      * @return <i>true</i> if the volume is clean (has no Faults).
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     public boolean checkVolume(final Volume volume) throws PersistitException {
         reset();
@@ -819,7 +811,7 @@ public class IntegrityCheck extends Task {
      * @param tree
      *            The <code>Tree</code> to check.
      * @return <i>true</i> if the volume is clean (has no Faults).
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     public boolean checkTree(final Tree tree) throws PersistitException {
         final String messageStart;
@@ -887,10 +879,9 @@ public class IntegrityCheck extends Task {
      * page is a data page, then we are at the bottom of the tree. Else we
      * recursively checkTree on each of the subordinate pages.
      * 
-     * @param page
-     * @param level
-     * @param work
-     * @throws PersistitException
+     * @param page the page address of the subtree root to check
+     * @param level the level of the page within the tree
+     * @throws PersistitException if a persistence error occurs
      */
     private void checkTree(final Key parentKey, final long parent, final long page, final int level, final Tree tree)
             throws PersistitException {

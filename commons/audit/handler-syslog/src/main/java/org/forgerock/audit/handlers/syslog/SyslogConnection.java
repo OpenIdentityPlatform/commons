@@ -13,6 +13,7 @@
  *
  * Copyright 2013 Cybernetica AS
  * Portions copyright 2014-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.audit.handlers.syslog;
 
@@ -29,5 +30,6 @@ interface SyslogConnection extends AutoCloseable {
 
     void flush() throws IOException;
 
+    @Override
     void close();
 }

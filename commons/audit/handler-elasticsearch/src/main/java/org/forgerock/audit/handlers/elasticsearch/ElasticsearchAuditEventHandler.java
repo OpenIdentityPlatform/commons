@@ -54,6 +54,7 @@ import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Responses;
 import org.forgerock.http.spi.Loader;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CountPolicy;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
@@ -199,7 +200,11 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         if (query.getPagedResultsOffset() != 0) {
             offset = query.getPagedResultsOffset();
         } else if (query.getPagedResultsCookie() != null) {
-            offset = Integer.valueOf(query.getPagedResultsCookie());
+            try {
+                offset = Integer.parseInt(query.getPagedResultsCookie());
+            } catch (final NumberFormatException e) {
+                return new BadRequestException("Invalid paged results cookie", e).asPromise();
+            }
         } else {
             offset = DEFAULT_OFFSET;
         }

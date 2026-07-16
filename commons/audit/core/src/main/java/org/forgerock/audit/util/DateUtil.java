@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2011-2015 ForgeRock AS. All rights reserved.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 package org.forgerock.audit.util;
 
@@ -204,12 +205,15 @@ public final class DateUtil {
     public static int getDateDifferenceInDays(final Date start, final Date end, final Boolean includeDay) {
         Integer result = null;
         if (start != null && end != null) {
-            final Long l = 86400000L;
-            final Long r = (end.getTime() - start.getTime()) / l;
-            result = r.intValue();
+            final long l = 86400000L;
+            final long r = (end.getTime() - start.getTime()) / l;
+            result = (int) r;
             if (includeDay) {
                 result++;
             }
+        }
+        if (result == null) {
+            throw new IllegalArgumentException("start and end dates must not be null");
         }
         return result;
     }

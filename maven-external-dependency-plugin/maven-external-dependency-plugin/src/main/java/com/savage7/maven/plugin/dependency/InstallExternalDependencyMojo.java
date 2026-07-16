@@ -38,6 +38,15 @@ public class InstallExternalDependencyMojo extends
     AbstractExternalDependencyMojo
 {
     /**
+     * Creates a new instance.
+     */
+    public InstallExternalDependencyMojo()
+    {
+    }
+
+    /**
+     * The local repository into which the artifact is installed.
+     *
      * @parameter expression="${localRepository}"
      * @required
      * @readonly
@@ -45,6 +54,8 @@ public class InstallExternalDependencyMojo extends
     protected ArtifactRepository localRepository;
 
     /**
+     * The artifact installer used to install artifacts.
+     *
      * @component
      */
     protected ArtifactInstaller installer;
@@ -70,6 +81,7 @@ public class InstallExternalDependencyMojo extends
      */
     protected boolean createChecksum = true;
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException
     {
         try
@@ -81,7 +93,7 @@ public class InstallExternalDependencyMojo extends
             super.md5Digester = this.md5Digester;
             super.sha1Digester = this.sha1Digester;
 
-            Boolean cachedCreateChecksums = this.createChecksum;
+            boolean cachedCreateChecksums = this.createChecksum;
 
             getLog()
                 .info(
@@ -101,7 +113,7 @@ public class InstallExternalDependencyMojo extends
 
                 // determine if the artifact is already installed in the local
                 // Maven repository
-                Boolean artifactAlreadyInstalled = getLocalRepoFile(artifact)
+                boolean artifactAlreadyInstalled = getLocalRepoFile(artifact)
                     .exists();
 
                 // only proceed with this artifact if it is not already

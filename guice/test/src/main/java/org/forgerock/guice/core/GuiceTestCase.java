@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.guice.core;
@@ -56,6 +57,7 @@ public abstract class GuiceTestCase implements Module {
 
         final GuiceTestCase testCase = this;
         Module overrideModule = new Module() {
+            @Override
             public void configure(Binder binder) {
                 testCase.configureOverrideBindings(binder);
             }
@@ -79,6 +81,7 @@ public abstract class GuiceTestCase implements Module {
      * A default, empty implementation is provided as the test may not have any of its own objects to bind.
      * @param binder The Guice binder.
      */
+    @Override
     public void configure(Binder binder) {
     }
 

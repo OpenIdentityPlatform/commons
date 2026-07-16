@@ -64,6 +64,7 @@ import org.forgerock.util.Options;
 import org.forgerock.util.Reject;
 import org.forgerock.util.Utils;
 import org.forgerock.util.annotations.VisibleForTesting;
+import org.forgerock.util.crypto.SecretHash;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 
@@ -288,7 +289,10 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
 
         final String tokenId = getSsoTokenId(messageInfo.getRequest());
         LOG.debug("SSO Token found.");
-        LOG.trace("SSO Token value, {}", tokenId);
+        // Log only a one-way hash of the SSO token, never the value (CWE-532: sensitive data in logs).
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("SSO Token hash={}", SecretHash.hash(tokenId));
+        }
 
         if (tokenId == null) {
             LOG.trace("SSO Token not found on request.");
@@ -314,7 +318,7 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
             public Promise<AuthStatus, AuthenticationException> apply(Response response) {
                 try {
                     if (!response.getStatus().isSuccessful()) {
-                        LOG.error("REST validation call returned non HTTP 200 response",
+                        LOG.error("REST validation call returned non HTTP 200 response: {}",
                                 response.getEntity().getString());
                         return newResultPromise(SEND_FAILURE);
                     }
@@ -365,7 +369,7 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
             public AuthStatus apply(Response response) throws AuthenticationException {
                 if (!response.getStatus().isSuccessful()) {
                     try {
-                        LOG.error("REST validation call returned non HTTP 200 response",
+                        LOG.error("REST validation call returned non HTTP 200 response: {}",
                                 response.getEntity().getString());
                         return SEND_FAILURE;
                     } catch (IOException e) {

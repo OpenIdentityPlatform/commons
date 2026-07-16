@@ -311,18 +311,22 @@ public class JsonPointer implements Iterable<String> {
     /**
      * Returns an iterator over the pointer's reference tokens.
      */
+    @Override
     public Iterator<String> iterator() {
         return new Iterator<String>() {
             int cursor = 0;
+            @Override
             public boolean hasNext() {
                 return cursor < tokens.length;
             }
+            @Override
             public String next() {
                 if (cursor >= tokens.length) {
                     throw new NoSuchElementException();
                 }
                 return tokens[cursor++];
             }
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }

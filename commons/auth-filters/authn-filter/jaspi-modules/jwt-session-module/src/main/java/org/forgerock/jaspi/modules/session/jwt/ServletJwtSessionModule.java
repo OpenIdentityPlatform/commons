@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
- * Portions copyright 2024 3A Systems LLC.
+ * Portions copyright 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.jaspi.modules.session.jwt;
@@ -92,6 +92,7 @@ public class ServletJwtSessionModule extends AbstractJwtSessionModule<Cookie> im
      * @param messageInfo The message info.
      * @return The cookie, or null.
      */
+    @Override
     public Cookie findJwtSessionCookie(MessageInfo messageInfo) {
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
         Set<Cookie> cookies = getCookies(request);

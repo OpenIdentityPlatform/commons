@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2013-2015 ForgeRock AS. All Rights Reserved
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,6 +21,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.script.registry;
@@ -185,6 +187,7 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
 
     // ScriptRegistry Methods
 
+    @Override
     public Set<ScriptName> listScripts() {
         return Collections.unmodifiableSet(cache.keySet());
     }
@@ -193,10 +196,12 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
         return takeScript(new ScriptName(name, SourceUnit.AUTO_DETECT));
     }
 
+    @Override
     public ScriptEngine getEngineByName(String shortName) {
         return findScriptEngine(shortName);
     }
 
+    @Override
     public ScriptEntry takeScript(JsonValue script) throws ScriptException {
         if (null == script || script.expect(Map.class).isNull()) {
             throw new NullPointerException("Null scriptValue");
@@ -248,6 +253,7 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
         return scriptEntry;
     }
 
+    @Override
     public synchronized ScriptEntry takeScript(ScriptName name) throws ScriptException {
         LibraryRecord rec = cache.get(name);
         if (null != rec) {
@@ -347,7 +353,7 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
         }
 
         private boolean isDependOn(ScriptName dependency) {
-            if (null != dependency || null != source) {
+            if (null != dependency && null != source) {
                 ScriptName[] dep = source.getDependencies();
                 if (null != dep && dep.length > 0) {
                     for (ScriptName name : dep) {
@@ -427,14 +433,17 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
 
         // START CompilationHandler
 
+        @Override
         public ScriptSource getScriptSource() {
             return source;
         }
 
+        @Override
         public ClassLoader getParentClassLoader() {
             return ScriptRegistryImpl.this.getRegistryLevelScriptClassLoader();
         }
 
+        @Override
         public void setCompiledScript(CompiledScript script) {
             int type = null != target ? ScriptEvent.MODIFIED : ScriptEvent.REGISTERED;
             target = script;
@@ -442,6 +451,7 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
             notifyListeners(type);
         }
 
+        @Override
         public void handleException(Exception exception) {
             try {
                 if (null != target) {
@@ -455,6 +465,7 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
             logger.error("Script compilation exception: {}", source.getName().getName(), exception);
         }
 
+        @Override
         public void setClassLoader(ClassLoader classLoader) {
             this.scriptClassLoader = classLoader;
         }
@@ -493,6 +504,7 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
             return Thread.currentThread().getContextClassLoader();
         }
 
+        @Override
         public Object invoke(Object proxy, Method method, Object[] arguments) throws Throwable {
             // do not proxy equals, hashCode, toString
             if (method.getDeclaringClass() == Object.class) {
@@ -521,14 +533,17 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
                 this.targetProxy = target;
             }
 
+            @Override
             public void addScriptListener(ScriptListener o) {
                 LibraryRecord.this.addScriptListener(o);
             }
 
+            @Override
             public void deleteScriptListener(ScriptListener o) {
                 LibraryRecord.this.deleteScriptListener(o);
             }
 
+            @Override
             public Bindings getScriptBindings(Context context, Bindings request) {
                 if (null == context) {
                     throw new NullPointerException();
@@ -541,6 +556,7 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
                         ScriptRegistryImpl.this.globalScope.get());
             }
 
+            @Override
             public Script getScript(final Context context) {
                 if (null == context) {
                     throw new NullPointerException();
@@ -560,30 +576,36 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
                     // return engine;
                     // }
 
+                    @Override
                     protected Bindings getGlobalBindings() {
                         return ScriptRegistryImpl.this.globalScope.get();
                     }
 
+                    @Override
                     protected Bindings getServiceBindings() {
                         return ServiceScript.this.getBindings();
                     }
                 };
             }
 
+            @Override
             public ScriptName getName() {
                 return scriptName;
             }
 
+            @Override
             public Visibility getVisibility() {
                 return null != source ? source.getVisibility() : Visibility.DEFAULT;
             }
 
+            @Override
             public boolean isActive() {
                 return target != null;
             }
         }
     }
 
+    @Override
     public void addScriptListener(ScriptName name, ScriptListener hook) {
         if (null != hook && null != name) {
             LibraryRecord record = cache.get(name);
@@ -598,6 +620,7 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
         }
     }
 
+    @Override
     public void deleteScriptListener(ScriptName name, ScriptListener hook) {
         if (null != hook && null != name) {
             LibraryRecord record = cache.get(name);
@@ -627,6 +650,7 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
     }
 
     // ScriptEngineFactoryObserver
+    @Override
     public void addingEntries(ScriptEngineFactory factory) throws ScriptException {
         engineFactories.add(factory);
         for (LibraryRecord cacheRecord : cache.values()) {
@@ -639,6 +663,7 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
         }
     }
 
+    @Override
     public void removingEntries(ScriptEngineFactory factory) throws ScriptException {
         engineFactories.remove(factory);
         engines.remove(factory);
@@ -653,6 +678,7 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
     }
 
     // SourceUnitObserver
+    @Override
     public void addSourceUnit(SourceUnit unit) throws ScriptException {
         try {
             if (unit instanceof ScriptSource) {
@@ -694,6 +720,7 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
         }
     }
 
+    @Override
     public void removeSourceUnit(SourceUnit unit) throws ScriptException {
         if (unit instanceof ScriptSource) {
             LibraryRecord cacheRecord = cache.get(unit.getName());
@@ -703,9 +730,9 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
         } else if (unit instanceof SourceContainer) {
             sourceCacheLock.writeLock().lock();
             try {
-                sourceCache.remove(unit);
+                sourceCache.remove(unit.getName());
             } finally {
-                sourceCacheLock.writeLock().lock();
+                sourceCacheLock.writeLock().unlock();
             }
 
             for (LibraryRecord cacheRecord : cache.values()) {
@@ -729,6 +756,7 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
             this.context = new ScriptContext(context, scriptName.getName(), scriptName.getType(), scriptName.getRevision());
         }
 
+        @Override
         public void putSafe(String key, Object value) {
             if (null == safeBinding) {
                 safeBinding = new SimpleBindings();
@@ -736,6 +764,7 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
             safeBinding.put(key, value);
         }
 
+        @Override
         public Object eval(final Bindings bindings) throws ScriptException {
             try {
                 return target.eval(context, bindings, safeBinding, getServiceBindings(),
@@ -748,6 +777,7 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
             }
         }
 
+        @Override
         public Object eval() throws ScriptException {
             return eval(getBindings());
         }
@@ -762,6 +792,7 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
 
         private Bindings bindings = null;
 
+        @Override
         public void put(String key, Object value) {
             if (null == bindings) {
                 bindings = createBindings();
@@ -769,6 +800,7 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
             bindings.put(key, value);
         }
 
+        @Override
         public Object get(String key) {
             if (getBindings() != null) {
                 return getBindings().get(key);
@@ -776,18 +808,22 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
             return null;
         }
 
+        @Override
         public Bindings getBindings() {
             return bindings;
         }
 
+        @Override
         public void setBindings(Bindings bindings) {
             this.bindings = bindings;
         }
 
+        @Override
         public Bindings createBindings() {
             return new SimpleBindings();
         }
 
+        @Override
         public void flush() {
             setBindings(null);
         }

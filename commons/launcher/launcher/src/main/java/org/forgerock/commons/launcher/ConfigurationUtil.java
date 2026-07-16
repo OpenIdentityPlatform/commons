@@ -62,6 +62,7 @@ public class ConfigurationUtil {
      * which will match each entry.
      * 
      * @param location
+     *            the URL of the jar file to scan.
      * @param includes
      *            to filter the results within a regular expression.
      * @return a list of files within the jar |file|
@@ -125,6 +126,7 @@ public class ConfigurationUtil {
 
     static { 
     	URL.setURLStreamHandlerFactory(protocol -> "jar".equals(protocol) ? new URLStreamHandler() {
+    	    @Override
     	    protected URLConnection openConnection(URL url) throws IOException {
     	        return new JarURLConnection(url) {
     	        	
@@ -153,6 +155,7 @@ public class ConfigurationUtil {
      * which will match each entry.
      * 
      * @param location
+     *            the URL of the zip file to scan.
      * @param includes
      *            to filter the results within a regular expression.
      * @return a list of files within the zip |file|

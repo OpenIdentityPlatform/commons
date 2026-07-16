@@ -12,6 +12,7 @@
 * information: "Portions copyright [year] [name of copyright owner]".
 *
 * Copyright 2014-2015 ForgeRock AS.
+* Portions Copyrighted 2026 3A Systems, LLC
 */
 
 package org.forgerock.jaspi.modules.openid.resolvers.service;
@@ -46,6 +47,7 @@ public class OpenIdResolverServiceConfiguratorImpl implements OpenIdResolverServ
      * @param resolvers the configuration
      * @return false if any resolver configuration fails true otherwise
      */
+    @Override
     public boolean configureService(final OpenIdResolverService service, final List<Map<String, String>> resolvers) {
 
         if (resolvers == null || resolvers.size() < 1) {

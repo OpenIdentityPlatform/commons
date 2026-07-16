@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.script.source;
@@ -52,6 +53,7 @@ public class BundleContainer implements SourceContainer {
         this.sourceURI = source.toURI();
     }
 
+    @Override
     public ScriptSource findScriptSource(ScriptName name) {
         URL source = bundle.getResource(name.getName());
         if (source != null) {
@@ -67,22 +69,27 @@ public class BundleContainer implements SourceContainer {
         return null;
     }
 
+    @Override
     public ScriptName getName() {
         return unitName;
     }
 
+    @Override
     public URL getSource() {
         return source;
     }
 
+    @Override
     public URI getSourceURI() {
         return sourceURI;
     }
 
+    @Override
     public ScriptEntry.Visibility getVisibility() {
         return visibility;
     }
 
+    @Override
     public SourceContainer getParentContainer() {
         return null;
     }

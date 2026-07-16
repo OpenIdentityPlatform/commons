@@ -1,5 +1,6 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
+ * Portions Copyrighted 2026 3A Systems, LLC
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,7 +192,7 @@ public class CLI {
      * annotation, and its arguments must be defined with @Arg annotations. This
      * method allows applications to extend the CLI.
      * 
-     * @param clazz
+     * @param clazz the class whose <code>@Cmd</code>-annotated methods are registered as CLI commands
      */
     public static void registerCommands(final Class<?> clazz) {
         for (final Method method : clazz.getDeclaredMethods()) {
@@ -248,8 +249,8 @@ public class CLI {
      * 
      * To execute the select command on a server on port 9999.
      * 
-     * @param args
-     * @throws Exception
+     * @param args command-line arguments; the first element specifies the host and/or port of the CLI server, and the remaining elements form the CLI command to execute
+     * @throws Exception if an error occurs while connecting to or communicating with the CLI server
      */
     public static void main(final String[] args) throws Exception {
         final StringBuilder sb = new StringBuilder();
@@ -279,16 +280,17 @@ public class CLI {
             throw new IllegalArgumentException("Invalid host or port specified by " + args[0]);
         }
 
-        final Socket socket = new Socket(host, port);
-        final OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream());
-        writer.write(sb.toString());
-        writer.flush();
-        final InputStreamReader reader = new InputStreamReader(socket.getInputStream());
-        int c;
-        while ((c = reader.read()) != -1) {
-            System.out.print((char) c);
+        try (final Socket socket = new Socket(host, port)) {
+            final OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream());
+            writer.write(sb.toString());
+            writer.flush();
+            final InputStreamReader reader = new InputStreamReader(socket.getInputStream());
+            int c;
+            while ((c = reader.read()) != -1) {
+                System.out.print((char) c);
+            }
+            System.out.println();
         }
-        System.out.println();
     }
 
     /**
@@ -296,10 +298,10 @@ public class CLI {
      * commands and write any generated output to the supplied
      * <code>PrintWriter</code>.
      * 
-     * @param persistit
-     * @param reader
-     * @param writer
-     * @throws Exception
+     * @param persistit the <code>Persistit</code> instance on which the commands operate
+     * @param reader the <code>BufferedReader</code> from which CLI command lines are read
+     * @param writer the <code>PrintWriter</code> to which generated output is written
+     * @throws Exception if an error occurs while reading, executing a command, or writing output
      */
     public static void runScript(final Persistit persistit, final BufferedReader reader, final PrintWriter writer)
             throws Exception {
@@ -324,7 +326,7 @@ public class CLI {
      * name=value parameters, all separate by spaces. Argument values containing
      * spaces can be quoted by a leading backslash.
      * 
-     * @param commandLine
+     * @param commandLine the command line string to split into command and argument tokens
      * @return List of String values, one per command name or argument token.
      */
     public static List<String> pieces(final String commandLine) {
@@ -620,71 +622,91 @@ public class CLI {
     }
 
     private void commandLoop() throws Exception {
-        while (!_stop) {
-            final String input;
-            if (!_sourceStack.isEmpty()) {
-                input = _sourceStack.peek().readLine();
-                if (input == null) {
-                    _sourceStack.pop();
-                    continue;
-                }
-            } else {
-                input = _lineReader.readLine();
-            }
-            if (input == null) {
-                break;
-            }
-            _writer = _lineReader.writer();
-            _commandCount++;
-            _lastStatus = input;
-            try {
-                final List<String> list = pieces(input);
-                if (list.isEmpty()) {
-                    continue;
-                }
-                final String commandName = list.get(0);
-                if (commandName.startsWith("#")) {
-                    continue;
-                }
-
-                if ("exit".equals(commandName) || "quit".equals(commandName)) {
-                    _stop = true;
-                    close(false);
-                    _lastStatus = "Done";
-                    _writer.println("Done");
-                    _lineReader.close();
-                }
-
-                // Handle intrinsic commands
-                final Command command = COMMANDS.get(commandName);
-                if (command != null) {
-                    list.remove(0);
-                    try {
-                        final String[] args = list.toArray(new String[list.size()]);
-                        final ArgParser ap = new ArgParser(commandName, args, command.argTemplate).strict();
-                        if (!ap.isUsageOnly()) {
-                            final String result = command.execute(this, ap);
-                            if (result != null) {
-                                _writer.println(result);
-                            }
-                            _lastStatus += " - done";
-                        }
-                    } catch (final InvocationTargetException e) {
-                        _lastStatus += e.getTargetException();
-                        _writer.println(e.getTargetException());
-                    } catch (final RuntimeException e) {
-                        _lastStatus += e;
-                        e.printStackTrace(_writer);
-                    } catch (final Exception e) {
-                        _lastStatus += e;
-                        _writer.println(e);
+        try {
+            while (!_stop) {
+                final String input;
+                if (!_sourceStack.isEmpty()) {
+                    input = _sourceStack.peek().readLine();
+                    if (input == null) {
+                        _sourceStack.pop().close();
+                        continue;
                     }
-                    continue;
+                } else {
+                    input = _lineReader.readLine();
                 }
-                _lastStatus += " - invalid command";
-                _writer.println("No such command " + commandName);
-            } finally {
-                _writer.flush();
+                if (input == null) {
+                    break;
+                }
+                _writer = _lineReader.writer();
+                _commandCount++;
+                _lastStatus = input;
+                try {
+                    final List<String> list = pieces(input);
+                    if (list.isEmpty()) {
+                        continue;
+                    }
+                    final String commandName = list.get(0);
+                    if (commandName.startsWith("#")) {
+                        continue;
+                    }
+
+                    if ("exit".equals(commandName) || "quit".equals(commandName)) {
+                        _stop = true;
+                        close(false);
+                        _lastStatus = "Done";
+                        _writer.println("Done");
+                        _lineReader.close();
+                    }
+
+                    // Handle intrinsic commands
+                    final Command command = COMMANDS.get(commandName);
+                    if (command != null) {
+                        list.remove(0);
+                        try {
+                            final String[] args = list.toArray(new String[list.size()]);
+                            final ArgParser ap = new ArgParser(commandName, args, command.argTemplate).strict();
+                            if (!ap.isUsageOnly()) {
+                                final String result = command.execute(this, ap);
+                                if (result != null) {
+                                    _writer.println(result);
+                                }
+                                _lastStatus += " - done";
+                            }
+                        } catch (final InvocationTargetException e) {
+                            _lastStatus += e.getTargetException();
+                            _writer.println(e.getTargetException());
+                        } catch (final RuntimeException e) {
+                            _lastStatus += e;
+                            e.printStackTrace(_writer);
+                        } catch (final Exception e) {
+                            _lastStatus += e;
+                            _writer.println(e);
+                        }
+                        continue;
+                    }
+                    _lastStatus += " - invalid command";
+                    _writer.println("No such command " + commandName);
+                } finally {
+                    _writer.flush();
+                }
+            }
+        } finally {
+            closeSourceStack();
+        }
+    }
+
+    /**
+     * Closes and discards any command-source readers still on the source stack.
+     * This covers the case where an <code>exit</code>/<code>quit</code> command
+     * (or an error) terminates the command loop before a sourced script has been
+     * read to its end. Best-effort: close failures during cleanup are ignored.
+     */
+    private void closeSourceStack() {
+        while (!_sourceStack.isEmpty()) {
+            try {
+                _sourceStack.pop().close();
+            } catch (final IOException e) {
+                // best-effort cleanup
             }
         }
     }
@@ -699,13 +721,13 @@ public class CLI {
      * Open files on disk and attempt to make a read-only Persistit instance.
      * This method does not return a Task and cannot be executed in a live
      * 
-     * @param datapath
-     * @param journalpath
-     * @param volumepath
-     * @param rmiport
-     * @param y
+     * @param datapath the directory path in which the data files are located
+     * @param journalpath the path to the journal files; if empty, the data path is used
+     * @param volumepath the path to the volume file(s); if empty, the data path is used
+     * @param rmiport the RMI management port on which to register the instance
+     * @param y <code>true</code> to recover committed transactions while opening
      * @return Result description
-     * @throws Exception
+     * @throws Exception if the read-only Persistit instance cannot be opened
      */
     @Cmd("open")
     String open(@Arg("datapath|string|Data path") final String datapath,
@@ -890,7 +912,7 @@ public class CLI {
                     postMessage(String.format("Source is %s", fileName), LOG_NORMAL);
                     return;
                 } else {
-                    _sourceStack.clear();
+                    closeSourceStack();
                     postMessage("Source is console", LOG_NORMAL);
                     return;
                 }
@@ -1139,7 +1161,7 @@ public class CLI {
             @Override
             protected void runTask() throws Exception {
                 long currentPage = pageAddress;
-                int count = 0;
+                long count = 0;
                 while (currentPage > 0 && count++ < maxcount) {
                     if (_currentVolume == null) {
                         postMessage("Select a volume", LOG_NORMAL);
@@ -1243,78 +1265,77 @@ public class CLI {
 
                 final ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(target),
                         BUFFER_SIZE));
-                final String basePath = "PersistitDump_" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
-                final long baseTime = System.currentTimeMillis();
+                try (final DataOutputStream stream = new DataOutputStream(zos)) {
+                    final String basePath = "PersistitDump_" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
+                    final long baseTime = System.currentTimeMillis();
 
-                zos.setLevel(ZipEntry.DEFLATED);
-                ZipEntry ze = new ZipEntry(JournalManager.generationToFile(basePath, 0).getPath());
-                ze.setSize(Integer.MAX_VALUE);
-                ze.setTime(baseTime);
-                zos.putNextEntry(ze);
+                    zos.setLevel(ZipEntry.DEFLATED);
+                    ZipEntry ze = new ZipEntry(JournalManager.generationToFile(basePath, 0).getPath());
+                    ze.setSize(Integer.MAX_VALUE);
+                    ze.setTime(baseTime);
+                    zos.putNextEntry(ze);
 
-                final DataOutputStream stream = new DataOutputStream(zos);
-
-                final ByteBuffer bb = ByteBuffer.allocate(BUFFER_SIZE);
-                {
-                    JH.putType(bb);
-                    JH.putTimestamp(bb, 0);
-                    JH.putVersion(bb, JournalManagerMXBean.VERSION);
-                    JH.putBlockSize(bb, HUGE_BLOCK_SIZE);
-                    JH.putBaseJournalAddress(bb, 0);
-                    JH.putCurrentJournalAddress(bb, 0);
-                    JH.putJournalCreatedTime(bb, 0);
-                    JH.putFileCreatedTime(bb, 0);
-                    JH.putPath(bb, basePath);
-                    bb.position(JH.getLength(bb));
-                }
-
-                final List<BufferPool> pools = new ArrayList<BufferPool>(_persistit.getBufferPoolHashMap().values());
-                for (final BufferPool pool : pools) {
-                    pool.dump(stream, bb, secure, verbose);
-                }
-
-                {
-                    CP.putLength(bb, CP.OVERHEAD);
-                    CP.putType(bb);
-                    CP.putTimestamp(bb, _persistit.getTimestampAllocator().getCurrentTimestamp() + 1);
-                    CP.putSystemTimeMillis(bb, baseTime);
-                    CP.putBaseAddress(bb, 0);
-                    bb.position(CP.OVERHEAD);
-                }
-
-                bb.flip();
-                stream.write(bb.array(), 0, bb.limit());
-                stream.flush();
-                zos.closeEntry();
-                bb.clear();
-
-                final PrintWriter writer = new PrintWriter(zos);
-                ze = new ZipEntry(basePath + ".txt");
-                ze.setSize(Integer.MAX_VALUE);
-                ze.setTime(baseTime);
-                zos.putNextEntry(ze);
-                final List<Volume> volumes = _persistit.getVolumes();
-
-                writer.printf("@volumes=%d\n", volumes.size());
-                for (final Volume volume : volumes) {
-                    writer.printf("%s\n", volume.toString());
-                    final List<Tree> trees = volume.getStructure().referencedTrees();
-                    writer.printf("@trees=%d\n", trees.size());
-                    for (final Tree tree : trees) {
-                        writer.printf("%s\n", tree.toString());
+                    final ByteBuffer bb = ByteBuffer.allocate(BUFFER_SIZE);
+                    {
+                        JH.putType(bb);
+                        JH.putTimestamp(bb, 0);
+                        JH.putVersion(bb, JournalManagerMXBean.VERSION);
+                        JH.putBlockSize(bb, HUGE_BLOCK_SIZE);
+                        JH.putBaseJournalAddress(bb, 0);
+                        JH.putCurrentJournalAddress(bb, 0);
+                        JH.putJournalCreatedTime(bb, 0);
+                        JH.putFileCreatedTime(bb, 0);
+                        JH.putPath(bb, basePath);
+                        bb.position(JH.getLength(bb));
                     }
-                }
-                writer.printf("@bufferPools=%d\n", pools.size());
-                for (final BufferPool pool : pools) {
-                    writer.printf("%s\n", pool.toString());
-                    writer.printf("@buffers=%d\n", pool.getBufferCount());
-                    for (int i = 0; i < pool.getBufferCount(); i++) {
-                        writer.printf("%s\n", pool.toString(i, false));
+
+                    final List<BufferPool> pools = new ArrayList<BufferPool>(_persistit.getBufferPoolHashMap().values());
+                    for (final BufferPool pool : pools) {
+                        pool.dump(stream, bb, secure, verbose);
                     }
+
+                    {
+                        CP.putLength(bb, CP.OVERHEAD);
+                        CP.putType(bb);
+                        CP.putTimestamp(bb, _persistit.getTimestampAllocator().getCurrentTimestamp() + 1);
+                        CP.putSystemTimeMillis(bb, baseTime);
+                        CP.putBaseAddress(bb, 0);
+                        bb.position(CP.OVERHEAD);
+                    }
+
+                    bb.flip();
+                    stream.write(bb.array(), 0, bb.limit());
+                    stream.flush();
+                    zos.closeEntry();
+                    bb.clear();
+
+                    final PrintWriter writer = new PrintWriter(zos);
+                    ze = new ZipEntry(basePath + ".txt");
+                    ze.setSize(Integer.MAX_VALUE);
+                    ze.setTime(baseTime);
+                    zos.putNextEntry(ze);
+                    final List<Volume> volumes = _persistit.getVolumes();
+
+                    writer.printf("@volumes=%d\n", volumes.size());
+                    for (final Volume volume : volumes) {
+                        writer.printf("%s\n", volume.toString());
+                        final List<Tree> trees = volume.getStructure().referencedTrees();
+                        writer.printf("@trees=%d\n", trees.size());
+                        for (final Tree tree : trees) {
+                            writer.printf("%s\n", tree.toString());
+                        }
+                    }
+                    writer.printf("@bufferPools=%d\n", pools.size());
+                    for (final BufferPool pool : pools) {
+                        writer.printf("%s\n", pool.toString());
+                        writer.printf("@buffers=%d\n", pool.getBufferCount());
+                        for (int i = 0; i < pool.getBufferCount(); i++) {
+                            writer.printf("%s\n", pool.toString(i, false));
+                        }
+                    }
+                    writer.flush();
+                    zos.closeEntry();
                 }
-                writer.flush();
-                zos.closeEntry();
-                stream.close();
             }
 
             @Override

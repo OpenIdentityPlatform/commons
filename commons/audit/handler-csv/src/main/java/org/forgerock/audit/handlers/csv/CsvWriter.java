@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.audit.handlers.csv;
 
@@ -37,15 +38,16 @@ interface CsvWriter extends AutoCloseable {
     /**
      * Write a row into the CSV files.
      * @param values The keys of the {@link Map} have to match the column's header.
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while writing the row.
      */
     void writeEvent(Map<String, String> values) throws IOException;
 
     /**
      * Flush the data into the CSV file.
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while flushing.
      */
     void flush() throws IOException;
 
+    @Override
     void close() throws IOException;
 }

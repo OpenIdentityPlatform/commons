@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.script.javascript;
@@ -146,6 +147,7 @@ abstract class AbstractScriptableRequest extends NativeObject implements Wrapper
         return request;
     }
 
+    @Override
     public String toString() {
         if (request == null) {
             return "null";

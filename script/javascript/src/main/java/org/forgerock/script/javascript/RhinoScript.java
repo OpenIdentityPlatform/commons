@@ -18,6 +18,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  *
  * Copyright 2012-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.script.javascript;
@@ -26,7 +27,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.SecureClassLoader;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -62,7 +62,6 @@ import org.slf4j.LoggerFactory;
  * <p>
  * This implementation pre-compiles the provided script. Any syntax errors in
  * the source code will throw an exception during construction of the object.
- * <p>
  *
  * @author Paul C. Bryan
  * @author aegloff
@@ -108,6 +107,7 @@ public class RhinoScript implements CompiledScript {
      * Proxy class to avoid proliferation of anonymous classes.
      */
     private static class IProxy implements QuitAction {
+        @Override
         public void quit(Context cx, int exitCode) {
             /* no quit :) */
         }
@@ -224,6 +224,7 @@ public class RhinoScript implements CompiledScript {
         return name.indexOf("/") != -1 ? name.substring(name.lastIndexOf("/") + 1) : name;
     }
 
+    @Override
     public Bindings prepareBindings(org.forgerock.services.context.Context context, Bindings request, Bindings... scopes) {
         // TODO Fix it later
         return new SimpleBindings();
@@ -243,14 +244,12 @@ public class RhinoScript implements CompiledScript {
                     operationParameter);
 
             Set<String> safeAttributes = null != request ? request.keySet() : Collections.EMPTY_SET;
-            Map<String, Object> scope = new HashMap<String, Object>();
             for (Map<String, Object> next : scopes) {
                 if (null == next) {
                     continue;
                 }
                 for (Map.Entry<String, Object> entry : next.entrySet()) {
-                    if (scope.containsKey(entry.getKey())
-                            || safeAttributes.contains(entry.getKey())) {
+                    if (safeAttributes.contains(entry.getKey())) {
                         continue;
                     }
                     long index = ScriptRuntime.indexFromString(entry.getKey());
@@ -337,6 +336,7 @@ public class RhinoScript implements CompiledScript {
             super(parent);
         }
 
+        @Override
         public Class<?> loadClass(String name) throws ClassNotFoundException {
             // First check whether it's already been loaded, if so use it
             Class loadedClass = Kit.classOrNull(getParent(), name);

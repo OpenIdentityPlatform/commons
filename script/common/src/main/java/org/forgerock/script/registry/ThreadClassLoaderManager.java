@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.script.registry;
@@ -36,6 +37,7 @@ public final class ThreadClassLoaderManager {
 
     private static ThreadLocal<ThreadClassLoaderManager> instance =
             new ThreadLocal<ThreadClassLoaderManager>() {
+                @Override
                 public ThreadClassLoaderManager initialValue() {
                     return new ThreadClassLoaderManager();
                 }
@@ -50,7 +52,7 @@ public final class ThreadClassLoaderManager {
     /**
      * Returns the thread-local instance of the manager.
      *
-     * @return
+     * @return the thread-local instance of the manager.
      */
     public static ThreadClassLoaderManager getInstance() {
         return instance.get();

@@ -231,7 +231,7 @@ public class ArgParser {
      * Return the boolean value of argument specified by its index in the
      * template
      * 
-     * @param index
+     * @param index the index of the argument in the template
      * @return the boolean value for the specified template item
      */
     public boolean booleanValue(final int index) {
@@ -269,7 +269,7 @@ public class ArgParser {
      * Return the integer value of argument specified by its index in the
      * template
      * 
-     * @param index
+     * @param index the index of the argument in the template
      * @return the int value for the specified template item
      */
     public int intValue(final int index) {
@@ -290,7 +290,7 @@ public class ArgParser {
     /**
      * Return the long value of argument specified by its index in the template
      * 
-     * @param index
+     * @param index the index of the argument in the template
      * @return the long value for the specified template item
      */
 
@@ -302,7 +302,7 @@ public class ArgParser {
      * Return the String value of argument specified by its index in the
      * template
      * 
-     * @param index
+     * @param index the index of the argument in the template
      * @return the String value for the specified template item
      */
     public String stringValue(final int index) {
@@ -313,7 +313,7 @@ public class ArgParser {
      * Indicate whether the value returned for the specified field is the
      * default value.
      * 
-     * @param fieldName
+     * @param fieldName the argument name of the field to test
      * @return <code>true</code> if the field contains its default value
      */
     public boolean isSpecified(final String fieldName) {

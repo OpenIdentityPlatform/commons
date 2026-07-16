@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,7 +134,7 @@ class InspectorPanel extends JPanel {
         }
 
         if (_showValue) {
-            new Thread(new Fetcher(getLogicalRecord())).start();
+            new Thread(new Fetcher(lr)).start();
         } else {
             refreshed();
         }

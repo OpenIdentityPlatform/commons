@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 package org.forgerock.json.fluent;
@@ -61,15 +62,18 @@ class RangeSet extends AbstractSet<String> implements Set<String>, Cloneable, Se
     public Iterator<String> iterator() {
         return new Iterator<String>() {
             int cursor = start;
+            @Override
             public boolean hasNext() {
                 return cursor <= end;
             }
+            @Override
             public String next() {
                 if (cursor > end) {
                     throw new NoSuchElementException();
                 }
                 return Integer.toString(cursor++);
             }
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }
@@ -134,5 +138,14 @@ class RangeSet extends AbstractSet<String> implements Set<String>, Cloneable, Se
     @Override
     public void clear() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public RangeSet clone() {
+        try {
+            return (RangeSet) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(e);
+        }
     }
 }

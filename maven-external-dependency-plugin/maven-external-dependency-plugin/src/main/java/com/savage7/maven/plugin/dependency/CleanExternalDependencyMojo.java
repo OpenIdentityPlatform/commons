@@ -29,6 +29,14 @@ import org.apache.maven.plugin.MojoFailureException;
  */
 public class CleanExternalDependencyMojo extends AbstractExternalDependencyMojo
 {
+    /**
+     * Creates a new instance.
+     */
+    public CleanExternalDependencyMojo()
+    {
+    }
+
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException
     {
         try

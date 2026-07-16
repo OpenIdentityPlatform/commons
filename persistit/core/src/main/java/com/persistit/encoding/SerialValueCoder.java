@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit.encoding;
@@ -90,7 +91,7 @@ public final class SerialValueCoder implements ValueCoder {
      * @return An <code>Object</code> having the same class as the suppled
      *         <code>clazz</code> parameter.
      * 
-     * @throws ConversionException
+     * @throws ConversionException if the value cannot be converted
      */
     @Override
     public Object get(final Value value, final Class<?> clazz, final CoderContext context) {

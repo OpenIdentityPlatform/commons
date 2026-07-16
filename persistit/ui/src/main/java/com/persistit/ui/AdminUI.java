@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -203,11 +204,20 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
     public AdminUI(final String rmiHost) {
         this();
         _rmiHost = rmiHost;
-        if (rmiHost != null)
-            connect(rmiHost);
     }
 
     public AdminUI() {
+    }
+
+    /**
+     * Builds and displays the UI. Invoke this once, after construction, from a
+     * thread other than the AWT event-dispatch thread: it launches the
+     * frame-building helper thread and waits for it to finish. The thread starts
+     * are kept out of the constructor so that {@code this} does not escape to the
+     * helper threads before construction has completed (CodeQL
+     * java/thread-start-in-constructor).
+     */
+    public void launch() {
         //
         // This is a workaround for JVM bug 4030718 in JDK1.3.
         // (See http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4030718).
@@ -331,8 +341,7 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
                 }
                 if (propFileName == null)
                     propFileName = DEFAULT_CONFIG_FILE;
-                try {
-                    final FileInputStream fis = new FileInputStream(propFileName);
+                try (final FileInputStream fis = new FileInputStream(propFileName)) {
                     _properties = new Properties();
                     _properties.load(fis);
                 } catch (final Exception e) {
@@ -604,8 +613,8 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
             newPanel.setIsShowing(true);
             changeMenuMap(newPanel.getMenuMap(), true);
             scheduleRefresh(-1);
+            newPanel.setDefaultButton();
         }
-        newPanel.setDefaultButton();
     }
 
     void changeMenuMap(final Map menuMap, final boolean add) {
@@ -702,7 +711,7 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
         JComponent wrappedComponent = component;
         if (component instanceof JTextField) {
             final JTextField textField = (JTextField) component;
-            textField.setColumns(Integer.parseInt(widthStr));
+            textField.setColumns(parseDimension("width", widthStr));
             textField.setHorizontalAlignment(alignment.equals("R") ? SwingConstants.TRAILING
                     : alignment.equals("C") ? SwingConstants.CENTER : SwingConstants.LEADING);
             textField.setEditable(false);
@@ -710,8 +719,8 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
             textField.setBackground(Color.white);
         } else if (component instanceof JTextArea) {
             final JTextArea textArea = (JTextArea) component;
-            textArea.setColumns(Integer.parseInt(widthStr));
-            textArea.setRows(Integer.parseInt(heightStr));
+            textArea.setColumns(parseDimension("width", widthStr));
+            textArea.setRows(parseDimension("height", heightStr));
             textArea.setEditable(false);
             textArea.setEnabled(true);
             textArea.setBackground(Color.white);
@@ -731,6 +740,14 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
 
         component.setMinimumSize(component.getPreferredSize());
         return component;
+    }
+
+    private static int parseDimension(final String name, final String value) {
+        try {
+            return Integer.parseInt(value);
+        } catch (final NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid " + name + " in component specification: " + value, e);
+        }
     }
 
     AdminAction createAction(final AdminCommand command, final String specification) {
@@ -852,7 +869,12 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
     }
 
     public static void main(final String[] args) {
-        new AdminUI(args.length > 0 ? args[0] : null);
+        final String rmiHost = args.length > 0 ? args[0] : null;
+        final AdminUI adminUI = new AdminUI(rmiHost);
+        adminUI.launch();
+        if (rmiHost != null) {
+            adminUI.connect(rmiHost);
+        }
     }
 
     /**
@@ -887,6 +909,15 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
             _name = actionName;
             _caption = caption;
             _command = command;
+        }
+
+        @Override
+        public AdminAction clone() {
+            try {
+                return (AdminAction) super.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new AssertionError(e);
+            }
         }
 
         @Override
@@ -947,9 +978,9 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
         public void removeButton(final AbstractButton button) {
             if (_buttonList != null) {
                 _buttonList.remove(button);
+                if (_buttonList.size() == 0)
+                    _buttonList = null;
             }
-            if (_buttonList.size() == 0)
-                _buttonList = null;
         }
 
         public void stateChanged(final boolean selected) {
@@ -1000,6 +1031,19 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
                 _refreshOnceButton = item;
             }
             return item;
+        }
+
+        private void writeObject(final java.io.ObjectOutputStream out) throws java.io.IOException {
+            // AdminAction is a non-static inner class of the non-serializable AdminUI, so it can
+            // never be serialized: the implicit outer reference already makes serialization fail
+            // with NotSerializableException. Declare that explicitly rather than leaving the
+            // hazard implicit (CodeQL java/non-serializable-inner-class).
+            throw new java.io.NotSerializableException(getClass().getName());
+        }
+
+        private void readObject(final java.io.ObjectInputStream in)
+                throws java.io.IOException, ClassNotFoundException {
+            throw new java.io.NotSerializableException(getClass().getName());
         }
     }
 
@@ -1282,7 +1326,7 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
         if (interval >= 0)
             _refreshInterval = interval;
         if (_refreshInterval > 0) {
-            _refreshTimer.schedule(_refreshTimerTask, 0, _refreshInterval * 1000);
+            _refreshTimer.schedule(_refreshTimerTask, 0, _refreshInterval * 1000L);
         } else {
             _refreshTimer.schedule(_refreshTimerTask, 0);
         }
@@ -1357,6 +1401,19 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
         @Override
         public void paint(final Graphics g) {
             g.drawImage(_image, 0, 0, this);
+        }
+
+        private void writeObject(final java.io.ObjectOutputStream out) throws java.io.IOException {
+            // SplashWindow is a non-static inner class of the non-serializable AdminUI; the
+            // implicit outer reference already makes serialization fail with
+            // NotSerializableException. Declare that explicitly (CodeQL
+            // java/non-serializable-inner-class).
+            throw new java.io.NotSerializableException(getClass().getName());
+        }
+
+        private void readObject(final java.io.ObjectInputStream in)
+                throws java.io.IOException, ClassNotFoundException {
+            throw new java.io.NotSerializableException(getClass().getName());
         }
     }
 }

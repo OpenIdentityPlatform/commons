@@ -36,6 +36,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 /**
@@ -86,7 +87,6 @@ import groovy.util.ResourceException;
  * <p>
  * This implementation pre-compiles the provided script. Any syntax errors in
  * the source code will throw an exception during construction of the object.
- * <p>
  *
  * @author Paul C. Bryan
  * @author aegloff
@@ -105,12 +105,14 @@ public class GroovyScript implements CompiledScript {
         engine.createScript(scriptName, new Binding());
     }
 
+    @Override
     public Bindings prepareBindings(final Context context, final Bindings request,
             final Bindings... scopes) {
         final Map<String, Object> b = mergeBindings(context, request, scopes);
         return b instanceof Bindings ? (Bindings) b : new SimpleBindings(b);
     }
 
+    @Override
     public Object eval(final Context context, final Bindings request, final Bindings... scopes)
             throws ScriptException {
 
@@ -308,18 +310,22 @@ public class GroovyScript implements CompiledScript {
             this.parameter = parameter;
         }
 
+        @Override
         protected Factory<List<Object>> newListFactory(final List<Object> source) {
             return new InnerListFactory(source, parameter);
         }
 
+        @Override
         protected Factory<Map<String, Object>> newMapFactory(final Map<String, Object> source) {
             return new InnerMapFactory(source, parameter);
         }
 
+        @Override
         protected Object convertFunction(final Function<?> source) {
             return new FunctionClosure(null, parameter, source);
         }
 
+        @Override
         public Parameter getParameter() {
             return parameter;
         }
@@ -334,18 +340,22 @@ public class GroovyScript implements CompiledScript {
             this.parameter = parameter;
         }
 
+        @Override
         protected Factory<List<Object>> newListFactory(final List<Object> source) {
             return new InnerListFactory(source, parameter);
         }
 
+        @Override
         protected Factory<Map<String, Object>> newMapFactory(final Map<String, Object> source) {
             return new InnerMapFactory(source, parameter);
         }
 
+        @Override
         protected Object convertFunction(final Function<?> source) {
             return new FunctionClosure(null, parameter, source);
         }
 
+        @Override
         public Parameter getParameter() {
             return parameter;
         }

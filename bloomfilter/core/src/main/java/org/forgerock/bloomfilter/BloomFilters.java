@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.bloomfilter;
@@ -297,6 +298,7 @@ public final class BloomFilters {
         }
 
         @VisibleForTesting
+        @Override
         RollingBloomFilterBuilder<T> withClock(final TimeService clock) {
             Reject.ifNull(clock);
             this.clock = clock;

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 package org.forgerock.api.transform;
@@ -77,6 +78,15 @@ class LocalizableByteArrayProperty extends ByteArrayProperty implements Localiza
         return description;
     }
 
+    @Override
+    public LocalizableByteArrayProperty clone() {
+        try {
+            return (LocalizableByteArrayProperty) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(e);
+        }
+    }
+
     /**
      * Sets the default value, which is a base64 byte-representation.
      *
@@ -92,6 +102,7 @@ class LocalizableByteArrayProperty extends ByteArrayProperty implements Localiza
      *
      * @return Default value or {@code null}
      */
+    @Override
     public String getDefault() {
         return defaultValue;
     }

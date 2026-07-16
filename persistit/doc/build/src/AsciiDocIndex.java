@@ -56,13 +56,10 @@ public class AsciiDocIndex {
      * content of that one file. If it is a directory, read the files in that
      * directory and index them.
      * 
-     * @param file
-     * 
      * @return The count of indexable terms in the file or directory
      * 
      * @throws IOException
      * 
-     * @throws PersistitException
      */
     public int buildIndex(final String pathName, String base) throws IOException {
         File file = new File(pathName);

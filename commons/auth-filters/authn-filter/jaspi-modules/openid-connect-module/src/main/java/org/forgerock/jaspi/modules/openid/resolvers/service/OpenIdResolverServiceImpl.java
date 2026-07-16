@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.jaspi.modules.openid.resolvers.service;
@@ -85,6 +86,7 @@ public class OpenIdResolverServiceImpl implements OpenIdResolverService {
      * @param issuer The name of the issuer of the Open Id Connect token to check
      * @return A resolver which can handle verification of the Open Id Connect token
      */
+    @Override
     public OpenIdResolver getResolverForIssuer(final String issuer) {
         return openIdResolvers.get(issuer);
     }
@@ -100,6 +102,7 @@ public class OpenIdResolverServiceImpl implements OpenIdResolverService {
      * @param keystorePassword password to enter the keystore
      * @return true if the resolver was configured successfully, false otherwise
      */
+    @Override
     public boolean configureResolverWithKey(final String issuer,
                                             final String keyAlias, final String keystoreLocation,
                                             final String keystoreType, final String keystorePassword) {
@@ -138,6 +141,7 @@ public class OpenIdResolverServiceImpl implements OpenIdResolverService {
      * @param sharedSecret The known-to-both-parties secret String
      * @return true if the resolver was configured successfully, false otherwise
      */
+    @Override
     public boolean configureResolverWithSecret(final String issuer, final String sharedSecret) {
 
         try {
@@ -158,6 +162,7 @@ public class OpenIdResolverServiceImpl implements OpenIdResolverService {
      * @param jwkUrl location from which to determine which public key to use
      * @return true if the resolver was configured successfully, false otherwise
      */
+    @Override
     public boolean configureResolverWithJWK(final String issuer,
                                             final URL jwkUrl) {
 
@@ -180,6 +185,7 @@ public class OpenIdResolverServiceImpl implements OpenIdResolverService {
      * @param configUrl location from which to determine which public key to use
      * @return true if the resolver was configured successfully, false otherwise
      */
+    @Override
     public boolean configureResolverWithWellKnownOpenIdConfiguration(final URL configUrl) {
 
         try {

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.util.xml;
@@ -47,7 +48,7 @@ public class XMLHandler extends DefaultHandler {
 
         if (sysid.toLowerCase().startsWith("jar://")) {
             final String dtdname = sysid.substring(5);
-            final InputStream is = getClass().getResourceAsStream(dtdname);
+            final InputStream is = XMLHandler.class.getResourceAsStream(dtdname);
             if (is != null) {
                 return new InputSource(is);
             }

@@ -13,6 +13,7 @@
  *
  *      Copyright 2009 Sun Microsystems, Inc.
  *      Portions copyright 2011 ForgeRock AS
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.i18n;
@@ -69,6 +70,7 @@ public class LocalizedIllegalArgumentException extends IllegalArgumentException
     /**
      * {@inheritDoc}
      */
+    @Override
     public final LocalizableMessage getMessageObject() {
         return this.message;
     }
