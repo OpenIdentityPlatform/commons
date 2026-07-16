@@ -1,6 +1,7 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
  * Copyright 2015 ForgeRock AS
+ * Portions Copyrighted 2026 3A Systems, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -4462,6 +4463,9 @@ public class Exchange implements ReadOnlyExchange {
       throw new IllegalArgumentException("Tree depth is " + _tree.getDepth());
     }
     final int lvl = level >= 0 ? level : _tree.getDepth() + level;
+    if (lvl < 0 || lvl >= _levelCache.length) {
+      throw new IllegalArgumentException("Tree depth is " + _tree.getDepth());
+    }
     final int foundAt = searchTree(_key, lvl, false);
     final Buffer buffer = _levelCache[lvl]._buffer;
     try {
