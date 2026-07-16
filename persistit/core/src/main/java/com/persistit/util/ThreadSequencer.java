@@ -203,7 +203,7 @@ public class ThreadSequencer implements SequencerConstants {
     public static String describeHistory(final int[] history) {
         final StringBuilder sb = new StringBuilder();
         if (history != null) {
-            for (final Integer location : history) {
+            for (final int location : history) {
                 if (sb.length() > 0) {
                     sb.append(',');
                 }

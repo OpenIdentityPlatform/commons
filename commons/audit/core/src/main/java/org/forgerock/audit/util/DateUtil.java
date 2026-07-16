@@ -205,9 +205,9 @@ public final class DateUtil {
     public static int getDateDifferenceInDays(final Date start, final Date end, final Boolean includeDay) {
         Integer result = null;
         if (start != null && end != null) {
-            final Long l = 86400000L;
-            final Long r = (end.getTime() - start.getTime()) / l;
-            result = r.intValue();
+            final long l = 86400000L;
+            final long r = (end.getTime() - start.getTime()) / l;
+            result = (int) r;
             if (includeDay) {
                 result++;
             }

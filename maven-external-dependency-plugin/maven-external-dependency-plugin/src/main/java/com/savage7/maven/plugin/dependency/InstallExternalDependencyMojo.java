@@ -92,7 +92,7 @@ public class InstallExternalDependencyMojo extends
             super.md5Digester = this.md5Digester;
             super.sha1Digester = this.sha1Digester;
 
-            Boolean cachedCreateChecksums = this.createChecksum;
+            boolean cachedCreateChecksums = this.createChecksum;
 
             getLog()
                 .info(
@@ -112,7 +112,7 @@ public class InstallExternalDependencyMojo extends
 
                 // determine if the artifact is already installed in the local
                 // Maven repository
-                Boolean artifactAlreadyInstalled = getLocalRepoFile(artifact)
+                boolean artifactAlreadyInstalled = getLocalRepoFile(artifact)
                     .exists();
 
                 // only proceed with this artifact if it is not already
