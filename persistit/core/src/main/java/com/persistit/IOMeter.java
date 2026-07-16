@@ -281,7 +281,7 @@ class IOMeter implements IOMeterMXBean {
                 if (analyzePages
                         && (op == WRITE_PAGE_TO_JOURNAL || op == READ_PAGE_FROM_JOURNAL || op == READ_PAGE_FROM_VOLUME
                                 || op == COPY_PAGE_FROM_JOURNAL || op == COPY_PAGE_TO_VOLUME || op == EVICT_PAGE_FROM_POOL)) {
-                    final long handle = (volumeHandle << 48) + pageAddress;
+                    final long handle = ((long) volumeHandle << 48) + pageAddress;
                     List<Event> list = events.get(handle);
                     if (list == null) {
                         list = new ArrayList<Event>(2);
