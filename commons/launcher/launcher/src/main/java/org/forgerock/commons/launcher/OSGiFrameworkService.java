@@ -335,14 +335,13 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
                             		   );
                 }
             } else {
-                input =
-                        new BufferedReader(new InputStreamReader(Main.class
-                                .getResourceAsStream("/launcher.json")));
-                if (null == input) {
+                final InputStream configStream = Main.class.getResourceAsStream("/launcher.json");
+                if (null == configStream) {
                     throw new IllegalArgumentException(
                             "Boot OSGi configuration file does not exists on CLASSPATH: "
                                     + Main.class.getResource("/").toString() + "/launcher.json");
                 }
+                input = new BufferedReader(new InputStreamReader(configStream));
             }
             launcherConfiguration = new JsonValue((new JSONParser()).parse(input));
             launcherConfiguration.getTransformers().add(transformer);

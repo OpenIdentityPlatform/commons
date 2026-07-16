@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2020-2024 3A Systems LLC.
+ * Copyright 2020-2026 3A Systems LLC.
  */
 
 package ru.org.openam.geo;
@@ -48,9 +48,9 @@ public class Info {
 	@Override
 	public String toString() {
 		if (ip!=null&&ip.isSiteLocalAddress())
-			return MessageFormat.format("{0} ({1})",(ip!=null)?ip.getHostAddress():ipString,"LAN");
+			return MessageFormat.format("{0} ({1})",ip.getHostAddress(),"LAN");
 		else if (ip!=null&&ip.isLoopbackAddress())
-			return MessageFormat.format("{0} ({1})",(ip!=null)?ip.getHostAddress():ipString,"LOCALHOST");
+			return MessageFormat.format("{0} ({1})",ip.getHostAddress(),"LOCALHOST");
 		else if (l!=null)
 			return MessageFormat.format("{0} ({1}:{2}/{3})",
 					(ip!=null)?ip.getHostAddress():ipString,
