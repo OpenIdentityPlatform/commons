@@ -300,7 +300,7 @@ public class FindFile extends JPanel {
             KeyFilter filter = new KeyFilter(ex.getKey());
             if (fixed.length() != 0) {
                 String end = fixed.substring(0, fixed.length() - 1)
-                        + new Character((char) (fixed.charAt(fixed.length() - 1) + 1));
+                        + Character.valueOf((char) (fixed.charAt(fixed.length() - 1) + 1));
                 //
                 // append a Term that selects only the range accepted by the
                 // fixed portion of the name.

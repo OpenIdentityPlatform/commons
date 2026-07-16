@@ -345,7 +345,7 @@ class ManagementImpl implements Management {
         final BufferPoolInfo[] result = new BufferPoolInfo[size];
         int index = 0;
         for (int bufferSize = Buffer.MIN_BUFFER_SIZE; bufferSize <= Buffer.MAX_BUFFER_SIZE; bufferSize *= 2) {
-            final BufferPool pool = bufferPoolTable.get(new Integer(bufferSize));
+            final BufferPool pool = bufferPoolTable.get(Integer.valueOf(bufferSize));
 
             if (pool != null && index < size) {
                 final BufferPoolInfo info = new BufferPoolInfo();
@@ -1049,7 +1049,7 @@ class ManagementImpl implements Management {
             final long taskId = ++_taskIdCounter;
             task.setPersistit(_persistit);
             task.setup(taskId, description, owner, maximumTime, verbosity);
-            _tasks.put(new Long(taskId), task);
+            _tasks.put(Long.valueOf(taskId), task);
             task.start();
             return taskId;
         } catch (final Exception ex) {
@@ -1149,7 +1149,7 @@ class ManagementImpl implements Management {
                     task.resume();
             }
         } else {
-            final Task task = _tasks.get(new Long(taskId));
+            final Task task = _tasks.get(Long.valueOf(taskId));
             if (task != null) {
                 if (suspend)
                     task.suspend();
@@ -1180,11 +1180,11 @@ class ManagementImpl implements Management {
                 _tasks.clear();
             }
         } else {
-            final Task task = _tasks.get(new Long(taskId));
+            final Task task = _tasks.get(Long.valueOf(taskId));
             if (task != null) {
                 task.stop();
                 if (remove) {
-                    _tasks.remove(new Long(task._taskId));
+                    _tasks.remove(Long.valueOf(task._taskId));
                 }
             }
         }
@@ -1304,7 +1304,7 @@ class ManagementImpl implements Management {
         try {
             final long taskId = taskId();
             task.setup(taskId, description, Thread.currentThread().getName(), 0, 5);
-            _tasks.put(new Long(taskId), task);
+            _tasks.put(Long.valueOf(taskId), task);
             task.start();
             return Long.toString(taskId);
         } catch (final Exception ex) {
