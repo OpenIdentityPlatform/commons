@@ -96,8 +96,8 @@ public interface IOMeterMXBean {
      * fixed-length record being added to the file. The resulting log file can
      * become extremely large.
      * 
-     * @param toFile
-     * @throws IOException
+     * @param toFile the path of the file into which I/O events should be logged, or null to disable logging
+     * @throws IOException if an I/O error occurs
      */
     @Description("Path for diagnostic I/O log file - normally null")
     public void setLogFile(final String toFile) throws IOException;

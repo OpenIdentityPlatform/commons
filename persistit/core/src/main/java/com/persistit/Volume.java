@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -109,9 +110,9 @@ public class Volume {
 
     /**
      * Construct a hollow Volume - used by JournalManager
-     * 
-     * @param name
-     * @param id
+     *
+     * @param name the volume name
+     * @param id the volume id
      */
     Volume(final String name, final long id) {
         _name = name;
@@ -121,8 +122,8 @@ public class Volume {
 
     /**
      * Construct a hollow Volume with its specification.
-     * 
-     * @param specification
+     *
+     * @param specification the volume specification
      */
     Volume(final VolumeSpecification specification) {
         this(specification.getName(), specification.getId());
@@ -189,8 +190,8 @@ public class Volume {
      * <code>Volume</code> may no longer be used after this call. Waits up to
      * {@value com.persistit.SharedResource#DEFAULT_MAX_WAIT_TIME} milliseconds
      * for other threads to relinquish access to the volume.
-     * 
-     * @throws PersistitException
+     *
+     * @throws PersistitException if a persistence error occurs
      */
     public void close() throws PersistitException {
         close(SharedResource.DEFAULT_MAX_WAIT_TIME);
@@ -204,7 +205,7 @@ public class Volume {
      * @param timeout
      *            Maximum time in milliseconds to wait for other threads to
      *            relinquish access to the volume.
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     public void close(final long timeout) throws PersistitException {
         closing();
@@ -250,8 +251,8 @@ public class Volume {
      * delete and close the file. Instead, this method truncates the file,
      * rewrites the head page, and invalidates all buffers belonging to this
      * <code>Volume</code> in the {@link BufferPool}.
-     * 
-     * @throws PersistitException
+     *
+     * @throws PersistitException if a persistence error occurs
      */
     public void truncate() throws PersistitException {
         if (isReadOnly()) {
@@ -291,7 +292,7 @@ public class Volume {
      * 
      * @return <code>true</code> if the file existed and was successfully
      *         deleted.
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     public boolean delete() throws PersistitException {
         if (!isClosed()) {
@@ -378,12 +379,12 @@ public class Volume {
      * @param createIfNecessary
      *            Determines whether this method will create a new tree if there
      *            is no tree having the specified name.
-     * 
+     *
      * @return The <code>NewTree</code>, or <code>null</code> if
      *         <code>createIfNecessary</code> is false and there is no such tree
      *         in this <code>Volume</code>.
-     * 
-     * @throws PersistitException
+     *
+     * @throws PersistitException if a persistence error occurs
      */
     public Tree getTree(final String name, final boolean createIfNecessary) throws PersistitException {
         checkClosing();
@@ -394,8 +395,8 @@ public class Volume {
      * Returns an array of all currently defined <code>Tree</code> names.
      * 
      * @return The array
-     * 
-     * @throws PersistitException
+     *
+     * @throws PersistitException if a persistence error occurs
      */
     public String[] getTreeNames() throws PersistitException {
         checkClosing();
@@ -406,7 +407,7 @@ public class Volume {
      * Return a TreeInfo structure for a tree by the specified name. If there is
      * no such tree, then return <code>null</code>.
      * 
-     * @param tree
+     * @param name
      *            name
      * @return an information structure for the Management interface.
      */
@@ -454,8 +455,8 @@ public class Volume {
     /**
      * Open an existing Volume file or create a new one, depending on the
      * settings of the {@link VolumeSpecification}.
-     * 
-     * @throws PersistitException
+     *
+     * @throws PersistitException if a persistence error occurs
      */
     synchronized void open(final Persistit persistit) throws PersistitException {
         checkClosing();
@@ -566,7 +567,7 @@ public class Volume {
      * Set the handle used to identify this Tree in the journal. May be invoked
      * only once.
      * 
-     * @param handle
+     * @param handle the handle value to assign
      * @return the handle
      * @throws IllegalStateException
      *             if the handle has already been set

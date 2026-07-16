@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.jose.jwt;
@@ -22,7 +23,6 @@ package org.forgerock.json.jose.jwt;
  * JSON Web Token (JWT) is a means of representing claims to be transferred between two parties.  The claims in a JWT
  * are encoded as a JSON object that is digitally signed or MACed using JSON Web Signature (JWS) and/or encrypted using
  * JSON Web Encryption (JWE).
- * <p>
  * @see <a href="http://tools.ietf.org/html/draft-jones-json-web-token-10">JSON Web Token Specification</a>
  *
  * @since 2.0.0
@@ -50,7 +50,6 @@ public interface Jwt {
     /**
      * Builds the JWT into a <code>String</code> by following the steps specified in the relevant specification
      * according to whether the JWT is being signed and/or encrypted.
-     * <p>
      * @see <a href="http://tools.ietf.org/html/draft-jones-json-web-token-10#section-7">
      *     JSON Web Token Specification</a>
      * @see <a href="http://tools.ietf.org/html/draft-ietf-jose-json-web-signature-11#section-5">

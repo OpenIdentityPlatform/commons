@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyrighted 2020-2026 3A Systems, LLC
  */
 
 package org.forgerock.json.jose.jwk;
@@ -335,7 +336,7 @@ public class RsaJWKTest {
         KeyPair keypair = null;
         try {
             KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-            generator.initialize(1024);
+            generator.initialize(2048);
             keypair = generator.genKeyPair();
         } catch (Exception e) {
             assertFalse(false, e.getLocalizedMessage());
@@ -358,7 +359,7 @@ public class RsaJWKTest {
         KeyPair keypair = null;
         try {
             KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-            generator.initialize(1024);
+            generator.initialize(2048);
             keypair = generator.genKeyPair();
         } catch (Exception e) {
             assertFalse(false, e.getLocalizedMessage());
@@ -384,7 +385,7 @@ public class RsaJWKTest {
         KeyPair keypair = null;
         try {
             KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-            generator.initialize(1024);
+            generator.initialize(2048);
             keypair = generator.genKeyPair();
         } catch (Exception e) {
             assertFalse(false, e.getLocalizedMessage());

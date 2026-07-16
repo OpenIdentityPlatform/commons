@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -330,8 +331,7 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
                 }
                 if (propFileName == null)
                     propFileName = DEFAULT_CONFIG_FILE;
-                try {
-                    final FileInputStream fis = new FileInputStream(propFileName);
+                try (final FileInputStream fis = new FileInputStream(propFileName)) {
                     _properties = new Properties();
                     _properties.load(fis);
                 } catch (final Exception e) {
@@ -607,8 +607,8 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
             newPanel.setIsShowing(true);
             changeMenuMap(newPanel.getMenuMap(), true);
             scheduleRefresh(-1);
+            newPanel.setDefaultButton();
         }
-        newPanel.setDefaultButton();
     }
 
     void changeMenuMap(final Map menuMap, final boolean add) {
@@ -893,6 +893,15 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
         }
 
         @Override
+        public AdminAction clone() {
+            try {
+                return (AdminAction) super.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new AssertionError(e);
+            }
+        }
+
+        @Override
         public void actionPerformed(final ActionEvent ae) {
             if (!_refreshing) {
                 _command.actionPerformed(this, ae);
@@ -950,9 +959,9 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
         public void removeButton(final AbstractButton button) {
             if (_buttonList != null) {
                 _buttonList.remove(button);
+                if (_buttonList.size() == 0)
+                    _buttonList = null;
             }
-            if (_buttonList.size() == 0)
-                _buttonList = null;
         }
 
         public void stateChanged(final boolean selected) {
@@ -1285,7 +1294,7 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
         if (interval >= 0)
             _refreshInterval = interval;
         if (_refreshInterval > 0) {
-            _refreshTimer.schedule(_refreshTimerTask, 0, _refreshInterval * 1000);
+            _refreshTimer.schedule(_refreshTimerTask, 0, _refreshInterval * 1000L);
         } else {
             _refreshTimer.schedule(_refreshTimerTask, 0);
         }

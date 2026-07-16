@@ -1,6 +1,7 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
- * 
+ * Portions Copyrighted 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,7 +79,7 @@ public class ManagementTableModel extends AbstractTableModel {
      * <i>width</i> is a percentage of the total table width, and
      * <i>justification</i> is L, C or R.
      * 
-     * @param clazz
+     * @param clazz the management info class whose columns are displayed.
      */
 
     public ManagementTableModel(final Class clazz, String className, final AdminUI ui) throws NoSuchMethodException {
@@ -217,7 +218,7 @@ public class ManagementTableModel extends AbstractTableModel {
             final TableColumnModel tcm = table.getColumnModel();
             final int count = tcm.getColumnCount();
             if (count > _displayedColumnCount) {
-                for (int i = _displayedColumnCount; --i >= count;) {
+                for (int i = count; --i >= _displayedColumnCount;) {
                     tcm.removeColumn(tcm.getColumn(i));
                 }
             }

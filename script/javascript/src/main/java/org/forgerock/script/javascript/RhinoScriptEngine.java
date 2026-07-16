@@ -193,7 +193,7 @@ public class RhinoScriptEngine extends AbstractScriptEngine {
      * @param scriptName
      *            name of the script to run
      * @return the script object
-     * @throws ResourceException
+     * @throws ScriptException
      *             if there is a problem accessing the script
      */
     Script createScript(String scriptName) throws ScriptException {

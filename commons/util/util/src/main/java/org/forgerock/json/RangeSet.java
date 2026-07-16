@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright 2011-2015 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 package org.forgerock.json;
 
@@ -133,5 +134,14 @@ class RangeSet extends AbstractSet<String> implements Set<String>, Cloneable, Se
     @Override
     public void clear() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public RangeSet clone() {
+        try {
+            return (RangeSet) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(e);
+        }
     }
 }

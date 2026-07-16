@@ -1,6 +1,8 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
- * 
+ *
+ * Portions Copyrighted 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -477,6 +479,18 @@ public class JournalManagerTest extends PersistitUnitTestCase {
         volume1 = null;
         volume2 = null;
         _persistit = new Persistit(_config);
+        /*
+         * The missing-volume alert is posted by JournalManager.writeForCopy when
+         * the journal copier tries to copy a page back to a now-deleted volume.
+         * For these non-transactional pages that copy runs on the background
+         * JOURNAL_COPIER thread, so asserting immediately after startup races it:
+         * on a slow/loaded runner no alert has been posted yet and getHistory()
+         * returns null (intermittent CI failure). Force the copy-back so the
+         * alert is generated deterministically. ignoreMissingVolumes is still
+         * false here, so the pages are retained for the ignore-behavior check
+         * below.
+         */
+        _persistit.copyBackPages();
         final AlertMonitor am = _persistit.getAlertMonitor();
         assertTrue("Startup with missing volumes should have generated alerts",
                 am.getHistory(AlertMonitor.MISSING_VOLUME_CATEGORY) != null);

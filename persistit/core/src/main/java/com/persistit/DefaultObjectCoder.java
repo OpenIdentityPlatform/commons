@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -189,8 +190,8 @@ public class DefaultObjectCoder extends DefaultValueCoder implements KeyRenderer
      *            of stored instances
      * 
      * @return the newly registered <code>DefaultObjectCoder</code>
-     * 
-     * @throws IntrospectionException
+     *
+     * @throws IntrospectionException if the client class cannot be introspected
      */
     public synchronized DefaultObjectCoder registerObjectCoderFromBean(final Persistit persistit,
             final Class clientClass, final String[] keyPropertyNames) throws IntrospectionException {
@@ -450,7 +451,7 @@ public class DefaultObjectCoder extends DefaultValueCoder implements KeyRenderer
                 accessor.toKey(object, key);
             }
         } catch (final Exception e) {
-            throw new ConversionException("Encoding " + accessor.toString() + " for " + getClientClass(), e);
+            throw new ConversionException("Encoding " + String.valueOf(accessor) + " for " + getClientClass(), e);
         }
     }
 
@@ -504,8 +505,8 @@ public class DefaultObjectCoder extends DefaultValueCoder implements KeyRenderer
      *            application to convey an application-specific context for the
      *            operation. (See {@link CoderContext}.) The default value is
      *            <code>null</code>.
-     * 
-     * @throws ConversionException
+     *
+     * @throws ConversionException if the key segment cannot be converted into the target object
      */
     @Override
     public void renderKeySegment(final Key key, final Object target, final Class clazz, final CoderContext context)
@@ -524,7 +525,7 @@ public class DefaultObjectCoder extends DefaultValueCoder implements KeyRenderer
                 accessor.fromKey(target, key);
             }
         } catch (final Exception e) {
-            throw new ConversionException("Decoding " + accessor.toString() + " for " + getClientClass(), e);
+            throw new ConversionException("Decoding " + String.valueOf(accessor) + " for " + getClientClass(), e);
         }
     }
 

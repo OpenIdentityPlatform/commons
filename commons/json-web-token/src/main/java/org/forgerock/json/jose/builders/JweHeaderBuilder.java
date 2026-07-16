@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.jose.builders;
@@ -42,7 +43,6 @@ public class JweHeaderBuilder<B extends EncryptedJwtBuilder> extends JwtSecureHe
 
     /**
      * Sets the Encryption Method header parameter for this JWE.
-     * <p>
      * @see org.forgerock.json.jose.jwe.JweHeader#setEncryptionMethod(org.forgerock.json.jose.jwe.EncryptionMethod)
      *
      * @param enc The Encryption Method.
@@ -55,7 +55,6 @@ public class JweHeaderBuilder<B extends EncryptedJwtBuilder> extends JwtSecureHe
 
     /**
      * Sets the Ephemeral Public Key header parameter for this JWE.
-     * <p>
      * @see org.forgerock.json.jose.jwe.JweHeader#setEphemeralPublicKey(org.forgerock.json.jose.jwk.JWK)
      *
      * @param epk The Ephemeral Public Key.
@@ -74,7 +73,6 @@ public class JweHeaderBuilder<B extends EncryptedJwtBuilder> extends JwtSecureHe
 
     /**
      * Sets the Agreement PartyUInfo header parameter for this JWE.
-     * <p>
      * @see org.forgerock.json.jose.jwe.JweHeader#setAgreementPartyUInfo(String)
      *
      * @param apu The Agreement PartyUInfo.

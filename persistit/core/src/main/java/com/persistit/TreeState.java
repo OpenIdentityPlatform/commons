@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -66,7 +67,6 @@ public class TreeState {
      * {@link Tree#store(byte[], int)} operation. This class is only for display
      * and reference.
      * 
-     * @param value
      */
     int load(final byte[] bytes, final int index, final int length) {
         final int nameLength = length < 20 ? -1 : Util.getShort(bytes, index + 18);

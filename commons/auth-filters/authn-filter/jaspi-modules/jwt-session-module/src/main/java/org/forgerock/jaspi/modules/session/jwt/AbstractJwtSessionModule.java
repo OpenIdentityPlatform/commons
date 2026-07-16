@@ -191,7 +191,9 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
         Boolean httpOnly = (Boolean) options.get(HTTP_ONLY_COOKIE_KEY);
         this.isHttpOnly = httpOnly == null ? false : httpOnly;
         Boolean secure = (Boolean) options.get(SECURE_COOKIE_KEY);
-        this.isSecure = secure == null ? false : secure;
+        // Secure-by-default: session cookies carry the Secure attribute unless the
+        // deployment explicitly opts out with isSecure=false (CodeQL java/insecure-cookie).
+        this.isSecure = secure == null ? true : secure;
         cookieDomains = (Collection<String>) options.get(COOKIE_DOMAINS_KEY);
         if (cookieDomains == null || cookieDomains.isEmpty()) {
             cookieDomains = Collections.singleton(null);

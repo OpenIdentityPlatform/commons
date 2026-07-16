@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -134,7 +135,7 @@ class TransactionStatus {
     /**
      * Constructs a partial copy. Used only in diagnostic code.
      * 
-     * @param status
+     * @param status the <code>TransactionStatus</code> to copy
      */
     TransactionStatus(final TransactionStatus status) {
         this._bucket = status._bucket;
@@ -174,7 +175,7 @@ class TransactionStatus {
     /**
      * Link another TransactionStatus this one depends on.
      * 
-     * @param next
+     * @param depends
      *            the TransactionStatus to link
      */
     void setDepends(final TransactionStatus depends) {
@@ -218,7 +219,7 @@ class TransactionStatus {
      * that until we implement SSI this method is unnecessary, but is included
      * so that unit tests can test the interim state.
      * 
-     * @param timestamp
+     * @param timestamp the commit timestamp
      */
     void commit(final long timestamp) {
         if (timestamp < _ts || timestamp == UNCOMMITTED) {
@@ -332,7 +333,7 @@ class TransactionStatus {
      * 
      * @param timeout
      *            in milliseconds
-     * @throws InterruptedException
+     * @throws InterruptedException if the thread is interrupted while waiting
      */
     void briefLock(final long timeout) throws InterruptedException {
         boolean locked = false;
@@ -361,9 +362,9 @@ class TransactionStatus {
      * wwDependency until the commit/abort status of the current transaction is
      * known.
      * 
-     * @param timeout
-     * @return
-     * @throws InterruptedException
+     * @param timeout the maximum time to wait, in milliseconds
+     * @return <code>true</code> if the permit was acquired within the timeout
+     * @throws InterruptedException if the thread is interrupted while waiting
      */
     boolean wwLock(final long timeout) throws InterruptedException {
         return _wwLock.tryAcquire(timeout, TimeUnit.MILLISECONDS);

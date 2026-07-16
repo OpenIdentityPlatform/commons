@@ -33,7 +33,6 @@ import org.forgerock.util.encode.Base64url;
  * A JWE implementation of the <code>Jwt</code> interface.
  * <p>
  * JSON Web Encryption (JWE) is a representing encrypted content using JSON based data structures.
- * <p>
  * @see <a href="http://tools.ietf.org/html/draft-ietf-jose-json-web-encryption-11">
  *     JSON Web Encryption Specification</a>
  *

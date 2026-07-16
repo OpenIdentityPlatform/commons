@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.jose.jwe.handlers.compression;
@@ -28,7 +29,6 @@ import org.forgerock.json.jose.exceptions.JweCompressionException;
 
 /**
  * An implementation of the CompressionHandler for DEFLATE Compressed Data Format Specification.
- * <p>
  * @see <a href="http://tools.ietf.org/html/rfc1951">DEFLATE Compressed Data Format Specification version 1.3</a>
  *
  */

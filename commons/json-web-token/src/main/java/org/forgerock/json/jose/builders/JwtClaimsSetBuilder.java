@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.jose.builders;
@@ -39,7 +40,6 @@ public class JwtClaimsSetBuilder {
 
     /**
      * Adds a custom claim to the JWT Claims Set.
-     * <p>
      * @see JwtClaimsSet#setClaim(String, Object)
      *
      * @param key The claim name.
@@ -53,7 +53,6 @@ public class JwtClaimsSetBuilder {
 
     /**
      * Sets all of the claims the JWT Claims Set with the values contained in the specified map.
-     * <p>
      * @see JwtClaimsSet#setClaims(java.util.Map)
      *
      * @param claims The Map to use to set the claims.
@@ -66,7 +65,6 @@ public class JwtClaimsSetBuilder {
 
     /**
      * Sets the type of the contents of the Claims Set.
-     * <p>
      * @see JwtClaimsSet#getType()
      *
      * @param typ The Claims Set content type.
@@ -78,7 +76,6 @@ public class JwtClaimsSetBuilder {
 
     /**
      * Sets the unique ID of the JWT.
-     * <p>
      * @see JwtClaimsSet#setJwtId(String)
      *
      * @param jti The JWT's ID.
@@ -90,7 +87,6 @@ public class JwtClaimsSetBuilder {
 
     /**
      * Sets the issuer this JWT was issued by.
-     * <p>
      * @see JwtClaimsSet#setIssuer(String)
      *
      * @param iss The JWT's issuer.
@@ -102,7 +98,6 @@ public class JwtClaimsSetBuilder {
 
     /**
      * Sets the issuer this JWT was issued by.
-     * <p>
      * @see JwtClaimsSet#setIssuer(java.net.URI)
      *
      * @param iss The JWT's issuer.
@@ -114,7 +109,6 @@ public class JwtClaimsSetBuilder {
 
     /**
      * Sets the subject this JWT is issued to.
-     * <p>
      * @see JwtClaimsSet#setSubject(String)
      *
      * @param sub The JWT's subject.
@@ -126,7 +120,6 @@ public class JwtClaimsSetBuilder {
 
     /**
      * Sets the subject this JWT is issued to.
-     * <p>
      * @see JwtClaimsSet#setSubject(java.net.URI)
      *
      * @param sub The JWT's subject.
@@ -138,7 +131,6 @@ public class JwtClaimsSetBuilder {
 
     /**
      * Sets the JWT's intended audience list in the Claims Set.
-     * <p>
      * @see JwtClaimsSet#addAudience(String)
      *
      * @param aud The JWT's audience.
@@ -150,7 +142,6 @@ public class JwtClaimsSetBuilder {
 
     /**
      * Sets the time the JWT was issued at, in the Claims Set.
-     * <p>
      * @see JwtClaimsSet#setIssuedAtTime(java.util.Date)
      *
      * @param iat The JWT's issued at time.
@@ -162,7 +153,6 @@ public class JwtClaimsSetBuilder {
 
     /**
      * Sets the time the JWT is not allowed to be processed before, in the Claims Set.
-     * <p>
      * @see JwtClaimsSet#setNotBeforeTime(java.util.Date)
      *
      * @param nbf The JWT's not before time.
@@ -174,7 +164,6 @@ public class JwtClaimsSetBuilder {
 
     /**
      * Sets the expiration time of the JWT in the Claims Set.
-     * <p>
      * @see JwtClaimsSet#setExpirationTime(java.util.Date)
      *
      * @param exp The JWT's expiration time.
