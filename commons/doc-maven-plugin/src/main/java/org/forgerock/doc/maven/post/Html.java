@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2014 ForgeRock AS
- * Portions copyright 2024 3A Systems LLC.
+ * Portions copyright 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.doc.maven.post;
@@ -131,7 +131,7 @@ public class Html {
      */
     private void addScript() throws MojoExecutionException {
 
-        final URL scriptUrl = getClass().getResource("/js/" + m.getJavaScriptFileName());
+        final URL scriptUrl = Html.class.getResource("/js/" + m.getJavaScriptFileName());
         String scriptString;
         try {
             scriptString = IOUtils.toString(scriptUrl);
@@ -197,16 +197,16 @@ public class Html {
             HashMap<String, String> replacements = new HashMap<>();
 
             String doctype = IOUtils.toString(
-                    getClass().getResourceAsStream("/starthtml-doctype.txt"), StandardCharsets.UTF_8);
+                    Html.class.getResourceAsStream("/starthtml-doctype.txt"), StandardCharsets.UTF_8);
             replacements.put("<html>", doctype);
 
             // See https://developers.google.com/webmasters/control-crawl-index/docs/robots_meta_tag
             String robots = "<head>" + System.getProperty("line.separator")
-                    + IOUtils.toString(getClass().getResourceAsStream("/robots.txt"), StandardCharsets.UTF_8);
+                    + IOUtils.toString(Html.class.getResourceAsStream("/robots.txt"), StandardCharsets.UTF_8);
             replacements.put("<head>", robots);
 
             String favicon = IOUtils.toString(
-                    getClass().getResourceAsStream("/endhead-favicon.txt"), StandardCharsets.UTF_8);
+                    Html.class.getResourceAsStream("/endhead-favicon.txt"), StandardCharsets.UTF_8);
             favicon = favicon.replace("FAVICON-LINK", m.getFaviconLink());
             replacements.put("</head>", favicon);
 
@@ -215,7 +215,7 @@ public class Html {
             String gascript = "";
             if(m.getGoogleAnalyticsId() != null && !"".equals(m.getGoogleAnalyticsId())) {
                 gascript = IOUtils.toString(
-                        getClass().getResourceAsStream("/endbody-ga.txt"), StandardCharsets.UTF_8);
+                        Html.class.getResourceAsStream("/endbody-ga.txt"), StandardCharsets.UTF_8);
                 gascript = gascript.replace("ANALYTICS-ID", m.getGoogleAnalyticsId());
             }
 

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2014 ForgeRock AS
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.doc.maven.site;
@@ -54,7 +55,7 @@ public class Htaccess {
 
         FileUtils.deleteQuietly(htaccess);
         try {
-            FileUtils.copyURLToFile(getClass().getResource("/.htaccess"), htaccess);
+            FileUtils.copyURLToFile(Htaccess.class.getResource("/.htaccess"), htaccess);
             HtmlUtils.addHtaccess(layoutDir, htaccess);
         } catch (IOException e) {
             throw new MojoExecutionException("Failed to copy .htaccess: " + e.getMessage(), e);

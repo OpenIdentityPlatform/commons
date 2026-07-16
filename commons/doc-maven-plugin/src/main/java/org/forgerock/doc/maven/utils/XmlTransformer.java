@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.doc.maven.utils;
@@ -96,7 +97,7 @@ public class XmlTransformer extends DirectoryWalker<File> {
     private Transformer getTransformer(final String xslResource)
             throws IOException, TransformerConfigurationException {
         TransformerFactory factory = TransformerFactory.newInstance();
-        Source xslt = new StreamSource(getClass().getResource(xslResource).openStream());
+        Source xslt = new StreamSource(XmlTransformer.class.getResource(xslResource).openStream());
         return factory.newTransformer(xslt);
     }
 

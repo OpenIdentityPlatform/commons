@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014 ForgeRock AS
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.doc.maven.release;
@@ -54,7 +55,7 @@ public class Robots {
 
         try {
             final String robots = IOUtils.toString(
-                    getClass().getResourceAsStream("/robots.txt"), "UTF-8");
+                    Robots.class.getResourceAsStream("/robots.txt"), "UTF-8");
 
             replacements.put(robots, ""); // Replace the tag with an empty string.
             HtmlUtils.updateHtml(m.getReleaseVersionPath(), replacements);
