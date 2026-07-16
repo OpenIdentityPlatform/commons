@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions Copyrighted 2026 3A Systems, LLC
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +86,7 @@ public class PersistitTableModel extends AbstractTableModel {
     /**
      * Establishes the supplied Exchange as the root of a display tree.
      * 
-     * @param exchange
+     * @param exchange the Exchange to establish as the root of the display tree.
      */
     public void setExchange(final Exchange exchange) {
         _exchange = exchange;
@@ -196,7 +197,7 @@ public class PersistitTableModel extends AbstractTableModel {
     /**
      * Sets up the TableColumnModel for a supplied JTable
      * 
-     * @param table
+     * @param table the JTable whose column model is configured.
      */
     public void setupColumns(final JTable table) {
         final TableColumnModel tcm = table.getColumnModel();

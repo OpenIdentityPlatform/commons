@@ -283,8 +283,6 @@ public final class AlertMonitor extends NotificationBroadcasterSupport implement
          * 
          * @param event
          *            the <code>Event</code> to add
-         * @param level
-         *            the <code>AlertLevel</code> that should be assigned to it
          */
         private void addEvent(final Event event) {
             trim(_historyLength - 1);
@@ -751,7 +749,7 @@ public final class AlertMonitor extends NotificationBroadcasterSupport implement
      * standard log message. If there have been multiple Events, emit a
      * recurring event message.
      * 
-     * @param history
+     * @param history the event history to log
      */
     private void log(final History history) {
         final Event event = history.getLastEvent();
@@ -767,7 +765,7 @@ public final class AlertMonitor extends NotificationBroadcasterSupport implement
     /**
      * Broadcast a JMX Notification.
      * 
-     * @param history
+     * @param history the event history to broadcast
      */
     private void sendNotification(final History history) {
         final Event event = history.getLastEvent();
@@ -795,7 +793,7 @@ public final class AlertMonitor extends NotificationBroadcasterSupport implement
      * were three argument elements.
      * </p>
      * 
-     * @param event
+     * @param event the event to format
      * @return formatted event
      */
     private String format(final Event event) {

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.jose.jws;
@@ -20,7 +21,6 @@ import org.forgerock.json.jose.jwt.Algorithm;
 
 /**
  * An Enum of the possible signing algorithms that can be used to sign a JWT.
- * <p>
  * @see <a href="http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-11#section-3.1">JWS Algorithms</a>
  *
  * @since 2.0.0

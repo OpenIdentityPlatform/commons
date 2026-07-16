@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.jose.builders;
@@ -49,7 +50,6 @@ public abstract class JwtSecureHeaderBuilder<T extends JwtBuilder, B extends Jwt
 
     /**
      * Sets the JWK Set URL header parameter for this JWS.
-     * <p>
      * @see org.forgerock.json.jose.jws.JwtSecureHeader#setJwkSetUrl(java.net.URL)
      *
      * @param jku The JWK Set URL.
@@ -63,7 +63,6 @@ public abstract class JwtSecureHeaderBuilder<T extends JwtBuilder, B extends Jwt
 
     /**
      * Sets the JSON Web Key header parameter for this JWS.
-     * <p>
      * @see org.forgerock.json.jose.jws.JwtSecureHeader#setJsonWebKey(org.forgerock.json.jose.jwk.JWK)
      *
      * @param jwk The JSON Web Key.
@@ -77,7 +76,6 @@ public abstract class JwtSecureHeaderBuilder<T extends JwtBuilder, B extends Jwt
 
     /**
      * Sets the X.509 URL header parameter for this JWS.
-     * <p>
      * @see org.forgerock.json.jose.jws.JwtSecureHeader#setX509Url(java.net.URL)
      *
      * @param x5u THe X.509 URL.
@@ -91,7 +89,6 @@ public abstract class JwtSecureHeaderBuilder<T extends JwtBuilder, B extends Jwt
 
     /**
      * Sets the X.509 Certificate Thumbprint header parameter for this JWS.
-     * <p>
      * @see org.forgerock.json.jose.jws.JwtSecureHeader#setX509CertificateThumbprint(String)
      *
      * @param x5t The X.509 Certificate Thumbprint.
@@ -105,7 +102,6 @@ public abstract class JwtSecureHeaderBuilder<T extends JwtBuilder, B extends Jwt
 
     /**
      * Sets the X.509 Certificate Chain header parameter for this JWS.
-     * <p>
      * @see org.forgerock.json.jose.jws.JwtSecureHeader#setX509CertificateChain(java.util.List)
      *
      * @param x5c The X.509 Certificate Chain.
@@ -119,7 +115,6 @@ public abstract class JwtSecureHeaderBuilder<T extends JwtBuilder, B extends Jwt
 
     /**
      * Sets the Key ID header parameter for this JWS.
-     * <p>
      * @see org.forgerock.json.jose.jws.JwtSecureHeader#setKeyId(String)
      *
      * @param kid The Key ID.
@@ -133,7 +128,6 @@ public abstract class JwtSecureHeaderBuilder<T extends JwtBuilder, B extends Jwt
 
     /**
      * Sets the content type header parameter for this JWS.
-     * <p>
      * @see org.forgerock.json.jose.jws.JwtSecureHeader#setContentType(String)
      *
      * @param cty The content type of the JWS payload.
@@ -147,7 +141,6 @@ public abstract class JwtSecureHeaderBuilder<T extends JwtBuilder, B extends Jwt
 
     /**
      * Sets the critical header parameters for this JWS.
-     * <p>
      * @see org.forgerock.json.jose.jws.JwtSecureHeader#setCriticalHeaders(java.util.List)
      *
      * @param crit A List of the JWS critical parameters.
@@ -161,7 +154,6 @@ public abstract class JwtSecureHeaderBuilder<T extends JwtBuilder, B extends Jwt
 
     /**
      * Sets the Compression Algorithm header parameter for this JWE.
-     * <p>
      * @see JwtSecureHeader#setCompressionAlgorithm(CompressionAlgorithm)
      *
      * @param zip The Compression Algorithm.

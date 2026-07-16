@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 package org.forgerock.util;
@@ -33,7 +34,7 @@ import java.util.Set;
 public class LazyMap<K, V> implements Map<K, V> {
 
     /** The map that this lazy map exposes, once initialized. */
-    private Map<K, V> map;
+    private volatile Map<K, V> map;
 
     /** Factory to create the instance of the map to expose. */
     protected Factory<Map<K, V>> factory;

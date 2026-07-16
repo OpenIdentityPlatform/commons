@@ -150,7 +150,7 @@ public class StreamSaver extends Task {
      * 
      * @param file
      *            The File to which data will be saved
-     * @throws FileNotFoundException
+     * @throws FileNotFoundException if the file cannot be opened
      */
     public StreamSaver(final Persistit persistit, final File file) throws FileNotFoundException {
         this(persistit, new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file), DEFAULT_BUFFER_SIZE)));
@@ -174,7 +174,7 @@ public class StreamSaver extends Task {
      * 
      * @param pathName
      *            The path name of the file to which data will be saved
-     * @throws FileNotFoundException
+     * @throws FileNotFoundException if the file cannot be opened
      */
     public StreamSaver(final Persistit persistit, final String pathName) throws FileNotFoundException {
         this(persistit, new DataOutputStream(new BufferedOutputStream(new FileOutputStream(pathName),
@@ -189,7 +189,7 @@ public class StreamSaver extends Task {
      *            The File to which data will be saved
      * @param bufferSize
      *            The buffer size
-     * @throws FileNotFoundException
+     * @throws FileNotFoundException if the file cannot be opened
      */
     public StreamSaver(final Persistit persistit, final File file, final int bufferSize) throws FileNotFoundException {
         this(persistit, new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file), bufferSize)));
@@ -203,7 +203,7 @@ public class StreamSaver extends Task {
      *            The path name of the file to which data will be saved
      * @param bufferSize
      *            The buffer size
-     * @throws FileNotFoundException
+     * @throws FileNotFoundException if the file cannot be opened
      */
     public StreamSaver(final Persistit persistit, final String pathName, final int bufferSize)
             throws FileNotFoundException {
@@ -240,7 +240,7 @@ public class StreamSaver extends Task {
      * indicates that the save file represents all the records requested by the
      * save operation.
      * 
-     * @throws IOException
+     * @throws IOException if an I/O error occurs
      */
     public void close() throws IOException {
         writeTimestamp();
@@ -263,7 +263,7 @@ public class StreamSaver extends Task {
      * 
      * @param exchange
      *            The <code>Exchange</code>
-     * @throws IOException
+     * @throws IOException if an I/O error occurs
      */
     protected void writeData(final Exchange exchange) throws IOException {
         if (_lastVolume != exchange.getVolume()) {
@@ -287,7 +287,7 @@ public class StreamSaver extends Task {
      *            The <code>Key</code>
      * @param value
      *            The <code>Value</code>
-     * @throws IOException
+     * @throws IOException if an I/O error occurs
      */
     protected void writeData(final Key key, final Value value) throws IOException {
         final int elisionCount = key.firstUniqueByteIndex(_lastKey);
@@ -314,7 +314,7 @@ public class StreamSaver extends Task {
      * preceded by three FILL records to allow for easier inspection of the save
      * file.
      * 
-     * @throws IOException
+     * @throws IOException if an I/O error occurs
      */
     protected void writeRecordCount(final long dataRecordCount, final long otherRecordCount) throws IOException {
         _dos.writeChar(RECORD_TYPE_FILL);
@@ -335,7 +335,7 @@ public class StreamSaver extends Task {
      * 
      * @param exchange
      *            The <code>Exchange</code>
-     * @throws IOException
+     * @throws IOException if an I/O error occurs
      */
     protected void writeVolumeInfo(final Exchange exchange) throws IOException {
         writeVolumeInfo(exchange.getVolume());
@@ -348,8 +348,8 @@ public class StreamSaver extends Task {
      * recreate a new, empty <code>Tree</code> having the same name as the
      * <code>Tree</code> being saved.
      * 
-     * @param exchange
-     * @throws IOException
+     * @param exchange The <code>Exchange</code>
+     * @throws IOException if an I/O error occurs
      */
     protected void writeTreeInfo(final Exchange exchange) throws IOException {
         writeTreeInfo(exchange.getTree());
@@ -364,7 +364,7 @@ public class StreamSaver extends Task {
      * 
      * @param volume
      *            The <code>Volume</code>
-     * @throws IOException
+     * @throws IOException if an I/O error occurs
      */
     protected void writeVolumeInfo(final Volume volume) throws IOException {
         _dos.writeChar(RECORD_TYPE_VOLUME_ID);
@@ -387,7 +387,7 @@ public class StreamSaver extends Task {
      * 
      * @param tree
      *            The <code>Tree</code>
-     * @throws IOException
+     * @throws IOException if an I/O error occurs
      */
     protected void writeTreeInfo(final Tree tree) throws IOException {
         _dos.writeChar(RECORD_TYPE_TREE_ID);
@@ -399,7 +399,7 @@ public class StreamSaver extends Task {
     /**
      * Writes a TIMESTAMP record containing the current system time.
      * 
-     * @throws IOException
+     * @throws IOException if an I/O error occurs
      */
     protected void writeTimestamp() throws IOException {
         _dos.writeChar(RECORD_TYPE_TIMESTAMP);
@@ -411,7 +411,7 @@ public class StreamSaver extends Task {
      * 
      * @param comment
      *            The comment string
-     * @throws IOException
+     * @throws IOException if an I/O error occurs
      */
     protected void writeComment(final String comment) throws IOException {
         _dos.writeChar(RECORD_TYPE_COMMENT);
@@ -424,7 +424,7 @@ public class StreamSaver extends Task {
      * 
      * @param exception
      *            The <code>Exception</code>
-     * @throws IOException
+     * @throws IOException if an I/O error occurs
      */
     protected void writeException(final Exception exception) throws IOException {
         _dos.writeChar(RECORD_TYPE_EXCEPTION);
@@ -441,8 +441,8 @@ public class StreamSaver extends Task {
      *            The <code>Exchange</code>
      * @param filter
      *            The <code>KeyFilter</code>
-     * @throws PersistitException
-     * @throws IOException
+     * @throws PersistitException if a persistence error occurs
+     * @throws IOException if an I/O error occurs
      */
     public void save(final Exchange exchange, final KeyFilter filter) throws PersistitException, IOException {
         postMessage("Saving Tree " + exchange.getTree().getName() + " in volume " + exchange.getVolume().getPath()
@@ -474,8 +474,8 @@ public class StreamSaver extends Task {
      *            The volume name, or a substring that matches only one volume.
      * @param selectedTreeNames
      *            An array names of the trees to be saved.
-     * @throws PersistitException
-     * @throws IOException
+     * @throws PersistitException if a persistence error occurs
+     * @throws IOException if an I/O error occurs
      */
     public void saveTrees(final String volumeName, final String[] selectedTreeNames) throws PersistitException,
             IOException {
@@ -491,8 +491,8 @@ public class StreamSaver extends Task {
      *            The <code>Volume</code>
      * @param selectedTreeNames
      *            An array names of the trees to be saved.
-     * @throws PersistitException
-     * @throws IOException
+     * @throws PersistitException if a persistence error occurs
+     * @throws IOException if an I/O error occurs
      */
     public void saveTrees(final Volume volume, final String[] selectedTreeNames) throws PersistitException, IOException {
         final String[] treeNames = volume.getTreeNames();
@@ -527,8 +527,8 @@ public class StreamSaver extends Task {
      * @param treeSelector
      *            The <code>TreeSelector</code>s to select volumes, trees, and
      *            KeyFilters within trees.
-     * @throws PersistitException
-     * @throws IOException
+     * @throws PersistitException if a persistence error occurs
+     * @throws IOException if an I/O error occurs
      */
     public void saveTrees(final TreeSelector treeSelector) throws PersistitException, IOException {
         final List<Tree> trees = _persistit.getSelectedTrees(treeSelector);
@@ -561,8 +561,8 @@ public class StreamSaver extends Task {
     /**
      * Save all trees in all open volumes.
      * 
-     * @throws PersistitException
-     * @throws IOException
+     * @throws PersistitException if a persistence error occurs
+     * @throws IOException if an I/O error occurs
      */
     public void saveAll() throws PersistitException, IOException {
 

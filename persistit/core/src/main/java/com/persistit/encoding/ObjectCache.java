@@ -234,8 +234,8 @@ public class ObjectCache {
 
     /**
      * Indicates whether there is a value associated with the key.
-     * 
-     * @param key
+     *
+     * @param key the <code>Key</code> whose associated value is sought
      * @return <code>true</code> if the cache contains a representation of the
      *         value associated with the key; otherwise <code>false</code>
      */
@@ -331,8 +331,8 @@ public class ObjectCache {
      * modestly, so it may be appropriate to raise the default dead count
      * threshold.
      * </p>
-     * 
-     * @param deadCountThreshold
+     *
+     * @param deadCountThreshold the number of dead references above which the cache is scanned and pruned
      */
     private void processQueue(final int deadCountThreshold) {
         while (_queue.poll() != null)

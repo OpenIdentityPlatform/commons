@@ -30,7 +30,6 @@ import org.forgerock.util.encode.Base64url;
  * <p>
  * JSON Web Signature (JWS) is a means of representing content secured with digital signatures or Message
  * Authentication Codes (MACs) using JSON based data structures.
- * <p>
  * @see <a href="http://tools.ietf.org/html/draft-ietf-jose-json-web-signature-11">JSON Web Signature Specification</a>
  *
  * @since 2.0.0

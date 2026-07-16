@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 package org.forgerock.http.apache;
@@ -103,6 +104,15 @@ public abstract class AbstractHttpClient implements HttpClient {
         public String getMethod() {
             return method;
         }
+
+        @Override
+        public EntityRequest clone() {
+            try {
+                return (EntityRequest) super.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new AssertionError(e);
+            }
+        }
     }
 
     /** A request that does not enclose an entity. */
@@ -121,6 +131,15 @@ public abstract class AbstractHttpClient implements HttpClient {
         @Override
         public String getMethod() {
             return method;
+        }
+
+        @Override
+        public NonEntityRequest clone() {
+            try {
+                return (NonEntityRequest) super.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new AssertionError(e);
+            }
         }
     }
 

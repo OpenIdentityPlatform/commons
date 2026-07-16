@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.selfservice.core.crypto;
 
@@ -66,7 +67,7 @@ class FieldStorageSchemeImpl implements FieldStorageScheme {
      *
      * @param digestSize the size of the digest in bytes.
      * @param algorithm  the algorithm to use.
-     * @throws Exception
+     * @throws Exception if no provider supports the given digest algorithm.
      */
     FieldStorageSchemeImpl(int digestSize, String algorithm) throws Exception {
         this.messageDigest = MessageDigest.getInstance(algorithm);

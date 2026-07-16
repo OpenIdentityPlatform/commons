@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.audit.events;
 
@@ -46,14 +47,14 @@ import org.slf4j.LoggerFactory;
  * new specific fields, e.g
  * <pre>
  * <code>
- * class OpenProductAccessAuditEventBuilder{@code <T extends OpenProductAccessAuditEventBuilder<T>>}
- extends AccessAuditEventBuilder{@code <T>} {
+ * class OpenProductAccessAuditEventBuilder&lt;T extends OpenProductAccessAuditEventBuilder&lt;T&gt;&gt;
+ extends AccessAuditEventBuilder&lt;T&gt; {
  *
  *    protected OpenProductAccessAuditEventBuilder(DnsUtils dnsUtils) {
  *        super(dnsUtils);
  *    }
  *
- *    public static {@code <T>} OpenProductAccessAuditEventBuilder{@code <?>} productAccessEvent() {
+ *    public static &lt;T&gt; OpenProductAccessAuditEventBuilder&lt;?&gt; productAccessEvent() {
  *       return new OpenProductAccessAuditEventBuilder(new DnsUtils());
  *    }
  *

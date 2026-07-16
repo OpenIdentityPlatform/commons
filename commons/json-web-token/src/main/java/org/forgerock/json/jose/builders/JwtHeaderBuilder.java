@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.jose.builders;
@@ -49,7 +50,6 @@ public abstract class JwtHeaderBuilder<T extends JwtBuilder, B extends JwtHeader
 
     /**
      * Adds a custom header parameter to the JWT header.
-     * <p>
      * @see JwtHeader#setParameter(String, Object)
      *
      * @param key The header parameter key.
@@ -79,7 +79,6 @@ public abstract class JwtHeaderBuilder<T extends JwtBuilder, B extends JwtHeader
 
     /**
      * Sets the algorithm used to perform cryptographic signing and/or encryption on the JWT.
-     * <p>
      * @see JwtHeader#setAlgorithm(org.forgerock.json.jose.jwt.Algorithm)
      *
      * @param algorithm The algorithm.

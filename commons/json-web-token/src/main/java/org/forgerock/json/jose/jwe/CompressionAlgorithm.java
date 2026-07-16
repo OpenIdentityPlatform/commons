@@ -12,13 +12,13 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.jose.jwe;
 
 /**
  * An Enum of the possible compression algorithms that can be applied to the JWE payload plaintext.
- * <p>
  * @see <a href="http://tools.ietf.org/html/draft-ietf-jose-json-web-encryption-11#section-4.1.4">
  *     JWE Compression Algorithm</a>
  *
