@@ -281,7 +281,6 @@ public final class AsciiDoc {
      * @return Doc builder
      */
     public AsciiDoc sectionTitle(final String title, final int level) {
-        final AsciiDocSymbols symbol;
         // @Checkstyle:off
         switch (level) {
             case 1:

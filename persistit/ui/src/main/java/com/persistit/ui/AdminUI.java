@@ -586,10 +586,6 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
             final StringTokenizer st = new StringTokenizer(paneSpecification, ":");
             final String className = st.nextToken();
             final String caption = st.nextToken();
-            String iconName = null;
-            if (st.hasMoreTokens()) {
-                iconName = st.nextToken();
-            }
             try {
                 final Class cl = Class.forName(className);
                 final AdminPanel panel = (AdminPanel) cl.newInstance();

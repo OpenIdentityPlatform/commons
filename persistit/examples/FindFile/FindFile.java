@@ -209,7 +209,6 @@ public class FindFile extends JPanel {
         sb.append("$");
         final Pattern pattern = Pattern.compile(sb.toString());
 
-        final DefaultListModel model = (DefaultListModel) list.getModel();
         //
         // Substring that precedes the first wildcard character. For example,
         // if the input is "/opt/*java", the prefix is "/opt/".

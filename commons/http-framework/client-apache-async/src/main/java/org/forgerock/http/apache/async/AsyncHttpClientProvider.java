@@ -200,7 +200,6 @@ public class AsyncHttpClientProvider implements HttpClientProvider {
         }
 
         // Apply proxy settings if necessary
-        AuthenticationStrategy proxyStrategy = NoAuthenticationStrategy.INSTANCE;
         ProxyAuthenticationStrategy proxyAuthenticationStrategy = null;
 
         // Read the proxy info from options

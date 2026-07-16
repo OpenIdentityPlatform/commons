@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 import java.io.BufferedReader;
@@ -65,7 +66,6 @@ public class SimpleDemo {
         System.out.println();
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
-        boolean done = false;
         int count = 0;
         while (true) {
             System.out.print("Name: ");
