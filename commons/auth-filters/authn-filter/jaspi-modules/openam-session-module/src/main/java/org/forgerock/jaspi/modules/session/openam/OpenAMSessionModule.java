@@ -318,7 +318,7 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
             public Promise<AuthStatus, AuthenticationException> apply(Response response) {
                 try {
                     if (!response.getStatus().isSuccessful()) {
-                        LOG.error("REST validation call returned non HTTP 200 response",
+                        LOG.error("REST validation call returned non HTTP 200 response: {}",
                                 response.getEntity().getString());
                         return newResultPromise(SEND_FAILURE);
                     }
@@ -369,7 +369,7 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
             public AuthStatus apply(Response response) throws AuthenticationException {
                 if (!response.getStatus().isSuccessful()) {
                     try {
-                        LOG.error("REST validation call returned non HTTP 200 response",
+                        LOG.error("REST validation call returned non HTTP 200 response: {}",
                                 response.getEntity().getString());
                         return SEND_FAILURE;
                     } catch (IOException e) {

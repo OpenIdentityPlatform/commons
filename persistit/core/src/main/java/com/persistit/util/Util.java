@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit.util;
@@ -581,7 +582,7 @@ public class Util {
             throw new IllegalArgumentException(String.format("Value must be greater than or equal to %,d: %,d", min,
                     value));
         } else {
-            throw new IllegalArgumentException(String.format("Value must be between %d and %d, inclusive: ", min, max,
+            throw new IllegalArgumentException(String.format("Value must be between %d and %d, inclusive: %d", min, max,
                     value));
         }
     }
@@ -598,7 +599,7 @@ public class Util {
             throw new IllegalArgumentException(String.format("Value must be greater than or equal to %,d: %,d", min,
                     value));
         } else {
-            throw new IllegalArgumentException(String.format("Value must be between %d and %d, inclusive: ", min, max,
+            throw new IllegalArgumentException(String.format("Value must be between %d and %d, inclusive: %d", min, max,
                     value));
         }
     }
@@ -615,7 +616,7 @@ public class Util {
             throw new IllegalArgumentException(String.format("Value must be greater than or equal to %,f: %,f", min,
                     value));
         } else {
-            throw new IllegalArgumentException(String.format("Value must be between %f and %f, inclusive: ", min, max,
+            throw new IllegalArgumentException(String.format("Value must be between %f and %f, inclusive: %f", min, max,
                     value));
         }
     }
