@@ -535,7 +535,12 @@ public class KeyParser {
     private int unicode() {
         if (_index + 4 > _end)
             return -1;
-        final int u = Integer.parseInt(_source.substring(_index, _index + 4), 16);
+        final int u;
+        try {
+            u = Integer.parseInt(_source.substring(_index, _index + 4), 16);
+        } catch (final NumberFormatException e) {
+            return -1;
+        }
         _index += 4;
         return u;
     }

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.api.jackson;
@@ -194,6 +195,10 @@ class CrestIntegerSchema extends IntegerSchema implements CrestReadWritePolicies
 
     @Override
     public void setExample(String example) {
-        this.example = Long.valueOf(example);
+        try {
+            this.example = Long.valueOf(example);
+        } catch (final NumberFormatException e) {
+            throw new ValidationException("Example value is not a valid integer: " + example);
+        }
     }
 }

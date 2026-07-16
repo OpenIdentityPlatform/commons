@@ -705,7 +705,7 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
         JComponent wrappedComponent = component;
         if (component instanceof JTextField) {
             final JTextField textField = (JTextField) component;
-            textField.setColumns(Integer.parseInt(widthStr));
+            textField.setColumns(parseDimension("width", widthStr));
             textField.setHorizontalAlignment(alignment.equals("R") ? SwingConstants.TRAILING
                     : alignment.equals("C") ? SwingConstants.CENTER : SwingConstants.LEADING);
             textField.setEditable(false);
@@ -713,8 +713,8 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
             textField.setBackground(Color.white);
         } else if (component instanceof JTextArea) {
             final JTextArea textArea = (JTextArea) component;
-            textArea.setColumns(Integer.parseInt(widthStr));
-            textArea.setRows(Integer.parseInt(heightStr));
+            textArea.setColumns(parseDimension("width", widthStr));
+            textArea.setRows(parseDimension("height", heightStr));
             textArea.setEditable(false);
             textArea.setEnabled(true);
             textArea.setBackground(Color.white);
@@ -734,6 +734,14 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
 
         component.setMinimumSize(component.getPreferredSize());
         return component;
+    }
+
+    private static int parseDimension(final String name, final String value) {
+        try {
+            return Integer.parseInt(value);
+        } catch (final NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid " + name + " in component specification: " + value, e);
+        }
     }
 
     AdminAction createAction(final AdminCommand command, final String specification) {

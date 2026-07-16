@@ -1,6 +1,7 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
  * Copyright 2015 ForgeRock AS
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1274,7 +1275,11 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
     static long fileToGeneration(final File file) {
         final Matcher matcher = PATH_PATTERN.matcher(file.getName());
         if (matcher.matches()) {
-            return Long.parseLong(matcher.group(2));
+            try {
+                return Long.parseLong(matcher.group(2));
+            } catch (final NumberFormatException e) {
+                return -1;
+            }
         } else {
             return -1;
         }

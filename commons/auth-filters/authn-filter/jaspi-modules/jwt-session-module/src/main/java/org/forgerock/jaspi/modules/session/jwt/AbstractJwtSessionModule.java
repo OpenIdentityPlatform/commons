@@ -168,9 +168,9 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
             throw new AuthenticationException("Can't use both " + TOKEN_IDLE_TIME_IN_MINUTES_CLAIM_KEY
                     + " setting and the " + TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY + " setting.");
         } else if (!isEmpty(tokenIdleTimeMinutes)) {
-            this.tokenIdleTime = Integer.parseInt(tokenIdleTimeMinutes) * 60;
+            this.tokenIdleTime = parseIntSetting(TOKEN_IDLE_TIME_IN_MINUTES_CLAIM_KEY, tokenIdleTimeMinutes) * 60;
         } else if (!isEmpty(tokenIdleTimeSeconds)) {
-            this.tokenIdleTime = Integer.parseInt(tokenIdleTimeSeconds);
+            this.tokenIdleTime = parseIntSetting(TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY, tokenIdleTimeSeconds);
         } else {
             this.tokenIdleTime = 0;
         }
@@ -180,9 +180,9 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
             throw new AuthenticationException("Can't use both the " + MAX_TOKEN_LIFE_IN_MINUTES_KEY
                     + " setting and the " + MAX_TOKEN_LIFE_IN_SECONDS_KEY + " setting.");
         } else if (!isEmpty(maxTokenLifeMinutes)) {
-            this.maxTokenLife = Integer.parseInt(maxTokenLifeMinutes) * 60;
+            this.maxTokenLife = parseIntSetting(MAX_TOKEN_LIFE_IN_MINUTES_KEY, maxTokenLifeMinutes) * 60;
         } else if (!isEmpty(maxTokenLifeSeconds)) {
-            this.maxTokenLife = Integer.parseInt(maxTokenLifeSeconds);
+            this.maxTokenLife = parseIntSetting(MAX_TOKEN_LIFE_IN_SECONDS_KEY, maxTokenLifeSeconds);
         } else {
             this.maxTokenLife = 0;
         }
@@ -204,6 +204,14 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
         }
         this.signingHandler = new HmacSigningHandler(signingKey);
         Arrays.fill(signingKey, (byte) 0);
+    }
+
+    private static int parseIntSetting(final String settingName, final String value) throws AuthenticationException {
+        try {
+            return Integer.parseInt(value);
+        } catch (final NumberFormatException e) {
+            throw new AuthenticationException("The " + settingName + " setting must be an integer, but was: " + value);
+        }
     }
 
     /**

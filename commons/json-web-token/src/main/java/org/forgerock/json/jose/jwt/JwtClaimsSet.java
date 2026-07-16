@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.jose.exceptions.JwtRuntimeException;
 import org.forgerock.json.jose.utils.IntDate;
 import org.forgerock.json.jose.utils.StringOrURI;
 
@@ -397,7 +398,11 @@ public class JwtClaimsSet extends JWObject implements Payload {
             if (isValueOfType(value, Number.class)) {
                 setExpirationTime(((Number) value).longValue());
             } else if (isValueOfType(value, String.class)) {
-            	setExpirationTime(Long.parseLong((String)value));
+                try {
+                    setExpirationTime(Long.parseLong((String) value));
+                } catch (final NumberFormatException e) {
+                    throw new JwtRuntimeException("Expiration time claim (exp) is not a valid number: " + value, e);
+                }
             } else {
                 checkValueIsOfType(value, Date.class);
                 setExpirationTime((Date) value);
