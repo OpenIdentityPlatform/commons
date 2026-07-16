@@ -1036,6 +1036,19 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
             }
             return item;
         }
+
+        private void writeObject(final java.io.ObjectOutputStream out) throws java.io.IOException {
+            // AdminAction is a non-static inner class of the non-serializable AdminUI, so it can
+            // never be serialized: the implicit outer reference already makes serialization fail
+            // with NotSerializableException. Declare that explicitly rather than leaving the
+            // hazard implicit (CodeQL java/non-serializable-inner-class).
+            throw new java.io.NotSerializableException(getClass().getName());
+        }
+
+        private void readObject(final java.io.ObjectInputStream in)
+                throws java.io.IOException, ClassNotFoundException {
+            throw new java.io.NotSerializableException(getClass().getName());
+        }
     }
 
     ButtonModel getMenuItemModel(final String actionName) {
@@ -1392,6 +1405,19 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
         @Override
         public void paint(final Graphics g) {
             g.drawImage(_image, 0, 0, this);
+        }
+
+        private void writeObject(final java.io.ObjectOutputStream out) throws java.io.IOException {
+            // SplashWindow is a non-static inner class of the non-serializable AdminUI; the
+            // implicit outer reference already makes serialization fail with
+            // NotSerializableException. Declare that explicitly (CodeQL
+            // java/non-serializable-inner-class).
+            throw new java.io.NotSerializableException(getClass().getName());
+        }
+
+        private void readObject(final java.io.ObjectInputStream in)
+                throws java.io.IOException, ClassNotFoundException {
+            throw new java.io.NotSerializableException(getClass().getName());
         }
     }
 }
