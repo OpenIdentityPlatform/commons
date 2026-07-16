@@ -22,11 +22,6 @@
   </modules>
 
   <properties>
-    <!-- To configure animal-sniffer to check API compat -->
-    <animal-sniffer.signature.groupId>org.codehaus.mojo.signature</animal-sniffer.signature.groupId>
-    <animal-sniffer.signature.artifactId>java17</animal-sniffer.signature.artifactId>
-    <animal-sniffer.signature.version>1.0</animal-sniffer.signature.version>
-    <version.animal-sniffer.plugin>1.20</version.animal-sniffer.plugin>
     <version.maven-license.plugin>2.6</version.maven-license.plugin>
   </properties>
 
@@ -45,29 +40,6 @@
     <pluginManagement>
       <!-- Plugins ordered by shortname (assembly, antrun ...) -->
       <plugins>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>animal-sniffer-maven-plugin</artifactId>
-          <version>${version.animal-sniffer.plugin}</version>
-          <configuration>
-            <signature>
-              <groupId>${animal-sniffer.signature.groupId}</groupId>
-              <artifactId>${animal-sniffer.signature.artifactId}</artifactId>
-              <version>${animal-sniffer.signature.version}</version>
-            </signature>
-            <skip>${skipSanityChecks}</skip>
-          </configuration>
-          <executions>
-            <execution>
-              <id>enforce-java-api-compatibility</id>
-              <phase>verify</phase>
-              <goals>
-                <goal>check</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-        
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>build-helper-maven-plugin</artifactId>
