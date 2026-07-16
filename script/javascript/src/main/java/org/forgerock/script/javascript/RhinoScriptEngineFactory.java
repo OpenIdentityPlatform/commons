@@ -21,6 +21,7 @@
 * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
 * or visit www.oracle.com if you need additional information or have any
 * questions.
+* Portions Copyrighted 2026 3A Systems, LLC
 */
 
 /*
@@ -79,34 +80,42 @@ public class RhinoScriptEngineFactory implements ScriptEngineFactory {
         extensions = Collections.unmodifiableList(extensions);
     }
 
+    @Override
     public String getEngineName() {
         return "javascript";
     }
 
+    @Override
     public String getEngineVersion() {
         return VERSION;
     }
 
+    @Override
     public List<String> getExtensions() {
         return extensions;
     }
 
+    @Override
     public List<String> getMimeTypes() {
         return mimeTypes;
     }
 
+    @Override
     public List<String> getNames() {
         return names;
     }
 
+    @Override
     public String getLanguageName() {
         return LANGUAGE_NAME;
     }
 
+    @Override
     public String getLanguageVersion() {
         return "1.8";
     }
 
+    @Override
     public ScriptEngine getScriptEngine(
             final Map<String, Object> configuration,
             final Collection<SourceContainer> sourceContainers,

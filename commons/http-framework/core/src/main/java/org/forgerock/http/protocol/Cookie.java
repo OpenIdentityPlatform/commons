@@ -98,6 +98,7 @@ public class Cookie {
         }
       }
 
+      @Override
       public String toString() {
         return name().toLowerCase();
       }

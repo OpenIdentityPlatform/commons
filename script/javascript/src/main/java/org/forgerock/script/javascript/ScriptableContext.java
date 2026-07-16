@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.script.javascript;
@@ -216,6 +217,7 @@ class ScriptableContext extends NativeObject implements Wrapper {
         return getWrappedContext();
     }
 
+    @Override
     public String toString() {
         final JsonValue allContexts = new JsonValue(new HashMap<String,Object>(contexts.size()));
         for (final Map.Entry<String,Context> entry : contexts.entrySet()) {

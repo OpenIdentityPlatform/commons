@@ -241,6 +241,7 @@ public final class Responses {
             }
         }
 
+        @Override
         public Promise<ResourceResponse, ResourceException> asPromise() {
             return Promises.<ResourceResponse, ResourceException>newResultPromise(this);
         }

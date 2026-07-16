@@ -351,6 +351,7 @@ public class ArtifactItem
      * 
      * @return result string
      */
+    @Override
     public final String toString()
     {
         if (this.classifier == null)

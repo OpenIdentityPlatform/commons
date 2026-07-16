@@ -37,6 +37,7 @@ public final class ThreadClassLoaderManager {
 
     private static ThreadLocal<ThreadClassLoaderManager> instance =
             new ThreadLocal<ThreadClassLoaderManager>() {
+                @Override
                 public ThreadClassLoaderManager initialValue() {
                     return new ThreadClassLoaderManager();
                 }

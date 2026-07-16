@@ -146,6 +146,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
     public OSGiFrameworkService() {
 
         propertyAccessor = new PropertyAccessor() {
+            @Override
             public <T> T get(String name) {
                 Object value = null;
                 if (null != bootParameters) {
@@ -175,6 +176,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
         };
 
         transformer = new JsonTransformer() {
+            @Override
             public void transform(JsonValue value) throws JsonException {
                 if (null != value && value.isString()) {
                     value.setObject(ConfigurationUtil.substVars(value.asString(), propertyAccessor));
@@ -223,6 +225,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
         this.configFile = configFile;
     }
 
+    @Override
     protected boolean isVerbose() {
         return verbose;
     }
@@ -250,6 +253,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
         this.bootParameters = bootParameters;
     }
 
+    @Override
     public boolean isNewThread() {
         return newThread;
     }
@@ -259,11 +263,13 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
         newThread = value;
     }
 
+    @Override
     protected long getStopTimeout() {
         return 0;
     }
 
     @SuppressWarnings({ "unchecked" })
+    @Override
     public void init(String[] arguments) throws Exception {
         CmdLineParser parser = new CmdLineParser(this);
 
@@ -293,14 +299,17 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
         init();
     }
 
+    @Override
     public void destroy() {
 
     }
 
+    @Override
     public Bundle getSystemBundle() {
         return getFramework();
     }
 
+    @Override
     public void init() throws Exception {
         if (null == bootParameters) {
             bootParameters = new HashMap<String, Object>();
@@ -388,6 +397,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
                 || ((enableHook instanceof String) && !((String) enableHook)
                         .equalsIgnoreCase("false"))) {
             Runtime.getRuntime().addShutdownHook(new Thread("Felix Shutdown Hook") {
+                @Override
                 public void run() {
                     try {
                         OSGiFrameworkService.this.stop();
@@ -402,6 +412,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
 
     }
 
+    @Override
     protected void registerServices(BundleContext bundleContext) throws Exception {
         Dictionary<String, String> properties = new Hashtable<String, String>(4);
         properties.put(Constants.SERVICE_VENDOR, "Open Identity Platform Community");
@@ -412,6 +423,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
                 properties);
     }
 
+    @Override
     protected Map<String, String> getConfigurationProperties() {
         if (null == configurationProperties) {
             configurationProperties = new HashMap<String, String>();
@@ -435,6 +447,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
         this.launcherConfiguration = launcherConfiguration;
     }
 
+    @Override
     protected List<BundleHandler> listBundleHandlers(BundleContext context)
             throws MalformedURLException {
         JsonValue bundle = getLauncherConfiguration().get("bundle");

@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 import java.awt.BorderLayout;
@@ -114,18 +115,21 @@ public class FindFile extends JPanel {
         this.persistit = persistit;
 
         searchButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent ae) {
                 doSearch();
             }
         });
 
         loadButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent ae) {
                 doLoad();
             }
         });
 
         clearButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent ae) {
                 doClear();
             }
@@ -216,6 +220,7 @@ public class FindFile extends JPanel {
         // performed in a separate thread.
         //
         Thread workerThread = new Thread() {
+            @Override
             public void run() {
                 if (suffix.length() > prefix.length()) {
                     //
@@ -248,6 +253,7 @@ public class FindFile extends JPanel {
         loadButton.setEnabled(false);
 
         Thread workerThread = new Thread(new Runnable() {
+            @Override
             public void run() {
                 loadFileNames(fileName);
             }
@@ -262,6 +268,7 @@ public class FindFile extends JPanel {
      */
     private void doClear() {
         Thread workerThread = new Thread(new Runnable() {
+            @Override
             public void run() {
                 resetFileNames();
             }
@@ -327,6 +334,7 @@ public class FindFile extends JPanel {
             setEnabled(searchField, true);
 
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     int size = selectedFileNames.size();
                     for (int index = 0; index < size; index++) {
@@ -511,6 +519,7 @@ public class FindFile extends JPanel {
      */
     private void adjustProgressBar(final int value, final int maximum) {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 progressBar.setMaximum(maximum);
                 progressBar.setValue(value);
@@ -532,6 +541,7 @@ public class FindFile extends JPanel {
      */
     private void setEnabled(final JComponent component, final boolean enabled) {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 component.setEnabled(enabled);
             }
@@ -564,12 +574,14 @@ public class FindFile extends JPanel {
         // the containing JFrame.
         //
         frame.addWindowListener(new WindowAdapter() {
+            @Override
             public void windowClosed(WindowEvent we) {
                 //
                 // Persistit.close may take several seconds to complete. Best
                 // not to do it on the Swing event dispatch thread.
                 //
                 Thread workerThread = new Thread(new Runnable() {
+                    @Override
                     public void run() {
                         try {
                             System.out.println("Closing Persistit");

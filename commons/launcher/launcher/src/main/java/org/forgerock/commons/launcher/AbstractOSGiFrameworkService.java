@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.commons.launcher;
@@ -78,6 +79,7 @@ public abstract class AbstractOSGiFrameworkService implements OSGiFramework {
 
     protected abstract void registerServices(BundleContext bundleContext) throws Exception;
 
+    @Override
     public void start() throws Exception {
         // Create an instance of the framework.
         FrameworkFactory factory = ServiceLoader.load(FrameworkFactory.class).iterator().next();
@@ -95,6 +97,7 @@ public abstract class AbstractOSGiFrameworkService implements OSGiFramework {
             registerServices(framework.get().getBundleContext());
 
             Callable<Void> container = new Callable<Void>() {
+                @Override
                 public Void call() throws Exception {
                     FrameworkEvent event = null;
                     do {
@@ -127,6 +130,7 @@ public abstract class AbstractOSGiFrameworkService implements OSGiFramework {
         }
     }
     
+    @Override
     public void stop() throws Exception {
         Framework fw = framework.getAndSet(null);
         if (null != fw) {

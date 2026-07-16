@@ -131,6 +131,7 @@ public class NumberTypeValidator extends Validator {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void validate(Object node, JsonPointer at, ErrorHandler handler) throws SchemaException {
         if (node instanceof Number) {
             Number nodeValue = (Number) node;

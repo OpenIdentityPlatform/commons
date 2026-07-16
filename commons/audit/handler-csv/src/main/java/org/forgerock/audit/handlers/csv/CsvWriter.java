@@ -48,5 +48,6 @@ interface CsvWriter extends AutoCloseable {
      */
     void flush() throws IOException;
 
+    @Override
     void close() throws IOException;
 }

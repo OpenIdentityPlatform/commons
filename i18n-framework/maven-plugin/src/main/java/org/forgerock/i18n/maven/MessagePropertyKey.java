@@ -13,6 +13,7 @@
  *
  *      Copyright 2008 Sun Microsystems, Inc.
  *      Portions copyright 2011 ForgeRock AS
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.i18n.maven;
@@ -106,6 +107,7 @@ final class MessagePropertyKey implements Comparable<MessagePropertyKey> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int compareTo(final MessagePropertyKey k) {
         if (ordinal == k.ordinal) {
             return name.compareTo(k.name);

@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.script.scope;
@@ -49,6 +50,7 @@ public class OperationParameter implements Parameter {
      *             If the connection could not be obtained for some other reason
      *             (e.g. due to a configuration or initialization problem).
      */
+    @Override
     public Context getContext(Context savedContext) throws ResourceException {
 
         if (null != savedContext) {

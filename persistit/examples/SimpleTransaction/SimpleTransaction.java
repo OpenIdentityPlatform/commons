@@ -13,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 import java.io.PrintStream;
@@ -143,10 +144,12 @@ public class SimpleTransaction implements Runnable {
         }
     }
 
+    @Override
     public String toString() {
         return "SimpleTransaction #" + _threadIndex;
     }
 
+    @Override
     public void run() {
         try {
             Exchange accountEx = new Exchange(persistit, "txndemo", "account", true);
@@ -253,6 +256,7 @@ public class SimpleTransaction implements Runnable {
             _ex = ex;
         }
 
+        @Override
         public void runTransaction() throws PersistitException {
             _ex.clear().append(Key.BEFORE);
             //

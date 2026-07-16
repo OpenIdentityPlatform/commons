@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.script.source;
@@ -80,26 +81,32 @@ public class URLScriptSource implements ScriptSource {
         this.parent = parent;
     }
 
+    @Override
     public String guessType() {
         return getName().getType();
     }
 
+    @Override
     public ScriptName getName() {
         return scriptName;
     }
 
+    @Override
     public URL getSource() {
         return source;
     }
 
+    @Override
     public URI getSourceURI() {
         return sourceURI;
     }
 
+    @Override
     public Reader getReader() throws IOException {
         // TODO Do we need the doPrivileged read?
         try {
             return AccessController.doPrivileged(new PrivilegedExceptionAction<Reader>() {
+                @Override
                 public Reader run() throws Exception {
                     return new BufferedReader(new InputStreamReader(getSource().openStream()));
                 }
@@ -109,14 +116,17 @@ public class URLScriptSource implements ScriptSource {
         }
     }
 
+    @Override
     public ScriptEntry.Visibility getVisibility() {
         return null != parent ? parent.getVisibility() : visibility;
     }
 
+    @Override
     public ScriptName[] getDependencies() {
         return null != parent ? new ScriptName[] { parent.getName() } : new ScriptName[0];
     }
 
+    @Override
     public SourceContainer getParentContainer() {
         return parent;
     }

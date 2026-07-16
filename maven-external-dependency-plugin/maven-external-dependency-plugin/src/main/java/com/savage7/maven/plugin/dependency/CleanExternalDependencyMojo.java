@@ -36,6 +36,7 @@ public class CleanExternalDependencyMojo extends AbstractExternalDependencyMojo
     {
     }
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException
     {
         try

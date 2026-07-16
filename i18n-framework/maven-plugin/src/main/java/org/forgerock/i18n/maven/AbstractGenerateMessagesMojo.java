@@ -549,6 +549,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo {
     /**
      * {@inheritDoc}
      */
+    @Override
     public final void execute() throws MojoExecutionException {
         final File resourceDirectory = getResourceDirectory();
 

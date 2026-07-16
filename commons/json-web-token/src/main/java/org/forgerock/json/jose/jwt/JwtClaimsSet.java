@@ -500,6 +500,7 @@ public class JwtClaimsSet extends JWObject implements Payload {
      *
      * @return A JSON string.
      */
+    @Override
     public String build() {
         return toString();
     }

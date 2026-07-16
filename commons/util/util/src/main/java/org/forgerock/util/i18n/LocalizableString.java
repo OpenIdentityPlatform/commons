@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.util.i18n;
 
@@ -125,6 +126,7 @@ public class LocalizableString {
      * The default toString method. No translation is applied.
      * @return the untranslated string value
      */
+    @Override
     public String toString() {
         return defaultValue == null ? value : "[" + value + "], default [" + defaultValue + "]";
     }

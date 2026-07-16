@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright 2012-2015 ForgeRock AS. All rights reserved.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.resource;
@@ -156,6 +157,7 @@ public final class SortKey {
      *
      * @return The string representation of this sort key.
      */
+    @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
         builder.append(isAscendingOrder ? '+' : '-');

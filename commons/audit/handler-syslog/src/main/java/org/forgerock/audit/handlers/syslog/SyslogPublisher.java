@@ -13,6 +13,7 @@
  *
  * Copyright 2013 Cybernetica AS
  * Portions copyright 2014-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.audit.handlers.syslog;
 
@@ -35,5 +36,6 @@ interface SyslogPublisher extends AutoCloseable {
     /**
      * Closes the underlying connection.
      */
+    @Override
     void close();
 }

@@ -47,6 +47,7 @@ public class EmbeddedServer implements Runnable, AutoCloseable {
 	final private ExecutorService executor = Executors.newSingleThreadExecutor();
 	private CassandraDaemon cassandraDaemon;
 	    
+	@Override
 	public void run() {
 		try {
 			//check for external cassandra settings
@@ -139,6 +140,7 @@ public class EmbeddedServer implements Runnable, AutoCloseable {
 		}
 	}
 
+	@Override
 	public void close() {
 		if (cassandraDaemon!=null) {
 			cassandraDaemon.stop();

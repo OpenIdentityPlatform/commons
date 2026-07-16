@@ -77,6 +77,7 @@ final class BranchingStreamWrapper extends BranchingInputStream {
         return new BranchingStreamWrapper(this, null);
     }
 
+    @Override
     public BranchingStreamWrapper copy() throws IOException {
         notClosed();
         return new BranchingStreamWrapper(this);

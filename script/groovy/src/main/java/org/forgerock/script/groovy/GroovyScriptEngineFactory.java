@@ -66,34 +66,42 @@ public class GroovyScriptEngineFactory implements ScriptEngineFactory {
         extensions = Collections.unmodifiableList(extensions);
     }
 
+    @Override
     public String getEngineName() {
         return "Groovy Scripting Engine";
     }
 
+    @Override
     public String getEngineVersion() {
         return "2.0";
     }
 
+    @Override
     public List<String> getExtensions() {
         return extensions;
     }
 
+    @Override
     public List<String> getMimeTypes() {
         return mimeTypes;
     }
 
+    @Override
     public List<String> getNames() {
         return names;
     }
 
+    @Override
     public String getLanguageName() {
         return LANGUAGE_NAME;
     }
 
+    @Override
     public String getLanguageVersion() {
         return GroovySystem.getVersion();
     }
 
+    @Override
     public ScriptEngine getScriptEngine(Map<String, Object> configuration, Collection<SourceContainer> sourceContainers,
             ClassLoader registryLevelClassLoader) {
         if (null == engine) {

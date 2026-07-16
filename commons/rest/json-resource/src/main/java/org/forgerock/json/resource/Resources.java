@@ -72,6 +72,7 @@ public final class Resources {
             return newInternalConnection(handler);
         }
 
+        @Override
         public Promise<Connection, ResourceException> getConnectionAsync() {
             return newSuccessfulPromise(getConnection());
         }

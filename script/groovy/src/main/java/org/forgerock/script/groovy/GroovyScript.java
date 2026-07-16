@@ -105,12 +105,14 @@ public class GroovyScript implements CompiledScript {
         engine.createScript(scriptName, new Binding());
     }
 
+    @Override
     public Bindings prepareBindings(final Context context, final Bindings request,
             final Bindings... scopes) {
         final Map<String, Object> b = mergeBindings(context, request, scopes);
         return b instanceof Bindings ? (Bindings) b : new SimpleBindings(b);
     }
 
+    @Override
     public Object eval(final Context context, final Bindings request, final Bindings... scopes)
             throws ScriptException {
 
@@ -308,18 +310,22 @@ public class GroovyScript implements CompiledScript {
             this.parameter = parameter;
         }
 
+        @Override
         protected Factory<List<Object>> newListFactory(final List<Object> source) {
             return new InnerListFactory(source, parameter);
         }
 
+        @Override
         protected Factory<Map<String, Object>> newMapFactory(final Map<String, Object> source) {
             return new InnerMapFactory(source, parameter);
         }
 
+        @Override
         protected Object convertFunction(final Function<?> source) {
             return new FunctionClosure(null, parameter, source);
         }
 
+        @Override
         public Parameter getParameter() {
             return parameter;
         }
@@ -334,18 +340,22 @@ public class GroovyScript implements CompiledScript {
             this.parameter = parameter;
         }
 
+        @Override
         protected Factory<List<Object>> newListFactory(final List<Object> source) {
             return new InnerListFactory(source, parameter);
         }
 
+        @Override
         protected Factory<Map<String, Object>> newMapFactory(final Map<String, Object> source) {
             return new InnerMapFactory(source, parameter);
         }
 
+        @Override
         protected Object convertFunction(final Function<?> source) {
             return new FunctionClosure(null, parameter, source);
         }
 
+        @Override
         public Parameter getParameter() {
             return parameter;
         }

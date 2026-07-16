@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.util.thread;
 
@@ -186,6 +187,7 @@ public class ExecutorServiceFactory {
     private void registerShutdown(final ExecutorService service) {
         shutdownManager.addShutdownListener(
                 new ShutdownListener() {
+                    @Override
                     public void shutdown() {
                         service.shutdownNow();
                     }
@@ -206,6 +208,7 @@ public class ExecutorServiceFactory {
             this.name = name;
         }
 
+        @Override
         public Thread newThread(Runnable r) {
             return new Thread(r, name + "-" +  count.getAndIncrement());
         }
