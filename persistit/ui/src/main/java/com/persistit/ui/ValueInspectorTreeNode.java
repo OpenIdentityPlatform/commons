@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,7 +158,7 @@ class ValueInspectorTreeNode implements TreeNode {
                 sb.append('\"');
             } else if (object instanceof Date) {
                 sb.append(" = ");
-                sb.append(Key.SDF.format((Date) object));
+                sb.append(Key.SDF.get().format((Date) object));
             } else if (type == Boolean.class || type == Byte.class || type == Short.class || type == Character.class
                     || type == Integer.class || type == Long.class || type == Float.class || type == Double.class
                     || type == BigInteger.class || type == BigDecimal.class) {
@@ -379,19 +380,19 @@ class ValueInspectorTreeNode implements TreeNode {
             if (elementType == boolean.class) {
                 element = ((boolean[]) _object)[index] ? Boolean.TRUE : Boolean.FALSE;
             } else if (elementType == byte.class) {
-                element = new Byte(((byte[]) _object)[index]);
+                element = Byte.valueOf(((byte[]) _object)[index]);
             } else if (elementType == short.class) {
-                element = new Short(((short[]) _object)[index]);
+                element = Short.valueOf(((short[]) _object)[index]);
             } else if (elementType == char.class) {
-                element = new Character(((char[]) _object)[index]);
+                element = Character.valueOf(((char[]) _object)[index]);
             } else if (elementType == int.class) {
-                element = new Integer(((int[]) _object)[index]);
+                element = Integer.valueOf(((int[]) _object)[index]);
             } else if (elementType == long.class) {
-                element = new Long(((long[]) _object)[index]);
+                element = Long.valueOf(((long[]) _object)[index]);
             } else if (elementType == float.class) {
-                element = new Float(((float[]) _object)[index]);
+                element = Float.valueOf(((float[]) _object)[index]);
             } else if (elementType == double.class) {
-                element = new Double(((double[]) _object)[index]);
+                element = Double.valueOf(((double[]) _object)[index]);
             } else
                 throw new RuntimeException();
         } else {

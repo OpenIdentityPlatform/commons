@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.selfservice.core.crypto;
 
@@ -66,7 +67,7 @@ class FieldStorageSchemeImpl implements FieldStorageScheme {
      *
      * @param digestSize the size of the digest in bytes.
      * @param algorithm  the algorithm to use.
-     * @throws Exception
+     * @throws Exception if no provider supports the given digest algorithm.
      */
     FieldStorageSchemeImpl(int digestSize, String algorithm) throws Exception {
         this.messageDigest = MessageDigest.getInstance(algorithm);
@@ -121,14 +122,14 @@ class FieldStorageSchemeImpl implements FieldStorageScheme {
 
             saltLength = decodedBytes.length - digestSize;
             if (saltLength <= 0) {
-                logger.error("Invalid decoded stored field", storedField);
+                logger.error("Invalid decoded stored field: {}", storedField);
                 return false;
             }
             saltBytes = new byte[saltLength];
             System.arraycopy(decodedBytes, 0, digestBytes, 0, digestSize);
             System.arraycopy(decodedBytes, digestSize, saltBytes, 0, saltLength);
         } catch (Exception e) {
-            logger.error("Cannot decode stored field", storedField, e);
+            logger.error("Cannot decode stored field: {}", storedField, e);
             return false;
         }
 
@@ -145,7 +146,7 @@ class FieldStorageSchemeImpl implements FieldStorageScheme {
             try {
                 userDigestBytes = messageDigest.digest(plainPlusSalt);
             } catch (Exception e) {
-                logger.error("Cannot encode field", storedField, e);
+                logger.error("Cannot encode field: {}", storedField, e);
                 return false;
             } finally {
                 Arrays.fill(plainPlusSalt, (byte) 0);

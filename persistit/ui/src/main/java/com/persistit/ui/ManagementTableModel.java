@@ -1,6 +1,7 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
- * 
+ * Portions Copyrighted 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,7 +79,7 @@ public class ManagementTableModel extends AbstractTableModel {
      * <i>width</i> is a percentage of the total table width, and
      * <i>justification</i> is L, C or R.
      * 
-     * @param clazz
+     * @param clazz the management info class whose columns are displayed.
      */
 
     public ManagementTableModel(final Class clazz, String className, final AdminUI ui) throws NoSuchMethodException {
@@ -113,13 +114,23 @@ public class ManagementTableModel extends AbstractTableModel {
         for (int index = 0; index < columnSpecs.length; index++) {
             final StringTokenizer st = new StringTokenizer(columnSpecs[index], ":");
             final String methodName = st.nextToken();
-            final int width = Integer.parseInt(st.nextToken());
+            final int width;
+            try {
+                width = Integer.parseInt(st.nextToken());
+            } catch (final NumberFormatException e) {
+                throw new IllegalArgumentException("Invalid width in column specification: " + columnSpecs[index], e);
+            }
             final String flags = st.nextToken();
             final String header = st.nextToken();
             String rendererName = null;
             int minWidth = width / 2;
             if (st.hasMoreTokens()) {
-                minWidth = Integer.parseInt(st.nextToken());
+                try {
+                    minWidth = Integer.parseInt(st.nextToken());
+                } catch (final NumberFormatException e) {
+                    throw new IllegalArgumentException(
+                            "Invalid minimum width in column specification: " + columnSpecs[index], e);
+                }
             }
             if (st.hasMoreTokens()) {
                 rendererName = st.nextToken();
@@ -217,7 +228,7 @@ public class ManagementTableModel extends AbstractTableModel {
             final TableColumnModel tcm = table.getColumnModel();
             final int count = tcm.getColumnCount();
             if (count > _displayedColumnCount) {
-                for (int i = _displayedColumnCount; --i >= count;) {
+                for (int i = count; --i >= _displayedColumnCount;) {
                     tcm.removeColumn(tcm.getColumn(i));
                 }
             }

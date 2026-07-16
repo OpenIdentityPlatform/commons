@@ -13,6 +13,7 @@
  *
  * Copyright 2010–2011 ApexIdentity Inc.
  * Portions Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.http.protocol;
@@ -97,6 +98,7 @@ public class Cookie {
         }
       }
 
+      @Override
       public String toString() {
         return name().toLowerCase();
       }
@@ -285,7 +287,7 @@ public class Cookie {
         result = prime * result + (maxAge == null ? 0 : maxAge.hashCode());
         result = prime * result + (name == null ? 0 : name.hashCode());
         result = prime * result + (path == null ? 0 : path.hashCode());
-        result = prime * result + (port == null ? 0 : port.hashCode());
+        result = prime * result + port.hashCode();
         result = prime * result + (secure == null ? 0 : secure.hashCode());
         result = prime * result + (sameSite == null ? 0 : sameSite.hashCode());
         result = prime * result + (value == null ? 0 : value.hashCode());
@@ -488,9 +490,7 @@ public class Cookie {
         if (path != null) {
             builder.append("path=").append(path).append(" ");
         }
-        if (port != null) {
-            builder.append("port=").append(port).append(" ");
-        }
+        builder.append("port=").append(port).append(" ");
         if (secure != null) {
             builder.append("secure=").append(secure).append(" ");
         }

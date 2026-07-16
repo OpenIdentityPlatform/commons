@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json;
@@ -64,6 +65,7 @@ public final class JsonPatch {
      */
     private static final JsonPatchValueTransformer DEFAULT_TRANSFORM =
         new JsonPatchValueTransformer() {
+            @Override
             public Object getTransformedValue(JsonValue target, JsonValue op) {
                 if (op.get(JsonPatch.VALUE_PTR) != null) {
                     return op.get(JsonPatch.VALUE_PTR).getObject();

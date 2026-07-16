@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.script.javascript;
@@ -301,18 +302,22 @@ class Converter {
             this.parameter = parameter;
         }
 
+        @Override
         public Parameter getParameter() {
             return parameter;
         }
 
+        @Override
         protected Factory<List<Object>> newListFactory(final List<Object> source) {
             return Converter.getList(parameter, source);
         }
 
+        @Override
         protected Factory<Map<String, Object>> newMapFactory(final Map<String, Object> source) {
             return Converter.getMap(parameter, source);
         }
 
+        @Override
         protected Object convertFunction(final Function<?> source) {
             return source;
         }
@@ -327,18 +332,22 @@ class Converter {
             this.parameter = parameter;
         }
 
+        @Override
         public Parameter getParameter() {
             return parameter;
         }
 
+        @Override
         protected Factory<List<Object>> newListFactory(final List<Object> source) {
             return Converter.getList(parameter, source);
         }
 
+        @Override
         protected Factory<Map<String, Object>> newMapFactory(final Map<String, Object> source) {
             return Converter.getMap(parameter, source);
         }
 
+        @Override
         protected Object convertFunction(final Function<?> source) {
             return source;
         }

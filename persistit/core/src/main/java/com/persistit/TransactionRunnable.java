@@ -1,6 +1,7 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
- * 
+ * Portions Copyrighted 2026 3A Systems, LLC
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,8 +49,8 @@ public interface TransactionRunnable {
      * them.
      * </p>
      * 
-     * @throws PersistitException
-     * @throws RollbackException
+     * @throws PersistitException if a persistence error occurs
+     * @throws RollbackException if the transaction must be rolled back
      */
     public void runTransaction() throws PersistitException, RollbackException;
 }

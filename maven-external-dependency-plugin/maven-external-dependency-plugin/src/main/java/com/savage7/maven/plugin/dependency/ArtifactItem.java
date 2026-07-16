@@ -253,6 +253,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns the artifact identifier.
+     *
      * @return Returns the artifactId.
      */
     public final String getArtifactId()
@@ -272,6 +274,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns the group identifier.
+     *
      * @return Returns the groupId.
      */
     public final String getGroupId()
@@ -280,6 +284,8 @@ public class ArtifactItem
     }
 
     /**
+     * Sets the group identifier.
+     *
      * @param groupId
      *            The groupId to set.
      */
@@ -289,6 +295,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns the artifact type (its packaging).
+     *
      * @return Returns the type.
      */
     public final String getType()
@@ -297,6 +305,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns the artifact version.
+     *
      * @return Returns the version.
      */
     public final String getVersion()
@@ -305,6 +315,8 @@ public class ArtifactItem
     }
 
     /**
+     * Sets the artifact version.
+     *
      * @param version
      *            The version to set.
      */
@@ -314,6 +326,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns the artifact classifier.
+     *
      * @return Classifier.
      */
     public final String getClassifier()
@@ -322,6 +336,8 @@ public class ArtifactItem
     }
 
     /**
+     * Sets the artifact classifier.
+     *
      * @param classifier
      *            Classifier.
      */
@@ -335,6 +351,7 @@ public class ArtifactItem
      * 
      * @return result string
      */
+    @Override
     public final String toString()
     {
         if (this.classifier == null)
@@ -350,6 +367,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns the local file path, with tokens resolved.
+     *
      * @return Returns the location.
      */
     public final String getLocalFile()
@@ -358,6 +377,8 @@ public class ArtifactItem
     }
 
     /**
+     * Sets the local file path.
+     *
      * @param localFile
      *            The localFile to set.
      */
@@ -367,6 +388,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns the staging directory, with tokens resolved.
+     *
      * @return Returns the stagingDirectory.
      */
     public final String getStagingDirectory()
@@ -375,6 +398,8 @@ public class ArtifactItem
     }
 
     /**
+     * Sets the staging directory.
+     *
      * @param stagingDirectory
      *            The stagingDirectory to set.
      */
@@ -384,6 +409,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns the source URL the artifact is downloaded from.
+     *
      * @return Returns the source URL to download the artifact.
      */
     public final String getDownloadUrl()
@@ -392,6 +419,8 @@ public class ArtifactItem
     }
 
     /**
+     * Sets the source URL to download the artifact from.
+     *
      * @param downloadUrl
      *            Set the URL to download the artifact from.
      */
@@ -401,6 +430,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns the download timeout in milliseconds.
+     *
      * @return Returns the timeout in millis allowed for artifact download.
      */
     public final Integer getTimeout()
@@ -409,6 +440,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns the raw, unresolved download timeout.
+     *
      * @return Raw timeout value as configured (may be null) so callers can
      *         distinguish an explicitly set per-artifact timeout from the
      *         default fallback returned by {@link #getTimeout()}.
@@ -419,6 +452,8 @@ public class ArtifactItem
     }
 
     /**
+     * Sets the download timeout in milliseconds.
+     *
      * @param timeout
      *            Set the timeout in millis allowed for artifact download.
      */
@@ -428,6 +463,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns the configured number of download retry attempts.
+     *
      * @return Raw retry attempts value as configured (may be null).
      */
     public final Integer getRetryAttempts()
@@ -436,6 +473,8 @@ public class ArtifactItem
     }
 
     /**
+     * Sets the number of download retry attempts.
+     *
      * @param retryAttempts
      *            Number of attempts to download the artifact in case of
      *            transient network failures.
@@ -446,6 +485,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns the configured delay between download retries.
+     *
      * @return Raw retry delay value (in millis) as configured (may be null).
      */
     public final Integer getRetryDelay()
@@ -454,6 +495,8 @@ public class ArtifactItem
     }
 
     /**
+     * Sets the delay between download retries.
+     *
      * @param retryDelay
      *            Delay in millis between download retry attempts.
      */
@@ -463,6 +506,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns the artifact packaging.
+     *
      * @return Packaging.
      */
     public final String getPackaging()
@@ -471,6 +516,8 @@ public class ArtifactItem
     }
 
     /**
+     * Sets the artifact packaging.
+     *
      * @param packaging
      *            Packaging.
      */
@@ -480,6 +527,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns whether the artifact download is forced.
+     *
      * @return Force.
      */
     public final Boolean getForce()
@@ -488,6 +537,8 @@ public class ArtifactItem
     }
 
     /**
+     * Sets whether the artifact download is forced.
+     *
      * @param force
      *            Force.
      */
@@ -497,6 +548,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns whether the artifact is installed.
+     *
      * @return Install.
      */
     public final Boolean getInstall()
@@ -505,6 +558,8 @@ public class ArtifactItem
     }
 
     /**
+     * Sets whether the artifact is installed.
+     *
      * @param install
      *            Install.
      */
@@ -514,6 +569,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns whether the artifact is deployed.
+     *
      * @return Deploy.
      */
     public final Boolean getDeploy()
@@ -522,6 +579,8 @@ public class ArtifactItem
     }
 
     /**
+     * Sets whether the artifact is deployed.
+     *
      * @param deploy
      *            Deploy.
      */
@@ -531,6 +590,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns the POM file associated with the artifact.
+     *
      * @return PomFile.
      */
     public final File getPomFile()
@@ -539,6 +600,8 @@ public class ArtifactItem
     }
 
     /**
+     * Sets the POM file associated with the artifact.
+     *
      * @param pomFile
      *            PomFile.
      */
@@ -548,6 +611,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns whether a POM is generated for the artifact.
+     *
      * @return GeneratePom.
      */
     public final Boolean getGeneratePom()
@@ -556,6 +621,8 @@ public class ArtifactItem
     }
 
     /**
+     * Sets whether a POM is generated for the artifact.
+     *
      * @param generatePom
      *            GeneratePom.
      */
@@ -565,6 +632,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns the checksum-creation setting.
+     *
      * @return CreateChecksum.
      */
     public final String getCreateChecksum()
@@ -573,6 +642,8 @@ public class ArtifactItem
     }
 
     /**
+     * Sets the checksum-creation setting.
+     *
      * @param createChecksum
      *            CreateChecksum.
      */
@@ -582,6 +653,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns the expected checksum of the artifact.
+     *
      * @return Checksum.
      */
     public final String getChecksum()
@@ -590,6 +663,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns whether a checksum is defined.
+     *
      * @return true is a checksum was defined.
      */
     public final boolean hasChecksum()
@@ -598,6 +673,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns whether a checksum is defined for an extracted file.
+     *
      * @return true is a checksum was defined for an extracted file.
      */
     public final boolean hasExtractFileChecksum()
@@ -606,6 +683,8 @@ public class ArtifactItem
     }
     
     /**
+     * Returns the expected checksum of the extracted file.
+     *
      * @return Extracted File Checksum.
      */    
     public final String getExtractFileChecksum()
@@ -615,6 +694,8 @@ public class ArtifactItem
     
     
     /**
+     * Sets the expected checksum of the artifact.
+     *
      * @param checksum
      *            Checksum
      */
@@ -624,6 +705,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns whether checksum verification is skipped.
+     *
      * @return SkipChecksumVerification.
      */
     public final Boolean getSkipChecksumVerification()
@@ -632,6 +715,8 @@ public class ArtifactItem
     }
 
     /**
+     * Sets whether checksum verification is skipped.
+     *
      * @param skipChecksumVerification
      *            SkipChecksumVerification.
      */
@@ -643,6 +728,8 @@ public class ArtifactItem
     
     
     /**
+     * Returns the path of the file to extract, with tokens resolved.
+     *
      * @return ExtractFile.
      */
     public final String getExtractFile()
@@ -651,6 +738,8 @@ public class ArtifactItem
     }
 
     /**
+     * Returns whether a file to extract is defined.
+     *
      * @return true is an extractFile was defined.
      */
     public final boolean hasExtractFile()
@@ -659,6 +748,8 @@ public class ArtifactItem
     }
 
     /**
+     * Sets the path of the file to extract.
+     *
      * @param extractFile
      *            ExtractFile
      */
@@ -731,17 +822,30 @@ public class ArtifactItem
         return target;
     }
 
+    /**
+     * Returns whether the artifact should be repacked.
+     *
+     * @return <code>true</code> if the artifact should be repacked
+     */
     public boolean isRepack()
     {
         return repack;
     }
 
+    /**
+     * Sets whether the artifact should be repacked.
+     *
+     * @param repack
+     *            <code>true</code> if the artifact should be repacked
+     */
     public void setRepack(boolean repack)
     {
         this.repack = repack;
     }
 
     /**
+     * Returns whether the POM is extracted from the artifact.
+     *
      * @return ExtractPom.
      */
     public final Boolean getExtractPom()
@@ -750,6 +854,8 @@ public class ArtifactItem
     }
 
     /**
+     * Sets whether the POM is extracted from the artifact.
+     *
      * @param extractPom
      *            ExtractPom.
      */

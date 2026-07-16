@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.script.groovy.internal;
@@ -53,6 +54,7 @@ public class Activator implements BundleActivator, ServiceFactory<ScriptEngineFa
     private static final ConcurrentMap<Bundle, ScriptEngineFactory> REGISTRY =
             new ConcurrentHashMap<Bundle, ScriptEngineFactory>();
 
+    @Override
     public void start(BundleContext context) throws Exception {
         Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
 
@@ -65,6 +67,7 @@ public class Activator implements BundleActivator, ServiceFactory<ScriptEngineFa
 
     }
 
+    @Override
     public void stop(BundleContext context) throws Exception {
         if (null != serviceRegistration) {
             serviceRegistration.unregister();
@@ -72,6 +75,7 @@ public class Activator implements BundleActivator, ServiceFactory<ScriptEngineFa
         }
     }
 
+    @Override
     public ScriptEngineFactory getService(Bundle bundle,
             ServiceRegistration<ScriptEngineFactory> registration) {
         ScriptEngineFactory factory = new GroovyScriptEngineFactory();
@@ -82,6 +86,7 @@ public class Activator implements BundleActivator, ServiceFactory<ScriptEngineFa
         return result;
     }
 
+    @Override
     public void ungetService(Bundle bundle, ServiceRegistration<ScriptEngineFactory> registration,
             ScriptEngineFactory service) {
         REGISTRY.remove(bundle);

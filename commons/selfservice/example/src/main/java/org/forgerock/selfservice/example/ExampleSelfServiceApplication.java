@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.selfservice.example;
@@ -89,7 +90,7 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
 
     private Handler buildHandler(String configResource) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
-        JsonValue json = new JsonValue(mapper.readValue(getClass().getResource(configResource), Map.class));
+        JsonValue json = new JsonValue(mapper.readValue(ExampleSelfServiceApplication.class.getResource(configResource), Map.class));
 
         RequestHandler service = JsonAnonymousProcessServiceBuilder.newBuilder()
                 .withJsonConfig(json)

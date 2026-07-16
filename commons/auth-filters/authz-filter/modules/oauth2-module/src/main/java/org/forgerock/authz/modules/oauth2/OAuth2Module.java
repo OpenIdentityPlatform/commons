@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.authz.modules.oauth2;
@@ -94,10 +95,10 @@ public class OAuth2Module {
      * Determines whether a request is authorized to access the resource based on the validity of an access token
      * the scopes of the access token.
      *
-     * @param accessToken {@inheritDoc}
-     * @param context {@inheritDoc}
-     * @return {@inheritDoc}
-     * @throws AuthorizationException {@inheritDoc}
+     * @param accessToken the OAuth2 access token presented with the request
+     * @param context the authorization context for the request being authorized
+     * @return a promise of the authorization result for the request
+     * @throws AuthorizationException if the access token cannot be validated
      */
     public Promise<AuthorizationResult, AuthorizationException> authorize(String accessToken,
             final AuthorizationContext context) {

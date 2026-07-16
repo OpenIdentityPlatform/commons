@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.audit.events;
 
@@ -22,10 +23,10 @@ package org.forgerock.audit.events;
  * new specific fields, e.g
  * <pre>
  * <code>
- * class OpenProductConfigAuditEventBuilder{@code <T extends OpenProductConfigAuditEventBuilder<T>>}
- *         extends ConfigAuditEventBuilder{@code <T>} {
+ * class OpenProductConfigAuditEventBuilder&lt;T extends OpenProductConfigAuditEventBuilder&lt;T&gt;&gt;
+ *         extends ConfigAuditEventBuilder&lt;T&gt; {
  *
- *     public static {@code <T>} OpenProductConfigAuditEventBuilder{@code <?>} productConfigEvent() {
+ *     public static &lt;T&gt; OpenProductConfigAuditEventBuilder&lt;?&gt; productConfigEvent() {
  *         return new OpenProductConfigAuditEventBuilder();
  *     }
  *

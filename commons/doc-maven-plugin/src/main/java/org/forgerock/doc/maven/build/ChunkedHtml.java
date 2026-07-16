@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.doc.maven.build;
@@ -110,8 +111,6 @@ public class ChunkedHtml {
                 cfg.add(element(name("targetsFilename"), m.getDocumentSrcName() + ".html.target.db"));
 
                 final String base = FilenameUtils.getBaseName(m.getDocumentSrcName());
-                final String chunkBaseDir = m.path(m.getDocbkxOutputDirectory())
-                        + "/html/" + docName + "/" + base + "/";
                //cfg.add(element(name("chunkBaseDir"), chunkBaseDir));
 
                 executeMojo(
@@ -150,8 +149,6 @@ public class ChunkedHtml {
                 cfg.add(element(name("includes"), docName + "/" + m.getDocumentSrcName()));
 
                 final String base = FilenameUtils.getBaseName(m.getDocumentSrcName());
-                final String chunkBaseDir = m.path(m.getDocbkxOutputDirectory())
-                        + "/html/" + docName + "/" + base + "/";
                 //cfg.add(element(name("chunkBaseDir"), chunkBaseDir));
 
                 cfg.add(element(name("manifest"),

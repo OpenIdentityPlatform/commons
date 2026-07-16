@@ -1,6 +1,7 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
- * 
+ * Portions Copyrighted 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -236,7 +237,7 @@ public class AdminUIBufferPanel extends AdminPanel implements AdminCommand {
 
             if (_bufferPoolIndex < 0)
                 _bufferPoolIndex = 0;
-            if (_bufferPoolIndex >= 0 && bufferPoolInfoArray != null && _bufferPoolIndex < bufferPoolInfoArray.length) {
+            if (bufferPoolInfoArray != null && _bufferPoolIndex < bufferPoolInfoArray.length) {
                 final int bufferSize = bufferPoolInfoArray[_bufferPoolIndex].getBufferSize();
                 _bufferInfoArrayModel.setInfoArray(management.getBufferInfoArray(bufferSize, _selectedTraversalType,
                         _selectedIncludeMask, _selectedExcludeMask));

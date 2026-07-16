@@ -1,6 +1,7 @@
 /**
  * Copyright 2012 Akiban Technologies, Inc.
- * 
+ * Portions Copyrighted 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,9 +58,9 @@ class LongRecordHelper {
      * Value. This will replace the byte array in that value with the actual
      * long value.
      * 
-     * @param value
-     * @param minimumBytesToFetch
-     * @throws PersistitException
+     * @param value the Value containing the LONG_RECORD pointer to decode
+     * @param minimumBytesToFetch the minimum number of bytes to fetch
+     * @throws PersistitException if a persistence error occurs
      */
     void fetchLongRecord(final Value value, final int minimumBytesToFetch, final long timeout)
             throws PersistitException {
@@ -114,10 +115,7 @@ class LongRecordHelper {
                 buffer = null;
 
                 if (count > MAX_LONG_RECORD_CHAIN) {
-                    if (count > MAX_LONG_RECORD_CHAIN) {
-                        corrupt("LONG_RECORD chain starting at " + startAtPage + " is too long");
-                    }
-
+                    corrupt("LONG_RECORD chain starting at " + startAtPage + " is too long");
                 }
             }
             value.setLongSize(rawSize);
@@ -155,7 +153,7 @@ class LongRecordHelper {
      *            indicates whether this operation is within the context of a
      *            transaction.
      * 
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     long storeLongRecord(final Value value, final boolean inTxn) throws PersistitException {
         value.changeLongRecordMode(true);

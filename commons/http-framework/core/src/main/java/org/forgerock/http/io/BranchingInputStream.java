@@ -13,6 +13,7 @@
  *
  * Copyright 2010–2011 ApexIdentity Inc.
  * Portions Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.http.io;
@@ -62,6 +63,7 @@ public abstract class BranchingInputStream extends InputStream {
      * @throws IOException
      *             if an I/O exception occurs.
      */
+    @Override
     public abstract void close() throws IOException;
 
     /**

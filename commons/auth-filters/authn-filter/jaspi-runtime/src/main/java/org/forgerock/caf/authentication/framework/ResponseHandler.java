@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.caf.authentication.framework;
@@ -53,6 +54,7 @@ class ResponseHandler {
     private static final String QUALITY_PARAMETER = "q";
 
     private static final Comparator<MediaType> ACCEPT_QUALITY_COMPARATOR = new Comparator<MediaType>() {
+        @Override
         public int compare(MediaType o1, MediaType o2) {
             int comparison = getQuality(o2).compareTo(getQuality(o1));
             if (comparison == 0) {
@@ -155,6 +157,7 @@ class ResponseHandler {
                 MediaType.JSON_UTF_8,
                 MediaType.JSON_UTF_8.withoutParameters());
 
+        @Override
         public List<MediaType> handles() {
             return MEDIA_TYPES;
         }

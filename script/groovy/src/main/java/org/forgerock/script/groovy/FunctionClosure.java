@@ -2,6 +2,7 @@
  * DO NOT REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2012-2015 ForgeRock AS. All rights reserved.
+ * Portions copyright 2026 3A Systems LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -89,5 +90,10 @@ public class FunctionClosure extends Closure<JsonValue> {
         } catch (Throwable e) {
             return throwRuntimeException(e);
         }
+    }
+
+    @Override
+    public FunctionClosure clone() {
+        return (FunctionClosure) super.clone();
     }
 }

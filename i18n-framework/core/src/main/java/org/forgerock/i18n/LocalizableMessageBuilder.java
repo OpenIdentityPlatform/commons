@@ -13,6 +13,7 @@
  *
  *      Copyright 2007-2009 Sun Microsystems, Inc.
  *      Portions copyright 2011 ForgeRock AS
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.i18n;
@@ -103,6 +104,7 @@ public final class LocalizableMessageBuilder implements Appendable,
      *            The character to be appended.
      * @return A reference to this message builder.
      */
+    @Override
     public LocalizableMessageBuilder append(final char c) {
         return append(LocalizableMessage.valueOf(c));
     }
@@ -116,6 +118,7 @@ public final class LocalizableMessageBuilder implements Appendable,
      * @throws NullPointerException
      *             If {@code cs} was {@code null}.
      */
+    @Override
     public LocalizableMessageBuilder append(final CharSequence cs) {
         if (cs == null) {
             throw new NullPointerException("cs was null");
@@ -150,6 +153,7 @@ public final class LocalizableMessageBuilder implements Appendable,
      * @throws NullPointerException
      *             If {@code cs} was {@code null}.
      */
+    @Override
     public LocalizableMessageBuilder append(final CharSequence cs,
             final int start, final int end) {
         return append(cs.subSequence(start, end));
@@ -208,6 +212,7 @@ public final class LocalizableMessageBuilder implements Appendable,
      *             If the {@code index} argument is negative or not less than
      *             {@code length()}.
      */
+    @Override
     public char charAt(final int index) {
         return charAt(Locale.getDefault(), index);
     }
@@ -239,6 +244,7 @@ public final class LocalizableMessageBuilder implements Appendable,
      * @return The length of the {@code String} representation of this message
      *         builder in the default locale.
      */
+    @Override
     public int length() {
         return length(Locale.getDefault());
     }
@@ -277,6 +283,7 @@ public final class LocalizableMessageBuilder implements Appendable,
      *             is greater than {@code length()}, or if {@code start} is
      *             greater than {@code end}.
      */
+    @Override
     public CharSequence subSequence(final int start, final int end) {
         return subSequence(Locale.getDefault(), start, end);
     }

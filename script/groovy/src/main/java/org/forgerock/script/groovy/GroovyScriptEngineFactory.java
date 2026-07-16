@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 package org.forgerock.script.groovy;
@@ -48,7 +49,7 @@ public class GroovyScriptEngineFactory implements ScriptEngineFactory {
 
     public static final String LANGUAGE_NAME = "Groovy";
 
-    private GroovyScriptEngineImpl engine = null;
+    private volatile GroovyScriptEngineImpl engine = null;
 
     static {
         names = new ArrayList<String>(2);
@@ -65,34 +66,42 @@ public class GroovyScriptEngineFactory implements ScriptEngineFactory {
         extensions = Collections.unmodifiableList(extensions);
     }
 
+    @Override
     public String getEngineName() {
         return "Groovy Scripting Engine";
     }
 
+    @Override
     public String getEngineVersion() {
         return "2.0";
     }
 
+    @Override
     public List<String> getExtensions() {
         return extensions;
     }
 
+    @Override
     public List<String> getMimeTypes() {
         return mimeTypes;
     }
 
+    @Override
     public List<String> getNames() {
         return names;
     }
 
+    @Override
     public String getLanguageName() {
         return LANGUAGE_NAME;
     }
 
+    @Override
     public String getLanguageVersion() {
         return GroovySystem.getVersion();
     }
 
+    @Override
     public ScriptEngine getScriptEngine(Map<String, Object> configuration, Collection<SourceContainer> sourceContainers,
             ClassLoader registryLevelClassLoader) {
         if (null == engine) {

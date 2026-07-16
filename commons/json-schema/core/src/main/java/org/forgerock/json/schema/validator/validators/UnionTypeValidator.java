@@ -37,7 +37,6 @@ import static org.forgerock.json.schema.validator.Constants.*;
  * the simple validators definitions, or valid by one of the schemas, in
  * the array.
  * <p>
- * <p>
  * For example, a schema that defines if an instance can be a string or
  * a number would be:</p>
  * <p>

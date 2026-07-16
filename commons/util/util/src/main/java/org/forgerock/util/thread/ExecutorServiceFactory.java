@@ -187,6 +187,7 @@ public class ExecutorServiceFactory {
     private void registerShutdown(final ExecutorService service) {
         shutdownManager.addShutdownListener(
                 new ShutdownListener() {
+                    @Override
                     public void shutdown() {
                         service.shutdownNow();
                     }
@@ -207,6 +208,7 @@ public class ExecutorServiceFactory {
             this.name = name;
         }
 
+        @Override
         public Thread newThread(Runnable r) {
             return new Thread(r, name + "-" +  count.getAndIncrement());
         }

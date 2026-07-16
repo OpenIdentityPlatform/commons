@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.doc.maven.utils;
@@ -76,7 +77,6 @@ public final class PngUtils {
         final int imageHeight = getHeight(image);
         final int newWidth = 700;
 
-        String absolutePath = image.getAbsolutePath();
 
         /** File thumbFile = new File(absolutePath.substring(0, absolutePath
                 .lastIndexOf(File.separator)) + File.separator + "thumb_"

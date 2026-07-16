@@ -107,7 +107,7 @@ class ManagementSlidingTableModel extends ManagementTableModel {
      * <i>width</i> is a percentage of the total table width, and
      * <i>justification</i> is L, C or R.
      * 
-     * @param clazz
+     * @param clazz the management info class whose columns are displayed.
      */
 
     public ManagementSlidingTableModel(final Class clazz, final String className, final AdminUI ui)
@@ -232,9 +232,7 @@ class ManagementSlidingTableModel extends ManagementTableModel {
 
         final int oldOffset = _offset;
         int newOffset = oldOffset;
-        final int oldRowCount = _currentRowCount;
         int firstUpdatedRow;
-        int lastUpdatedRow;
 
         int lost = 0; // rows lost from row cache
         int kept = _valid; // rows kept from row cache
@@ -263,7 +261,6 @@ class ManagementSlidingTableModel extends ManagementTableModel {
             System.arraycopy(fetcher._resultRows, cut, _infoArray, kept, count - cut);
 
             firstUpdatedRow = newOffset + kept;
-            lastUpdatedRow = firstUpdatedRow + count - cut - 1;
 
             if (count < fetcher._requestedCount) {
                 changeRowCount(newOffset + newValid, true);
@@ -291,7 +288,6 @@ class ManagementSlidingTableModel extends ManagementTableModel {
             System.arraycopy(fetcher._resultRows, 0, _infoArray, 0, count - cut);
 
             firstUpdatedRow = newOffset;
-            lastUpdatedRow = firstUpdatedRow + count - cut - 1;
 
             if (count < fetcher._requestedCount) {
                 _definite = false;

@@ -1,6 +1,7 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
- * 
+ * Portions Copyrighted 2026 3A Systems, LLC
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,7 +82,7 @@ public class EnumValueCoder implements ValueCoder {
      *            <code>null</code>.
      * @return An <code>Object</code> having the same class as the suppled
      *         <code>clazz</code> parameter.
-     * @throws ConversionException
+     * @throws ConversionException if the value cannot be converted
      */
     @Override
     public Object get(final Value value, Class clazz, final CoderContext context) throws ConversionException {

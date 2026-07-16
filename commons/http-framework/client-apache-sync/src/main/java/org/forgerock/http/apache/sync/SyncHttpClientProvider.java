@@ -14,6 +14,7 @@
  * Copyright 2009 Sun Microsystems Inc.
  * Portions Copyright 2010–2011 ApexIdentity Inc.
  * Portions Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.http.apache.sync;
@@ -132,7 +133,6 @@ public final class SyncHttpClientProvider implements HttpClientProvider {
                 asArrayOrNull(ciphers), hostnameVerifier));
 
         // Apply proxy settings if necessary
-        AuthenticationStrategy proxyStrategy = NoAuthenticationStrategy.INSTANCE;
         ProxyAuthenticationStrategy proxyAuthenticationStrategy = null;
 
         // Read the proxy info from options

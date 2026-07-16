@@ -125,8 +125,8 @@ public class JoinPolicy {
      * Determines whether two pages will be permitted to be rejoined during a
      * delete operation.
      * 
-     * @param buffer
-     * @param virtualSize
+     * @param buffer the <code>Buffer</code> that would receive the joined content
+     * @param virtualSize the proposed combined size in bytes of the joined pages
      * @return <code>true</code> if the buffer will accept content of the
      *         specified size
      */

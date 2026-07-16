@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.doc.maven.post;
@@ -60,6 +61,7 @@ public class ManpagePost extends AbstractDocbkxMojo {
      *
      * @throws MojoExecutionException   Failed to copy files.
      */
+    @Override
     public void execute() throws MojoExecutionException {
         File manPageOutputDir = new File(m.getDocbkxOutputDirectory(), "manpages");
         File generatedManPageDir = new File(manPageOutputDir.getAbsolutePath().replace(' ', '_'));

@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -32,10 +33,6 @@ final class AccumulatorState {
      * Deserialize stored statistics values from the supplied byte array
      * starting at <code>index</code>.
      * 
-     * @param bytes
-     *            serialized statistics
-     * @param index
-     *            at which serialized statistics start in the byte array
      */
     void load(final Value value) {
         _treeName = value.getString();

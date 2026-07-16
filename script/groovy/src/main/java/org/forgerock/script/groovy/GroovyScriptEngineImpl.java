@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.script.groovy;
@@ -175,6 +176,7 @@ public class GroovyScriptEngineImpl extends AbstractScriptEngine {
         return ic;
     }
 
+    @Override
     public void compileScript(CompilationHandler handler) throws ScriptException {
         try {
             handler.setClassLoader(groovyScriptEngine.getGroovyClassLoader());
@@ -212,6 +214,7 @@ public class GroovyScriptEngineImpl extends AbstractScriptEngine {
         }
     }
 
+    @Override
     public ScriptEngineFactory getFactory() {
         return factory;
     }
@@ -233,6 +236,7 @@ public class GroovyScriptEngineImpl extends AbstractScriptEngine {
         return Script.class.getClassLoader();
     }
 
+    @Override
     public Bindings compileBindings(Context context, Bindings request, Bindings... value) {
         return null;
     }

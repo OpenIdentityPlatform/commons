@@ -13,6 +13,7 @@
  *
  * Copyright 2010–2011 ApexIdentity Inc.
  * Portions Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.http.io;
@@ -86,9 +87,11 @@ final class ByteArrayBranchingStream extends BranchingInputStream {
         if (n <= 0) {
             return 0;
         }
-        n = Math.min(n, data.length - position);
-        position += n;
-        return n;
+        // Math.min bounds the result to data.length - position, which fits in an int
+        // (position is always in [0, data.length]), so this narrowing cast is lossless.
+        final int skipped = (int) Math.min(n, data.length - position);
+        position += skipped;
+        return skipped;
     }
 
     @Override
@@ -102,7 +105,7 @@ final class ByteArrayBranchingStream extends BranchingInputStream {
     }
 
     @Override
-    public void mark(int readlimit) {
+    public synchronized void mark(int readlimit) {
         mark = position;
     }
 

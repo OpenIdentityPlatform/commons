@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.fluent;
@@ -43,6 +44,7 @@ public class JsonValueList<E> extends AbstractList<E> implements JsonValueWrappe
         this.jsonValue = jsonValue.expect(List.class);
     }
 
+    @Override
     public JsonValue unwrap() {
         return jsonValue;
     }

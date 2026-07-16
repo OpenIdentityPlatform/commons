@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2015 ForgeRock AS.
- * Portions copyright 2024 3A Systems LLC.
+ * Portions copyright 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.guice.core;
@@ -39,6 +39,7 @@ public final class GuiceInitialisationFilter implements ServletContextListener {
      *
      * @param servletContextEvent {@inheritDoc}
      */
+    @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
     		try {
 	        ServletContext servletContext = servletContextEvent.getServletContext();
@@ -58,6 +59,7 @@ public final class GuiceInitialisationFilter implements ServletContextListener {
      *
      * @param servletContextEvent {@inheritDoc}
      */
+    @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
     }
 }

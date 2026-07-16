@@ -1,5 +1,6 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
+ * Portions copyright 2026 3A Systems LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -87,6 +89,11 @@ class CheckpointManager extends IOTaskRunnable implements CheckpointManagerMXBea
             }
             final Checkpoint cp = (Checkpoint) object;
             return cp._systemTime == _systemTime && cp._timestamp == _timestamp;
+        }
+
+        @Override
+        public int hashCode() {
+            return (int) (_timestamp ^ (_timestamp >>> 32) ^ _systemTime ^ (_systemTime >>> 32));
         }
     }
 
@@ -219,7 +226,7 @@ class CheckpointManager extends IOTaskRunnable implements CheckpointManagerMXBea
      * checkpoints.
      * 
      * @return The newly created Checkpoint
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     synchronized Checkpoint createCheckpoint() throws PersistitException {
         /*

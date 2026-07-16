@@ -158,7 +158,7 @@ public final class EventTopicsMetaDataBuilder {
     }
 
     private InputStream getResourceAsStream(String resourcePath) {
-        return new BufferedInputStream(getClass().getResourceAsStream(resourcePath));
+        return new BufferedInputStream(EventTopicsMetaDataBuilder.class.getResourceAsStream(resourcePath));
     }
 
     private void extendCoreEventTopicsSchemas(Map<String, JsonValue> auditEventTopicSchemas) {
