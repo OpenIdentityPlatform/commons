@@ -535,8 +535,8 @@ public abstract class Accumulator {
      * This method is called when computing a snapshot value and when
      * aggregating <code>Delta</code> instances.
      * 
-     * @param a
-     * @param b
+     * @param a the first operand
+     * @param b the second operand
      * @return the result of the commutative operation on a and b
      */
     abstract long applyValue(long a, long b);
@@ -548,18 +548,18 @@ public abstract class Accumulator {
      * <code>SeqAccumulator</code> update(a, b) returns a + b (computed
      * atomically) whereas apply(a, b) return Math.max(a, b).
      * 
-     * @param a
-     * @param b
+     * @param a the first operand
+     * @param b the second operand
      * @return the result of the commutative operation on a and b
      */
     abstract long updateValue(long a, long b);
 
     /**
-     * @param value
+     * @param value the current value
      * @param updated
      *            return One of the supplied parameters as the value to be held
      *            in a <code>Delta</code>.
-     * 
+     *
      */
     abstract long selectValue(long value, long updated);
 
@@ -665,8 +665,8 @@ public abstract class Accumulator {
     }
 
     /**
-     * @param timestamp
-     * @param step
+     * @param timestamp the start timestamp bounding committed transactions to include
+     * @param step the step number bounding operations of the current transaction to include
      * @return The value computed by accumulating values contributed by (a) all
      *         transactions having commit timestamps less than or equal to
      *         <code>timestamp</code>, and (b) all operations performed by the
@@ -686,7 +686,7 @@ public abstract class Accumulator {
      * recovery processing to apply Deltas from recovered committed
      * transactions.
      * 
-     * @param value
+     * @param value the delta value to apply to the base value
      */
     void updateBaseValue(final long value, final long commitTimestamp) {
         _baseValue = applyValue(_baseValue, value);

@@ -1,6 +1,7 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
- * 
+ * Portions Copyrighted 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -275,7 +276,6 @@ class FastIndex {
         int ebc0;
         int ebc = -1;
         int ebc2 = Buffer.decodeKeyBlockEbc(_buffer.getInt(start));
-        int faultAt = -1;
 
         for (int i = 0, p = start; p < end; i++, p += Buffer.KEYBLOCK_LENGTH) {
             ebc0 = ebc;
@@ -284,16 +284,10 @@ class FastIndex {
                     + Buffer.KEYBLOCK_LENGTH)) : 0;
             if (ebc2 > ebc) {
                 if (getRunCount(i) >= 0) {
-                    if (faultAt < 0) {
-                        faultAt = i;
-                    }
                     return false;
                 }
             } else if (ebc > ebc0) {
                 if (getRunCount(i) < 0) {
-                    if (faultAt < 0) {
-                        faultAt = i;
-                    }
                     return false;
                 }
             }
@@ -514,11 +508,11 @@ class FastIndex {
      * Fixes up the elements surrounding insertion of keyblock that causes the
      * successor ebc to get fixed up.
      * 
-     * @param insertIndex
-     * @param runIndex
-     * @param runCount
-     * @param ebc
-     * @param successorEbc
+     * @param insertIndex the index at which the new keyblock is inserted
+     * @param runIndex the index of the first keyblock in the affected run
+     * @param runCount the number of keyblocks in the run
+     * @param ebc the elided byte count at the head of the run
+     * @param successorEbc the elided byte count of the successor keyblock
      */
     private void fixupSuccessor(final int lastIndex, final int insertIndex, final int runIndex, final int runCount,
             final int ebc, final int successorEbc) {

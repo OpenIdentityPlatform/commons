@@ -62,7 +62,6 @@ public abstract class Validator implements SimpleValidator<Object> {
     /**
      * Gets the valid JSONPath of the node or the given property.
      * <p>
-     * <p>
      * Combines the two parameter and generates a valid JSONPath with dot–notation.
      * Simple type: $
      * Array type: $[0]

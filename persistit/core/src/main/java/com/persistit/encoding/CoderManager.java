@@ -242,7 +242,7 @@ public interface CoderManager {
      * Return a <code>ValueCoder</code> for the supplied <code>Class</code>. If
      * there is none registered, implicitly create one and register it.
      * 
-     * @param clazz
+     * @param clazz The <code>Class</code>
      * @return The ValueCoder
      */
     public ValueCoder getValueCoder(Class<?> clazz);

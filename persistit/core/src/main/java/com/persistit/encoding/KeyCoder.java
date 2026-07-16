@@ -1,6 +1,7 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
- * 
+ * Portions Copyrighted 2026 3A Systems, LLC
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -106,7 +107,7 @@ public interface KeyCoder {
      *            application to convey an application-specific context for the
      *            operation. (See {@link CoderContext}.) The default value is
      *            <code>null</code>.
-     * @throws ConversionException
+     * @throws ConversionException if the value cannot be converted
      */
 
     public Object decodeKeySegment(Key key, Class<?> clazz, CoderContext context) throws ConversionException;
@@ -130,7 +131,7 @@ public interface KeyCoder {
      * 
      * @return whether this KeyCoder produces encodings guaranteed not to
      *         contain zero bytes
-     * @throws ConversionException
+     * @throws ConversionException if the value cannot be converted
      */
     public boolean isZeroByteFree() throws ConversionException;
 }

@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,7 +105,7 @@ public class SimpleTransaction implements Runnable {
             System.out.println("Completed transactions: " + _committedTransactionCount);
             System.out.println("Failed transactions: " + _failedTransactionCount);
             System.out.println("Retried transactions: " + _rolledBackTransactionCount);
-            System.out.println("Average completed transactions rate: " + (_committedTransactionCount * 1000 / time)
+            System.out.println("Average completed transactions rate: " + (_committedTransactionCount * 1000L / time)
                     + " per second");
 
             int endingBalance = balance(accountEx);

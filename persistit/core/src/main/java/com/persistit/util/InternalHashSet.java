@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions copyright 2026 3A Systems LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +61,14 @@ public class InternalHashSet {
             if (_hashCode == -1)
                 _hashCode = hashCode() & 0x7FFFFFFF;
             return _hashCode;
+        }
+
+        // Identity equals: InternalHashSet chains entries by hash bucket and never
+        // compares them with equals(), so each Entry is distinct by identity
+        // (CodeQL java/inconsistent-equals-and-hashcode).
+        @Override
+        public boolean equals(final Object obj) {
+            return this == obj;
         }
 
         @Override

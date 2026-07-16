@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
- * Portions copyright 2024 3A Systems LLC.
+ * Portions copyright 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.audit.handlers.jms;
@@ -67,7 +67,7 @@ class JmsResourceManager {
      *
      * @param configuration The Audit Configuration.
      * @param jmsContextManager The {@link JmsContextManager}.
-     * @throws InternalServerErrorException
+     * @throws InternalServerErrorException if the JMS resources cannot be initialized.
      */
     public JmsResourceManager(JmsAuditEventHandlerConfiguration configuration, JmsContextManager jmsContextManager)
             throws ResourceException {
@@ -87,7 +87,7 @@ class JmsResourceManager {
 
     /**
      * Opens the connection to the JMS services with the configured session mode.
-     * @throws JMSException
+     * @throws JMSException if there is trouble opening the connection.
      */
     public void openConnection() throws JMSException {
         connection = connectionFactory.createConnection();
@@ -98,7 +98,7 @@ class JmsResourceManager {
     /**
      * Closes the connection to the JMS services.
      *
-     * @throws JMSException
+     * @throws JMSException if there is trouble closing the connection.
      */
     public void closeConnection() throws JMSException {
         if (null != connection) {

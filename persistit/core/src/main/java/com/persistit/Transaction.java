@@ -498,6 +498,7 @@ public class Transaction {
      * only during recovery processing.
      * 
      * @param id
+     *            the transaction identifier to assign to this context
      */
     private Transaction(final Persistit persistit, final SessionId sessionId, final long id) {
         _persistit = persistit;
@@ -514,6 +515,8 @@ public class Transaction {
      * transaction if it was abandoned due to thread death.
      * 
      * @throws PersistitException
+     *             if a persistence error occurs while closing the transaction
+     *             context
      */
     void close() throws PersistitException {
         if (_nestedDepth > 0 && !_commitCompleted && !_rollbackCompleted) {
@@ -538,6 +541,8 @@ public class Transaction {
      * roll-back transition pending.
      * 
      * @throws RollbackException
+     *             if this transaction context has a roll-back transition
+     *             pending
      */
     public void checkPendingRollback() throws RollbackException {
         if (_rollbackPending) {
@@ -930,11 +935,14 @@ public class Transaction {
      * </p>
      * 
      * @param runnable
-     * 
+     *            the <code>TransactionRunnable</code> containing logic to
+     *            access and update Persistit data
+     *
      * @return Count of passes needed to complete the transaction. Always 1 on
      *         successful completion.
      * 
      * @throws PersistitException
+     *             if a persistence error occurs during the transaction
      */
     public int run(final TransactionRunnable runnable) throws PersistitException {
         return run(runnable, 0, 0, _persistit.getDefaultTransactionCommitPolicy());
@@ -978,6 +986,7 @@ public class Transaction {
      * @return Count of attempts needed to complete the transaction
      * 
      * @throws PersistitException
+     *             if a persistence error occurs during the transaction
      * @throws RollbackException
      *             If after <code>retryCount+1</code> attempts the transaction
      *             cannot be completed or committed due to concurrent updated
@@ -1050,6 +1059,7 @@ public class Transaction {
      * Set the current default policy
      * 
      * @param policy
+     *            the default <code>CommitPolicy</code> to set
      */
     public void setDefaultCommitPolicy(final CommitPolicy policy) {
         _defaultCommitPolicy = policy;
@@ -1119,9 +1129,13 @@ public class Transaction {
      * Record a store operation.
      * 
      * @param exchange
+     *            the <code>Exchange</code> that performed the store operation
      * @param key
+     *            the <code>Key</code> at which the value was stored
      * @param value
+     *            the <code>Value</code> that was stored
      * @throws PersistitException
+     *             if a persistence error occurs while recording the operation
      */
     void store(final Exchange exchange, final Key key, final Value value) throws PersistitException {
         if (_nestedDepth > 0) {
@@ -1134,9 +1148,13 @@ public class Transaction {
      * Record a remove operation.
      * 
      * @param exchange
+     *            the <code>Exchange</code> that performed the remove operation
      * @param key1
+     *            the left edge <code>Key</code> of the removed range
      * @param key2
+     *            the right edge <code>Key</code> of the removed range
      * @throws PersistitException
+     *             if a persistence error occurs while recording the operation
      */
     void remove(final Exchange exchange, final Key key1, final Key key2) throws PersistitException {
         if (_nestedDepth > 0) {
@@ -1149,7 +1167,9 @@ public class Transaction {
      * Record a tree delete operation
      * 
      * @param exchange
+     *            the <code>Exchange</code> whose tree was removed
      * @throws PersistitException
+     *             if a persistence error occurs while recording the operation
      */
     void removeTree(final Exchange exchange) throws PersistitException {
         if (_nestedDepth > 0) {

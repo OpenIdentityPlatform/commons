@@ -285,7 +285,6 @@ public class Tree extends SharedResource {
     /**
      * Save a Tree in the directory
      * 
-     * @param value
      */
     int store(final byte[] bytes, final int index) {
         final byte[] nameBytes = Util.stringToBytes(_name);
@@ -301,7 +300,6 @@ public class Tree extends SharedResource {
     /**
      * Load an existing Tree from the directory
      * 
-     * @param value
      */
     int load(final byte[] bytes, final int index, final int length) {
         final int nameLength = length < 20 ? -1 : Util.getShort(bytes, index + 18);
@@ -322,8 +320,8 @@ public class Tree extends SharedResource {
     /**
      * Initialize a Tree.
      * 
-     * @param rootPageAddr
-     * @throws PersistitException
+     * @param rootPageAddr the root page address to assign to the tree
+     * @throws PersistitException if a persistence error occurs
      */
     void setRootPageAddress(final long rootPageAddr) throws PersistitException {
         final TreeVersion version = version();
@@ -414,7 +412,7 @@ public class Tree extends SharedResource {
      * Assign and set the tree handle. The tree must may not be a member of a
      * temporary volume.
      * 
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     void loadHandle() throws PersistitException {
         assert !_volume.isTemporary() : "Handle allocation for temporary tree " + this;
@@ -557,7 +555,7 @@ public class Tree extends SharedResource {
      * Set the handle used to identify this Tree in the journal. May be invoked
      * only once.
      * 
-     * @param handle
+     * @param handle the handle value to assign
      * @return the handle
      * @throws IllegalStateException
      *             if the handle has already been set

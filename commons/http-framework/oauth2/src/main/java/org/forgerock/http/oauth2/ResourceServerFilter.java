@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions copyright 2020-2026 3A Systems LLC.
  */
 
 package org.forgerock.http.oauth2;
@@ -32,6 +33,7 @@ import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.http.protocol.Status;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
+import org.forgerock.util.crypto.SecretHash;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.time.TimeService;
@@ -159,7 +161,10 @@ public class ResourceServerFilter implements Filter {
         return new AsyncFunction<AccessTokenException, Response, NeverThrowsException>() {
             @Override
             public Promise<? extends Response, ? extends NeverThrowsException> apply(AccessTokenException e) {
-                logger.debug("Access Token '{}' cannot be resolved", token, e);
+                // Log only a one-way hash of the bearer token, never the value (CWE-532: sensitive data in logs).
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Access token '{}' could not be resolved", SecretHash.hash(token), e);
+                }
                 return newResponsePromise(invalidToken(realm));
             }
         };
@@ -174,14 +179,20 @@ public class ResourceServerFilter implements Filter {
             public Promise<? extends Response, ? extends NeverThrowsException> apply(AccessTokenInfo accessToken) {
                 // Validate the token (expiration + scopes)
                 if (isExpired(accessToken)) {
-                    logger.debug("Access Token {} is expired", accessToken);
+                    // Log only a one-way hash of the token, never the value (CWE-532: sensitive data in logs).
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Access token '{}' is expired", SecretHash.hash(accessToken.getToken()));
+                    }
                     return newResponsePromise(invalidToken(realm));
                 }
 
                 try {
                     final Set<String> scopesNeeded = resourceAccess.getRequiredScopes(context, request);
                     if (!accessToken.getScopes().containsAll(scopesNeeded)) {
-                        logger.debug("Access Token {} is missing required scopes", accessToken);
+                        // Log only a one-way hash of the token, never the value (CWE-532: sensitive data in logs).
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Access token '{}' is missing required scopes", SecretHash.hash(accessToken.getToken()));
+                        }
                         return newResponsePromise(insufficientScope(realm, scopesNeeded));
                     }
                 } catch (ResponseException e) {

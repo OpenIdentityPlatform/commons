@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 package org.forgerock.commons.launcher;
@@ -84,15 +85,6 @@ public class BundleHandlerBuilder {
 
     public BundleHandler build(String bundleURL) throws MalformedURLException {
         return build(new URL(bundleURL));
-    }
-
-    public boolean equals(BundleHandlerBuilder that) {
-        if (this == that)
-            return true;
-        if ((that == null)
-                || (!actions.equals(that.actions) || !startLevel.equals(that.startLevel)))
-            return false;
-        return true;
     }
 
 }

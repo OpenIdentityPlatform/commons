@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.json.jose.jwk;
@@ -89,13 +90,12 @@ public abstract class JWK extends JWObject {
     protected JWK(KeyType kty, KeyUse use, String alg, String kid, String x5u, String x5t, List<String> x5c) {
         super();
         if (kty == null) {
-            new JsonException("kty is a required field");
+            throw new JsonException("kty is a required field");
         }
         put(KTY, kty.toString());
-        if (kid == null || kid.isEmpty()) {
-            new JsonException("kid is a required field");
+        if (kid != null && !kid.isEmpty()) {
+            put(KID, kid);
         }
-        put(KID, kid);
         if (use != null) {
             put(USE, use.toString());
         }

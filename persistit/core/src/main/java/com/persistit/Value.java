@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -788,7 +789,7 @@ public final class Value {
    * This method is part of the <a href="#_lowLevelAPI">Low-Level API</a>.
    * </p>
    * 
-   * @param length
+   * @param length the number of bytes to ensure can be appended
    * @return <code>true</code> if the backing byte array was replaced by a
    *         larger array.
    */
@@ -823,7 +824,7 @@ public final class Value {
    *            Offset into the target at which the subarray should be copied
    * @param length
    *            Number of bytes to copy
-   * @throws ArrayIndexOutOfBoundsException
+   * @throws ArrayIndexOutOfBoundsException if the specified range is outside the array bounds
    */
   public void copyFromEncodedBytes(final byte[] dest, final int from, final int to, final int length) {
     System.arraycopy(_bytes, from, dest, to, length);
@@ -1567,7 +1568,7 @@ public final class Value {
           sb.append("...");
       } else if (cl == Date.class) {
         appendParenthesizedFriendlyClassName(sb, cl);
-        sb.append(Key.SDF.format((Date) value));
+        sb.append(Key.SDF.get().format((Date) value));
       } else if (value instanceof Number) {
         sb.append('(');
         sb.append(className.startsWith("java.lang.") ? className.substring(10) : className);
@@ -5214,7 +5215,7 @@ public final class Value {
      * Look up the handle for an Object that has already been stored in this
      * Value.
      * 
-     * @param object
+     * @param object the object whose handle is to be found
      * @return The handle, or -1 if the object has not been stored yet.
      */
     int lookup(final Object object) {
@@ -5229,7 +5230,7 @@ public final class Value {
     /**
      * Get the object stored with the supplied handle value.
      * 
-     * @param handle
+     * @param handle the handle of the object to retrieve
      * @return The object
      */
     Object get(final int handle) {
@@ -5246,8 +5247,8 @@ public final class Value {
      * Subsequent lookup and get operations will then be able to find this
      * object or fetch it by handle.
      * 
-     * @param handle
-     * @param object
+     * @param handle the handle to associate with the object
+     * @param object the object to associate with the handle
      * @return previous handle, or -1 if none
      */
     void store(final int handle, final Object object) {
@@ -5394,7 +5395,7 @@ public final class Value {
    * the multi-value versions currently held in this Value object.
    * 
    * @return the list of <code>Version</code>s
-   * @throws PersistitException
+   * @throws PersistitException if a persistence error occurs
    */
   List<Version> unpackMvvVersions() throws PersistitException {
     final List<Version> versions = new ArrayList<Version>();

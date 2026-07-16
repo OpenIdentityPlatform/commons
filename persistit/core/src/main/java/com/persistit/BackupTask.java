@@ -1,6 +1,7 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
- * 
+ * Portions Copyrighted 2026 3A Systems, LLC
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -172,8 +173,9 @@ public class BackupTask extends Task {
      * A convenience method for backing up relatively small amounts of data from
      * within Persistit. In production it is expected that the actual file
      * copies required for backup will be performed be third-party utilities.
-     * 
+     *
      * @throws Exception
+     *             if the backup operation fails
      */
     private void doBackup() throws Exception {
         final ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(_toFile),
@@ -222,8 +224,9 @@ public class BackupTask extends Task {
      * A convenience method for unit tests to unzip a backup created by
      * {@link #doBackup()}. In production it is expected a backup produced by
      * {@link #doBackup()} will be restored via an external unzip utility.
-     * 
+     *
      * @throws Exception
+     *             if the restore operation fails
      */
     public void doRestore(final String path) throws Exception {
         final File zipFile = new File(path);
