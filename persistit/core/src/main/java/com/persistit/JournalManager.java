@@ -2176,6 +2176,22 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
             }
         }
 
+        /**
+         * Equality is kept consistent with {@link #compareTo(TransactionMapItem)}:
+         * two items are equal exactly when they order equally (same commit
+         * timestamp for committed items, otherwise same start timestamp).
+         */
+        @Override
+        public boolean equals(final Object object) {
+            return this == object
+                    || (object instanceof TransactionMapItem && compareTo((TransactionMapItem) object) == 0);
+        }
+
+        @Override
+        public int hashCode() {
+            return Long.hashCode(isCommitted() ? _commitTimestamp : _startTimestamp);
+        }
+
         final static Comparator<TransactionMapItem> TRANSACTION_MAP_ITEM_COMPARATOR = new Comparator<TransactionMapItem>() {
 
             @Override

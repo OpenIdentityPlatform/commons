@@ -254,6 +254,24 @@ public class TreeBuilder {
                 return _key.compareTo(node._key);
         }
 
+        /**
+         * Equality is kept consistent with {@link #compareTo(Node)}: two nodes
+         * are equal exactly when they order equally (same tree and key, or both
+         * with no tree).
+         */
+        @Override
+        public boolean equals(final Object object) {
+            return this == object || (object instanceof Node && compareTo((Node) object) == 0);
+        }
+
+        @Override
+        public int hashCode() {
+            // Consistent with compareTo: equal nodes share the same tree
+            // instance (or both have none), so the tree's identity hash yields
+            // equal hash codes for equal nodes.
+            return _tree == null ? 0 : System.identityHashCode(_tree);
+        }
+
         @Override
         public String toString() {
             Node n = this;

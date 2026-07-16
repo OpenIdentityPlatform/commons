@@ -1348,6 +1348,22 @@ public class BufferPool {
 
         }
 
+        /**
+         * Equality is defined by the same (volumeId, page) ordering key used by
+         * {@link #compareTo(BufferHolder)}, so that {@code equals} stays
+         * consistent with the natural ordering.
+         */
+        @Override
+        public boolean equals(final Object object) {
+            return this == object
+                    || (object instanceof BufferHolder && compareTo((BufferHolder) object) == 0);
+        }
+
+        @Override
+        public int hashCode() {
+            return Long.hashCode(_volumeId) * 31 + Long.hashCode(_page);
+        }
+
         @Override
         public String toString() {
             final Buffer buffer = _buffer;
