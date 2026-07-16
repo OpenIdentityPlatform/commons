@@ -79,7 +79,7 @@ public class ManagementTableModel extends AbstractTableModel {
      * <i>width</i> is a percentage of the total table width, and
      * <i>justification</i> is L, C or R.
      * 
-     * @param clazz
+     * @param clazz the management info class whose columns are displayed.
      */
 
     public ManagementTableModel(final Class clazz, String className, final AdminUI ui) throws NoSuchMethodException {

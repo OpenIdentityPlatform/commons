@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit.encoding;
@@ -68,8 +69,8 @@ public interface KeyRenderer extends KeyCoder {
      *            application to convey an application-specific context for the
      *            operation. (See {@link CoderContext}.) The default value is
      *            <code>null</code>.
-     * 
-     * @throws ConversionException
+     *
+     * @throws ConversionException if the key segment cannot be converted into the target object
      */
     public void renderKeySegment(Key key, Object target, Class<?> clazz, CoderContext context)
             throws ConversionException;

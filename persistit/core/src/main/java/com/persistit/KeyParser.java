@@ -13,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -219,7 +220,7 @@ public class KeyParser {
      * Attempt to parse a chunk of the source string as a key segment. If
      * successful, append the segment to the key.
      * 
-     * @param key
+     * @param key the <code>Key</code> to which the parsed segment is appended
      * @return <code>true</code> a valid key segment was parsed
      */
     private boolean parseKeySegment(final Key key) {

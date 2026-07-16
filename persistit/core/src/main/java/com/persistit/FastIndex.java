@@ -508,11 +508,11 @@ class FastIndex {
      * Fixes up the elements surrounding insertion of keyblock that causes the
      * successor ebc to get fixed up.
      * 
-     * @param insertIndex
-     * @param runIndex
-     * @param runCount
-     * @param ebc
-     * @param successorEbc
+     * @param insertIndex the index at which the new keyblock is inserted
+     * @param runIndex the index of the first keyblock in the affected run
+     * @param runCount the number of keyblocks in the run
+     * @param ebc the elided byte count at the head of the run
+     * @param successorEbc the elided byte count of the successor keyblock
      */
     private void fixupSuccessor(final int lastIndex, final int insertIndex, final int runIndex, final int runCount,
             final int ebc, final int successorEbc) {

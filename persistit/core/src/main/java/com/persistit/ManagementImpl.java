@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -190,7 +192,7 @@ class ManagementImpl implements Management {
      * requested it to close so that the final state of the Persistit
      * environment can be examined.
      * 
-     * @param enabled
+     * @param suspended
      *            <code>true</code> to specify that Persistit will wait when
      *            attempting to close; otherwise <code>false</code>.
      */
@@ -206,7 +208,6 @@ class ManagementImpl implements Management {
      * 
      * @return <code>true</code> if Persistit will suspend any attempt to update
      *         a <code>Volume</code>; otherwise <code>false</code>.
-     * @throws RemoteException
      */
     @Override
     public boolean isUpdateSuspended() {
@@ -218,8 +219,7 @@ class ManagementImpl implements Management {
      * enabled, Persistit will delay each Thread that attempts to perform an
      * update operation indefinitely.
      * 
-     * @param suspended
-     * @throws RemoteException
+     * @param suspended <code>true</code> to suspend all update operations; otherwise <code>false</code>
      */
     @Override
     public void setUpdateSuspended(final boolean suspended) {
@@ -264,7 +264,7 @@ class ManagementImpl implements Management {
      * 
      * @param fast
      *            <code>true</code> to copy pages at maximum speed.
-     * @throws RemoteException
+     * @throws RemoteException if a remote error occurs
      */
     @Override
     public void setJournalCopyingFast(final boolean fast) throws RemoteException {
@@ -296,7 +296,7 @@ class ManagementImpl implements Management {
      * 
      * @return <code>true</code> if the attempt to close Persistit was
      *         successful; otherwise <code>false</code>
-     * @throws RemoteException
+     * @throws RemoteException if a remote error occurs
      */
     @Override
     public boolean close() throws RemoteException {
@@ -312,7 +312,7 @@ class ManagementImpl implements Management {
      * Attempts to flush and force all dirty data in Persistit by invoking
      * {@link Persistit#flush} and {@link Persistit#force}.
      * 
-     * @throws RemoteException
+     * @throws RemoteException if a remote error occurs
      */
     @Override
     public void flushAndForce() throws RemoteException {
@@ -439,7 +439,9 @@ class ManagementImpl implements Management {
         } catch (final Exception e) {
             throw new WrappedRemoteException(e);
         } finally {
-            exchange.ignoreMVCCFetch(false);
+            if (exchange != null) {
+                exchange.ignoreMVCCFetch(false);
+            }
         }
         if (count < maxCount) {
             final LogicalRecord[] trimmed = new LogicalRecord[count];
@@ -492,10 +494,10 @@ class ManagementImpl implements Management {
      * causes the attempt to retrieve records to fail, then this method returns
      * an empty array.
      * 
-     * @param volumeName
-     * 
-     * @param pageAddress
-     * 
+     * @param volumeName the name of the volume
+     *
+     * @param pageAddress the page address within the volume
+     *
      * @return the array
      */
     @Override
@@ -647,7 +649,7 @@ class ManagementImpl implements Management {
      *            having depth d.
      * @return a <code>BufferInfo</code> object reflecting the selected page, or
      *         <code>null</code> if the specified tree does not exist.
-     * @throws RemoteException
+     * @throws RemoteException if a remote error occurs
      */
     @Override
     public BufferInfo getBufferInfo(final String volumeName, final String treeName, final KeyState key, final int level)
@@ -810,8 +812,8 @@ class ManagementImpl implements Management {
      * is no unique volume corresponding with the supplied name, then this
      * method returns <code>null</code>.
      * 
-     * @param volumeName
-     * 
+     * @param volumeName the name of the volume
+     *
      * @return the <code>VolumeInfo</code>
      */
     @Override
@@ -912,7 +914,7 @@ class ManagementImpl implements Management {
      *            Fully qualified class name.
      * @return The <code>Class</code>, or <code>null</code> if an exception
      *         occurred while attempting to acquire the Class.
-     * @throws RemoteException
+     * @throws RemoteException if a remote error occurs
      */
     @Override
     public Class getRemoteClass(final String className) throws RemoteException {
@@ -962,7 +964,7 @@ class ManagementImpl implements Management {
      * 
      * @return              Array of zero or more Objects encoded
      *                      in the <code>ValueState</code>
-     * @throws RemoteException
+     * @throws RemoteException if a remote error occurs
      */
     @Override
     public Object[] decodeValueObjects(final ValueState valueState, final CoderContext context) throws RemoteException {
@@ -993,10 +995,12 @@ class ManagementImpl implements Management {
      *            Representation of an encoded {@link Key}.
      * 
      * @param context
-     * 
-     * @return
-     * 
-     * @throws RemoteException
+     *            Object passed to any {@link ValueCoder} used in decoding the
+     *            key segments. May be <code>null</code>
+     *
+     * @return Array of Objects, one per key segment
+     *
+     * @throws RemoteException if a remote error occurs
      */
     @Override
     public Object[] decodeKeyObjects(final KeyState keyState, final CoderContext context) throws RemoteException {
@@ -1025,11 +1029,6 @@ class ManagementImpl implements Management {
      *            Readable description of this task
      * @param owner
      *            Hostname or username of the user who requested this task
-     * @param className
-     *            Class name of task to run, e.g.,
-     *            <code>com.persistit.IntegrityCheck</code>.
-     * @param args
-     *            Task-specific parameters
      * @param maximumTime
      *            Maximum wall-clock time (in milliseconds) this Task will be
      *            allowed to run, or 0 for unbounded time
@@ -1037,7 +1036,7 @@ class ManagementImpl implements Management {
      *            Verbosity level, one of {@link Task#LOG_NORMAL} or
      *            {@link Task#LOG_NORMAL}.
      * @return Task identifier Unique ID for the running task
-     * @throws RemoteException
+     * @throws RemoteException if a remote error occurs
      */
     @Override
     public synchronized long startTask(final String description, final String owner, final String commandLine,
@@ -1072,7 +1071,6 @@ class ManagementImpl implements Management {
      * @param clearMessages
      *            <code>true</code> to clear all received messages from the
      *            task.
-     * @throws RemoteException
      */
     @Override
     public synchronized TaskStatus[] queryTaskStatus(final long taskId, final boolean details,
@@ -1097,7 +1095,6 @@ class ManagementImpl implements Management {
      * @param clearTasks
      *            <code>true</code> to remove the task's status if it has
      *            finished, failed or expired.
-     * @throws RemoteException
      */
     @Override
     public synchronized TaskStatus[] queryTaskStatus(final long taskId, final boolean details,
@@ -1140,7 +1137,6 @@ class ManagementImpl implements Management {
      * @param suspend
      *            <code>true</code> to suspend the task, <code>false</code> to
      *            allow it to resume.
-     * @throws RemoteException
      */
     @Override
     public synchronized void setTaskSuspended(final long taskId, final boolean suspend) {
@@ -1172,7 +1168,6 @@ class ManagementImpl implements Management {
      * 
      * @param taskId
      *            Task ID for a selected Task.
-     * @throws RemoteException
      */
     @Override
     public synchronized void stopTask(final long taskId, final boolean remove) {
@@ -1202,7 +1197,6 @@ class ManagementImpl implements Management {
      * @param taskId
      *            Task ID for a selected task, or -1 for all tasks.
      * 
-     * @throws RemoteException
      */
     @Override
     public synchronized void removeFinishedTasks(final long taskId) {

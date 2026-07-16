@@ -1,5 +1,6 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
+ * Portions copyright 2026 3A Systems LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -22,9 +24,7 @@ import static com.persistit.TransactionStatus.TIMED_OUT;
 import static com.persistit.TransactionStatus.UNCOMMITTED;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
@@ -521,8 +521,8 @@ class TransactionIndex implements TransactionIndexMXBean {
      * this one and cause inconsistent results.
      * 
      * @return the TransactionStatus.
-     * @throws InterruptedException
-     * @throws TimeoutException
+     * @throws InterruptedException if the thread is interrupted while waiting
+     * @throws TimeoutException if the transaction could not be registered within the timeout period
      */
     TransactionStatus registerTransaction() throws TimeoutException, InterruptedException {
         return registerTransaction(false);
@@ -535,8 +535,8 @@ class TransactionIndex implements TransactionIndexMXBean {
      * {@link CheckpointManager#createCheckpoint()}.
      * 
      * @return the TransactionStatus.
-     * @throws InterruptedException
-     * @throws TimeoutException
+     * @throws InterruptedException if the thread is interrupted while waiting
+     * @throws TimeoutException if the transaction could not be registered within the timeout period
      */
     TransactionStatus registerCheckpointTransaction() throws TimeoutException, InterruptedException {
         return registerTransaction(true);
@@ -920,7 +920,7 @@ class TransactionIndex implements TransactionIndexMXBean {
      * Atomically decrement the MVV count for the aborted
      * <code>TransactionStatus</code> identified by the suppled version handle.
      * 
-     * @param versionHandle
+     * @param versionHandle the version handle identifying the aborted transaction
      * @return The resulting count
      * @throws IllegalArgumentException
      *             if the supplied <code>versionHandle</code> does not identify
@@ -938,7 +938,7 @@ class TransactionIndex implements TransactionIndexMXBean {
     /**
      * Compute hash index for a given timestamp.
      * 
-     * @param ts
+     * @param ts the timestamp to hash
      * @return the hash table index
      */
     private int hashIndex(final long ts) {
@@ -950,8 +950,8 @@ class TransactionIndex implements TransactionIndexMXBean {
      * bucket. This method is called during recovery processing to register
      * transactions that were
      * 
-     * @param timestamp
-     * @throws InterruptedException
+     * @param ts the start timestamp of the aborted transaction
+     * @throws InterruptedException if the thread is interrupted while waiting
      */
     void injectAbortedTransaction(final long ts) throws InterruptedException {
         final TransactionStatus status;
@@ -1041,8 +1041,8 @@ class TransactionIndex implements TransactionIndexMXBean {
 
     /**
      * Compute and return the snapshot value of an Accumulator
-     * 
-     * @throws InterruptedException
+     *
+     * @throws InterruptedException if the thread is interrupted while waiting
      */
     long getAccumulatorSnapshot(final Accumulator accumulator, final long timestamp, final int step,
             final long initialValue) throws InterruptedException {
@@ -1084,13 +1084,11 @@ class TransactionIndex implements TransactionIndexMXBean {
      *            checkpoint timestamp
      * @param accumulators
      *            List of Accumulators that need to be check-pointed
-     * @throws InterruptedException
+     * @throws InterruptedException if the thread is interrupted while waiting
      */
     void checkpointAccumulatorSnapshots(final long timestamp, final List<Accumulator> accumulators)
             throws InterruptedException {
-        final Map<Accumulator, Accumulator> lookupMap = new HashMap<Accumulator, Accumulator>();
         for (final Accumulator accumulator : accumulators) {
-            lookupMap.put(accumulator, accumulator);
             accumulator.setCheckpointValueAndTimestamp(accumulator.getBaseValue(), Long.MIN_VALUE);
         }
         for (final TransactionIndexBucket bucket : _hashTable) {
@@ -1273,8 +1271,8 @@ class TransactionIndex implements TransactionIndexMXBean {
      * Return the start timestamps of the oldest <code>max</code> transactions
      * currently running.
      * 
-     * @param max
-     * @return
+     * @param max the maximum number of transactions to return
+     * @return an array of the oldest transaction start timestamps, or <code>null</code> if the cache could not be read consistently
      */
     long[] oldestTransactions(final int max) {
         final long[] array = new long[Math.max(max, INITIAL_ACTIVE_TRANSACTIONS_SIZE)];

@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.script.source;
@@ -50,7 +51,7 @@ public interface ScriptSource extends SourceUnit {
 
     /**
      *
-     * @return
+     * @return the script names this source depends on.
      */
     ScriptName[] getDependencies();
 }

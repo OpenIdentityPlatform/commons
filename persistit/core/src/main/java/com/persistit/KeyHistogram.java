@@ -27,14 +27,10 @@ import java.util.List;
  * {@link Exchange#computeHistogram(Key, Key, int, int, KeyFilter, int)} method
  * to accumulate and return the result of scanning all the keys at a fixed depth
  * within a Tree.
- * <p>
- * </p>
  * The result is represented by a List of {@link KeyCount} objects, each
  * representing a key and a count. The count represents the number of smaller
  * keys in the tree level. With this information client applications can
  * estimate the number of elements between any two keys in the Tree.
- * <p>
- * </p>
  * Application code can specify a <code>keyDepth</code> at which sibling keys
  * are grouped together. For example, suppose a Tree contains keys such as
  * 
@@ -50,15 +46,11 @@ import java.util.List;
  * with a <code>count</code> value of 1.  But if <code>keyDepth=1</code> the
  * result will have two buckets, one each for "BLUE" and "RED". Specifying
  * <code>keyDepth=0</code> turns off aggregation by partial key depth.
- * <p>
- * </p>
  * During the aggregation process the {@link Exchange#computeHistogram} method
  * invokes the {@link #addKeyCopy} method for each Key it traverses. Each key is
  * analyzed to determine whether the first <code>keyDepth</code> segments are
  * the same as the previously added Key. If so then the previous count is
  * incremented; otherwise a new KeyCount entry is added to the sample list.
- * <p>
- * </p>
  * 
  * 
  * @author peter

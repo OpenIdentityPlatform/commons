@@ -58,9 +58,9 @@ class LongRecordHelper {
      * Value. This will replace the byte array in that value with the actual
      * long value.
      * 
-     * @param value
-     * @param minimumBytesToFetch
-     * @throws PersistitException
+     * @param value the Value containing the LONG_RECORD pointer to decode
+     * @param minimumBytesToFetch the minimum number of bytes to fetch
+     * @throws PersistitException if a persistence error occurs
      */
     void fetchLongRecord(final Value value, final int minimumBytesToFetch, final long timeout)
             throws PersistitException {
@@ -153,7 +153,7 @@ class LongRecordHelper {
      *            indicates whether this operation is within the context of a
      *            transaction.
      * 
-     * @throws PersistitException
+     * @throws PersistitException if a persistence error occurs
      */
     long storeLongRecord(final Value value, final boolean inTxn) throws PersistitException {
         value.changeLongRecordMode(true);

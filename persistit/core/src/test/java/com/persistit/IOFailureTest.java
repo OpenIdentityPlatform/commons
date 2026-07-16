@@ -12,10 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
 
+import com.persistit.JournalRecord.JE;
+import com.persistit.JournalRecord.TX;
 import com.persistit.Transaction.CommitPolicy;
 import com.persistit.exception.CorruptJournalException;
 import com.persistit.exception.CorruptVolumeException;
@@ -26,6 +29,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Properties;
 import java.util.Timer;
@@ -280,6 +284,43 @@ public class IOFailureTest extends PersistitUnitTestCase {
     volume.getPool().invalidate(volume);
   }
 
+  /**
+   * Issue #268. FileChannel#write may report partial progress instead of
+   * throwing - observed empirically on disk-full, and suspected for
+   * transfers aborted by a concurrent interrupt-driven channel close on
+   * Windows. VolumeStorageV2.writePage used to ignore the returned count,
+   * so a short write during copyback silently tore the page in the volume
+   * file: intact header, stale tail. The journal copy was then dropped by
+   * cleanupForCopy, the pool evicted the page, and a later read served the
+   * torn page with no error - resurrecting stale record versions.
+   */
+  @Test
+  public void testVolumeShortWriteMustNotTearPage() throws Exception {
+    store1(0);
+    final Volume volume = _persistit.getVolume(_volumeName);
+    final ErrorInjectingFileChannel eifc = errorInjectingChannel(volume.getStorage().getChannel());
+    /*
+     * The next volume write that spans the middle of page 6 - a tree page
+     * after store1 - transfers only half the page and returns the short
+     * count without an exception, exactly once. Subsequent writes are
+     * normal, so the copyback cycle completes and cleanupForCopy drops the
+     * journal copies, making the volume file authoritative.
+     */
+    final int pageSize = volume.getPageSize();
+    eifc.injectShortWriteOnce(6L * pageSize + pageSize / 2);
+    _persistit.copyBackPages();
+    /*
+     * Force every subsequent read to come from the volume file.
+     */
+    volume.getPool().flush(Long.MAX_VALUE);
+    _persistit.getJournalManager().force();
+    volume.getPool().invalidate(volume);
+    /*
+     * All records must read back intact through the volume channel.
+     */
+    checkStore1(0);
+  }
+
   @Test
   public void testJournalEOFonRecovery() throws Exception {
     final JournalManager jman = _persistit.getJournalManager();
@@ -414,6 +455,82 @@ public class IOFailureTest extends PersistitUnitTestCase {
 
   }
 
+  /**
+   * Issue #265. An IOException thrown inside rollover() - for example an
+   * InterruptedIOException when the rolling thread is interrupted during
+   * truncate or force - after writeJournalEnd() has already advanced
+   * _currentAddress to within JE.OVERHEAD bytes of the block end used to
+   * leave the JournalManager permanently broken: the retried
+   * writeJournalEnd() wrote past the buffer limit and tore the bookkeeping
+   * invariant _writeBufferAddress + position == _currentAddress, after which
+   * every journal write failed.
+   */
+  @Test
+  public void testRolloverRecoversAfterFailureNearBlockEnd() throws Exception {
+    final JournalManager jman = _persistit.getJournalManager();
+    /*
+     * Keep the copier from moving journal addresses while the test
+     * positions _currentAddress near the block end.
+     */
+    jman.setAppendOnly(true);
+    final ErrorInjectingFileChannel eifc = errorInjectingChannel(jman.getFileChannel(jman.getCurrentAddress()));
+    final ByteBuffer payload = ByteBuffer.allocate(65536);
+    synchronized (jman) {
+      /*
+       * Write TX records sized to land _currentAddress exactly
+       * JE.OVERHEAD + 2 bytes before the end of the current block - the
+       * geometry observed in issue #265.
+       */
+      final long target = JE.OVERHEAD + 2;
+      long distance = BLOCKSIZE - jman.getCurrentJournalSize();
+      while (distance > target) {
+        long recordSize = Math.min(50000, distance - target);
+        final long rest = distance - target - recordSize;
+        if (rest > 0 && rest < TX.OVERHEAD + 8) {
+          recordSize -= TX.OVERHEAD + 8;
+        }
+        payload.clear();
+        payload.position((int) recordSize - TX.OVERHEAD);
+        jman.writeTransactionToJournal(payload, _persistit.getTimestampAllocator().updateTimestamp(),
+          TransactionStatus.ABORTED, 0);
+        distance = BLOCKSIZE - jman.getCurrentJournalSize();
+      }
+      assertEquals("Current address should sit just above the JE reserve", target, distance);
+      /*
+       * Fail the truncate() call so that rollover() aborts after
+       * writeJournalEnd() has consumed the JE reserve, as an interrupt
+       * would.
+       */
+      eifc.injectTestIOException(new IOException("injected"), "t");
+      try {
+        jman.rollover();
+        fail("rollover should have failed on the injected truncate error");
+      } catch (final PersistitIOException e) {
+        assertEquals("injected", e.getCause().getMessage());
+      }
+      assertEquals("Abandoned rollover should stop just below the block end", BLOCKSIZE - 2,
+        jman.getCurrentJournalSize());
+      /*
+       * With the failure cleared the retried rollover must complete and
+       * move to the next block.
+       */
+      eifc.injectTestIOException(null, "");
+      jman.rollover();
+      assertEquals("Retried rollover should reach the next block boundary", 0, jman.getCurrentJournalSize());
+    }
+    jman.setAppendOnly(false);
+    /*
+     * Journal writes must work again and the bookkeeping must stay
+     * consistent.
+     */
+    store1(0);
+    synchronized (jman) {
+      jman.force();
+      assertEquals("Write buffer address should agree with the current address", jman.getCurrentAddress(),
+        jman.getWriteBufferAddress());
+    }
+  }
+
   private int storeUntilDiskFull() throws Exception {
     final Exchange exchange = _persistit.getExchange(_volumeName, "IOFailureTest", true);
     exchange.getValue().put(RED_FOX);
@@ -461,6 +578,21 @@ public class IOFailureTest extends PersistitUnitTestCase {
       exchange.clear().append(at).append(sb);
       exchange.getValue().put("Record #" + at + "_" + i);
       exchange.store();
+    }
+    _persistit.releaseExchange(exchange);
+  }
+
+  private void checkStore1(final int at) throws PersistitException {
+    final Exchange exchange = _persistit.getExchange(_volumeName, "IOFailureTest", false);
+    final StringBuilder sb = new StringBuilder();
+
+    for (int i = 1; i <= 5000; i++) {
+      sb.setLength(0);
+      sb.append((char) (i / 20 + 64));
+      sb.append((char) (i % 20 + 64));
+      exchange.clear().append(at).append(sb).fetch();
+      assertEquals("Record " + at + "_" + i + " should read back intact", "Record #" + at + "_" + i, exchange
+        .getValue().isDefined() ? exchange.getValue().getString() : null);
     }
     _persistit.releaseExchange(exchange);
   }

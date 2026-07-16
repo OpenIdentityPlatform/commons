@@ -82,7 +82,7 @@ class IOMeter implements IOMeterMXBean {
 
     private final AtomicReference<DataOutputStream> _logStream = new AtomicReference<DataOutputStream>();
 
-    private String _logFileName;
+    private volatile String _logFileName;
 
     private final Counter[][] _counters = new Counter[ITEM_COUNT][BUCKETS];
 
@@ -409,7 +409,8 @@ class IOMeter implements IOMeterMXBean {
      * how frequently to schedule its own activities without interfering
      * severely with current operational load.
      * 
-     * @return
+     * @return an estimate of the number of bytes read or written per second, or
+     *         -1 if there was no recent activity
      */
     synchronized long recentCharge() {
         final long now = System.nanoTime();
@@ -439,7 +440,7 @@ class IOMeter implements IOMeterMXBean {
      * 
      * @param args
      *            Specify one argument in the form file=<pathname>
-     * @throws Exception
+     * @throws Exception if an error occurs while reading or dumping the log
      */
     public static void main(final String[] args) throws Exception {
         final ArgParser ap = new ArgParser("com.persistit.IOMeter", args, new String[] { "file||log file name",

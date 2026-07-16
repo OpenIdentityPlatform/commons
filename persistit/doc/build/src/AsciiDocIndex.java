@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 import java.io.File;
@@ -55,13 +56,10 @@ public class AsciiDocIndex {
      * content of that one file. If it is a directory, read the files in that
      * directory and index them.
      * 
-     * @param file
-     * 
      * @return The count of indexable terms in the file or directory
      * 
      * @throws IOException
      * 
-     * @throws PersistitException
      */
     public int buildIndex(final String pathName, String base) throws IOException {
         File file = new File(pathName);

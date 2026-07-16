@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2020-2026 3A Systems, LLC
  */
 
 package org.forgerock.json.crypto;
@@ -77,9 +78,9 @@ public class JsonCryptoTest {
         kg.init(128); // the Sun JRE out of the box restricts to 128-bit key length
         secretKey = kg.generateKey();
 
-        // generate RSA 1024-bit key pair
+        // generate RSA 2048-bit key pair
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-        kpg.initialize(1024);
+        kpg.initialize(2048);
         KeyPair kp = kpg.genKeyPair();
         publicKey = kp.getPublic();
         privateKey = kp.getPrivate();
