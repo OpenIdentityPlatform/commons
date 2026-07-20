@@ -12,34 +12,49 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 //<![CDATA[
 
 var loadJavaScriptsFN = function () {
     $.ajaxSetup({ cache: true });
-    $.getScript("http://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js", function () { prettyPrint() });
-    $.getScript("http://cdnjs.cloudflare.com/ajax/libs/zeroclipboard/2.2.0/ZeroClipboard.min.js", function () {enableZeroClipboardFN() });
-    $.getScript("http://cdnjs.cloudflare.com/ajax/libs/jquery.colorbox/1.4.33/jquery.colorbox-min.js", function () { enableColorboxFN() });
+    $.getScript("https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js", function () { prettyPrint() });
+    $.getScript("https://cdnjs.cloudflare.com/ajax/libs/zeroclipboard/2.2.0/ZeroClipboard.min.js", function () {enableZeroClipboardFN() });
+    $.getScript("https://cdnjs.cloudflare.com/ajax/libs/jquery.colorbox/1.4.33/jquery.colorbox-min.js", function () { enableColorboxFN() });
+};
+
+// Escape HTML metacharacters in a text node before it is re-inserted with
+// .html(): .text() returns decoded text, so passing it straight to .html()
+// would reinterpret any &, < or > as markup (CodeQL js/xss-through-dom).
+var escapeHtml = function (text) {
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+};
+
+// Escape regex metacharacters so a literal example string is matched literally
+// rather than as a pattern; otherwise the dots in the example host match any
+// character (CodeQL js/incomplete-hostname-regexp).
+var escapeRegExp = function (text) {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 };
 
 var wrapConfigurablesFn = function () {
     $('*:contains("https://openam.example.com:8443")').each(function(){
         if($(this).children().length < 1)
             $(this).html(
-                $(this).text().replace(new RegExp("https://openam.example.com:8443", 'g'),'<span class="exampleUrl">https://openam.example.com:8443</span>')
+                escapeHtml($(this).text()).replace(new RegExp(escapeRegExp("https://openam.example.com:8443"), 'g'),'<span class="exampleUrl">https://openam.example.com:8443</span>')
             )
     });
     $('*:contains("amadmin")').each(function(){
         if($(this).children().length < 1)
             $(this).html(
-                $(this).text().replace(new RegExp("amadmin", 'g'),'<span class="exampleAdmin">amadmin</span>')
+                escapeHtml($(this).text()).replace(new RegExp(escapeRegExp("amadmin"), 'g'),'<span class="exampleAdmin">amadmin</span>')
             )
     });
     $('*:contains("iPlanetDirectoryPro")').each(function(){
         if($(this).children().length < 1)
             $(this).html(
-                $(this).text().replace(new RegExp("iPlanetDirectoryPro", 'g'),'<span class="exampleSsoCookieName">iPlanetDirectoryPro</span>')
+                escapeHtml($(this).text()).replace(new RegExp(escapeRegExp("iPlanetDirectoryPro"), 'g'),'<span class="exampleSsoCookieName">iPlanetDirectoryPro</span>')
             )
     });
 };
