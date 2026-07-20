@@ -101,11 +101,15 @@ public class SimpleEncryptor implements JsonEncryptor {
      * @throws IOException if an I/O exception occurred.
      */
     private Object asymmetric(Object object) throws GeneralSecurityException, IOException {
-        // Use CBC with a random IV rather than ECB; ECB leaks plaintext block
-        // patterns regardless of session-key freshness (CWE-327). The IV is stored
-        // alongside the data and the self-describing "cipher" field keeps this
-        // backward compatible with values previously written using ECB.
-        String symmetricCipher = "AES/CBC/PKCS5Padding";
+        // Use GCM (authenticated encryption) with a random 96-bit nonce rather
+        // than CBC or ECB. GCM provides integrity and is not vulnerable to the
+        // padding-oracle attacks that affect CBC/PKCS#5, nor does it leak block
+        // patterns like ECB (CWE-327). A fresh session key is generated for every
+        // message, so the randomly generated nonce is never reused under the same
+        // key. The nonce is stored alongside the data and the self-describing
+        // "cipher" field keeps this backward compatible with values previously
+        // written using CBC or ECB.
+        String symmetricCipher = "AES/GCM/NoPadding";
         KeyGenerator generator = KeyGenerator.getInstance("AES");
         generator.init(128);
         SecretKey sessionKey = generator.generateKey();

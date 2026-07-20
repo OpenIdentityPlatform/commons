@@ -12,16 +12,19 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.crypto.simple;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.Key;
+import java.security.spec.AlgorithmParameterSpec;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.json.crypto.JsonCryptoException;
@@ -38,6 +41,9 @@ public class SimpleDecryptor implements JsonDecryptor {
 
     /** The type of cryptographic representation that this decryptor supports. */
     public static final String TYPE = "x-simple-encryption";
+
+    /** GCM authentication tag length, in bits, matching the encryptor default. */
+    private static final int GCM_TAG_LENGTH_BITS = 128;
 
     /** Converts between JSON constructs and Java objects. */
     private final ObjectMapper mapper = new ObjectMapper();
@@ -84,13 +90,39 @@ public class SimpleDecryptor implements JsonDecryptor {
             }
             Cipher symmetric = Cipher.getInstance(cipher);
             String iv = value.get("iv").asString();
-            IvParameterSpec ivps = (iv == null ? null : new IvParameterSpec(Base64.decode(iv)));
-            symmetric.init(Cipher.DECRYPT_MODE, symmetricKey, ivps);
+            symmetric.init(Cipher.DECRYPT_MODE, symmetricKey, parameterSpec(cipher, iv));
             byte[] plaintext = symmetric.doFinal(Base64.decode(value.get("data").required().asString()));
             return new JsonValue(mapper.readValue(plaintext, Object.class));
         } catch (GeneralSecurityException | IOException | JsonValueException e) {
             throw new JsonCryptoException(e);
         }
+    }
+
+    /**
+     * Builds the algorithm parameters for the given cipher transformation and
+     * Base64-encoded IV/nonce. GCM requires a {@link GCMParameterSpec}; other
+     * modes (such as CBC) use a plain {@link IvParameterSpec}. Values written
+     * without an IV (for example legacy ECB) yield {@code null}, preserving the
+     * previous behaviour. Because the {@code cipher} field is self-describing,
+     * older CBC/ECB values continue to decrypt unchanged.
+     *
+     * @param cipher the cipher transformation stored with the encrypted value.
+     * @param iv the Base64-encoded IV/nonce, or {@code null} if none was stored.
+     * @return the algorithm parameter spec, or {@code null} when no IV is present.
+     */
+    private static AlgorithmParameterSpec parameterSpec(String cipher, String iv) {
+        if (iv == null) {
+            return null;
+        }
+        byte[] ivBytes = Base64.decode(iv);
+        return isGcm(cipher)
+                ? new GCMParameterSpec(GCM_TAG_LENGTH_BITS, ivBytes)
+                : new IvParameterSpec(ivBytes);
+    }
+
+    private static boolean isGcm(String cipher) {
+        String[] parts = cipher.split("/");
+        return parts.length > 1 && parts[1].equalsIgnoreCase("GCM");
     }
 
 }

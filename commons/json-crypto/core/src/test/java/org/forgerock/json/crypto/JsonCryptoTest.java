@@ -44,6 +44,8 @@ public class JsonCryptoTest {
 
     private static final String SYMMETRIC_CIPHER = "AES/CBC/PKCS5Padding";
 
+    private static final String SYMMETRIC_GCM_CIPHER = "AES/GCM/NoPadding";
+
     private static final String ASYMMETRIC_CIPHER = "RSA/ECB/OAEPWithSHA1AndMGF1Padding";
 
     private static final String PASSWORD = "P@55W0RD";
@@ -102,6 +104,16 @@ public class JsonCryptoTest {
         JsonValue value = new JsonValue(PLAINTEXT);
         value = new SimpleEncryptor(ASYMMETRIC_CIPHER, publicKey, "privateKey").encrypt(value);
         assertThat(value.getObject()).isNotEqualTo(PLAINTEXT);
+        value = new SimpleDecryptor(selector).decrypt(value);
+        assertThat(value.getObject()).isEqualTo(PLAINTEXT);
+    }
+
+    @Test
+    public void testSymmetricGcmEncryption() throws JsonCryptoException {
+        JsonValue value = new JsonValue(PLAINTEXT);
+        value = new SimpleEncryptor(SYMMETRIC_GCM_CIPHER, secretKey, "secretKey").encrypt(value);
+        assertThat(value.getObject()).isNotEqualTo(PLAINTEXT);
+        assertThat(((Map<?, ?>) value.getObject()).get("cipher")).isEqualTo(SYMMETRIC_GCM_CIPHER);
         value = new SimpleDecryptor(selector).decrypt(value);
         assertThat(value.getObject()).isEqualTo(PLAINTEXT);
     }
