@@ -8,6 +8,8 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.workflow_run.head_branch }}
   cancel-in-progress: false
+permissions:
+  contents: read
 jobs:
   deploy:
     name: Maven deploy
