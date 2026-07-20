@@ -1,3 +1,6 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/
+	Portions Copyrighted 2026 3A Systems, LLC -->
 <script>
 (function () {
     /**
@@ -16,7 +19,11 @@
     */
     var queryParams = window.location.search.replace("?", "").split("&").reduce(function (map, item) {
             var parts = item.split("=");
-            map[parts[0]] = decodeURIComponent(parts[1]);
+            // Guard against prototype pollution: never let a user-controlled query
+            // parameter name overwrite __proto__/constructor/prototype (CWE-1321).
+            if (parts[0] !== "__proto__" && parts[0] !== "constructor" && parts[0] !== "prototype") {
+                map[parts[0]] = decodeURIComponent(parts[1]);
+            }
             return map;
         }, {});
 
