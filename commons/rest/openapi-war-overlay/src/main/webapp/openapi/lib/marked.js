@@ -2,6 +2,8 @@
  * marked - a markdown parser
  * Copyright (c) 2011-2014, Christopher Jeffrey. (MIT Licensed)
  * https://github.com/chjj/marked
+ *
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 ;(function() {
@@ -454,7 +456,11 @@ var inline = {
   reflink: /^!?\[(inside)\]\s*\[([^\]]*)\]/,
   nolink: /^!?\[((?:\[[^\]]*\]|[^\[\]])*)\]/,
   strong: /^__([\s\S]+?)__(?!_)|^\*\*([\s\S]+?)\*\*(?!\*)/,
-  em: /^\b_((?:__|[\s\S])+?)_\b|^\*((?:\*\*|[\s\S])+?)\*(?!\*)/,
+  // Local ReDoS patch: the alternatives once used [\s\S], which overlaps with
+  // the __ / ** literals, letting a run of those markers be partitioned in
+  // exponentially many ways. Restricting the non-marker branch to [^_] / [^*]
+  // removes the overlap so matching stays linear.
+  em: /^\b_((?:__|[^_])+?)_\b|^\*((?:\*\*|[^*])+?)\*(?!\*)/,
   code: /^(`+)\s*([\s\S]*?[^`])\s*\1(?!`)/,
   br: /^ {2,}\n(?!\s*$)/,
   del: noop,
@@ -868,7 +874,9 @@ Renderer.prototype.link = function(href, title, text) {
     } catch (e) {
       return '';
     }
-    if (prot.indexOf('javascript:') === 0) {
+    // Local patch: also reject data: and vbscript:, not just javascript:.
+    // Any of these schemes can carry executable/script payloads (XSS).
+    if (/^(?:javascript|vbscript|data):/.test(prot)) {
       return '';
     }
   }
