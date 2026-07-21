@@ -25,13 +25,32 @@ Mock OAuth Provider redirecting in <span id="countDown"></span>....
         return value;
     }
 
+    // The mock provider only ever redirects back into the application that
+    // initiated the flow, so resolve redirect_uri against the current
+    // document and rebuild it on our own origin. Cross-origin targets and
+    // non-http schemes (e.g. javascript:) are rejected (CWE-79, CWE-601).
+    function getSafeRedirectUri() {
+        var resolver = document.createElement("a");
+        resolver.href = getQueryParam("redirect_uri");
+        if (resolver.protocol !== window.location.protocol || resolver.host !== window.location.host) {
+            return undefined;
+        }
+        return window.location.protocol + "//" + window.location.host + resolver.pathname;
+    }
+
     var countDown = 3;
 
-    setInterval(function () {
+    var timer = setInterval(function () {
         document.getElementById("countDown").innerHTML = countDown;
         countDown--;
         if (countDown <= 0) {
-            window.location.href=getQueryParam("redirect_uri") + "?code=randomAccessCode&state=" + encodeURIComponent(getQueryParam("state"));
+            clearInterval(timer);
+            var redirectUri = getSafeRedirectUri();
+            if (redirectUri) {
+                window.location.href=redirectUri + "?code=randomAccessCode&state=" + encodeURIComponent(getQueryParam("state"));
+            } else {
+                document.body.innerHTML = "Invalid redirect_uri";
+            }
         }
     }, 1000);
     document.getElementById("countDown").innerHTML = countDown+1;
