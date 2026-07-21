@@ -69,6 +69,7 @@ import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -697,11 +698,12 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
             } else if (unit instanceof SourceContainer) {
                 SourceContainer container = (SourceContainer) unit;
 
-                sourceCacheLock.writeLock().lock();
+                final Lock writeLock = sourceCacheLock.writeLock();
+                writeLock.lock();
                 try {
                     sourceCache.put(unit.getName(), container);
                 } finally {
-                    sourceCacheLock.writeLock().unlock();
+                    writeLock.unlock();
                 }
 
                 for (LibraryRecord cacheRecord : cache.values()) {
