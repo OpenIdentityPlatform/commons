@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.audit.handlers.csv;
 
@@ -149,9 +150,11 @@ public class SecureCsvWriterTest {
         final File actual = new File("target/test-classes/shouldGenerateHMACColumn-actual.txt");
         actual.delete();
         final String header = "FOO";
+        // Use a signature interval long enough to never fire during the test, so that the final
+        // signature is deterministically written by close() and the file content is predictable.
         try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
-                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, createBasicSecureConfig(),
-                keyStoreHandler, random)) {
+                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE,
+                createBasicSecureConfig("5 minutes"), keyStoreHandler, random)) {
             Map<String, String> values;
 
 //            secureCsvWriter.writeHeader(header);
@@ -182,8 +185,8 @@ public class SecureCsvWriterTest {
         actual.delete();
         final String header = "FOO";
         try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
-                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, createBasicSecureConfig(),
-                keyStoreHandler, random)) {
+                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE,
+                createBasicSecureConfig(signatureInterval.toString()), keyStoreHandler, random)) {
 
             secureCsvWriter.writeEvent(singletonMap(header, "bar"));
 
@@ -211,10 +214,10 @@ public class SecureCsvWriterTest {
                 new File("target/test-classes/shouldGeneratePeriodicallySignature-expected.txt")));
     }
 
-    private CsvAuditEventHandlerConfiguration createBasicSecureConfig() {
+    private CsvAuditEventHandlerConfiguration createBasicSecureConfig(String interval) {
         CsvAuditEventHandlerConfiguration configuration = new CsvAuditEventHandlerConfiguration();
         configuration.getSecurity().setEnabled(true);
-        configuration.getSecurity().setSignatureInterval(signatureInterval.toString());
+        configuration.getSecurity().setSignatureInterval(interval);
         return configuration;
     }
 
