@@ -41,7 +41,7 @@ import com.fasterxml.jackson.databind.util.TokenBuffer;
 class ClassNameFallbackPropertyTypeDeserializer extends AsPropertyTypeDeserializer {
     public ClassNameFallbackPropertyTypeDeserializer(JavaType bt, TypeIdResolver idRes, String typePropertyName,
             boolean typeIdVisible, JavaType defaultImpl) {
-        super(bt, idRes, typePropertyName, typeIdVisible, defaultImpl, JsonTypeInfo.As.PROPERTY);
+        super(bt, idRes, typePropertyName, typeIdVisible, defaultImpl, JsonTypeInfo.As.PROPERTY, true);
     }
 
     public ClassNameFallbackPropertyTypeDeserializer(AsPropertyTypeDeserializer src, BeanProperty property) {
