@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.api.jackson;
@@ -40,7 +41,7 @@ import org.forgerock.api.enums.WritePolicy;
 public class CrestArraySchema extends ArraySchema implements CrestReadWritePoliciesSchema, OrderedFieldSchema,
         ValidatableSchema, WithExampleSchema<List<Object>> {
     private static final JavaType EXAMPLE_VALUE_TYPE = OBJECT_MAPPER.getTypeFactory()
-            .constructParametrizedType(ArrayList.class, List.class, Object.class);
+            .constructParametricType(ArrayList.class, Object.class);
 
     private WritePolicy writePolicy;
     private ReadPolicy readPolicy;

@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
- * Portions copyright 2024 3A Systems LLC.
+ * Portions copyright 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.caf.authn.test.runtime;
@@ -21,7 +21,7 @@ import static org.forgerock.caf.authentication.framework.AuthenticationFilter.Au
 import static org.forgerock.caf.authentication.framework.AuthenticationFilter.AuthenticationModuleBuilder.configureModule;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.forgerock.json.resource.Resources.newInternalConnection;
-import static org.forgerock.json.resource.Resources.newSingleton;
+import static org.forgerock.json.resource.Resources.newHandler;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -96,7 +96,7 @@ public class GuiceModule extends AbstractModule {
     public AsyncServerAuthModule getSessionAuthModule(ConfigurationResource configurationResource, Injector injector)
             throws ResourceException, ClassNotFoundException {
 
-        ResourceResponse configuration = newInternalConnection(newSingleton(configurationResource))
+        ResourceResponse configuration = newInternalConnection(newHandler(configurationResource))
                 .read(new RootContext(), newReadRequest(""));
         JsonValue sessionModuleConfig = configuration.getContent().get("serverAuthContext").get("sessionModule");
         if (!sessionModuleConfig.isNull()) {
@@ -124,7 +124,7 @@ public class GuiceModule extends AbstractModule {
 
         List<AsyncServerAuthModule> authModules = new ArrayList<>();
 
-        ResourceResponse configuration = newInternalConnection(newSingleton(configurationResource))
+        ResourceResponse configuration = newInternalConnection(newHandler(configurationResource))
                 .read(new RootContext(), newReadRequest(""));
         JsonValue authModulesConfig = configuration.getContent().get("serverAuthContext").get("authModules");
         for (JsonValue authModuleConfig : authModulesConfig) {

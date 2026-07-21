@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.selfservice.stages.tokenhandlers;
@@ -100,7 +101,7 @@ public final class JwtTokenHandler implements SnapshotTokenHandler {
                         .enc(jweMethod)
                         .done()
                     .claims(claimsSet)
-                    .sign(jwsHandler, jwsAlgorithm)
+                    .signedWith(jwsHandler, jwsAlgorithm)
                     .build();
         } catch (JwtRuntimeException jwtRE) {
             throw new InternalServerErrorException("Error constructing snapshot token", jwtRE);

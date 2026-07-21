@@ -257,6 +257,6 @@ public class Utils {
         } catch (final Throwable tmp) {
             resourceResultCode = ResourceException.INTERNAL_ERROR;
         }
-        return ResourceException.getException(resourceResultCode, t.getMessage(), t);
+        return ResourceException.newResourceException(resourceResultCode, t.getMessage(), t);
     }
 }

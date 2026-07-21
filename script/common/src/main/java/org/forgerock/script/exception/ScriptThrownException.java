@@ -33,7 +33,7 @@ import java.util.Map;
 import static org.forgerock.json.resource.ResourceException.FIELD_CODE;
 import static org.forgerock.json.resource.ResourceException.FIELD_DETAIL;
 import static org.forgerock.json.resource.ResourceException.FIELD_MESSAGE;
-import static org.forgerock.json.resource.ResourceException.getException;
+import static org.forgerock.json.resource.ResourceException.newResourceException;
 
 /**
  * An exception that is thrown to indicate that an executed script encountered
@@ -129,17 +129,17 @@ public class ScriptThrownException extends ScriptException {
                 if (throwable == null) {
                     throwable = this;
                 }
-                return getException(openidmCode.intValue(), message, throwable).setDetail(
+                return newResourceException(openidmCode.intValue(), message, throwable).setDetail(
                         failureDetail);
 
             }
         }
         if (defaultMsg != null) {
-            return getException(defaultCode, defaultMsg, this);
+            return newResourceException(defaultCode, defaultMsg, this);
         } else if (value == null) {
-            return getException(defaultCode, null, this);
+            return newResourceException(defaultCode, null, this);
         } else {
-            return getException(defaultCode, String.valueOf(value), this);
+            return newResourceException(defaultCode, String.valueOf(value), this);
         }
     }
 

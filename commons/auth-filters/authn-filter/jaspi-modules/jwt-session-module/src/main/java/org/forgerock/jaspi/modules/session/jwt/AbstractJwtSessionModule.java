@@ -558,7 +558,7 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
                 .enc(EncryptionMethod.A128CBC_HS256)
                 .done()
                 .claims(claimsSet)
-                .sign(signingHandler, SIGNING_ALGORITHM)
+                .signedWith(signingHandler, SIGNING_ALGORITHM)
                 .build();
     }
 

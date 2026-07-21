@@ -828,7 +828,7 @@ public class Configuration {
         setSysVolume(getProperty(SYSTEM_VOLUME_PROPERTY_NAME, DEFAULT_SYSTEM_VOLUME_NAME));
         setBufferInventoryEnabled(getBooleanProperty(BUFFER_INVENTORY_PROPERTY_NAME, false));
         setBufferPreloadEnabled(getBooleanProperty(BUFFER_PRELOAD_PROPERTY_NAME, false));
-        setUseOldVSpec(getBooleanProperty(USE_OLD_VSPEC, false));
+        useOldVSpec = getBooleanProperty(USE_OLD_VSPEC, false);
 
         loadPropertiesBufferSpecifications();
         loadPropertiesVolumeSpecifications();
@@ -2093,6 +2093,10 @@ public class Configuration {
      */
     @Deprecated
     public boolean isUseOldVSpec() {
+        return useOldVSpec;
+    }
+
+    boolean isUseOldVSpecInternal() {
         return useOldVSpec;
     }
 

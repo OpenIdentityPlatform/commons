@@ -134,7 +134,7 @@ public class Html {
         final URL scriptUrl = Html.class.getResource("/js/" + m.getJavaScriptFileName());
         String scriptString;
         try {
-            scriptString = IOUtils.toString(scriptUrl);
+            scriptString = IOUtils.toString(scriptUrl, StandardCharsets.UTF_8);
         } catch (IOException ie) {
             throw new MojoExecutionException("Failed to read " + scriptUrl, ie);
         }

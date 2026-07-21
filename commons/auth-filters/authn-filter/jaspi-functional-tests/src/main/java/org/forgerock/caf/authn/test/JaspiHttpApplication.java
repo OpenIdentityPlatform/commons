@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.caf.authn.test;
@@ -31,6 +32,7 @@ import org.forgerock.http.io.Buffer;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.routing.Router;
+import org.forgerock.json.resource.Applications;
 import org.forgerock.json.resource.http.CrestHttp;
 import org.forgerock.util.Factory;
 import org.forgerock.util.promise.NeverThrowsException;
@@ -48,7 +50,7 @@ public class JaspiHttpApplication implements HttpApplication {
         Router router = new Router();
         router.addRoute(requestUriMatcher(RoutingMode.EQUALS, "/protected/resource"),
                 new ConfigurableAuthenticationFilterHandler());
-        router.setDefaultRoute(CrestHttp.newHttpHandler(ConfigurationConnectionFactory.getConnectionFactory()));
+        router.setDefaultRoute(CrestHttp.newHttpHandler(Applications.simpleCrestApplication(ConfigurationConnectionFactory.getConnectionFactory(), null, null)));
         return router;
     }
 

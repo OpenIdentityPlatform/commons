@@ -66,6 +66,7 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -2324,7 +2325,13 @@ public class Persistit {
     ClassNotFoundException, RemoteException {
     if (_localGUI == null) {
       _logBase.startAdminUI.log();
-      _localGUI = (UtilControl) (Class.forName(PERSISTIT_GUI_CLASS_NAME)).newInstance();
+      try {
+        _localGUI = (UtilControl) Class.forName(PERSISTIT_GUI_CLASS_NAME).getDeclaredConstructor().newInstance();
+      } catch (final NoSuchMethodException | InvocationTargetException e) {
+        final InstantiationException instantiationException = new InstantiationException(e.toString());
+        instantiationException.initCause(e);
+        throw instantiationException;
+      }
     }
     _localGUI.setManagement(getManagement());
     _suspendShutdown.set(suspendShutdown);

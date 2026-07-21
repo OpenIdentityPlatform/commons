@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.util.xml;
@@ -49,7 +50,7 @@ public final class XMLUtils {
         Object securityManager = null;
         try {
             Class<?> securityManagerClass = Class.forName("org.apache.xerces.util.SecurityManager");
-            securityManager = securityManagerClass.newInstance();
+            securityManager = securityManagerClass.getDeclaredConstructor().newInstance();
             Method setEntityExpansionLimit = securityManagerClass.getMethod("setEntityExpansionLimit", int.class);
             setEntityExpansionLimit.invoke(securityManager, ENTITY_EXP_LIMIT);
         } catch (ClassNotFoundException ex) {

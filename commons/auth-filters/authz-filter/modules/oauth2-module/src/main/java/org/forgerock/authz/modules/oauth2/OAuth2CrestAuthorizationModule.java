@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.authz.modules.oauth2;
@@ -223,7 +224,7 @@ public class OAuth2CrestAuthorizationModule implements CrestAuthorizationModule 
                     }, new AsyncFunction<AuthorizationException, AuthorizationResult, ResourceException>() {
                         @Override
                         public Promise<AuthorizationResult, ResourceException> apply(AuthorizationException e) {
-                            return Promises.newExceptionPromise(ResourceException.getException(
+                            return Promises.newExceptionPromise(ResourceException.newResourceException(
                                     ResourceException.INTERNAL_ERROR, e.getMessage(), e));
                         }
                     }

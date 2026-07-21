@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.authz.basic;
@@ -26,6 +27,7 @@ import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.routing.Router;
+import org.forgerock.json.resource.Applications;
 import org.forgerock.json.resource.http.CrestHttp;
 import org.forgerock.util.Factory;
 
@@ -40,9 +42,9 @@ public class AuthzHttpApplication implements HttpApplication {
     public Handler start() throws HttpApplicationException {
         Router router = new Router();
         router.addRoute(requestUriMatcher(STARTS_WITH, "basic/crest"),
-                CrestHttp.newHttpHandler(BasicAuthorizationConnectionFactory.getConnectionFactory()));
+                CrestHttp.newHttpHandler(Applications.simpleCrestApplication(BasicAuthorizationConnectionFactory.getConnectionFactory(), null, null)));
         router.addRoute(requestUriMatcher(STARTS_WITH, "modules/oauth2/crest"),
-                CrestHttp.newHttpHandler(OAuth2AuthorizationConnectionFactory.getConnectionFactory()));
+                CrestHttp.newHttpHandler(Applications.simpleCrestApplication(OAuth2AuthorizationConnectionFactory.getConnectionFactory(), null, null)));
         return router;
     }
 

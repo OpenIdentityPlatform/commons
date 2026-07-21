@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.json.ref;
@@ -20,6 +21,7 @@ import java.net.URI;
 import java.util.HashMap;
 
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueFunctions;
 import org.forgerock.json.JsonValueException;
 
 /**
@@ -85,7 +87,7 @@ public class JsonReference {
      * @throws NullPointerException if {@code value} is {@code null}.
      */
     public JsonReference fromJsonValue(JsonValue value) throws JsonValueException {
-        this.uri = value.get("$ref").required().asURI();
+        this.uri = value.get("$ref").required().as(JsonValueFunctions.uri());
         return this;
     }
 

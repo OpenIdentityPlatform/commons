@@ -422,7 +422,7 @@ public final class ForgeRockTestListener extends TestListenerAdapter implements 
 
         // Read the comments in ForgeRockTestCase to understand what's
         // going on here.
-        final Object[] testInstances = result.getMethod().getInstances();
+        final Object[] testInstances = new Object[] { result.getMethod().getInstance() };
         for (final Object testInstance : testInstances) {
             if (testInstance instanceof ForgeRockTestCase) {
                 final ForgeRockTestCase testCase = (ForgeRockTestCase) testInstance;
@@ -449,7 +449,7 @@ public final class ForgeRockTestListener extends TestListenerAdapter implements 
     }
 
     private void checkForInterleavedBetweenClasses(final ITestResult tr) {
-        final Object[] testInstances = tr.getMethod().getInstances();
+        final Object[] testInstances = new Object[] { tr.getMethod().getInstance() };
         // This will almost always have a single element. If it doesn't,
         // just skip it.
         if (testInstances.length != 1) {

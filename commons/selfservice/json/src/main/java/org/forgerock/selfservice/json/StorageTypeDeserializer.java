@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 package org.forgerock.selfservice.json;
 
@@ -39,7 +40,7 @@ class StorageTypeDeserializer extends JsonDeserializer<StorageType> {
             return type;
         }
 
-        throw new JsonMappingException("Invalid value for type 'StorageType'");
+        throw JsonMappingException.from(jsonParser, "Invalid value for type 'StorageType'");
     }
 
 }

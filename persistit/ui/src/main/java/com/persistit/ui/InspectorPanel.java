@@ -85,7 +85,7 @@ class InspectorPanel extends JPanel {
             final String caption = st.nextToken();
             try {
                 final Class cl = Class.forName(className);
-                final AbstractInspector panel = (AbstractInspector) cl.newInstance();
+                final AbstractInspector panel = (AbstractInspector) cl.getDeclaredConstructor().newInstance();
                 panel.setup(_adminUI, this);
                 _tabbedPane.addTab(caption, panel);
             } catch (final Exception e) {

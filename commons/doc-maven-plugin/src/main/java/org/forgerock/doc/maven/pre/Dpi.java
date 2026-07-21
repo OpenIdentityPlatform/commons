@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2014 ForgeRock AS
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.doc.maven.pre;
@@ -61,7 +62,7 @@ public class Dpi {
 
             for (File image : FileUtils.listFiles(
                     m.getDocbkxModifiableSourcesDirectory(),
-                    new WildcardFileFilter("*.png"),
+                    WildcardFileFilter.builder().setWildcards("*.png").get(),
                     TrueFileFilter.INSTANCE)) {
                 PngUtils.setSafeDpi(image, m.getMaxImageHeightInInches());
             }

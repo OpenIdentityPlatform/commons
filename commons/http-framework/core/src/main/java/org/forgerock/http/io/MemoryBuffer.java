@@ -13,6 +13,7 @@
  *
  * Copyright 2010–2011 ApexIdentity Inc.
  * Portions Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.http.io;
@@ -112,7 +113,6 @@ final class MemoryBuffer implements Buffer {
     @Override
     public void finalize() throws Throwable {
         close();
-        super.finalize();
     }
 
     /**

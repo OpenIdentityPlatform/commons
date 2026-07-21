@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.doc.maven;
@@ -28,6 +29,7 @@ import org.forgerock.json.fluent.JsonValue;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 
 /**
@@ -113,7 +115,7 @@ public class BackstageMojo extends AbstractDocbkxMojo {
                 .add("released", getReleaseDate());
         final File file = new File(getBackstageDirectory(), "docset.json");
         try {
-            FileUtils.writeStringToFile(file, jsonValue.toString());
+            FileUtils.writeStringToFile(file, jsonValue.toString(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new MojoFailureException("Failed to write :" + file.getPath());
         }

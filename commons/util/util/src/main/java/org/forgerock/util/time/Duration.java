@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.util.time;
@@ -104,6 +105,16 @@ public class Duration implements Comparable<Duration> {
      */
     @Deprecated
     public Duration(final Long number, final TimeUnit unit) {
+        this(number.longValue(), unit);
+    }
+
+    /**
+     * Builds a new {@code Duration}.
+     *
+     * @param number number of time unit.
+     * @param unit TimeUnit to express the duration in (cannot be {@literal null}).
+     */
+    private Duration(final long number, final TimeUnit unit) {
         Reject.ifTrue(number < 0, "Negative durations are not supported");
         this.number = number;
         this.unit = checkNotNull(unit);
@@ -177,7 +188,7 @@ public class Duration implements Comparable<Duration> {
                 unitSB.append(fragment.charAt(i));
                 i++;
             }
-            Long number = Long.valueOf(numberSB.toString());
+            long number = Long.parseLong(numberSB.toString());
             TimeUnit unit = parseTimeUnit(unitSB.toString());
 
             composite.add(new Duration(number, unit));

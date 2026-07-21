@@ -4563,7 +4563,7 @@ public class Exchange implements ReadOnlyExchange {
    *
    */
   public void setMaximumValueSize(int size) {
-    _value.setMaximumSize(size);
-    _spareValue.setMaximumSize(size);
+    _value.setMaximumSizeInternal(size);
+    _spareValue.setMaximumSizeInternal(size);
   }
 }

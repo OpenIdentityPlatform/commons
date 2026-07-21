@@ -208,7 +208,6 @@ final class BranchingStreamWrapper extends BranchingInputStream {
         } catch (IOException ioe) {
             // inappropriate to throw an exception when object is being collected
         }
-        super.finalize();
     }
 
     /**

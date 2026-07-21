@@ -465,7 +465,7 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
                         setPropertyMethod.invoke(null, new Object[] { propName, propValue });
                     }
                 }
-                final javax.swing.LookAndFeel lnf = (javax.swing.LookAndFeel) lnfClass.newInstance();
+                final javax.swing.LookAndFeel lnf = (javax.swing.LookAndFeel) lnfClass.getDeclaredConstructor().newInstance();
 
                 javax.swing.UIManager.setLookAndFeel(lnf);
                 lafLoaded = true;
@@ -588,7 +588,7 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
             final String caption = st.nextToken();
             try {
                 final Class cl = Class.forName(className);
-                final AdminPanel panel = (AdminPanel) cl.newInstance();
+                final AdminPanel panel = (AdminPanel) cl.getDeclaredConstructor().newInstance();
                 panel.setup(this);
                 _tabbedPane.addTab(caption, panel);
             } catch (final Exception e) {

@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +90,8 @@ public class SimpleBench {
         props.setProperty("journalpath", "${datapath}/sbdemo_journal");
 
         Persistit persistit = new Persistit();
-        persistit.initialize(props);
+        persistit.setProperties(props);
+        persistit.initialize();
 
         try {
             doBench(persistit, args);

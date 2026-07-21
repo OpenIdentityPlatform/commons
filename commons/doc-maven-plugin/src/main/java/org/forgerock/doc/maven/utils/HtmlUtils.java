@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.doc.maven.utils;
@@ -24,6 +25,7 @@ import org.apache.commons.io.filefilter.IOFileFilter;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +78,7 @@ public final class HtmlUtils {
             throw new IOException(cssFile.getPath() + " not found");
         }
 
-        final String cssString = FileUtils.readFileToString(cssFile);
+        final String cssString = FileUtils.readFileToString(cssFile, StandardCharsets.UTF_8);
 
         Set<String> docNames = NameUtils.getDocumentNames(
                 srcDir, documentSrcName);
@@ -90,10 +92,10 @@ public final class HtmlUtils {
             final File xmlFile = new File(parent, cssFile.getName() + ".xml");
 
             if (!xmlFile.exists()) { // Do not append the document again to the same file.
-                FileUtils.write(xmlFile, "<?xml version=\"1.0\"?>\n", true);
-                FileUtils.write(xmlFile, "<style>\n", true);
-                FileUtils.write(xmlFile, cssString, true);
-                FileUtils.write(xmlFile, "</style>\n", true);
+                FileUtils.write(xmlFile, "<?xml version=\"1.0\"?>\n", StandardCharsets.UTF_8, true);
+                FileUtils.write(xmlFile, "<style>\n", StandardCharsets.UTF_8, true);
+                FileUtils.write(xmlFile, cssString, StandardCharsets.UTF_8, true);
+                FileUtils.write(xmlFile, "</style>\n", StandardCharsets.UTF_8, true);
             }
         }
     }

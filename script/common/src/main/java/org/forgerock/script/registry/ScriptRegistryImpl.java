@@ -28,6 +28,7 @@ package org.forgerock.script.registry;
 
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueFunctions;
 import org.forgerock.script.Scope;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptContext;
@@ -230,7 +231,7 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
                 addSourceUnit(new EmbeddedScriptSource(source.asString(), scriptName));
             } else {
                 addSourceUnit(new EmbeddedScriptSource(visibility
-                        .asEnum(ScriptEntry.Visibility.class), source.asString(), scriptName));
+                        .as(JsonValueFunctions.enumConstant(ScriptEntry.Visibility.class)), source.asString(), scriptName));
             }
         }
         ScriptEntry scriptEntry = takeScript(scriptName);

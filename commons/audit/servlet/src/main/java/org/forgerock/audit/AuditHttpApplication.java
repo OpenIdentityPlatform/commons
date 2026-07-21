@@ -35,6 +35,7 @@ import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ServiceUnavailableException;
+import org.forgerock.json.resource.Applications;
 import org.forgerock.json.resource.http.CrestHttp;
 import org.forgerock.util.Factory;
 import org.slf4j.Logger;
@@ -83,7 +84,7 @@ public final class AuditHttpApplication implements HttpApplication {
             throw new HttpApplicationException(e);
         }
         router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, AUDIT_ROOT_PATH),
-                CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(auditService)));
+                CrestHttp.newHttpHandler(Applications.simpleCrestApplication(Resources.newInternalConnectionFactory(auditService), null, null)));
         return router;
     }
 
