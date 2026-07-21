@@ -301,7 +301,8 @@ define([
     Handlebars.registerHelper("staticSelect", function(value, options){
         var selected = $("<select />").html(options.fn(this));
         if (typeof value !== "undefined" && value !== null) {
-            selected.find("[value=\'" + value.toString().replace(/\\/g, "\\\\").replace(/'/g, "\\'") + "\']").attr({"selected":"selected"});
+            var escaped = value.toString().replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+            selected.find("[value=\'" + escaped + "\']").attr({"selected":"selected"});
         }
         return selected.html();
     });
