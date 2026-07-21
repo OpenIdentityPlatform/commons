@@ -18,6 +18,7 @@ package org.forgerock.selfservice.core.config;
 
 import java.io.IOException;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -40,7 +41,7 @@ import com.fasterxml.jackson.databind.util.TokenBuffer;
 class ClassNameFallbackPropertyTypeDeserializer extends AsPropertyTypeDeserializer {
     public ClassNameFallbackPropertyTypeDeserializer(JavaType bt, TypeIdResolver idRes, String typePropertyName,
             boolean typeIdVisible, JavaType defaultImpl) {
-        super(bt, idRes, typePropertyName, typeIdVisible, defaultImpl);
+        super(bt, idRes, typePropertyName, typeIdVisible, defaultImpl, JsonTypeInfo.As.PROPERTY, true);
     }
 
     public ClassNameFallbackPropertyTypeDeserializer(AsPropertyTypeDeserializer src, BeanProperty property) {
@@ -93,7 +94,7 @@ class ClassNameFallbackPropertyTypeDeserializer extends AsPropertyTypeDeserializ
                         return deser.deserialize(newParser, context);
                     }
                 } catch (Exception ex) {
-                    throw new JsonMappingException("Unable to load class for " + node.toString(), ex);
+                    throw JsonMappingException.from(jsonParser, "Unable to load class for " + node.toString(), ex);
                 }
             }
 

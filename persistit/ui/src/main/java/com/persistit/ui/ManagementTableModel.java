@@ -381,7 +381,7 @@ public class ManagementTableModel extends AbstractTableModel {
         className = className.substring(0, className.lastIndexOf('.')) + ".renderers." + rendererName;
         try {
             final Class clazz = Class.forName(className);
-            final Object object = clazz.newInstance();
+            final Object object = clazz.getDeclaredConstructor().newInstance();
             if (object instanceof AbstractCustomTableCellRenderer) {
                 ((AbstractCustomTableCellRenderer) object).setup(_adminUI, infoClass, columnSpec);
                 return (TableCellRenderer) object;

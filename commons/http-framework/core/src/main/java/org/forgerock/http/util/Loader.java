@@ -13,6 +13,7 @@
  *
  * Copyright 2010–2011 ApexIdentity Inc.
  * Portions Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.http.util;
@@ -67,7 +68,7 @@ public final class Loader {
      */
     public static Object newInstance(String name) {
         try {
-            return getClass(name).newInstance();
+            return getClass(name).getDeclaredConstructor().newInstance();
         } catch (Throwable t) {
             return null;
         }

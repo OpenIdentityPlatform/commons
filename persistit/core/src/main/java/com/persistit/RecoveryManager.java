@@ -1586,7 +1586,7 @@ public class RecoveryManager implements RecoveryManagerMXBean, VolumeHandleLooku
         final long startAddress = page;
         value.clear();
         if (size > value.getMaximumSize()) {
-            value.setMaximumSize(size);
+            value.setMaximumSizeInternal(size);
         }
         value.ensureFit(size);
 

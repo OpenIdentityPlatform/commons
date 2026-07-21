@@ -29,7 +29,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,8 +44,8 @@ public class BufferedRequestWrapper extends HttpServletRequestWrapper {
 
     private void readBody() {
         if (body == null
-                && !StringUtils.containsIgnoreCase(getContentType(), "application/x-www-form-urlencoded")
-                && !StringUtils.containsIgnoreCase(getContentType(), "multipart/form-data")
+                && !Strings.CI.contains(getContentType(), "application/x-www-form-urlencoded")
+                && !Strings.CI.contains(getContentType(), "multipart/form-data")
         )
             try {
                 InputStream is = super.getInputStream();

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.api.jackson;
@@ -43,7 +44,7 @@ import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
 public class CrestObjectSchema extends ObjectSchema implements CrestReadWritePoliciesSchema, OrderedFieldSchema,
         ValidatableSchema, RequiredFieldsSchema, WithExampleSchema<Map<String, Object>> {
     private static final JavaType EXAMPLE_VALUE_TYPE = OBJECT_MAPPER.getTypeFactory()
-            .constructParametrizedType(HashMap.class, Map.class, String.class, Object.class);
+            .constructParametricType(HashMap.class, String.class, Object.class);
     private WritePolicy writePolicy;
     private ReadPolicy readPolicy;
     private Boolean errorOnWritePolicyFailure;

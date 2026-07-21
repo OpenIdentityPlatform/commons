@@ -51,7 +51,7 @@ public abstract class GuiceTestCase implements Module {
         GuiceModules guiceModules = this.getClass().getAnnotation(GuiceModules.class);
         if (guiceModules != null) {
             for (Class<? extends Module> moduleType : guiceModules.value()) {
-                modules.add(moduleType.newInstance());
+                modules.add(moduleType.getDeclaredConstructor().newInstance());
             }
         }
 

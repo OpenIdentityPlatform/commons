@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.json.resource.http.examples;
@@ -24,8 +25,8 @@ import static org.forgerock.json.resource.RouteMatchers.*;
 import static org.forgerock.json.resource.http.CrestHttp.*;
 
 import org.asciidoctor.Asciidoctor;
-import org.asciidoctor.AttributesBuilder;
-import org.asciidoctor.OptionsBuilder;
+import org.asciidoctor.Attributes;
+import org.asciidoctor.Options;
 import org.asciidoctor.Placement;
 import org.asciidoctor.SafeMode;
 import org.forgerock.api.markup.ApiDocGenerator;
@@ -100,15 +101,15 @@ public class CrestHttpApplication implements DescribedHttpApplication {
                         final String html;
                         synchronized (asciidoctor) {
                             html = asciidoctor.convert(asciiDocMarkup,
-                                    OptionsBuilder.options()
-                                            .attributes(AttributesBuilder.attributes()
+                                    Options.builder()
+                                            .attributes(Attributes.builder()
                                                     .tableOfContents(Placement.LEFT)
                                                     .sectNumLevels(5)
                                                     .attribute("toclevels", 5)
-                                                    .get())
+                                                    .build())
                                             .safe(SafeMode.SAFE)
                                             .headerFooter(true)
-                                            .get());
+                                            .build());
                         }
 
                         final Response response = new Response(Status.OK);

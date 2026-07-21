@@ -989,7 +989,7 @@ public class DefaultValueCoder implements ValueRenderer, HandleCache {
             if (_newInstanceMethod != null) {
                 return _newInstanceMethod.invoke(_classDescriptor, _newInstanceArguments);
             } else {
-                return _clazz.newInstance();
+                return _clazz.getDeclaredConstructor().newInstance();
             }
         } catch (final Exception e) {
             throw new ConversionException("Instantiating " + _clazz.getName(), e);

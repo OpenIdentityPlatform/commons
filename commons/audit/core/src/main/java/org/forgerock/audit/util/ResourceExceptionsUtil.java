@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.audit.util;
@@ -48,7 +49,7 @@ public final class ResourceExceptionsUtil {
         } catch (final Throwable tmp) {
             resourceResultCode = ResourceException.INTERNAL_ERROR;
         }
-        return ResourceException.getException(resourceResultCode, t.getMessage(), t);
+        return ResourceException.newResourceException(resourceResultCode, t.getMessage(), t);
     }
 
     /**

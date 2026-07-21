@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.doc.maven.pre;
@@ -62,7 +63,7 @@ public class CreateThumbs {
 
             for (File image : FileUtils.listFiles(
                     m.getDocbkxModifiableSourcesDirectory(),
-                    new WildcardFileFilter("*.png"),
+                    WildcardFileFilter.builder().setWildcards("*.png").get(),
                     TrueFileFilter.INSTANCE)) {
                 PngUtils.resizePng(image);
             }

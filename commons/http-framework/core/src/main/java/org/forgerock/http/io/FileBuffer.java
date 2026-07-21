@@ -13,6 +13,7 @@
  *
  * Copyright 2010–2011 ApexIdentity Inc.
  * Portions Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.http.io;
@@ -122,7 +123,6 @@ final class FileBuffer implements Buffer {
         } catch (IOException ioe) {
             // inappropriate to throw an exception when object is being collected
         }
-        super.finalize();
     }
 
     /**

@@ -49,10 +49,10 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.forgerock.caf.authentication.framework.AuthenticationFramework;
 import org.forgerock.json.jose.builders.EncryptedJwtBuilder;
+import org.forgerock.json.jose.builders.EncryptedThenSignedJwtBuilder;
 import org.forgerock.json.jose.builders.JweHeaderBuilder;
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
 import org.forgerock.json.jose.builders.JwtClaimsSetBuilder;
-import org.forgerock.json.jose.builders.SignedEncryptedJwtBuilder;
 import org.forgerock.json.jose.exceptions.JweDecryptionException;
 import org.forgerock.json.jose.jwe.EncryptionMethod;
 import org.forgerock.json.jose.jwe.JweAlgorithm;
@@ -704,7 +704,7 @@ public class ServletJwtSessionModuleTest {
         given(messageInfo.getMap()).willReturn(map);
 
         EncryptedJwtBuilder encryptedJwtBuilder = mock(EncryptedJwtBuilder.class);
-        SignedEncryptedJwtBuilder signedEncryptedJwtBuilder = mock(SignedEncryptedJwtBuilder.class);
+        EncryptedThenSignedJwtBuilder signedEncryptedJwtBuilder = mock(EncryptedThenSignedJwtBuilder.class);
         JweHeaderBuilder jweHeaderBuilder = mock(JweHeaderBuilder.class);
         JwtClaimsSetBuilder jwtClaimsSetBuilder = mock(JwtClaimsSetBuilder.class);
         JwtClaimsSet claimsSet = mock(JwtClaimsSet.class);
@@ -724,7 +724,7 @@ public class ServletJwtSessionModuleTest {
         given(jwtClaimsSetBuilder.claims(anyMap())).willReturn(jwtClaimsSetBuilder);
         given(jwtClaimsSetBuilder.build()).willReturn(claimsSet);
         given(encryptedJwtBuilder.claims(claimsSet)).willReturn(encryptedJwtBuilder);
-        given(encryptedJwtBuilder.sign(any(HmacSigningHandler.class), eq(JwsAlgorithm.HS256)))
+        given(encryptedJwtBuilder.signedWith(any(HmacSigningHandler.class), eq(JwsAlgorithm.HS256)))
                 .willReturn(signedEncryptedJwtBuilder);
         given(signedEncryptedJwtBuilder.build()).willReturn("ENCRYPTED_JWT");
 
@@ -793,7 +793,7 @@ public class ServletJwtSessionModuleTest {
         given(messageInfo.getMap()).willReturn(map);
 
         EncryptedJwtBuilder encryptedJwtBuilder = mock(EncryptedJwtBuilder.class);
-        SignedEncryptedJwtBuilder signedEncryptedJwtBuilder = mock(SignedEncryptedJwtBuilder.class);
+        EncryptedThenSignedJwtBuilder signedEncryptedJwtBuilder = mock(EncryptedThenSignedJwtBuilder.class);
         JweHeaderBuilder jweHeaderBuilder = mock(JweHeaderBuilder.class);
         JwtClaimsSetBuilder jwtClaimsSetBuilder = mock(JwtClaimsSetBuilder.class);
         JwtClaimsSet claimsSet = mock(JwtClaimsSet.class);
@@ -813,7 +813,7 @@ public class ServletJwtSessionModuleTest {
         given(jwtClaimsSetBuilder.claims(anyMap())).willReturn(jwtClaimsSetBuilder);
         given(jwtClaimsSetBuilder.build()).willReturn(claimsSet);
         given(encryptedJwtBuilder.claims(claimsSet)).willReturn(encryptedJwtBuilder);
-        given(encryptedJwtBuilder.sign(any(HmacSigningHandler.class), eq(JwsAlgorithm.HS256)))
+        given(encryptedJwtBuilder.signedWith(any(HmacSigningHandler.class), eq(JwsAlgorithm.HS256)))
                 .willReturn(signedEncryptedJwtBuilder);
         given(signedEncryptedJwtBuilder.build()).willReturn("ENCRYPTED_JWT");
 
@@ -921,7 +921,7 @@ public class ServletJwtSessionModuleTest {
         given(messageInfo.getMap()).willReturn(map);
 
         EncryptedJwtBuilder encryptedJwtBuilder = mock(EncryptedJwtBuilder.class);
-        SignedEncryptedJwtBuilder signedEncryptedJwtBuilder = mock(SignedEncryptedJwtBuilder.class);
+        EncryptedThenSignedJwtBuilder signedEncryptedJwtBuilder = mock(EncryptedThenSignedJwtBuilder.class);
         JweHeaderBuilder jweHeaderBuilder = mock(JweHeaderBuilder.class);
         JwtClaimsSetBuilder jwtClaimsSetBuilder = mock(JwtClaimsSetBuilder.class);
         JwtClaimsSet claimsSet = mock(JwtClaimsSet.class);
@@ -941,7 +941,7 @@ public class ServletJwtSessionModuleTest {
         given(jwtClaimsSetBuilder.claims(anyMap())).willReturn(jwtClaimsSetBuilder);
         given(jwtClaimsSetBuilder.build()).willReturn(claimsSet);
         given(encryptedJwtBuilder.claims(claimsSet)).willReturn(encryptedJwtBuilder);
-        given(encryptedJwtBuilder.sign(any(HmacSigningHandler.class), eq(JwsAlgorithm.HS256)))
+        given(encryptedJwtBuilder.signedWith(any(HmacSigningHandler.class), eq(JwsAlgorithm.HS256)))
                 .willReturn(signedEncryptedJwtBuilder);
         given(signedEncryptedJwtBuilder.build()).willReturn("ENCRYPTED_JWT");
 
@@ -1010,7 +1010,7 @@ public class ServletJwtSessionModuleTest {
         given(messageInfo.getMap()).willReturn(map);
 
         EncryptedJwtBuilder encryptedJwtBuilder = mock(EncryptedJwtBuilder.class);
-        SignedEncryptedJwtBuilder signedEncryptedJwtBuilder = mock(SignedEncryptedJwtBuilder.class);
+        EncryptedThenSignedJwtBuilder signedEncryptedJwtBuilder = mock(EncryptedThenSignedJwtBuilder.class);
         JweHeaderBuilder jweHeaderBuilder = mock(JweHeaderBuilder.class);
         JwtClaimsSetBuilder jwtClaimsSetBuilder = mock(JwtClaimsSetBuilder.class);
         JwtClaimsSet claimsSet = mock(JwtClaimsSet.class);
@@ -1030,7 +1030,7 @@ public class ServletJwtSessionModuleTest {
         given(jwtClaimsSetBuilder.claims(anyMapOf(String.class, Object.class))).willReturn(jwtClaimsSetBuilder);
         given(jwtClaimsSetBuilder.build()).willReturn(claimsSet);
         given(encryptedJwtBuilder.claims(claimsSet)).willReturn(encryptedJwtBuilder);
-        given(encryptedJwtBuilder.sign(any(HmacSigningHandler.class), eq(JwsAlgorithm.HS256)))
+        given(encryptedJwtBuilder.signedWith(any(HmacSigningHandler.class), eq(JwsAlgorithm.HS256)))
                 .willReturn(signedEncryptedJwtBuilder);
         given(signedEncryptedJwtBuilder.build()).willReturn("ENCRYPTED_JWT");
 
@@ -1098,7 +1098,7 @@ public class ServletJwtSessionModuleTest {
         HttpServletResponse response = mock(HttpServletResponse.class);
         Subject serviceSubject = null;
         EncryptedJwtBuilder encryptedJwtBuilder = mock(EncryptedJwtBuilder.class);
-        SignedEncryptedJwtBuilder signedEncryptedJwtBuilder = mock(SignedEncryptedJwtBuilder.class);
+        EncryptedThenSignedJwtBuilder signedEncryptedJwtBuilder = mock(EncryptedThenSignedJwtBuilder.class);
         JweHeaderBuilder jweHeaderBuilder = mock(JweHeaderBuilder.class);
         JwtClaimsSetBuilder jwtClaimsSetBuilder = mock(JwtClaimsSetBuilder.class);
         JwtClaimsSet claimsSet = mock(JwtClaimsSet.class);
@@ -1118,7 +1118,7 @@ public class ServletJwtSessionModuleTest {
         given(jwtClaimsSetBuilder.claims(anyMap())).willReturn(jwtClaimsSetBuilder);
         given(jwtClaimsSetBuilder.build()).willReturn(claimsSet);
         given(encryptedJwtBuilder.claims(claimsSet)).willReturn(encryptedJwtBuilder);
-        given(encryptedJwtBuilder.sign(any(HmacSigningHandler.class), eq(JwsAlgorithm.HS256)))
+        given(encryptedJwtBuilder.signedWith(any(HmacSigningHandler.class), eq(JwsAlgorithm.HS256)))
                 .willReturn(signedEncryptedJwtBuilder);
         given(signedEncryptedJwtBuilder.build()).willReturn("ENCRYPTED_JWT");
 

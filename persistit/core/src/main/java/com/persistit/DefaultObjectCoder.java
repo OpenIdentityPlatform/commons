@@ -463,7 +463,7 @@ public class DefaultObjectCoder extends DefaultValueCoder implements KeyRenderer
                     + " does not match requested class " + clazz.getName());
         Object instance;
         try {
-            instance = getClientClass().newInstance();
+            instance = getClientClass().getDeclaredConstructor().newInstance();
         } catch (final Exception e) {
             throw new ConversionException("Unable to instantiate an instance of " + getClientClass(), e);
 

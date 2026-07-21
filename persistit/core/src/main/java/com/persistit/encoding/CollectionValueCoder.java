@@ -163,14 +163,12 @@ public class CollectionValueCoder implements ValueRenderer, ValueDisplayer {
     @Override
     public Object get(final Value value, final Class<?> clazz, final CoderContext context) throws ConversionException {
         try {
-            final Object target = clazz.newInstance();
+            final Object target = clazz.getDeclaredConstructor().newInstance();
             value.registerEncodedObject(target);
             render(value, target, clazz, context);
             return target;
-        } catch (final InstantiationException ce) {
-            throw new ConversionException(ce + " while decoding a Collection value");
-        } catch (final IllegalAccessException iae) {
-            throw new ConversionException(iae + " while decoding a Collection value");
+        } catch (final ReflectiveOperationException e) {
+            throw new ConversionException(e + " while decoding a Collection value");
         }
     }
 

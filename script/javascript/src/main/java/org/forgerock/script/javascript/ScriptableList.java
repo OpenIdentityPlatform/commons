@@ -4,6 +4,7 @@
 
 /**
  * Portions Copyrighted 2012-2014 ForgeRock AS
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 package org.forgerock.script.javascript;
 
@@ -734,7 +735,7 @@ class ScriptableList extends IdScriptableObject implements Wrapper {
             long llength = scriptableList.getLength();
             int length = (int) llength;
             if (llength != length) {
-                throw Context.reportRuntimeError(ScriptRuntime.getMessage1(
+                throw Context.reportRuntimeError(ScriptRuntime.getMessageById(
                         "msg.arraylength.too.big", String.valueOf(llength)));
             }
             // if no args, use "," as separator

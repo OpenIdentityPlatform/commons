@@ -38,6 +38,7 @@ import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
+import org.forgerock.json.resource.Applications;
 import org.forgerock.json.resource.http.CrestHttp;
 import org.forgerock.selfservice.core.UserUpdateService;
 import org.forgerock.selfservice.json.JsonAnonymousProcessServiceBuilder;
@@ -71,7 +72,7 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
 
             org.forgerock.http.routing.Router chfRouter = new org.forgerock.http.routing.Router();
             chfRouter.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "internal"),
-                    CrestHttp.newHttpHandler(crestConnectionFactory));
+                    CrestHttp.newHttpHandler(Applications.simpleCrestApplication(crestConnectionFactory, null, null)));
             chfRouter.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "reset"), registerResetHandler());
             chfRouter.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "username"), registerUsernameHandler());
             chfRouter.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "registration"),
@@ -99,7 +100,7 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
                 .withProcessStore(new SimpleInMemoryStore())
                 .build();
 
-        return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(service));
+        return CrestHttp.newHttpHandler(Applications.simpleCrestApplication(Resources.newInternalConnectionFactory(service), null, null));
     }
 
     private Handler registerResetHandler() throws Exception {
@@ -115,8 +116,8 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
     }
 
     private Handler registerUserKBAUpdateHandler() {
-        return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(Resources.newCollection(
-                new UserUpdateService(crestConnectionFactory, resourcePath("users"), new JsonPointer("kbaInfo")))));
+        return CrestHttp.newHttpHandler(Applications.simpleCrestApplication(Resources.newInternalConnectionFactory(Resources.newHandler(
+                new UserUpdateService(crestConnectionFactory, resourcePath("users"), new JsonPointer("kbaInfo")))), null, null));
     }
 
     @Override

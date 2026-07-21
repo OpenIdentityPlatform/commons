@@ -37,6 +37,7 @@ import java.util.Scanner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueFunctions;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.ErrorHandler;
 import org.forgerock.json.schema.validator.FailFastErrorHandler;
@@ -189,7 +190,7 @@ public final class Main {
         try (final FileInputStream in = new FileInputStream(schemaFile)) {
             schemaMap = new JsonValue(MAPPER.readValue(in, Map.class));
         }
-        URI id = schemaMap.get(Constants.ID).required().asURI();
+        URI id = schemaMap.get(Constants.ID).required().as(JsonValueFunctions.uri());
         Validator v = ObjectValidatorFactory.getTypeValidator(schemaMap.asMap());
         if (!id.isAbsolute()) {
             id = base.resolve(id);
@@ -248,7 +249,7 @@ public final class Main {
     //Validation
 
     private void validate(JsonValue value) throws SchemaException, URISyntaxException {
-        URI schemaId = value.get(Constants.SCHEMA).asURI();
+        URI schemaId = value.get(Constants.SCHEMA).as(JsonValueFunctions.uri());
         if (null == schemaId && isEmptyOrBlank(schemaURI)) {
             System.out.println("-i (--id) must be an URI");
             return;

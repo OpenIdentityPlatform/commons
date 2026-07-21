@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.authz.filter.crest;
@@ -100,7 +101,7 @@ public final class AuthorizationFilters {
             filters.add(new AuthorizationFilter(module));
         }
 
-        return new FilterChain(Resources.newCollection(target), filters);
+        return new FilterChain(Resources.newHandler(target), filters);
     }
 
     /**
@@ -141,7 +142,7 @@ public final class AuthorizationFilters {
             filters.add(new AuthorizationFilter(module));
         }
 
-        return new FilterChain(Resources.newSingleton(target), filters);
+        return new FilterChain(Resources.newHandler(target), filters);
     }
 
     /**
@@ -209,7 +210,7 @@ public final class AuthorizationFilters {
          * @return A {@code ResourceException} representing a {@code Unauthorized} request.
          */
         private ResourceException newUnauthorizedException(AuthorizationResult result) {
-            final ResourceException e = ResourceException.getException(ResourceException.FORBIDDEN, result.getReason());
+            final ResourceException e = ResourceException.newResourceException(ResourceException.FORBIDDEN, result.getReason());
             e.setDetail(result.getDetail());
             return e;
         }
