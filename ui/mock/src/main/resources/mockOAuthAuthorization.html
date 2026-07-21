@@ -30,12 +30,20 @@ Mock OAuth Provider redirecting in <span id="countDown"></span>....
     // document and rebuild it on our own origin. Cross-origin targets and
     // non-http schemes (e.g. javascript:) are rejected (CWE-79, CWE-601).
     function getSafeRedirectUri() {
-        var resolver = document.createElement("a");
-        resolver.href = getQueryParam("redirect_uri");
-        if (resolver.protocol !== window.location.protocol || resolver.host !== window.location.host) {
+        var redirectUri = getQueryParam("redirect_uri");
+        if (!redirectUri) {
             return undefined;
         }
-        return window.location.protocol + "//" + window.location.host + resolver.pathname;
+        var url;
+        try {
+            url = new URL(redirectUri, window.location.href);
+        } catch (e) {
+            return undefined;
+        }
+        if (url.origin !== window.location.origin) {
+            return undefined;
+        }
+        return window.location.protocol + "//" + window.location.host + url.pathname;
     }
 
     var countDown = 3;
