@@ -42,7 +42,7 @@ public class SimpleDecryptor implements JsonDecryptor {
     /** The type of cryptographic representation that this decryptor supports. */
     public static final String TYPE = "x-simple-encryption";
 
-    /** GCM authentication tag length, in bits, matching the encryptor default. */
+    /** GCM authentication tag length, in bits, matching {@link SimpleEncryptor}. */
     private static final int GCM_TAG_LENGTH_BITS = 128;
 
     /** Converts between JSON constructs and Java objects. */

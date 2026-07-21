@@ -20,9 +20,11 @@ package org.forgerock.json.crypto.simple;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.Key;
+import java.security.SecureRandom;
 import java.util.HashMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,6 +40,15 @@ public class SimpleEncryptor implements JsonEncryptor {
 
     /** The type of cryptographic representation that this encryptor supports. */
     public static final String TYPE = "x-simple-encryption";
+
+    /** GCM authentication tag length, in bits. {@link SimpleDecryptor} assumes the same value. */
+    private static final int GCM_TAG_LENGTH_BITS = 128;
+
+    /** GCM nonce length, in bytes, per NIST SP 800-38D recommendation. */
+    private static final int GCM_NONCE_LENGTH_BYTES = 12;
+
+    /** Generates random GCM nonces. */
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     /** Converts between Java objects and JSON constructs. */
     private final ObjectMapper mapper = new ObjectMapper();
@@ -79,7 +90,17 @@ public class SimpleEncryptor implements JsonEncryptor {
      */
     private Object symmetric(Object object) throws GeneralSecurityException, IOException {
         Cipher symmetric = Cipher.getInstance(cipher);
-        symmetric.init(Cipher.ENCRYPT_MODE, key);
+        if (isGcm(cipher)) {
+            // Pin the 96-bit nonce and 128-bit tag instead of relying on the
+            // provider's GCM defaults, which the JCE leaves provider-specific;
+            // SimpleDecryptor assumes a 128-bit tag. The key supplied to this
+            // encryptor is caller-managed and typically long-lived, so with
+            // random nonces NIST SP 800-38D section 8.3 bounds GCM to at most
+            // 2^32 encryptions under the same key.
+            symmetric.init(Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(GCM_TAG_LENGTH_BITS, randomNonce()));
+        } else {
+            symmetric.init(Cipher.ENCRYPT_MODE, key);
+        }
         String data = Base64.encode(symmetric.doFinal(mapper.writeValueAsBytes(object)));
         byte[] iv = symmetric.getIV();
         HashMap<String, Object> result = new HashMap<>();
@@ -106,7 +127,9 @@ public class SimpleEncryptor implements JsonEncryptor {
         // padding-oracle attacks that affect CBC/PKCS#5, nor does it leak block
         // patterns like ECB (CWE-327). A fresh session key is generated for every
         // message, so the randomly generated nonce is never reused under the same
-        // key. The nonce is stored alongside the data and the self-describing
+        // key. The nonce and tag length are passed explicitly because the JCE
+        // leaves them provider-specific and SimpleDecryptor assumes a 128-bit
+        // tag. The nonce is stored alongside the data and the self-describing
         // "cipher" field keeps this backward compatible with values previously
         // written using CBC or ECB.
         String symmetricCipher = "AES/GCM/NoPadding";
@@ -114,7 +137,7 @@ public class SimpleEncryptor implements JsonEncryptor {
         generator.init(128);
         SecretKey sessionKey = generator.generateKey();
         Cipher symmetric = Cipher.getInstance(symmetricCipher);
-        symmetric.init(Cipher.ENCRYPT_MODE, sessionKey);
+        symmetric.init(Cipher.ENCRYPT_MODE, sessionKey, new GCMParameterSpec(GCM_TAG_LENGTH_BITS, randomNonce()));
         String data = Base64.encode(symmetric.doFinal(mapper.writeValueAsBytes(object)));
         byte[] iv = symmetric.getIV();
         Cipher asymmetric = Cipher.getInstance(cipher);
@@ -131,6 +154,17 @@ public class SimpleEncryptor implements JsonEncryptor {
             result.put("iv", Base64.encode(iv));
         }
         return result;
+    }
+
+    private static byte[] randomNonce() {
+        byte[] nonce = new byte[GCM_NONCE_LENGTH_BYTES];
+        RANDOM.nextBytes(nonce);
+        return nonce;
+    }
+
+    private static boolean isGcm(String cipher) {
+        String[] parts = cipher.split("/");
+        return parts.length > 1 && parts[1].equalsIgnoreCase("GCM");
     }
 
     @Override

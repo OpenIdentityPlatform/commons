@@ -21,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyPair;
@@ -52,6 +54,24 @@ public class JsonCryptoTest {
 
     private static final String PLAINTEXT = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
 
+    /**
+     * Fixed AES key for the checked-in legacy values below; unlike the random
+     * per-run keys, it lets ciphertexts produced by pre-GCM builds be kept in
+     * the test as backward-compatibility fixtures.
+     */
+    private static final SecretKey COMPAT_KEY =
+            new SecretKeySpec("0123456789abcdef".getBytes(StandardCharsets.US_ASCII), "AES");
+
+    /** {@link #PLAINTEXT} encrypted with {@link #COMPAT_KEY} using legacy AES/ECB/PKCS5Padding (no IV). */
+    private static final String LEGACY_ECB_DATA =
+            "8sDxsiLqBe63ul0Pup+Bv3CREJeNI+bpMydH8hnajinHixZAmDwzoNGBDpyFApurpvwOZa6bF153jD2Rk0Jwfg==";
+
+    /** {@link #PLAINTEXT} encrypted with {@link #COMPAT_KEY} and {@link #LEGACY_CBC_IV} using AES/CBC/PKCS5Padding. */
+    private static final String LEGACY_CBC_DATA =
+            "kgxfhkMPxKtmhfmxQt/p8bCj4bIZPH1s/AwAmVANAAuYLGRosaLsNrfclIosTJYKWAAGygDF/dkzs+2ye2+1tw==";
+
+    private static final String LEGACY_CBC_IV = "ZmVkY2JhOTg3NjU0MzIxMA==";
+
     private SecretKey secretKey;
 
     private PublicKey publicKey;
@@ -64,6 +84,8 @@ public class JsonCryptoTest {
                 return secretKey;
             } else if (key.equals("privateKey")) {
                 return privateKey;
+            } else if (key.equals("compatKey")) {
+                return COMPAT_KEY;
             } else {
                 return null;
             }
@@ -104,6 +126,7 @@ public class JsonCryptoTest {
         JsonValue value = new JsonValue(PLAINTEXT);
         value = new SimpleEncryptor(ASYMMETRIC_CIPHER, publicKey, "privateKey").encrypt(value);
         assertThat(value.getObject()).isNotEqualTo(PLAINTEXT);
+        assertThat(((Map<?, ?>) value.getObject()).get("cipher")).isEqualTo(SYMMETRIC_GCM_CIPHER);
         value = new SimpleDecryptor(selector).decrypt(value);
         assertThat(value.getObject()).isEqualTo(PLAINTEXT);
     }
@@ -116,6 +139,33 @@ public class JsonCryptoTest {
         assertThat(((Map<?, ?>) value.getObject()).get("cipher")).isEqualTo(SYMMETRIC_GCM_CIPHER);
         value = new SimpleDecryptor(selector).decrypt(value);
         assertThat(value.getObject()).isEqualTo(PLAINTEXT);
+    }
+
+    // ----- backward compatibility ----------
+
+    @Test
+    public void testDecryptLegacyEcbValue() throws JsonCryptoException {
+        JsonValue value = new JsonValue(legacyValue("AES/ECB/PKCS5Padding", LEGACY_ECB_DATA, null));
+        value = new SimpleDecryptor(selector).decrypt(value);
+        assertThat(value.getObject()).isEqualTo(PLAINTEXT);
+    }
+
+    @Test
+    public void testDecryptLegacyCbcValue() throws JsonCryptoException {
+        JsonValue value = new JsonValue(legacyValue(SYMMETRIC_CIPHER, LEGACY_CBC_DATA, LEGACY_CBC_IV));
+        value = new SimpleDecryptor(selector).decrypt(value);
+        assertThat(value.getObject()).isEqualTo(PLAINTEXT);
+    }
+
+    private static Map<String, Object> legacyValue(String cipher, String data, String iv) {
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("cipher", cipher);
+        result.put("key", "compatKey");
+        result.put("data", data);
+        if (iv != null) {
+            result.put("iv", iv);
+        }
+        return result;
     }
 
 //    @Test
