@@ -12,22 +12,26 @@ Mock OAuth Provider redirecting in <span id="countDown"></span>....
 
 <script>
 (function () {
-    var queryParams = window.location.search.replace("?", "").split("&").reduce(function (map, item) {
+    // Look up a single query parameter by name. Reading only the known
+    // parameters avoids writing map entries keyed by user input (CWE-1321).
+    function getQueryParam(name) {
+        var value;
+        window.location.search.replace("?", "").split("&").forEach(function (item) {
             var parts = item.split("=");
-            // Guard against prototype pollution: never let a user-controlled query
-            // parameter name overwrite __proto__/constructor/prototype (CWE-1321).
-            if (parts[0] !== "__proto__" && parts[0] !== "constructor" && parts[0] !== "prototype") {
-                map[parts[0]] = decodeURIComponent(parts[1]);
+            if (parts[0] === name) {
+                value = decodeURIComponent(parts[1]);
             }
-            return map;
-        }, {}),
-        countDown = 3;
+        });
+        return value;
+    }
+
+    var countDown = 3;
 
     setInterval(function () {
         document.getElementById("countDown").innerHTML = countDown;
         countDown--;
         if (countDown <= 0) {
-            window.location.href=queryParams.redirect_uri + "?code=randomAccessCode&state=" + encodeURIComponent(queryParams.state);
+            window.location.href=getQueryParam("redirect_uri") + "?code=randomAccessCode&state=" + encodeURIComponent(getQueryParam("state"));
         }
     }, 1000);
     document.getElementById("countDown").innerHTML = countDown+1;
