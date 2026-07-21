@@ -43,7 +43,9 @@ Mock OAuth Provider redirecting in <span id="countDown"></span>....
         if (url.origin !== window.location.origin) {
             return undefined;
         }
-        return window.location.protocol + "//" + window.location.host + url.pathname;
+        // Any query or fragment on the incoming redirect_uri is dropped
+        // deliberately: the caller appends its own ?code=...&state=... below.
+        return url.origin + url.pathname;
     }
 
     var countDown = 3;
