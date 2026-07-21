@@ -167,9 +167,7 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
                 @Override
                 public void run() {
                     try {
-                    	logger.trace("THREAD !!!");
-                    	if(!signatureLock.isLocked())
-                    		writeSignature(csvWriter);
+                        writeSignature(csvWriter);
                     } catch (Exception ex) {
                         logger.error("An error occurred while writing the signature", ex);
                     }
@@ -252,8 +250,7 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
     private void forceWriteSignature(Writer writer) throws IOException {
         if (scheduledSignature != null && scheduledSignature.cancel(false)) {
             // We were able to cancel it before it starts, so let's generate the signature now.
-        	writeSignature(writer);
-            
+            writeSignature(writer);
         }
     }
 
@@ -272,7 +269,7 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
     void writeSignature(Writer writer) throws IOException {
         // We have to prevent from writing another line between the signature calculation
         // and the signature's row write, as the calculation uses the lastHMAC.
-    	signatureLock.lock();
+        signatureLock.lock();
         try {
             lastSignature = secureStorage.sign(dataToSign(lastSignature, lastHMAC));
             logger.trace("Calculated new Signature");
@@ -344,7 +341,6 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
                     && (scheduledSignature == null || scheduledSignature.isDone())) {
                 logger.trace("Triggering a new signature task to be executed in {}", signatureInterval);
                 try {
-                	logger.trace("SHCHEDULED!!");
                     scheduledSignature = scheduler.schedule(signatureTask, signatureInterval.getValue(),
                             signatureInterval.getUnit());
                 } catch (RejectedExecutionException e) {
