@@ -171,7 +171,7 @@ class MVV {
             return overheadLength(2) + targetLength + newVersionLength;
         } else {
             int offset = targetOffset + 1;
-            while (offset < targetLength) {
+            while (offset < targetOffset + targetLength) {
                 final long version = getVersion(target, offset);
                 final int valueLength = getLength(target, offset);
                 offset += LENGTH_PER_VERSION + valueLength;
@@ -295,7 +295,7 @@ class MVV {
          * Value previously existed as a primordial value. Result will be an MVV
          * with two versions.
          */
-        else if (target[0] != TYPE_MVV_BYTE) {
+        else if (target[targetOffset] != TYPE_MVV_BYTE) {
             assertCapacity(targetLimit, targetOffset + sourceLength + targetLength + overheadLength(2));
             // Promote to MVV, shift existing down for header
             System.arraycopy(target, to, target, to + LENGTH_TYPE_MVV + LENGTH_PER_VERSION, targetLength);
@@ -484,7 +484,13 @@ class MVV {
                     }
                 }
                 from += vlength + LENGTH_PER_VERSION;
-                if (from > offset + length) {
+                if (from != offset + length && from + LENGTH_PER_VERSION > offset + length) {
+                    /*
+                     * A version must either end exactly at the region end or
+                     * leave room for at least one more version header. Anything
+                     * else is a misaligned traversal; reject it before the next
+                     * iteration reads or marks outside the MVV region.
+                     */
                     throw new CorruptValueException("MVV Value is corrupt at index: " + from);
                 }
             }
@@ -578,17 +584,21 @@ class MVV {
             throw new PersistitInterruptedException(ie);
         } finally {
             /*
-             * Make sure all marks are removed even if this method exits via an
-             * Exception.
+             * Remove marks left by pass 1 even when this method exits via an
+             * exception: a mark left in a live page is read back as part of
+             * the version length and corrupts the MVV (issue #286). Mirrors
+             * pass 1 - same advance, same guard - so it touches exactly the
+             * indices that pass could have marked, and nothing else. A
+             * zero-length version is legal, hence no break on vlength == 0.
+             * The array-end bound covers pass 1's unguarded first iteration.
              */
             if (marked > 0) {
                 int index = offset + 1;
-                while (index < length) {
+                while (index + LENGTH_PER_VERSION <= bytes.length) {
                     final int vlength = getLength(bytes, index);
-                    Debug.$assert0.t(vlength + index + LENGTH_PER_VERSION <= offset + length);
                     unmark(bytes, index);
                     index += vlength + LENGTH_PER_VERSION;
-                    if (vlength <= 0) {
+                    if (index + LENGTH_PER_VERSION > offset + length) {
                         break;
                     }
                 }
@@ -663,8 +673,12 @@ class MVV {
      *         if no value was copied.
      * @throws IllegalArgumentException
      *             If the target array is too small to hold the value
+     * @throws CorruptValueException
+     *             If a version header or value extends past
+     *             <code>sourceLength</code>
      */
-    public static int fetchVersion(final byte[] source, final int sourceLength, final long version, final byte[] target) {
+    public static int fetchVersion(final byte[] source, final int sourceLength, final long version, final byte[] target)
+            throws CorruptValueException {
         int offset = 0;
         int length = VERSION_NOT_FOUND;
 
@@ -673,9 +687,17 @@ class MVV {
         } else if (sourceLength > 0 && source[0] == TYPE_MVV_BYTE) {
             offset = 1;
             while (offset < sourceLength) {
-                final long curVersion = Util.getLong(source, offset);
-                final int curLength = Util.getShort(source, offset + LENGTH_VERSION);
+                if (offset + LENGTH_PER_VERSION > sourceLength) {
+                    throw new CorruptValueException("MVV version header at offset " + offset
+                            + " extends past length " + sourceLength);
+                }
+                final long curVersion = getVersion(source, offset);
+                final int curLength = getLength(source, offset);
                 offset += LENGTH_PER_VERSION;
+                if (curLength > sourceLength - offset) {
+                    throw new CorruptValueException("MVV version value at offset " + offset + " with length "
+                            + curLength + " extends past length " + sourceLength);
+                }
                 if (curVersion == version) {
                     length = curLength;
                     break;
@@ -739,15 +761,29 @@ class MVV {
         } else if (source[sourceOffset] != TYPE_MVV_BYTE) {
             visitor.sawVersion(PRIMORDIAL_VALUE_VERSION, sourceOffset, sourceLength);
         } else {
+            final int end = sourceOffset + sourceLength;
             int offset = sourceOffset + 1;
-            while (offset < sourceOffset + sourceLength) {
-                final long version = Util.getLong(source, offset);
-                final int valueLength = Util.getShort(source, offset + LENGTH_VERSION);
+            while (offset < end) {
+                if (offset + LENGTH_PER_VERSION > end) {
+                    throw new CorruptValueException("MVV version header at offset " + offset
+                            + " extends past offset/length=" + sourceOffset + "/" + sourceLength);
+                }
+                final long version = getVersion(source, offset);
+                final int valueLength = getLength(source, offset);
                 offset += LENGTH_PER_VERSION;
+                if (valueLength > end - offset) {
+                    throw new CorruptValueException("MVV version value at offset " + offset + " with length "
+                            + valueLength + " extends past offset/length=" + sourceOffset + "/" + sourceLength);
+                }
                 visitor.sawVersion(version, offset, valueLength);
                 offset += valueLength;
             }
-            if (offset != sourceOffset + sourceLength) {
+            /*
+             * Defensive only: the per-version guards above make this
+             * unreachable (the loop can only exit with offset == end). Kept in
+             * case the traversal logic changes.
+             */
+            if (offset != end) {
                 throw new CorruptValueException("invalid length in MVV at offset/length=" + sourceOffset + "/"
                         + sourceLength);
             }
@@ -773,14 +809,20 @@ class MVV {
      *         if no value was copied.
      * @throws IllegalArgumentException
      *             If the target array is too small to hold the value
+     * @throws CorruptValueException
+     *             If the stored value extends past <code>sourceLength</code>
      */
     public static int fetchVersionByOffset(final byte[] source, final int sourceLength, final int offset,
-            final byte[] target) {
+            final byte[] target) throws CorruptValueException {
         if (offset < 0 || (offset > 0 && offset > sourceLength)) {
             throw new IllegalArgumentException("Offset out of range: " + offset);
         }
-        final int length = (offset == 0) ? sourceLength : Util.getShort(source, offset - LENGTH_VALUE_LENGTH);
+        final int length = (offset == 0) ? sourceLength : getLength(source, offset - LENGTH_PER_VERSION);
         if (length > 0) {
+            if (length > sourceLength - offset) {
+                throw new CorruptValueException("MVV version value at offset " + offset + " with length " + length
+                        + " extends past length " + sourceLength);
+            }
             assertCapacity(target.length, length);
             System.arraycopy(source, offset, target, 0, length);
         }

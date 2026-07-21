@@ -12,15 +12,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
 
+import com.persistit.exception.CorruptValueException;
 import com.persistit.exception.PersistitException;
 import com.persistit.util.Util;
 import junit.framework.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -30,6 +34,7 @@ import static com.persistit.MVV.TYPE_MVV;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class MVVTest {
     @Test
@@ -321,7 +326,7 @@ public class MVVTest {
     }
 
     @Test
-    public void fetchVersionFromUnused() {
+    public void fetchVersionFromUnused() throws PersistitException {
         final long vh = 10;
         final byte[] source = {};
         final byte[] target = {};
@@ -329,7 +334,7 @@ public class MVVTest {
     }
 
     @Test
-    public void fetchVersionFromUndefined() {
+    public void fetchVersionFromUndefined() throws PersistitException {
         final long vh = 10;
         final byte[] source = {};
         final byte[] target = {};
@@ -337,7 +342,7 @@ public class MVVTest {
     }
 
     @Test
-    public void fetchVersionFromPrimordial() {
+    public void fetchVersionFromPrimordial() throws PersistitException {
         final long vh = 10;
         final byte[] source = { 0xA, 0xB, 0xC };
         final byte[] target = {};
@@ -345,7 +350,7 @@ public class MVVTest {
     }
 
     @Test
-    public void fetchVersionFromExistingNoFound() {
+    public void fetchVersionFromExistingNoFound() throws PersistitException {
         final long vh = 10;
         final byte[] source = { (byte) TYPE_MVV, 0, 0, 0, 0, 0, 0, 0, 1, 0, 3, 0xA, 0xB, 0xC, 0, 0, 0, 0, 0, 0, 0, 2,
                 0, 2, 0xD, 0xE };
@@ -354,7 +359,7 @@ public class MVVTest {
     }
 
     @Test
-    public void fetchVersionFromExisting() {
+    public void fetchVersionFromExisting() throws PersistitException {
         final long vh = 10;
         final byte[] source = { (byte) TYPE_MVV, 0, 0, 0, 0, 0, 0, 0, 10, 0, 2, 0xA, 0xB, 0, 0, 0, 0, 0, 0, 0, 11, 0,
                 3, 0xB, 0xC };
@@ -366,7 +371,7 @@ public class MVVTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void fetchVersionFromExistingOverCapacity() {
+    public void fetchVersionFromExistingOverCapacity() throws PersistitException {
         final long vh = 10;
         final byte[] source = { (byte) TYPE_MVV, 0, 0, 0, 0, 0, 0, 0, 11, 0, 5, 0x1, 0x2, 0x3, 0x4, 0x5, 0, 0, 0, 0, 0,
                 0, 0, 9, 0, 1, 0xA, 0, 0, 0, 0, 0, 0, 0, 10, 0, 3, 0xB, 0xC, 0xD };
@@ -429,21 +434,21 @@ public class MVVTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void fetchByOffsetNegative() {
+    public void fetchByOffsetNegative() throws PersistitException {
         final byte[] source = {};
         final byte[] target = new byte[10];
         MVV.fetchVersionByOffset(source, source.length, -1, target);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void fetchByOffsetTooLarge() {
+    public void fetchByOffsetTooLarge() throws PersistitException {
         final byte[] source = newArray(TYPE_MVV, 0, 0, 0, 0, 0, 0, 0, 1, 0, 3, 0xA, 0xB, 0xC);
         final byte[] target = new byte[10];
         MVV.fetchVersionByOffset(source, source.length, source.length + 1, target);
     }
 
     @Test
-    public void storeAndFetchVersionMany() {
+    public void storeAndFetchVersionMany() throws PersistitException {
         final int VERSION_COUNT = 10;
         final int versions[] = new int[VERSION_COUNT];
         final byte sources[][] = new byte[VERSION_COUNT][];
@@ -478,6 +483,145 @@ public class MVVTest {
         final byte[] target = new byte[LENGTH + 100];
         final byte[] source = new byte[LENGTH];
         MVV.storeVersion(target, 0, 0, target.length, VERSION, source, 0, source.length);
+    }
+
+    //
+    // Issue #286: a version left in the marked state (e.g. by a prune that was
+    // interrupted mid-way) must still be readable. The length accessors used
+    // by the fetch paths formerly read the length field signed and with the
+    // mark bit included, driving the scan offset negative and throwing
+    // ArrayIndexOutOfBoundsException.
+    //
+
+    @Test
+    public void visitMarkedVersion() throws PersistitException {
+        final byte[] source = newArray(TYPE_MVV, 0, 0, 0, 0, 0, 0, 0, 1, 0, 3, 0xA, 0xB, 0xC, 0, 0, 0, 0, 0, 0, 0, 2,
+                0, 2, 0xD, 0xE);
+        MVV.mark(source, 1);
+        final TestVisitor visitor = new TestVisitor();
+        MVV.visitAllVersions(visitor, source, 0, source.length);
+        assertTrue(visitor.initCalled);
+        assertEquals(newVisitorMap(1, 3, 11, 2, 2, 24), visitor.versions);
+    }
+
+    @Test
+    public void fetchMarkedVersion() throws PersistitException {
+        final byte[] source = newArray(TYPE_MVV, 0, 0, 0, 0, 0, 0, 0, 10, 0, 2, 0xA, 0xB, 0, 0, 0, 0, 0, 0, 0, 11, 0,
+                3, 0xC, 0xD, 0xE);
+        MVV.mark(source, 1);
+        MVV.mark(source, 13);
+        final byte[] target = new byte[20];
+        assertEquals(2, MVV.fetchVersion(source, source.length, 10, target));
+        assertArrayEqualsLen(newArray(0xA, 0xB), target, 2);
+        assertEquals(3, MVV.fetchVersion(source, source.length, 11, target));
+        assertArrayEqualsLen(newArray(0xC, 0xD, 0xE), target, 3);
+    }
+
+    @Test
+    public void fetchByOffsetMarkedVersion() throws PersistitException {
+        final byte[] source = newArray(TYPE_MVV, 0, 0, 0, 0, 0, 0, 0, 10, 0, 2, 0xA, 0xB, 0, 0, 0, 0, 0, 0, 0, 11, 0,
+                3, 0xC, 0xD, 0xE);
+        MVV.mark(source, 1);
+        final byte[] target = new byte[20];
+        assertEquals(2, MVV.fetchVersionByOffset(source, source.length, 11, target));
+        assertArrayEqualsLen(newArray(0xA, 0xB), target, 2);
+    }
+
+    @Test(expected = CorruptValueException.class)
+    public void visitTruncatedHeaderThrows() throws PersistitException {
+        final byte[] source = newArray(TYPE_MVV, 0, 0, 0, 0, 0);
+        MVV.visitAllVersions(new TestVisitor(), source, 0, source.length);
+    }
+
+    /**
+     * The old code also threw CorruptValueException here (from the trailing
+     * length check), but only after handing the visitor an out-of-bounds
+     * version — which Exchange.MvvVisitor would record and fetchVersionByOffset
+     * would then copy. The fix must throw before the visitor sees it.
+     */
+    @Test
+    public void visitOverrunningLengthThrows() throws PersistitException {
+        final byte[] source = newArray(TYPE_MVV, 0, 0, 0, 0, 0, 0, 0, 1, 0, 50, 0xA, 0xB, 0xC);
+        final TestVisitor visitor = new TestVisitor();
+        try {
+            MVV.visitAllVersions(visitor, source, 0, source.length);
+            fail("expected CorruptValueException");
+        } catch (final CorruptValueException expected) {
+        }
+        assertTrue("visitor must not see an out-of-bounds version", visitor.versions.isEmpty());
+    }
+
+    /**
+     * Issue #286: when prune exits via an exception after its first pass has
+     * marked versions (e.g. interrupted while resolving a commit status, or a
+     * CorruptValueException), the finally-block safety net must remove the
+     * marks. Its loop bound was wrong for a non-zero offset — exactly the
+     * in-page pruning case — leaving mark bits behind in the live buffer page.
+     */
+    @Test
+    public void pruneExceptionUnmarksVersionsAtNonZeroOffset() throws Exception {
+        final TimestampAllocator tsa = new TimestampAllocator();
+        final TransactionIndex ti = new TransactionIndex(tsa, 1);
+        final TransactionStatus status1 = ti.registerTransaction();
+        final TransactionStatus status2 = ti.registerTransaction();
+
+        /*
+         * Two uncommitted versions from different transactions make prune's
+         * first pass throw "Multiple uncommitted versions" after it has marked
+         * the first version. The non-zero offset emulates in-page pruning.
+         */
+        final int offset = 117;
+        final byte[] bytes = new byte[offset + 100];
+        final byte[] v1 = { 0xA, 0xB, 0xC };
+        final byte[] v2 = { 0xD, 0xE };
+        int length = MVV.storeVersion(bytes, offset, -1, bytes.length, TransactionIndex.ts2vh(status1.getTs()), v1, 0,
+                v1.length) & STORE_LENGTH_MASK;
+        length = MVV.storeVersion(bytes, offset, length, bytes.length, TransactionIndex.ts2vh(status2.getTs()), v2, 0,
+                v2.length) & STORE_LENGTH_MASK;
+
+        final byte[] before = bytes.clone();
+        try {
+            MVV.prune(bytes, offset, length, ti, true, new ArrayList<MVV.PrunedVersion>());
+            fail("expected CorruptValueException");
+        } catch (final CorruptValueException expected) {
+        }
+        assertArrayEquals("prune must leave the byte array unchanged when it throws", before, bytes);
+    }
+
+    /**
+     * Issue #286: on a misaligned (corrupt) MVV the tightened first-pass guard
+     * throws before the traversal can mark outside the MVV region, so the
+     * finally-block safety net must stop at the same point. A net that keeps
+     * iterating while inside the region would unmark() — write — past the
+     * region end, into the next record of a live buffer page.
+     */
+    @Test
+    public void pruneExceptionMustNotUnmarkPastRegionEnd() throws Exception {
+        final TimestampAllocator tsa = new TimestampAllocator();
+        final TransactionIndex ti = new TransactionIndex(tsa, 1);
+        final TransactionStatus status = ti.registerTransaction();
+
+        /*
+         * One uncommitted version, so the first pass marks it, followed by a
+         * claimed region length that leaves the next version header straddling
+         * the region end: the guard throws with the mark still set. The 0xFF
+         * fill makes any out-of-region unmark() visible (bit 15 cleared).
+         */
+        final int offset = 117;
+        final byte[] bytes = new byte[offset + 100];
+        Arrays.fill(bytes, (byte) 0xFF);
+        final byte[] v1 = { 0xA, 0xB, 0xC };
+        final int stored = MVV.storeVersion(bytes, offset, -1, bytes.length, TransactionIndex.ts2vh(status.getTs()),
+                v1, 0, v1.length) & STORE_LENGTH_MASK;
+        final int length = stored + 5;
+
+        final byte[] before = bytes.clone();
+        try {
+            MVV.prune(bytes, offset, length, ti, true, new ArrayList<MVV.PrunedVersion>());
+            fail("expected CorruptValueException");
+        } catch (final CorruptValueException expected) {
+        }
+        assertArrayEquals("prune must not write outside the MVV region when it throws", before, bytes);
     }
 
     //

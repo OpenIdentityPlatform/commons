@@ -25,6 +25,7 @@ import com.persistit.exception.PersistitIOException;
 import com.persistit.exception.PersistitInterruptedException;
 import com.persistit.exception.RollbackException;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.InterruptedIOException;
@@ -34,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -62,8 +64,21 @@ public class TransactionTest2 extends PersistitUnitTestCase {
     static AtomicInteger _completedTransactionCount = new AtomicInteger();
     static AtomicInteger _failedTransactionCount = new AtomicInteger();
     static AtomicInteger _strandedThreads = new AtomicInteger();
+    static AtomicReference<Throwable> _firstFailure = new AtomicReference<Throwable>();
 
     static int _threadCounter = 0;
+
+    /*
+     * The counters are static and shared by every test in this class; reset
+     * them so each test's assertions see only its own failures.
+     */
+    @Before
+    public void resetCounters() {
+        _retriedTransactionCount.set(0);
+        _completedTransactionCount.set(0);
+        _failedTransactionCount.set(0);
+        _firstFailure.set(null);
+    }
 
     int _threadIndex = 0;
 
@@ -228,6 +243,8 @@ public class TransactionTest2 extends PersistitUnitTestCase {
         assertEquals("Starting and ending balance don't agree", startingBalance, endingBalance);
         assertTrue("ATC has very old transaction",
                 ti.getActiveTransactionCeiling() - ti.getActiveTransactionFloor() < 10000);
+        assertEquals("Worker threads died with unexpected exceptions; first was " + _firstFailure.get(), 0,
+                _failedTransactionCount.get());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -314,6 +331,7 @@ public class TransactionTest2 extends PersistitUnitTestCase {
                 // expected
             } else {
                 exception.printStackTrace();
+                _firstFailure.compareAndSet(null, exception);
                 _failedTransactionCount.incrementAndGet();
             }
         } catch (final Throwable throwable) {
@@ -321,6 +339,7 @@ public class TransactionTest2 extends PersistitUnitTestCase {
             // AssertionError must be reported and counted rather than
             // silently killing the worker thread (see issue #265).
             throwable.printStackTrace();
+            _firstFailure.compareAndSet(null, throwable);
             _failedTransactionCount.incrementAndGet();
         }
     }
