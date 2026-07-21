@@ -23,8 +23,12 @@ import com.persistit.exception.PersistitException;
 import org.junit.Test;
 
 import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -97,6 +101,88 @@ public class IntegrityCheckTest extends PersistitUnitTestCase {
         final IntegrityCheck icheck = icheck();
         icheck.checkTree(ex.getTree());
         assertTrue(icheck.getFaults().length > 0);
+    }
+
+    /**
+     * Issue #290: a leftover prune mark bit (pre-#288 interrupted-prune
+     * corruption) reads normally through all fetch paths, so IntegrityCheck
+     * must detect it explicitly and report it as a fault.
+     */
+    @Test
+    public void testLeftoverMarkBitsReported() throws Exception {
+        final Exchange ex = _persistit.getExchange(_volumeName, "mvv", true);
+        disableBackgroundCleanup();
+        transactionalStore(ex);
+
+        IntegrityCheck icheck = icheck();
+        icheck.checkTree(ex.getTree());
+        assertEquals(0, icheck.getFaults().length);
+        assertEquals(0, icheck.getMarkedVersionCount());
+
+        final int[] corrupted = corrupt5(ex);
+        final int corruptedValues = corrupted[0];
+        final int markedVersions = corrupted[1];
+        assertTrue(corruptedValues > 0);
+        assertTrue("some values must carry more than one mark", markedVersions > corruptedValues);
+
+        icheck = icheck();
+        icheck.checkTree(ex.getTree());
+        assertEquals(corruptedValues, icheck.getFaults().length);
+        assertEquals(markedVersions, icheck.getMarkedVersionCount());
+    }
+
+    /**
+     * Issue #290: pruning rewrites marked versions, so icheck with pruning
+     * enabled is the remediation path - a subsequent icheck must be clean.
+     */
+    @Test
+    public void testPruneClearsLeftoverMarkBits() throws Exception {
+        final Exchange ex = _persistit.getExchange(_volumeName, "mvv", true);
+        disableBackgroundCleanup();
+        transactionalStore(ex);
+        _persistit.getTransactionIndex().updateActiveTransactionCache();
+
+        final SortedMap<String, String> expectedContents = treeContents(ex);
+        assertTrue(corrupt5(ex)[0] > 0);
+
+        IntegrityCheck icheck = icheck();
+        icheck.setPruneEnabled(true);
+        icheck.checkTree(ex.getTree());
+        assertTrue(icheck.getMarkedVersionCount() > 0);
+        assertTrue(icheck.getPrunedPagesCount() > 0);
+
+        assertEquals("remediation must not change the visible contents", expectedContents, treeContents(ex));
+
+        icheck = icheck();
+        icheck.checkTree(ex.getTree());
+        assertEquals(0, icheck.getMarkedVersionCount());
+        assertEquals(0, icheck.getFaults().length);
+    }
+
+    /**
+     * Issues #290/#292: icheck -P reports leftover mark bits as faults but
+     * must still clear the TransactionIndex - the prune pass has already
+     * rewritten the marks, so they are not a pruning failure.
+     */
+    @Test
+    public void testPruneAndClearWithLeftoverMarkBits() throws Exception {
+        final Exchange ex = _persistit.getExchange(_volumeName, "mvv", true);
+        disableBackgroundCleanup();
+        transactionalStore(ex);
+        _persistit.getTransactionIndex().updateActiveTransactionCache();
+
+        assertTrue(corrupt5(ex)[0] > 0);
+
+        final IntegrityCheck icheck = (IntegrityCheck) CLI.parseTask(_persistit, "icheck trees=* -u -P");
+        final StringWriter output = new StringWriter();
+        icheck.setMessageWriter(new PrintWriter(output));
+        icheck.setup(1, "icheck", "cli", 0, 5);
+        icheck.run();
+
+        assertTrue(icheck.getMarkedVersionCount() > 0);
+        assertTrue(icheck.hasFaults());
+        assertTrue(output.toString(), output.toString().contains("aborted transactions were cleared by pruning"));
+        assertFalse(output.toString(), output.toString().contains("PruneAndClear failed"));
     }
 
     @Test
@@ -283,26 +369,52 @@ public class IntegrityCheckTest extends PersistitUnitTestCase {
         buffer.release();
     }
 
+    private interface MVVCorruption {
+        /** Corrupts one stored MVV value; returns its contribution to the total */
+        int corrupt(byte[] bytes, int length);
+    }
+
+    /**
+     * Applies a corruption to the raw bytes of up to ten stored MVV values
+     *
+     * @param ex
+     * @param corruption
+     * @return the number of values corrupted and the summed corruption
+     *         contributions, as a two-element array
+     * @throws PersistitException
+     */
+    private int[] corruptMVVs(final Exchange ex, final MVVCorruption corruption) throws PersistitException {
+        ex.ignoreMVCCFetch(true);
+        try {
+            ex.clear().to(key(500));
+            int corrupted = 0;
+            int total = 0;
+            while (corrupted < 10 && ex.next()) {
+                final byte[] bytes = ex.getValue().getEncodedBytes();
+                final int length = ex.getValue().getEncodedSize();
+                if (MVV.isArrayMVV(bytes, 0, length)) {
+                    total += corruption.corrupt(bytes, length);
+                    ex.store();
+                    corrupted++;
+                }
+            }
+            return new int[] { corrupted, total };
+        } finally {
+            ex.ignoreMVCCFetch(false);
+        }
+    }
+
     /**
      * Corrupts some MVV values on a page by damaging a version length field
-     * 
+     *
      * @param ex
      * @throws PersistitException
      */
     private void corrupt2(final Exchange ex) throws PersistitException {
-        ex.ignoreMVCCFetch(true);
-        ex.clear().to(key(500));
-        int corrupted = 0;
-        while (corrupted < 10 && ex.next()) {
-            final byte[] bytes = ex.getValue().getEncodedBytes();
-            final int length = ex.getValue().getEncodedSize();
-            if (MVV.isArrayMVV(bytes, 0, length)) {
-                bytes[9]++;
-                ex.store();
-                corrupted++;
-            }
-        }
-        ex.ignoreMVCCFetch(false);
+        corruptMVVs(ex, (bytes, length) -> {
+            bytes[9]++;
+            return 1;
+        });
     }
 
     /**
@@ -336,6 +448,45 @@ public class IntegrityCheckTest extends PersistitUnitTestCase {
         final Buffer buffer = ex.getBufferPool().get(ex.getVolume(), copy.getPageAddress(), true, true);
         ex.getVolume().getStructure().deallocateGarbageChain(buffer.getPageAddress(), buffer.getRightSibling());
         buffer.release();
+    }
+
+    /**
+     * Simulates the pre-#288 interrupted-prune corruption (issue #286) by
+     * setting the leftover mark bit on every version of some MVV values
+     *
+     * @param ex
+     * @return the number of values corrupted and the total number of versions
+     *         marked, as a two-element array
+     * @throws PersistitException
+     */
+    private int[] corrupt5(final Exchange ex) throws PersistitException {
+        return corruptMVVs(ex, (bytes, length) -> {
+            int marked = 0;
+            int from = 1;
+            while (from + MVV.LENGTH_PER_VERSION <= length) {
+                MVV.mark(bytes, from);
+                marked++;
+                from += MVV.getLength(bytes, from) + MVV.LENGTH_PER_VERSION;
+            }
+            return marked;
+        });
+    }
+
+    /**
+     * Returns the visible key/value contents of the tree as seen by a
+     * non-transactional traversal
+     *
+     * @param ex
+     * @return the visible contents, keyed by decoded key string
+     * @throws PersistitException
+     */
+    private SortedMap<String, String> treeContents(final Exchange ex) throws PersistitException {
+        final SortedMap<String, String> contents = new TreeMap<String, String>();
+        ex.clear().append(Key.BEFORE);
+        while (ex.next()) {
+            contents.put(ex.getKey().decodeString(), ex.getValue().getString());
+        }
+        return contents;
     }
 
     private IntegrityCheck icheck() {

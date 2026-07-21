@@ -133,9 +133,9 @@ programmatically or through JMX. (You may specify any valid, available port.) Th
 Where ``classpath`` includes the Persistit library. Assuming the name of the script is ``pcli`` you can then invoke commands from a shell as shown in this example::
 
   /home/akiban:~$ pcli icheck -v -c "trees=*:Acc*"
-  Volume,Tree,Faults,IndexPages,IndexBytes,DataPages,DataBytes,LongRecordPages,LongRecordBytes,MvvPages,MvvRecords,MvvOverhead,MvvAntiValues,IndexHoles,PrunedPages
-  "persistit","AccumulatorRecoveryTest",0,3,24296,1519,15560788,0,0,1506,52192,721521,2397,0,0
-  "*","*",0,3,24296,1519,15560788,0,0,1506,52192,721521,2397,0,0
+  Volume,Tree,Faults,IndexPages,IndexBytes,DataPages,DataBytes,LongRecordPages,LongRecordBytes,MvvPages,MvvRecords,MvvOverhead,MvvAntiValues,IndexHoles,PrunedPages,MarkedVersions
+  "persistit","AccumulatorRecoveryTest",0,3,24296,1519,15560788,0,0,1506,52192,721521,2397,0,0,0
+  "*","*",0,3,24296,1519,15560788,0,0,1506,52192,721521,2397,0,0,0
   /home/akiban:~$
 
 Alternatively, you can use ``curl`` as follows::

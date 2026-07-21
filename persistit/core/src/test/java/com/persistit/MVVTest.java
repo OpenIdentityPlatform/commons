@@ -625,6 +625,34 @@ public class MVVTest {
         assertArrayEquals("prune must not write outside the MVV region when it throws", before, bytes);
     }
 
+    /**
+     * Issue #290: leftover mark bits are invisible to the read paths (the
+     * length accessors strip them), so IntegrityCheck needs a dedicated scan
+     * to detect them.
+     */
+    @Test
+    public void countMarkedVersions() {
+        final byte[] source = newArray(TYPE_MVV, 0, 0, 0, 0, 0, 0, 0, 10, 0, 2, 0xA, 0xB, 0, 0, 0, 0, 0, 0, 0, 11, 0,
+                3, 0xC, 0xD, 0xE);
+        assertEquals(0, MVV.countMarkedVersions(source, 0, source.length));
+        MVV.mark(source, 1);
+        assertEquals(1, MVV.countMarkedVersions(source, 0, source.length));
+        MVV.mark(source, 13);
+        assertEquals(2, MVV.countMarkedVersions(source, 0, source.length));
+        MVV.unmark(source, 1);
+        assertEquals(1, MVV.countMarkedVersions(source, 0, source.length));
+        MVV.unmark(source, 13);
+        assertEquals(0, MVV.countMarkedVersions(source, 0, source.length));
+    }
+
+    @Test
+    public void countMarkedVersionsNonMVV() {
+        final byte[] source = newArray(0xA, 0xB, 0xC);
+        assertEquals(0, MVV.countMarkedVersions(source, 0, source.length));
+        assertEquals(0, MVV.countMarkedVersions(source, 0, 0));
+        assertEquals(0, MVV.countMarkedVersions(source, 0, -1));
+    }
+
     //
     // Issue #292: prune uses the mark bit as private transient state and
     // assumes no version is marked on entry. A stale mark left on disk by a
