@@ -43,7 +43,6 @@ import org.forgerock.http.protocol.Status;
 import org.forgerock.http.routing.RouteMatchers;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.http.swagger.SwaggerApiProducer;
-import org.forgerock.http.util.Uris;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.Router;
@@ -64,8 +63,6 @@ import io.swagger.models.Swagger;
  * Http Application implementation to demonstrate integration with the Commons HTTP Framework.
  */
 public class CrestHttpApplication implements DescribedHttpApplication {
-
-    private static final String SWAGGER_JSON_ROUTE = "../..?_api";
 
     private static final ContentTypeHeader HTML_CONTENT_TYPE_HEADER =
             ContentTypeHeader.valueOf("text/html; charset=UTF-8");
@@ -119,24 +116,7 @@ public class CrestHttpApplication implements DescribedHttpApplication {
                     }
                 });
 
-        // redirect to Swagger UI page, given a URL parameter to point to the Swagger JSON endpoint
-        router.addRoute(RouteMatchers.requestUriMatcher(RoutingMode.EQUALS, "/docs/api"),
-                new Handler() {
-                    @Override
-                    public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
-                        final String uri = request.getUri().toString();
-                        final String baseUrl = uri.substring(0, uri.indexOf("/docs/api"));
-                        final String url = baseUrl + "/openapi/index.html?url="
-                                + Uris.urlEncodeQueryParameterNameOrValue(SWAGGER_JSON_ROUTE)
-                                + "&title=" + Uris.urlEncodeQueryParameterNameOrValue("Users and Devices API");
-
-                        final Response response = new Response(Status.FOUND);
-                        response.getHeaders().add("Location", url);
-                        return Response.newResponsePromise(response);
-                    }
-                });
-
-        // simple page providing links to HTML docs and Swagger UI
+        // simple page providing links to HTML docs
         router.addRoute(new DelegatingRouteMatcher<Request>(RouteMatchers.requestUriMatcher(RoutingMode.EQUALS, "/")) {
             @Override
             public RouteMatch evaluate(Context context, Request request) {
@@ -151,7 +131,6 @@ public class CrestHttpApplication implements DescribedHttpApplication {
                 final String html = "<!DOCTYPE html><html><head><title>CREST Examples</title></head><body>"
                         + "<p><a href=\"?_api\">Users and Devices API OpenAPI JSON</a></p>"
                         + "<p><a href=\"?_crestapi\">Users and Devices API CREST Descriptor JSON</a></p>"
-                        + "<p><a href=\"./docs/api\">Users and Devices API explorer</a></p>"
                         + "<p><a href=\"./docs/html\">Users and Devices API documentation</a></p>"
                         + "</body></html>";
 
