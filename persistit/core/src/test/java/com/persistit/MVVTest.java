@@ -33,6 +33,7 @@ import static com.persistit.MVV.STORE_LENGTH_MASK;
 import static com.persistit.MVV.TYPE_MVV;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -585,7 +586,7 @@ public class MVVTest {
             fail("expected CorruptValueException");
         } catch (final CorruptValueException expected) {
         }
-        assertArrayEquals("prune must leave the byte array unchanged when it throws", before, bytes);
+        assertArrayEquals("prune must leave an MVV without stale marks unchanged when it throws", before, bytes);
     }
 
     /**
@@ -625,8 +626,193 @@ public class MVVTest {
     }
 
     //
+    // Issue #292: prune uses the mark bit as private transient state and
+    // assumes no version is marked on entry. A stale mark left on disk by a
+    // prune interrupted before the issue #286 fix violated that assumption:
+    // prune could promote the wrong version and skip the PrunedVersion
+    // accounting. Prune now clears all mark bits up front.
+    //
+
+    /**
+     * A stale mark on an obsolete committed version used to win the
+     * primordial-conversion scan: the obsolete value was resurrected while the
+     * most recent committed version was silently dropped — and neither showed
+     * up in the PrunedVersion list, leaking the MVV count (and the page chain,
+     * had the dropped version been a long record).
+     */
+    @Test
+    public void pruneStaleMarkedVersionPromotesMostRecentCommitted() throws Exception {
+        final TimestampAllocator tsa = new TimestampAllocator();
+        final TransactionIndex ti = new TransactionIndex(tsa, 1);
+
+        final int offset = 7;
+        final byte[] bytes = new byte[offset + 100];
+        final byte[] oldValue = { 0xA, 0xB };
+        final byte[] newValue = { 0xC, 0xD, 0xE };
+        int length = storeCommittedVersion(tsa, ti, bytes, offset, -1, oldValue);
+        final long oldVersionHandle = MVV.getVersion(bytes, offset + 1);
+        length = storeCommittedVersion(tsa, ti, bytes, offset, length, newValue);
+        ti.updateActiveTransactionCache();
+
+        /* The stale mark an interrupted pre-#286 prune leaves behind. */
+        MVV.mark(bytes, offset + 1);
+
+        final ArrayList<MVV.PrunedVersion> pruned = new ArrayList<MVV.PrunedVersion>();
+        final int newLength = MVV.prune(bytes, offset, length, ti, true, pruned);
+
+        assertEquals(newValue.length, newLength);
+        assertArrayEquals(newValue, Arrays.copyOfRange(bytes, offset, offset + newLength));
+        assertEquals("obsolete version must be accounted for", 1, pruned.size());
+        assertEquals(oldVersionHandle, pruned.get(0).getVersionHandle());
+    }
+
+    /**
+     * The same scenario with the stale mark on the zero-length initial version
+     * of a value that was undefined before the MVV was created: prune used to
+     * resurrect "undefined", discarding the committed value entirely.
+     */
+    @Test
+    public void pruneStaleMarkedUndefinedVersionNotPromoted() throws Exception {
+        final TimestampAllocator tsa = new TimestampAllocator();
+        final TransactionIndex ti = new TransactionIndex(tsa, 1);
+
+        final int offset = 7;
+        final byte[] bytes = new byte[offset + 100];
+        final byte[] value = { 0xC, 0xD, 0xE };
+        final int length = storeCommittedVersion(tsa, ti, bytes, offset, 0, value);
+        ti.updateActiveTransactionCache();
+
+        /* The stale mark sits on the zero-length undefined initial version. */
+        MVV.mark(bytes, offset + 1);
+
+        final ArrayList<MVV.PrunedVersion> pruned = new ArrayList<MVV.PrunedVersion>();
+        final int newLength = MVV.prune(bytes, offset, length, ti, true, pruned);
+
+        assertEquals(value.length, newLength);
+        assertArrayEquals(value, Arrays.copyOfRange(bytes, offset, offset + newLength));
+        assertEquals("the primordial version carries no accounting", 0, pruned.size());
+    }
+
+    /**
+     * Milder variant in the multi-version path: a stale-marked dead version
+     * was treated as a keeper — it survived the prune and was left out of the
+     * PrunedVersion list, deferring its removal and accounting to the next
+     * prune while this one reported a clean result.
+     */
+    @Test
+    public void pruneStaleMarkedVersionPrunedInMultiVersionPath() throws Exception {
+        final TimestampAllocator tsa = new TimestampAllocator();
+        final TransactionIndex ti = new TransactionIndex(tsa, 1);
+
+        final int offset = 7;
+        final byte[] bytes = new byte[offset + 100];
+        final byte[] v1 = { 0xA };
+        final byte[] v2 = { 0xB, 0xC };
+        final byte[] v3 = { 0xD, 0xE, 0xF };
+        int length = storeCommittedVersion(tsa, ti, bytes, offset, -1, v1);
+        final long vh1 = MVV.getVersion(bytes, offset + 1);
+        length = storeCommittedVersion(tsa, ti, bytes, offset, length, v2);
+        final int v2At = offset + 1 + MVV.LENGTH_PER_VERSION + v1.length;
+        final long vh2 = MVV.getVersion(bytes, v2At);
+        length = storeCommittedVersion(tsa, ti, bytes, offset, length, v3);
+        final int v3At = v2At + MVV.LENGTH_PER_VERSION + v2.length;
+        final long vh3 = MVV.getVersion(bytes, v3At);
+        ti.updateActiveTransactionCache();
+
+        MVV.mark(bytes, offset + 1);
+
+        final ArrayList<MVV.PrunedVersion> pruned = new ArrayList<MVV.PrunedVersion>();
+        final int newLength = MVV.prune(bytes, offset, length, ti, false, pruned);
+
+        assertEquals("both dead versions must be pruned in one round", MVV.overheadLength(1) + v3.length, newLength);
+        assertEquals(vh3, MVV.getVersion(bytes, offset + 1));
+        assertEquals(v3.length, MVV.getLength(bytes, offset + 1));
+        assertArrayEquals(v3,
+                Arrays.copyOfRange(bytes, offset + 1 + MVV.LENGTH_PER_VERSION, offset + 1 + MVV.LENGTH_PER_VERSION
+                        + v3.length));
+        assertEquals("both dead versions must be accounted for", 2, pruned.size());
+        assertEquals(vh1, pruned.get(0).getVersionHandle());
+        assertEquals(vh2, pruned.get(1).getVersionHandle());
+        int from = offset + 1;
+        while (from + MVV.LENGTH_PER_VERSION <= offset + newLength) {
+            assertFalse("no version may remain marked", MVV.isMarked(bytes, from));
+            from += MVV.getLength(bytes, from) + MVV.LENGTH_PER_VERSION;
+        }
+    }
+
+    /**
+     * The up-front sweep must not follow a corrupted length field: a
+     * misaligned traversal lands inside a value and unmark() clears bit 15 of
+     * a payload byte — inside the MVV region, past what
+     * {@link #pruneExceptionMustNotUnmarkPastRegionEnd} guards. Prune must
+     * reject the malformed region without writing anything.
+     */
+    @Test
+    public void pruneMustNotSweepMisalignedMvv() throws Exception {
+        final TimestampAllocator tsa = new TimestampAllocator();
+        final TransactionIndex ti = new TransactionIndex(tsa, 1);
+
+        /*
+         * Two aborted versions, so no pass marks anything and any byte that
+         * differs after prune was written by the sweep. The 0xFF fill of the
+         * second value makes a misaligned unmark() visible (bit 15 cleared).
+         */
+        final int offset = 7;
+        final byte[] bytes = new byte[offset + 100];
+        final byte[] v1 = { 0x1, 0x2, 0x3, 0x4 };
+        final byte[] v2 = new byte[20];
+        Arrays.fill(v2, (byte) 0xFF);
+        int length = storeAbortedVersion(tsa, ti, bytes, offset, -1, v1);
+        length = storeAbortedVersion(tsa, ti, bytes, offset, length, v2);
+        ti.updateActiveTransactionCache();
+
+        /* Corrupt the first version's length field: it claims 9 bytes, not 4. */
+        MVV.putLength(bytes, offset + 1, 9);
+
+        final byte[] before = bytes.clone();
+        try {
+            MVV.prune(bytes, offset, length, ti, true, new ArrayList<MVV.PrunedVersion>());
+            fail("expected CorruptValueException");
+        } catch (final CorruptValueException expected) {
+        }
+        assertArrayEquals("prune must not write into a misaligned MVV region", before, bytes);
+    }
+
+    //
     // Test helper methods
     //
+
+    /**
+     * Store <code>value</code> as a new version created by a registered
+     * transaction and commit it, so that {@link MVV#prune} sees a committed,
+     * non-concurrent version.
+     */
+    private static int storeCommittedVersion(final TimestampAllocator tsa, final TransactionIndex ti,
+            final byte[] bytes, final int offset, final int length, final byte[] value) throws Exception {
+        final TransactionStatus status = ti.registerTransaction();
+        final int newLength = MVV.storeVersion(bytes, offset, length, bytes.length,
+                TransactionIndex.ts2vh(status.getTs()), value, 0, value.length) & STORE_LENGTH_MASK;
+        final long tc = tsa.updateTimestamp();
+        status.commit(tc);
+        ti.notifyCompleted(status, tc);
+        return newLength;
+    }
+
+    /**
+     * Store <code>value</code> as a new version created by a registered
+     * transaction and abort it, so that {@link MVV#prune} sees an aborted
+     * version and marks nothing.
+     */
+    private static int storeAbortedVersion(final TimestampAllocator tsa, final TransactionIndex ti,
+            final byte[] bytes, final int offset, final int length, final byte[] value) throws Exception {
+        final TransactionStatus status = ti.registerTransaction();
+        final int newLength = MVV.storeVersion(bytes, offset, length, bytes.length,
+                TransactionIndex.ts2vh(status.getTs()), value, 0, value.length) & STORE_LENGTH_MASK;
+        status.incrementMvvCount();
+        status.abort();
+        ti.notifyCompleted(status, tsa.updateTimestamp());
+        return newLength;
+    }
 
     private static int writeArray(final byte[] array, final int... contents) {
         assert contents.length <= array.length : "Too many values for array";

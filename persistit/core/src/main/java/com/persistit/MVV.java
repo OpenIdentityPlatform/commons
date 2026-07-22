@@ -381,7 +381,13 @@ class MVV {
      * </p>
      * <p>
      * This method leaves the byte array unchanged if any of its checked
-     * Exceptions is thrown.
+     * Exceptions is thrown, with one exception: on a well-formed MVV, stale
+     * mark bits left on disk by a prune interrupted before the issue #286 fix
+     * are cleared up front regardless of outcome (issue #292). Mark bits are
+     * transient state private to this method and invisible to the read paths,
+     * so clearing them repairs the corruption without altering any version's
+     * value. A malformed MVV is never swept — it is rejected with a
+     * <code>CorruptValueException</code> and left unchanged.
      * </p>
      * <p>
      * This method adds {@link PrunedVersion} instances to the supplied list.
@@ -420,7 +426,8 @@ class MVV {
             return length;
         }
 
-        Debug.$assert0.t(verify(bytes, offset, length));
+        final boolean wellFormed = verify(bytes, offset, length);
+        Debug.$assert0.t(wellFormed);
 
         boolean primordial = convertToPrimordial;
         int marked = 0;
@@ -437,6 +444,28 @@ class MVV {
             long lastVersionHandle = Long.MIN_VALUE;
             long lastVersionTc = UNCOMMITTED;
             long uncommittedTransactionTs = 0;
+            /*
+             * The passes below trust isMarked() while the marked counter only
+             * counts marks set by this run, so a stale mark left on disk by a
+             * prune interrupted before the issue #286 fix would win the
+             * primordial-conversion scan — promoting an obsolete version and
+             * silently dropping the current one with no PrunedVersion
+             * accounting (issue #292). Sweep the region clean before the
+             * first pass marks the real keepers. This is a separate pass, not
+             * an unmark() at the first pass's loop head, so the whole region
+             * is repaired even when that pass exits early via an exception.
+             * Only a well-formed region may be swept: a corrupt length field
+             * would misalign the traversal and unmark() would clear a bit
+             * inside a value payload. On a malformed region skip the sweep —
+             * the first pass's guard throws for it anyway.
+             */
+            if (wellFormed) {
+                int sweep = offset + 1;
+                while (sweep + LENGTH_PER_VERSION <= offset + length) {
+                    unmark(bytes, sweep);
+                    sweep += getLength(bytes, sweep) + LENGTH_PER_VERSION;
+                }
+            }
             /*
              * First pass - mark all the versions to keep. Keep every
              * UNCOMMITTED version (there may be more than one created by the
