@@ -1,5 +1,8 @@
 
 
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/
+	Portions Copyrighted 2026 3A Systems, LLC -->
 <body>
 
 Mock OAuth Provider redirecting in <span id="countDown"></span>....
@@ -9,18 +12,55 @@ Mock OAuth Provider redirecting in <span id="countDown"></span>....
 
 <script>
 (function () {
-    var queryParams = window.location.search.replace("?", "").split("&").reduce(function (map, item) {
+    // Look up a single query parameter by name. Reading only the known
+    // parameters avoids writing map entries keyed by user input (CWE-1321).
+    function getQueryParam(name) {
+        var value;
+        window.location.search.replace("?", "").split("&").forEach(function (item) {
             var parts = item.split("=");
-            map[parts[0]] = decodeURIComponent(parts[1]);
-            return map;
-        }, {}),
-        countDown = 3;
+            if (parts[0] === name) {
+                value = decodeURIComponent(parts[1]);
+            }
+        });
+        return value;
+    }
 
-    setInterval(function () {
+    // The mock provider only ever redirects back into the application that
+    // initiated the flow, so resolve redirect_uri against the current
+    // document and rebuild it on our own origin. Cross-origin targets and
+    // non-http schemes (e.g. javascript:) are rejected (CWE-79, CWE-601).
+    function getSafeRedirectUri() {
+        var redirectUri = getQueryParam("redirect_uri");
+        if (!redirectUri) {
+            return undefined;
+        }
+        var url;
+        try {
+            url = new URL(redirectUri, window.location.href);
+        } catch (e) {
+            return undefined;
+        }
+        if (url.origin !== window.location.origin) {
+            return undefined;
+        }
+        // Any query or fragment on the incoming redirect_uri is dropped
+        // deliberately: the caller appends its own ?code=...&state=... below.
+        return url.origin + url.pathname;
+    }
+
+    var countDown = 3;
+
+    var timer = setInterval(function () {
         document.getElementById("countDown").innerHTML = countDown;
         countDown--;
         if (countDown <= 0) {
-            window.location.href=queryParams.redirect_uri + "?code=randomAccessCode&state=" + encodeURIComponent(queryParams.state);
+            clearInterval(timer);
+            var redirectUri = getSafeRedirectUri();
+            if (redirectUri) {
+                window.location.href=redirectUri + "?code=randomAccessCode&state=" + encodeURIComponent(getQueryParam("state"));
+            } else {
+                document.body.innerHTML = "Invalid redirect_uri";
+            }
         }
     }, 1000);
     document.getElementById("countDown").innerHTML = countDown+1;
