@@ -586,7 +586,7 @@ public class MVVTest {
             fail("expected CorruptValueException");
         } catch (final CorruptValueException expected) {
         }
-        assertArrayEquals("prune must leave the byte array unchanged when it throws", before, bytes);
+        assertArrayEquals("prune must leave an MVV without stale marks unchanged when it throws", before, bytes);
     }
 
     /**
@@ -740,6 +740,44 @@ public class MVVTest {
         }
     }
 
+    /**
+     * The up-front sweep must not follow a corrupted length field: a
+     * misaligned traversal lands inside a value and unmark() clears bit 15 of
+     * a payload byte — inside the MVV region, past what
+     * {@link #pruneExceptionMustNotUnmarkPastRegionEnd} guards. Prune must
+     * reject the malformed region without writing anything.
+     */
+    @Test
+    public void pruneMustNotSweepMisalignedMvv() throws Exception {
+        final TimestampAllocator tsa = new TimestampAllocator();
+        final TransactionIndex ti = new TransactionIndex(tsa, 1);
+
+        /*
+         * Two aborted versions, so no pass marks anything and any byte that
+         * differs after prune was written by the sweep. The 0xFF fill of the
+         * second value makes a misaligned unmark() visible (bit 15 cleared).
+         */
+        final int offset = 7;
+        final byte[] bytes = new byte[offset + 100];
+        final byte[] v1 = { 0x1, 0x2, 0x3, 0x4 };
+        final byte[] v2 = new byte[20];
+        Arrays.fill(v2, (byte) 0xFF);
+        int length = storeAbortedVersion(tsa, ti, bytes, offset, -1, v1);
+        length = storeAbortedVersion(tsa, ti, bytes, offset, length, v2);
+        ti.updateActiveTransactionCache();
+
+        /* Corrupt the first version's length field: it claims 9 bytes, not 4. */
+        MVV.putLength(bytes, offset + 1, 9);
+
+        final byte[] before = bytes.clone();
+        try {
+            MVV.prune(bytes, offset, length, ti, true, new ArrayList<MVV.PrunedVersion>());
+            fail("expected CorruptValueException");
+        } catch (final CorruptValueException expected) {
+        }
+        assertArrayEquals("prune must not write into a misaligned MVV region", before, bytes);
+    }
+
     //
     // Test helper methods
     //
@@ -757,6 +795,22 @@ public class MVVTest {
         final long tc = tsa.updateTimestamp();
         status.commit(tc);
         ti.notifyCompleted(status, tc);
+        return newLength;
+    }
+
+    /**
+     * Store <code>value</code> as a new version created by a registered
+     * transaction and abort it, so that {@link MVV#prune} sees an aborted
+     * version and marks nothing.
+     */
+    private static int storeAbortedVersion(final TimestampAllocator tsa, final TransactionIndex ti,
+            final byte[] bytes, final int offset, final int length, final byte[] value) throws Exception {
+        final TransactionStatus status = ti.registerTransaction();
+        final int newLength = MVV.storeVersion(bytes, offset, length, bytes.length,
+                TransactionIndex.ts2vh(status.getTs()), value, 0, value.length) & STORE_LENGTH_MASK;
+        status.incrementMvvCount();
+        status.abort();
+        ti.notifyCompleted(status, tsa.updateTimestamp());
         return newLength;
     }
 
