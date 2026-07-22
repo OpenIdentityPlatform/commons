@@ -60,6 +60,7 @@ public class IntegrityCheck extends Task {
 
     private Volume _currentVolume;
     private Tree _currentTree;
+    private long _currentPage;
     private LongBitSet _usedPageBits = new LongBitSet();
     private long _totalPages = 0;
     private long _pagesVisited = 0;
@@ -79,6 +80,8 @@ public class IntegrityCheck extends Task {
     private boolean _csv;
 
     private final ArrayList<Fault> _faults = new ArrayList<Fault>();
+    private int _faultCount;
+    private int _markedVersionFaultCount;
     private final ArrayList<CleanupIndexHole> _holes = new ArrayList<CleanupIndexHole>();
 
     // Used in checking long values
@@ -98,6 +101,7 @@ public class IntegrityCheck extends Task {
         private long _mvvCount = 0;
         private long _mvvOverhead = 0;
         private long _mvvAntiValues = 0;
+        private long _markedVersionCount = 0;
         private long _pruningErrorCount = 0;
         private long _prunedPageCount = 0;
         private long _garbagePageCount = 0;
@@ -118,6 +122,7 @@ public class IntegrityCheck extends Task {
             _mvvCount = counters._mvvCount;
             _mvvOverhead = counters._mvvOverhead;
             _mvvAntiValues = counters._mvvAntiValues;
+            _markedVersionCount = counters._markedVersionCount;
             _pruningErrorCount = counters._pruningErrorCount;
             _prunedPageCount = counters._prunedPageCount;
             _garbagePageCount = counters._garbagePageCount;
@@ -135,6 +140,7 @@ public class IntegrityCheck extends Task {
             _mvvCount = counters._mvvCount - _mvvCount;
             _mvvOverhead = counters._mvvOverhead - _mvvOverhead;
             _mvvAntiValues = counters._mvvAntiValues - _mvvAntiValues;
+            _markedVersionCount = counters._markedVersionCount - _markedVersionCount;
             _pruningErrorCount = counters._pruningErrorCount - _pruningErrorCount;
             _prunedPageCount = counters._prunedPageCount - _prunedPageCount;
             _garbagePageCount = counters._garbagePageCount - _garbagePageCount;
@@ -144,20 +150,21 @@ public class IntegrityCheck extends Task {
         public String toString() {
             return String.format("Index pages/bytes: %,d / %,d Data pages/bytes: %,d / %,d"
                     + " LongRec pages/bytes: %,d / %,d  MVV pages/records/bytes/antivalues: "
-                    + "%,d / %,d / %,d / %,d  Holes %,d Pages pruned %,d", _indexPageCount, _indexBytesInUse,
-                    _dataPageCount, _dataBytesInUse, _longRecordPageCount, _longRecordBytesInUse, _mvvPageCount,
-                    _mvvCount, _mvvOverhead, _mvvAntiValues, _indexHoleCount, _prunedPageCount);
+                    + "%,d / %,d / %,d / %,d  Holes %,d Pages pruned %,d Marked versions %,d", _indexPageCount,
+                    _indexBytesInUse, _dataPageCount, _dataBytesInUse, _longRecordPageCount, _longRecordBytesInUse,
+                    _mvvPageCount, _mvvCount, _mvvOverhead, _mvvAntiValues, _indexHoleCount, _prunedPageCount,
+                    _markedVersionCount);
         }
 
         private String toCSV() {
-            return String.format("%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d", _indexPageCount, _indexBytesInUse,
+            return String.format("%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d", _indexPageCount, _indexBytesInUse,
                     _dataPageCount, _dataBytesInUse, _longRecordPageCount, _longRecordBytesInUse, _mvvPageCount,
-                    _mvvCount, _mvvOverhead, _mvvAntiValues, _indexHoleCount, _prunedPageCount);
+                    _mvvCount, _mvvOverhead, _mvvAntiValues, _indexHoleCount, _prunedPageCount, _markedVersionCount);
         }
 
         private final static String CSV_HEADERS = "IndexPages,IndexBytes,"
                 + "DataPages,DataBytes,LongRecordPages,LongRecordBytes,MvvPages,"
-                + "MvvRecords,MvvOverhead,MvvAntiValues,IndexHoles,PrunedPages";
+                + "MvvRecords,MvvOverhead,MvvAntiValues,IndexHoles,PrunedPages,MarkedVersions";
 
     }
 
@@ -186,6 +193,19 @@ public class IntegrityCheck extends Task {
         protected void visitDataRecord(final Key key, final int foundAt, final int tail, final int klength,
                 final int offset, final int length, final byte[] bytes) throws PersistitException {
             MVV.visitAllVersions(_versionVisitor, bytes, offset, length);
+            /*
+             * Scanned only after visitAllVersions has validated the version
+             * structure. Leftover prune marks read normally (the length
+             * accessors strip the mark bit), so only this dedicated scan can
+             * detect and report them - see issue #290.
+             */
+            final int marked = MVV.countMarkedVersions(bytes, offset, length);
+            if (marked > 0) {
+                _counters._markedVersionCount += marked;
+                _markedVersionFaultCount++;
+                addFault("MVV has " + plural(marked, "version") + " with a leftover mark bit", _currentPage, 0,
+                        foundAt);
+            }
             if (_versionVisitor._count > 0) {
                 _counters._mvvCount++;
                 final int voffset = _versionVisitor._lastOffset;
@@ -289,7 +309,18 @@ public class IntegrityCheck extends Task {
                 postMessage("Total " + toString(), LOG_NORMAL);
             }
             if (_pruneAndClear) {
-                if (_faults.isEmpty() && _counters._mvvPageCount == _counters._prunedPageCount
+                /*
+                 * Leftover mark-bit faults (issue #290) identify volumes
+                 * affected by a pre-#286 interrupted prune but do not block
+                 * clearing the TransactionIndex: the prune pass above has
+                 * already rewritten those marks (issue #292). Only other
+                 * faults and incomplete pruning count as failures here. The
+                 * comparison uses fault counts, not the _faults list: the
+                 * list is capped at MAX_FAULTS, so a genuine fault found
+                 * after marked-version faults fill the cap would be missing
+                 * from the list but must still block the clear.
+                 */
+                if (_faultCount == _markedVersionFaultCount && _counters._mvvPageCount == _counters._prunedPageCount
                         && _counters._pruningErrorCount == 0) {
                     final int count = _persistit.getTransactionIndex().resetMVVCounts(startTimestamp);
                     postMessage(String.format("%,d aborted transactions were cleared by pruning", count), LOG_NORMAL);
@@ -331,6 +362,7 @@ public class IntegrityCheck extends Task {
 
     private void addFault(final String description, final long page, final int level, final int position) {
         final Fault fault = new Fault(resourceName(), this, description, page, _treeDepth, level, position);
+        _faultCount++;
         if (_faults.size() < MAX_FAULTS)
             _faults.add(fault);
         postMessage(fault.toString(), LOG_VERBOSE);
@@ -338,6 +370,7 @@ public class IntegrityCheck extends Task {
 
     private void addGarbageFault(final String description, final long page, final int level, final int position) {
         final Fault fault = new Fault(resourceName(), this, description, page, 3, level, position);
+        _faultCount++;
         if (_faults.size() < MAX_FAULTS)
             _faults.add(fault);
         postMessage(fault.toString(), LOG_VERBOSE);
@@ -542,6 +575,16 @@ public class IntegrityCheck extends Task {
      */
     public long getMvvAntiValues() {
         return _counters._mvvAntiValues;
+    }
+
+    /**
+     * @return Count of MVV versions whose length field still carries a
+     *         leftover prune mark bit, left behind by a prune interrupted
+     *         before the issue #286 fix. Such versions read normally but
+     *         indicate the volume was corrupted; pruning rewrites them.
+     */
+    public long getMarkedVersionCount() {
+        return _counters._markedVersionCount;
     }
 
     /**
@@ -1144,6 +1187,7 @@ public class IntegrityCheck extends Task {
     }
 
     private boolean verifyPage(final Buffer buffer, final long page, final int level, final Key key, final Tree tree) {
+        _currentPage = page;
         if (buffer.getPageAddress() != page) {
             addFault("Buffer contains wrong page " + buffer.getPageAddress(), page, level, 0);
             return false;

@@ -654,6 +654,37 @@ class MVV {
         return true;
     }
 
+    /**
+     * Count versions whose length field still carries the mark bit. Marks are
+     * transient state private to {@link #prune} and must never be observable
+     * outside it; a non-zero count on a stored MVV means the value was
+     * corrupted by a prune interrupted before the issue #286 fix. The length
+     * accessors strip the mark bit silently, so such versions read normally
+     * and only this scan can detect them (issue #290).
+     *
+     * @param bytes
+     *            the byte array
+     * @param offset
+     *            the index of the first byte of the MVV within the byte array
+     * @param length
+     *            the count of bytes in the MVV
+     * @return the number of marked versions, 0 for a non-MVV value
+     */
+    static int countMarkedVersions(final byte[] bytes, final int offset, final int length) {
+        if (!isArrayMVV(bytes, offset, length)) {
+            return 0;
+        }
+        int marked = 0;
+        int from = offset + 1;
+        while (from + LENGTH_PER_VERSION <= offset + length) {
+            if (isMarked(bytes, from)) {
+                marked++;
+            }
+            from += getLength(bytes, from) + LENGTH_PER_VERSION;
+        }
+        return marked;
+    }
+
     static boolean verify(final TransactionIndex ti, final byte[] bytes, final int offset, final int length) {
         if (!isArrayMVV(bytes, offset, length)) {
             /*
