@@ -101,6 +101,12 @@ public class IntegrityCheckTest extends PersistitUnitTestCase {
         final IntegrityCheck icheck = icheck();
         icheck.checkTree(ex.getTree());
         assertTrue(icheck.getFaults().length > 0);
+        /*
+         * A structurally corrupt MVV must not inflate the marked-version
+         * counter: the leftover-mark scan runs only after visitAllVersions
+         * has validated the record.
+         */
+        assertEquals(0, icheck.getMarkedVersionCount());
     }
 
     /**
@@ -183,6 +189,34 @@ public class IntegrityCheckTest extends PersistitUnitTestCase {
         assertTrue(icheck.hasFaults());
         assertTrue(output.toString(), output.toString().contains("aborted transactions were cleared by pruning"));
         assertFalse(output.toString(), output.toString().contains("PruneAndClear failed"));
+    }
+
+    /**
+     * The -P gate must compare fault counts, not the MAX_FAULTS-capped fault
+     * list: with more than MAX_FAULTS marked-version faults the list holds
+     * only them, and a genuine fault found later (here a corrupt garbage
+     * chain, checked after the trees) is not recorded in the list - it must
+     * still block clearing the TransactionIndex.
+     */
+    @Test
+    public void testPruneAndClearBlockedByFaultBeyondFaultCap() throws Exception {
+        final Exchange ex = _persistit.getExchange(_volumeName, "mvv", true);
+        disableBackgroundCleanup();
+        transactionalStore(ex);
+        _persistit.getTransactionIndex().updateActiveTransactionCache();
+
+        assertTrue(corrupt5(ex, 0, IntegrityCheck.MAX_FAULTS + 1)[0] > IntegrityCheck.MAX_FAULTS);
+        corrupt4(ex);
+
+        final IntegrityCheck icheck = (IntegrityCheck) CLI.parseTask(_persistit, "icheck trees=* -u -P");
+        final StringWriter output = new StringWriter();
+        icheck.setMessageWriter(new PrintWriter(output));
+        icheck.setup(1, "icheck", "cli", 0, 5);
+        icheck.run();
+
+        assertTrue(icheck.getMarkedVersionCount() > 0);
+        assertTrue(output.toString(), output.toString().contains("PruneAndClear failed"));
+        assertFalse(output.toString(), output.toString().contains("aborted transactions were cleared by pruning"));
     }
 
     @Test
@@ -376,6 +410,7 @@ public class IntegrityCheckTest extends PersistitUnitTestCase {
 
     /**
      * Applies a corruption to the raw bytes of up to ten stored MVV values
+     * following key 500
      *
      * @param ex
      * @param corruption
@@ -384,12 +419,29 @@ public class IntegrityCheckTest extends PersistitUnitTestCase {
      * @throws PersistitException
      */
     private int[] corruptMVVs(final Exchange ex, final MVVCorruption corruption) throws PersistitException {
+        return corruptMVVs(ex, 500, 10, corruption);
+    }
+
+    /**
+     * Applies a corruption to the raw bytes of up to <code>limit</code>
+     * stored MVV values following <code>startKey</code>
+     *
+     * @param ex
+     * @param startKey
+     * @param limit
+     * @param corruption
+     * @return the number of values corrupted and the summed corruption
+     *         contributions, as a two-element array
+     * @throws PersistitException
+     */
+    private int[] corruptMVVs(final Exchange ex, final int startKey, final int limit, final MVVCorruption corruption)
+            throws PersistitException {
         ex.ignoreMVCCFetch(true);
         try {
-            ex.clear().to(key(500));
+            ex.clear().to(key(startKey));
             int corrupted = 0;
             int total = 0;
-            while (corrupted < 10 && ex.next()) {
+            while (corrupted < limit && ex.next()) {
                 final byte[] bytes = ex.getValue().getEncodedBytes();
                 final int length = ex.getValue().getEncodedSize();
                 if (MVV.isArrayMVV(bytes, 0, length)) {
@@ -460,7 +512,15 @@ public class IntegrityCheckTest extends PersistitUnitTestCase {
      * @throws PersistitException
      */
     private int[] corrupt5(final Exchange ex) throws PersistitException {
-        return corruptMVVs(ex, (bytes, length) -> {
+        return corrupt5(ex, 500, 10);
+    }
+
+    /**
+     * Same as {@link #corrupt5(Exchange)} for up to <code>limit</code> values
+     * following <code>startKey</code>
+     */
+    private int[] corrupt5(final Exchange ex, final int startKey, final int limit) throws PersistitException {
+        return corruptMVVs(ex, startKey, limit, (bytes, length) -> {
             int marked = 0;
             int from = 1;
             while (from + MVV.LENGTH_PER_VERSION <= length) {

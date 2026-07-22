@@ -80,6 +80,7 @@ public class IntegrityCheck extends Task {
     private boolean _csv;
 
     private final ArrayList<Fault> _faults = new ArrayList<Fault>();
+    private int _faultCount;
     private int _markedVersionFaultCount;
     private final ArrayList<CleanupIndexHole> _holes = new ArrayList<CleanupIndexHole>();
 
@@ -201,10 +202,9 @@ public class IntegrityCheck extends Task {
             final int marked = MVV.countMarkedVersions(bytes, offset, length);
             if (marked > 0) {
                 _counters._markedVersionCount += marked;
-                if (addFault("MVV has " + plural(marked, "version") + " with a leftover mark bit", _currentPage, 0,
-                        foundAt)) {
-                    _markedVersionFaultCount++;
-                }
+                _markedVersionFaultCount++;
+                addFault("MVV has " + plural(marked, "version") + " with a leftover mark bit", _currentPage, 0,
+                        foundAt);
             }
             if (_versionVisitor._count > 0) {
                 _counters._mvvCount++;
@@ -314,9 +314,13 @@ public class IntegrityCheck extends Task {
                  * affected by a pre-#286 interrupted prune but do not block
                  * clearing the TransactionIndex: the prune pass above has
                  * already rewritten those marks (issue #292). Only other
-                 * faults and incomplete pruning count as failures here.
+                 * faults and incomplete pruning count as failures here. The
+                 * comparison uses fault counts, not the _faults list: the
+                 * list is capped at MAX_FAULTS, so a genuine fault found
+                 * after marked-version faults fill the cap would be missing
+                 * from the list but must still block the clear.
                  */
-                if (_faults.size() == _markedVersionFaultCount && _counters._mvvPageCount == _counters._prunedPageCount
+                if (_faultCount == _markedVersionFaultCount && _counters._mvvPageCount == _counters._prunedPageCount
                         && _counters._pruningErrorCount == 0) {
                     final int count = _persistit.getTransactionIndex().resetMVVCounts(startTimestamp);
                     postMessage(String.format("%,d aborted transactions were cleared by pruning", count), LOG_NORMAL);
@@ -356,17 +360,17 @@ public class IntegrityCheck extends Task {
         }
     }
 
-    private boolean addFault(final String description, final long page, final int level, final int position) {
+    private void addFault(final String description, final long page, final int level, final int position) {
         final Fault fault = new Fault(resourceName(), this, description, page, _treeDepth, level, position);
-        final boolean recorded = _faults.size() < MAX_FAULTS;
-        if (recorded)
+        _faultCount++;
+        if (_faults.size() < MAX_FAULTS)
             _faults.add(fault);
         postMessage(fault.toString(), LOG_VERBOSE);
-        return recorded;
     }
 
     private void addGarbageFault(final String description, final long page, final int level, final int position) {
         final Fault fault = new Fault(resourceName(), this, description, page, 3, level, position);
+        _faultCount++;
         if (_faults.size() < MAX_FAULTS)
             _faults.add(fault);
         postMessage(fault.toString(), LOG_VERBOSE);
