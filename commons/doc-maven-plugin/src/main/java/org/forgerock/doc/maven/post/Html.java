@@ -213,7 +213,7 @@ public class Html {
             String linkToJira = getLinkToJira();
 
             String gascript = "";
-            if(m.getGoogleAnalyticsId() != null && !"".equals(m.getGoogleAnalyticsId())) {
+            if(m.getGoogleAnalyticsId() != null && !m.getGoogleAnalyticsId().isEmpty()) {
                 gascript = IOUtils.toString(
                         Html.class.getResourceAsStream("/endbody-ga.txt"), StandardCharsets.UTF_8);
                 gascript = gascript.replace("ANALYTICS-ID", m.getGoogleAnalyticsId());

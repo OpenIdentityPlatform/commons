@@ -627,7 +627,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
             File pFile = new File(propertyFile);
             if (!pFile.isAbsolute()) {
                 is =
-                        projectDirectory.resolve(propertyFile.toString()).toURL().openConnection()
+                        projectDirectory.resolve(propertyFile).toURL().openConnection()
                                 .getInputStream();
             } else {
                 is =  pFile.toURI().toURL().openConnection().getInputStream();

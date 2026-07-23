@@ -259,7 +259,7 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
      * @return <code>true</code> if the String is non-null and non-empty.
      */
     private boolean isEmpty(String s) {
-        return s == null || "".equals(s);
+        return s == null || s.isEmpty();
     }
 
     /**

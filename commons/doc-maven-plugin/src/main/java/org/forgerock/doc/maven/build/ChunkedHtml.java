@@ -110,7 +110,6 @@ public class ChunkedHtml {
                 cfg.add(element(name("targetDirectory"), m.path(m.getDocbkxOutputDirectory()) + "/html"));
                 cfg.add(element(name("targetsFilename"), m.getDocumentSrcName() + ".html.target.db"));
 
-                final String base = FilenameUtils.getBaseName(m.getDocumentSrcName());
                //cfg.add(element(name("chunkBaseDir"), chunkBaseDir));
 
                 executeMojo(
@@ -148,7 +147,6 @@ public class ChunkedHtml {
 
                 cfg.add(element(name("includes"), docName + "/" + m.getDocumentSrcName()));
 
-                final String base = FilenameUtils.getBaseName(m.getDocumentSrcName());
                 //cfg.add(element(name("chunkBaseDir"), chunkBaseDir));
 
                 cfg.add(element(name("manifest"),

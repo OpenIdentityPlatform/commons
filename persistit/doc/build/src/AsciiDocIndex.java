@@ -177,7 +177,6 @@ public class AsciiDocIndex {
             }
 
             else {
-                final String className = href.substring(0, pHtml).replace('/', '.');
                 final String name = href.substring(pHash + 1);
                 final int pLeftParen = name.indexOf('(');
                 if (pLeftParen == -1) {
