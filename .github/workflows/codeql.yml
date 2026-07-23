@@ -77,7 +77,6 @@ jobs:
               - '**/node_modules/**'
               - '**/webjars/**'
               - '**/doc-maven-plugin/src/main/resources/js/**'
-              - '**/openapi-war-overlay/**/swagger-ui.js'
 
       # --- Manual build (only used when build-mode is 'manual') -------------
       # - name: Set up JDK 11
