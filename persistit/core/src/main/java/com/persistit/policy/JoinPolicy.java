@@ -49,7 +49,7 @@ public class JoinPolicy {
                 return policy;
             }
         }
-        throw new IllegalArgumentException("No such SplitPolicy " + name);
+        throw new IllegalArgumentException("No such JoinPolicy " + name);
     }
 
     String _name;
@@ -138,6 +138,11 @@ public class JoinPolicy {
      * @return name of the policy
      */
     public String getName() {
+        return _name;
+    }
+
+    @Override
+    public String toString() {
         return _name;
     }
 

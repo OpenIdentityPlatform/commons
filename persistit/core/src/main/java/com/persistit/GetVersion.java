@@ -76,6 +76,6 @@ public class GetVersion {
 
     @Override
     public String toString() {
-        return _version.toString();
+        return _version;
     }
 }

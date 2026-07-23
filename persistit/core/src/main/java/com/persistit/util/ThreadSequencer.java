@@ -102,7 +102,7 @@ import java.util.concurrent.Semaphore;
  * @author peter
  * 
  */
-public class ThreadSequencer implements SequencerConstants {
+public class ThreadSequencer {
 
     private final static DisabledSequencer DISABLED_SEQUENCER = new DisabledSequencer();
 

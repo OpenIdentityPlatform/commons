@@ -907,8 +907,7 @@ public class CLI {
             @Override
             public void runTask() throws Exception {
                 if (!fileName.isEmpty()) {
-                    final FileReader in = new FileReader(fileName);
-                    _sourceStack.push(new BufferedReader(new BufferedReader(in)));
+                    _sourceStack.push(new BufferedReader(new FileReader(fileName)));
                     postMessage(String.format("Source is %s", fileName), LOG_NORMAL);
                     return;
                 } else {

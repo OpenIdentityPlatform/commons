@@ -1,6 +1,7 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
- * 
+ * Portions Copyrighted 2026 3A Systems, LLC
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -264,8 +265,7 @@ public class AdminUITaskPanel extends AdminPanel implements AdminCommand {
             _startTimeField.setText(_adminUI.formatDate(taskStatus.getStartTime()));
             _endTimeField.setText(_adminUI.formatDate(taskStatus.getFinishTime()));
             _expirationTimeField.setText(_adminUI.formatDate(taskStatus.getExpirationTime()));
-            _lastExceptionField.setText(taskStatus.getLastException() == null ? "" : taskStatus.getLastException()
-                    .toString());
+            _lastExceptionField.setText(taskStatus.getLastException() == null ? "" : taskStatus.getLastException());
             _statusDetailArea.setText(taskStatus.getStatusDetail());
 
             final StringBuilder sb = new StringBuilder();
