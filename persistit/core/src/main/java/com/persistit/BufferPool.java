@@ -282,11 +282,8 @@ public class BufferPool {
             // Do not use String.format here.
             //
             // Release the reserved block to free memory for the diagnostic
-            // path below. Reading its length first keeps the reservation
-            // effective (and clears the "never read" static-analysis finding).
-            if (reserve.length > 0) {
-                reserve = null;
-            }
+            // path below.
+            reserve = null;
             System.err.print("Out of memory with ");
             System.err.print(Runtime.getRuntime().freeMemory());
             System.err.print(" bytes free after creating ");

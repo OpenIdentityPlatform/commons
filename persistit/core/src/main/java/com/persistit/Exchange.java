@@ -44,7 +44,6 @@ import com.persistit.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static com.persistit.Buffer.EXACT_MASK;
 import static com.persistit.Buffer.HEADER_SIZE;
@@ -4469,14 +4468,8 @@ public class Exchange implements ReadOnlyExchange {
     }
     final int lvl = level >= 0 ? level : _tree.getDepth() + level;
     final LevelCache[] levelCache = _levelCache;
-    // Objects.checkIndex is recognized by CodeQL as an array-index sanitizer.
-    // Preserve the original IllegalArgumentException contract (including the
-    // "Tree depth is N" message) for over-deep trees, since depth can legally
-    // reach PAGE_TYPE_INDEX_MAX and is unbounded on a corrupted volume.
-    try {
-      Objects.checkIndex(lvl, levelCache.length);
-    } catch (final IndexOutOfBoundsException e) {
-      throw new IllegalArgumentException("Tree depth is " + _tree.getDepth(), e);
+    if (lvl < 0 || lvl >= levelCache.length) {
+      throw new IllegalArgumentException("Tree depth is " + _tree.getDepth());
     }
     final int foundAt = searchTree(_key, lvl, false);
     final Buffer buffer = levelCache[lvl]._buffer;
