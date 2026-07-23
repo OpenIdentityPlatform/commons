@@ -1,6 +1,8 @@
 /**
  * Copyright 2012 Akiban Technologies, Inc.
- * 
+ *
+ * Portions Copyrighted 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,14 +19,22 @@
 package com.persistit;
 
 import com.persistit.BufferPool.BufferHolder;
+import com.persistit.exception.InUseException;
+import com.persistit.exception.PersistitException;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class BufferPoolTest extends PersistitUnitTestCase {
@@ -182,6 +192,113 @@ public class BufferPoolTest extends PersistitUnitTestCase {
             ex.to(j).fetch();
             assertEquals(j >= 1 && j <= i, ex.getValue().isDefined());
         }
+    }
+
+    /**
+     * When every buffer in the pool is claimed, get() for a page that is not
+     * in the pool must keep retrying the allocation until the caller's timeout
+     * budget expires and then throw a checked InUseException — not give up
+     * with a raw IllegalStateException after a single clock sweep (issue
+     * #300).
+     */
+    @Test
+    public void testGetHonorsTimeoutWhenPoolExhausted() throws Exception {
+        final Volume volume = _persistit.getVolume("persistit");
+        final BufferPool pool = volume.getPool();
+        final long timeout = 500;
+        final long[] pages = allocPages(volume, pool.getBufferCount() + 1);
+        final List<Buffer> claimed = new ArrayList<Buffer>();
+        try {
+            InUseException exhausted = null;
+            long elapsed = -1;
+            for (final long page : pages) {
+                final long start = System.currentTimeMillis();
+                try {
+                    claimed.add(pool.get(volume, page, true, false, timeout));
+                } catch (final InUseException e) {
+                    exhausted = e;
+                    elapsed = System.currentTimeMillis() - start;
+                    break;
+                }
+            }
+            assertNotNull("Claiming " + claimed.size() + " buffers of " + pool.getBufferCount()
+                    + " did not exhaust the pool", exhausted);
+            assertTrue("get() failed after " + elapsed + " ms, before its " + timeout + " ms timeout expired",
+                    elapsed >= timeout - 100);
+        } finally {
+            for (final Buffer buffer : claimed) {
+                buffer.release();
+            }
+        }
+    }
+
+    /**
+     * A get() that finds the pool exhausted must keep retrying and succeed as
+     * soon as another thread releases a buffer, rather than failing after a
+     * single sweep (issue #300).
+     */
+    @Test
+    public void testGetWaitsForReleasedBuffer() throws Exception {
+        final Volume volume = _persistit.getVolume("persistit");
+        final BufferPool pool = volume.getPool();
+        final long releaseDelay = 300;
+        final long[] pages = allocPages(volume, pool.getBufferCount() + 2);
+        final List<Buffer> claimed = new ArrayList<Buffer>();
+        try {
+            /*
+             * Require two consecutive allocation failures so that a single
+             * failure caused by a transient claim held by a background thread
+             * is not mistaken for pool exhaustion.
+             */
+            int consecutiveFailures = 0;
+            while (consecutiveFailures < 2 && claimed.size() <= pool.getBufferCount()) {
+                try {
+                    claimed.add(pool.get(volume, pages[claimed.size()], true, false, 100));
+                    consecutiveFailures = 0;
+                } catch (final InUseException expected) {
+                    consecutiveFailures++;
+                }
+            }
+            assertTrue("Claiming " + claimed.size() + " buffers of " + pool.getBufferCount()
+                    + " did not exhaust the pool", claimed.size() <= pool.getBufferCount());
+
+            final long page = pages[pages.length - 1];
+            final AtomicLong waited = new AtomicLong(-1);
+            final AtomicReference<Throwable> failure = new AtomicReference<Throwable>();
+            final Thread getter = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    final long start = System.currentTimeMillis();
+                    try {
+                        final Buffer buffer = pool.get(volume, page, true, false, 10000);
+                        waited.set(System.currentTimeMillis() - start);
+                        buffer.release();
+                    } catch (final Throwable t) {
+                        failure.set(t);
+                    }
+                }
+            }, "BufferPoolTest_getter");
+            getter.start();
+            Thread.sleep(releaseDelay);
+            claimed.remove(claimed.size() - 1).release();
+            getter.join(30000);
+            assertTrue("Getter thread did not finish", !getter.isAlive());
+            assertNull("Getter thread failed: " + failure.get(), failure.get());
+            assertTrue("get() returned after " + waited.get() + " ms, before a buffer was released",
+                    waited.get() >= releaseDelay - 100);
+        } finally {
+            for (final Buffer buffer : claimed) {
+                buffer.release();
+            }
+        }
+    }
+
+    private long[] allocPages(final Volume volume, final int count) throws PersistitException {
+        final long[] pages = new long[count];
+        for (int i = 0; i < count; i++) {
+            pages[i] = volume.getStorage().allocNewPage();
+        }
+        return pages;
     }
 
 }
