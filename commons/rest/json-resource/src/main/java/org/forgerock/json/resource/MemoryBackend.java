@@ -82,7 +82,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
             final String[] splitKeys = split[1].split(",");
 
             for (String key : splitKeys) {
-                if (!key.equals("")) {
+                if (!key.isEmpty()) {
                     sortKeys.add(SortKey.valueOf(key));
                 }
             }

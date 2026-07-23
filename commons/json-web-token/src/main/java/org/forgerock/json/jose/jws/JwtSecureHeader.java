@@ -77,7 +77,7 @@ public abstract class JwtSecureHeader extends JwtHeader {
      * @param jwkSetUrl The JWK Set URL.
      */
     public void setJwkSetUrl(URL jwkSetUrl) {
-        put(JKU.value(), new String(jwkSetUrl.toString()));
+        put(JKU.value(), jwkSetUrl.toString());
     }
 
     /**
@@ -133,7 +133,7 @@ public abstract class JwtSecureHeader extends JwtHeader {
      * @param x509Url The X.509 URL.
      */
     public void setX509Url(URL x509Url) {
-        put(X5U.value(), new String(x509Url.toString()));
+        put(X5U.value(), x509Url.toString());
     }
 
     /**

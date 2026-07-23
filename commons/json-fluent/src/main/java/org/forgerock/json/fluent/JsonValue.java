@@ -1018,10 +1018,10 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
         } else if (isMap()) {
             sb.append("{ ");
             Map<Object, Object> map = (Map<Object, Object>)object;
-            for (Iterator<Object> i = map.keySet().iterator(); i.hasNext();) {
-                Object key = i.next();
-                sb.append('"').append(key.toString()).append("\": ");
-                sb.append(new JsonValue(map.get(key)).toString()); // recursion
+            for (Iterator<Map.Entry<Object, Object>> i = map.entrySet().iterator(); i.hasNext();) {
+                Map.Entry<Object, Object> entry = i.next();
+                sb.append('"').append(entry.getKey().toString()).append("\": ");
+                sb.append(new JsonValue(entry.getValue()).toString()); // recursion
                 if (i.hasNext()) {
                     sb.append(", ");
                 }

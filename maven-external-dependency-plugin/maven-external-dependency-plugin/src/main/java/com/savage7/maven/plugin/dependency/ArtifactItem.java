@@ -242,7 +242,7 @@ public class ArtifactItem
      */
     private String filterEmptyString(final String in)
     {
-        if (in == null || in.equals(""))
+        if (in == null || in.isEmpty())
         {
             return null;
         }

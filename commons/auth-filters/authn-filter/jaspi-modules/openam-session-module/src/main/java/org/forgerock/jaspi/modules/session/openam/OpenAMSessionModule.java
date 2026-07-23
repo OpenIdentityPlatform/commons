@@ -253,7 +253,7 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
      * @return <code>true</code> if the String is non-null and non-empty.
      */
     private boolean isEmpty(String s) {
-        return s == null || "".equals(s);
+        return s == null || s.isEmpty();
     }
 
     /**

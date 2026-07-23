@@ -234,7 +234,7 @@ public class WDSSO {
         if (!returnRealm) {
             int index = user.indexOf("@");
             if (index != -1) {
-                userName = user.toString().substring(0, index);
+                userName = user.substring(0, index);
             }
         }
         return userName;

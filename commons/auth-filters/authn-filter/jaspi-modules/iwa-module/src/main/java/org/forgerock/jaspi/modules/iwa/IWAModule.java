@@ -99,7 +99,7 @@ public class IWAModule implements AsyncServerAuthModule {
         String httpAuthorization = request.getHeaders().getFirst("Authorization");
 
         try {
-            if (httpAuthorization == null || "".equals(httpAuthorization)) {
+            if (httpAuthorization == null || httpAuthorization.isEmpty()) {
                 LOG.debug("IWAModule: Authorization Header NOT set in request.");
 
                 response.getHeaders().put("WWW-Authenticate", "Negotiate");

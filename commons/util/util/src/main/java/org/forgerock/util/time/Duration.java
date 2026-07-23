@@ -165,7 +165,7 @@ public class Duration implements Comparable<Duration> {
         for (String fragment : fragments) {
             fragment = fragment.trim();
 
-            if ("".equals(fragment)) {
+            if (fragment.isEmpty()) {
                 throw new IllegalArgumentException("Cannot parse empty duration, expecting '<value> <unit>' pattern");
             }
 
