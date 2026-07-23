@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.audit.handlers.json;
@@ -275,12 +276,12 @@ class JsonFileWriter {
             filesToDelete = new HashSet<>();
 
             // build map of topic files
-            final Map<String, TopicEntry> topicEntryMap = new HashMap<>();
+            final Map<String, TopicEntry> entriesByTopic = new HashMap<>();
             for (final String topic : topics) {
                 final String fileName = topic + '.' + fileNameSuffix;
-                topicEntryMap.put(topic, new TopicEntry(fileName, configuration));
+                entriesByTopic.put(topic, new TopicEntry(fileName, configuration));
             }
-            this.topicEntryMap = Collections.unmodifiableMap(topicEntryMap);
+            this.topicEntryMap = Collections.unmodifiableMap(entriesByTopic);
         }
 
         /**

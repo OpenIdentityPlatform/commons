@@ -167,26 +167,26 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
             }
         }
 
-        Map<String, Set<String>> fieldOrderByTopic = new HashMap<>();
-        Map<String, JsonPointer> jsonPointerByField = new HashMap<>();
-        Map<String, String> fieldDotNotationByField = new HashMap<>();
+        Map<String, Set<String>> orderByTopic = new HashMap<>();
+        Map<String, JsonPointer> pointerByField = new HashMap<>();
+        Map<String, String> dotNotationByField = new HashMap<>();
         for (String topic : this.eventTopicsMetaData.getTopics()) {
             try {
                 Set<String> fieldOrder = getFieldOrder(topic, this.eventTopicsMetaData);
                 for (String field : fieldOrder) {
-                    if (!jsonPointerByField.containsKey(field)) {
-                        jsonPointerByField.put(field, new JsonPointer(field));
-                        fieldDotNotationByField.put(field, jsonPointerToDotNotation(field));
+                    if (!pointerByField.containsKey(field)) {
+                        pointerByField.put(field, new JsonPointer(field));
+                        dotNotationByField.put(field, jsonPointerToDotNotation(field));
                     }
                 }
-                fieldOrderByTopic.put(topic, Collections.unmodifiableSet(fieldOrder));
+                orderByTopic.put(topic, Collections.unmodifiableSet(fieldOrder));
             } catch (ResourceException e) {
                 LOGGER.error(topic + " topic schema meta-data misconfigured.");
             }
         }
-        this.fieldOrderByTopic = Collections.unmodifiableMap(fieldOrderByTopic);
-        this.jsonPointerByField = Collections.unmodifiableMap(jsonPointerByField);
-        this.fieldDotNotationByField = Collections.unmodifiableMap(fieldDotNotationByField);
+        this.fieldOrderByTopic = Collections.unmodifiableMap(orderByTopic);
+        this.jsonPointerByField = Collections.unmodifiableMap(pointerByField);
+        this.fieldDotNotationByField = Collections.unmodifiableMap(dotNotationByField);
     }
 
     private CsvPreference createCsvPreference(final CsvAuditEventHandlerConfiguration config) {
