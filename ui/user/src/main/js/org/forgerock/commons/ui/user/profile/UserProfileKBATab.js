@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 define([
@@ -127,7 +128,7 @@ define([
             }
 
             // validate form only in case security question was selected
-            if (!isKbaQuestion || (isKbaQuestion && (target.val() !== ""))) {
+            if (!isKbaQuestion || target.val() !== "") {
                 ValidatorsManager.bindValidators(form, Configuration.loggedUser.baseEntity, function () {
                     ValidatorsManager.validateAllFields(form);
                 });

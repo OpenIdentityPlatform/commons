@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 define([
@@ -103,7 +104,7 @@ define([
 
         showMessage: function() {
             var _this = this,
-                alertClass = "alert-info",
+                alertClass,
                 alertIcon = "alert-message-icon",
                 delay = _this.delay + (this.list[0].message.length * 20);
 
