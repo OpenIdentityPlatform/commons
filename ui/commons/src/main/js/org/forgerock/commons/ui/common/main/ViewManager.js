@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 define([
@@ -118,7 +119,7 @@ define([
         var cDialog = obj.currentDialog, cDialogArgs = obj.currentDialogArgs;
 
         obj.changeView(obj.currentView, obj.currentViewArgs, function() {}, true);
-        if (cDialog && cDialog !== null) {
+        if (cDialog) {
             obj.showDialog(cDialog, cDialogArgs);
         }
     };
