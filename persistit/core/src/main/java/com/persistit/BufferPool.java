@@ -741,12 +741,13 @@ public class BufferPool {
      *            throwing an InUseException
      * @return Buffer The Buffer describing the buffer containing the page.
      * @throws InUseException
-     *             if the specific lock could not be acquired within the
-     *             specified timeout
+     *             if the specific lock could not be acquired or no buffer
+     *             could be allocated for the page within the specified timeout
      */
     Buffer get(final Volume vol, final long page, final boolean writer, final boolean wantRead, final long timeout)
             throws PersistitException {
         final int hash = hashIndex(vol, page);
+        final long start = System.currentTimeMillis();
         Buffer buffer = null;
 
         for (;;) {
@@ -782,34 +783,52 @@ public class BufferPool {
                     // in the page from the Volume.
                     //
                     buffer = allocBuffer();
-                    Debug.$assert1.t(!buffer.isDirty());
-                    Debug.$assert0.t(buffer != _hashTable[hash]);
-                    Debug.$assert0.t(buffer.getNext() != buffer);
+                    if (buffer != null) {
+                        Debug.$assert1.t(!buffer.isDirty());
+                        Debug.$assert0.t(buffer != _hashTable[hash]);
+                        Debug.$assert0.t(buffer.getNext() != buffer);
 
-                    buffer.setPageAddressAndVolume(page, vol);
-                    buffer.setNext(_hashTable[hash]);
-                    _hashTable[hash] = buffer;
-                    //
-                    // It's not really valid yet, but it does have a writer
-                    // claim on it so no other Thread can access it. In the
-                    // meantime, any other Thread seeking access to the same
-                    // page will find it.
-                    //
-                    buffer.setValid();
-                    if (vol.isTemporary() || vol.isLockVolume()) {
-                        buffer.setTemporary();
-                    } else {
-                        buffer.clearTemporary();
+                        buffer.setPageAddressAndVolume(page, vol);
+                        buffer.setNext(_hashTable[hash]);
+                        _hashTable[hash] = buffer;
+                        //
+                        // It's not really valid yet, but it does have a writer
+                        // claim on it so no other Thread can access it. In the
+                        // meantime, any other Thread seeking access to the same
+                        // page will find it.
+                        //
+                        buffer.setValid();
+                        if (vol.isTemporary() || vol.isLockVolume()) {
+                            buffer.setTemporary();
+                        } else {
+                            buffer.clearTemporary();
+                        }
+                        Debug.$assert0.t(buffer.getNext() != buffer);
                     }
-                    Debug.$assert0.t(buffer.getNext() != buffer);
                 }
             } finally {
                 _hashLocks[hash % HASH_LOCKS].unlock();
             }
+            if (buffer == null) {
+                /*
+                 * allocBuffer() swept the whole pool without finding an
+                 * evictable buffer. Wait for one to be released and retry the
+                 * search until the timeout budget expires. The wait must
+                 * happen here, after the finally block above has released the
+                 * hash lock, so that no thread sleeps while holding a lock
+                 * stripe.
+                 */
+                if (System.currentTimeMillis() - start >= timeout) {
+                    throw new InUseException("Thread " + Thread.currentThread().getName()
+                            + " failed to allocate a buffer for page " + page + " in " + vol + " within " + timeout
+                            + " ms");
+                }
+                Util.sleep(RETRY_SLEEP_TIME);
+                continue;
+            }
             if (mustClaim) {
                 boolean claimed = false;
                 boolean same = true;
-                final long start = System.currentTimeMillis();
                 while (same && !claimed && System.currentTimeMillis() - start < timeout) {
                     /*
                      * We're here because we found the page we want, but another
@@ -963,8 +982,6 @@ public class BufferPool {
      *         currently available. The buffer has a writer claim.
      * @throws PersistitException
      *             if a persistence error occurs while evicting a page
-     * @throws IllegalStateException
-     *             if there is no available buffer.
      */
 
     private Buffer allocBuffer() throws PersistitException {
@@ -1070,7 +1087,7 @@ public class BufferPool {
             }
             retry++;
         }
-        throw new IllegalStateException("No available Buffers");
+        return null;
     }
 
     enum Result {
