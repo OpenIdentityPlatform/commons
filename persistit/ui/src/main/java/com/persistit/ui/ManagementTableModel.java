@@ -123,10 +123,14 @@ public class ManagementTableModel extends AbstractTableModel {
             final String flags = st.nextToken();
             final String header = st.nextToken();
             String rendererName = null;
-            int minWidth = width / 2;
             if (st.hasMoreTokens()) {
                 try {
-                    minWidth = Integer.parseInt(st.nextToken());
+                    // Consume the optional 5th (minimum-width) token so a
+                    // following renderer-name token is not shifted into its
+                    // slot; parsing also validates it. The effective minimum
+                    // width comes from the width token (_widths[i] / 10000),
+                    // so the parsed value itself is intentionally unused.
+                    Integer.parseInt(st.nextToken());
                 } catch (final NumberFormatException e) {
                     throw new IllegalArgumentException(
                             "Invalid minimum width in column specification: " + columnSpecs[index], e);

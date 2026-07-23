@@ -153,9 +153,14 @@ class InspectorPanel extends JPanel {
             final Management management = _adminUI.getManagement();
             if (management == null)
                 return;
+            // Defensive: refresh() already returns early on a null record, but
+            // keep this guard so the dereference below is provably safe.
+            final Management.LogicalRecord logicalRecord = _logicalRecord;
+            if (logicalRecord == null)
+                return;
             try {
                 final Management.LogicalRecord[] results = management.getLogicalRecordArray(getVolumeName(),
-                        getTreeName(), null, _logicalRecord.getKeyState(), Key.EQ, 1, Integer.MAX_VALUE, true
+                        getTreeName(), null, logicalRecord.getKeyState(), Key.EQ, 1, Integer.MAX_VALUE, true
 
                 );
                 if (results == null || results.length == 0) {

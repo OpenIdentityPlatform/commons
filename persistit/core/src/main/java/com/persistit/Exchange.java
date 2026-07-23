@@ -4456,6 +4456,10 @@ public class Exchange implements ReadOnlyExchange {
    * @param level
    *            The tree level, starting at zero for the data page.
    * @return copy of page on the key's index tree at that level.
+   * @throws IllegalArgumentException
+   *             if <code>level</code> does not identify a valid tree level
+   *             (for example when the tree depth exceeds
+   *             {@link #MAX_TREE_DEPTH})
    */
   public Buffer fetchBufferCopy(final int level) throws PersistitException {
     assertCorrectThread(true);
@@ -4463,11 +4467,12 @@ public class Exchange implements ReadOnlyExchange {
       throw new IllegalArgumentException("Tree depth is " + _tree.getDepth());
     }
     final int lvl = level >= 0 ? level : _tree.getDepth() + level;
-    if (lvl < 0 || lvl >= _levelCache.length) {
+    final LevelCache[] levelCache = _levelCache;
+    if (lvl < 0 || lvl >= levelCache.length) {
       throw new IllegalArgumentException("Tree depth is " + _tree.getDepth());
     }
     final int foundAt = searchTree(_key, lvl, false);
-    final Buffer buffer = _levelCache[lvl]._buffer;
+    final Buffer buffer = levelCache[lvl]._buffer;
     try {
       if (foundAt == -1) {
         return null;

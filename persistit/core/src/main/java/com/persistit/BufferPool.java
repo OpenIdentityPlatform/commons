@@ -281,6 +281,8 @@ public class BufferPool {
             // Note: written this way to try to avoid another OOME.
             // Do not use String.format here.
             //
+            // Release the reserved block to free memory for the diagnostic
+            // path below.
             reserve = null;
             System.err.print("Out of memory with ");
             System.err.print(Runtime.getRuntime().freeMemory());

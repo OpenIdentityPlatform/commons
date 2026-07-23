@@ -232,7 +232,6 @@ class ManagementSlidingTableModel extends ManagementTableModel {
 
         final int oldOffset = _offset;
         int newOffset = oldOffset;
-        int firstUpdatedRow;
 
         int lost = 0; // rows lost from row cache
         int kept = _valid; // rows kept from row cache
@@ -260,8 +259,6 @@ class ManagementSlidingTableModel extends ManagementTableModel {
             }
             System.arraycopy(fetcher._resultRows, cut, _infoArray, kept, count - cut);
 
-            firstUpdatedRow = newOffset + kept;
-
             if (count < fetcher._requestedCount) {
                 changeRowCount(newOffset + newValid, true);
             }
@@ -286,8 +283,6 @@ class ManagementSlidingTableModel extends ManagementTableModel {
                 newValid = _rowCacheSize;
             }
             System.arraycopy(fetcher._resultRows, 0, _infoArray, 0, count - cut);
-
-            firstUpdatedRow = newOffset;
 
             if (count < fetcher._requestedCount) {
                 _definite = false;
