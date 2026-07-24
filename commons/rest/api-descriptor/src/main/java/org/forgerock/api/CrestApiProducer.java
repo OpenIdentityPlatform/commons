@@ -91,7 +91,8 @@ public class CrestApiProducer implements ApiProducer<ApiDescription> {
             if (singleton(UNVERSIONED).equals(versionedPath.getVersions())) {
                 paths.put(path, versionedPath().put(version, versionedPath.get(UNVERSIONED)).build());
             } else {
-                throw new IllegalStateException("Trying to version something already versioned: " + versionedPath);
+                throw new IllegalStateException(
+                        "Trying to version something already versioned: " + versionedPath.getVersions());
             }
         }
         return createApi(api.getDefinitions(), api.getErrors(), api.getServices(), paths.build());

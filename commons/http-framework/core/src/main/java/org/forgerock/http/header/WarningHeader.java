@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.http.header;
@@ -159,9 +160,9 @@ public final class WarningHeader extends Header {
      * @param warning Single {@link Warning}
      */
     public WarningHeader(final Warning warning) {
-        final List<Warning> warnings = new ArrayList<>(1);
-        warnings.add(Reject.checkNotNull(warning));
-        this.warnings = Collections.unmodifiableList(warnings);
+        final List<Warning> warningList = new ArrayList<>(1);
+        warningList.add(Reject.checkNotNull(warning));
+        this.warnings = Collections.unmodifiableList(warningList);
     }
 
     /**
