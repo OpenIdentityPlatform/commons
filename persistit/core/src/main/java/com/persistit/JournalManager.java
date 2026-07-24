@@ -61,6 +61,7 @@ import com.persistit.JournalRecord.TX;
 import com.persistit.Persistit.FatalErrorException;
 import com.persistit.TransactionPlayer.TransactionPlayerListener;
 import com.persistit.exception.CorruptJournalException;
+import com.persistit.exception.PersistitClosedException;
 import com.persistit.exception.PersistitException;
 import com.persistit.exception.PersistitIOException;
 import com.persistit.exception.PersistitInterruptedException;
@@ -1849,6 +1850,8 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      *            complete the I/O when requested. In particular, a value of
      *            zero indicates the I/O should start immediately.
      * @throws PersistitInterruptedException if the thread is interrupted while waiting
+     * @throws PersistitClosedException if Persistit was closed or crashed before
+     *             durability could be confirmed
      */
 
     void waitForDurability(final long flushedTimestamp, final long leadTime, final long stallTime)
@@ -1857,7 +1860,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
         if (flusher != null) {
             flusher.waitForDurability(flushedTimestamp, leadTime, stallTime);
         } else {
-            throw new IllegalStateException("JOURNAL_FLUSHER is not running");
+            throw new PersistitClosedException("JOURNAL_FLUSHER is not running");
         }
     }
 
@@ -2347,6 +2350,21 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
                      * Done - commit is durable
                      */
                     break;
+                }
+
+                if (isStopped()) {
+                    /*
+                     * The flusher publishes its final _startTimestamp and
+                     * _endTimestamp before stopping, so one re-read after
+                     * observing the stop is exact: either the final flush
+                     * cycle covered flushedTimestamp, or no future cycle ever
+                     * will and polling would spin forever against a stopped
+                     * thread.
+                     */
+                    if (_endTimestamp > flushedTimestamp && _startTimestamp > flushedTimestamp) {
+                        break;
+                    }
+                    throw new PersistitClosedException("JOURNAL_FLUSHER stopped before durability was confirmed");
                 }
 
                 long remainingSleepNanos;

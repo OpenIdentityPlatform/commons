@@ -22,6 +22,7 @@ import com.persistit.Accumulator.SumAccumulator;
 import com.persistit.CheckpointManager.Checkpoint;
 import com.persistit.JournalManager.PageNode;
 import com.persistit.TransactionPlayer.TransactionPlayerListener;
+import com.persistit.exception.PersistitClosedException;
 import com.persistit.exception.PersistitException;
 import com.persistit.unit.ConcurrentUtil.ThrowingRunnable;
 import com.persistit.util.Util;
@@ -676,6 +677,50 @@ public class JournalManagerTest extends PersistitUnitTestCase {
         addSchedules(PAGE_MAP_READ_INVALIDATE_SCHEDULE);
         startAndJoinAssertSuccess(25000, thread1, thread2);
         disableSequencer();
+    }
+
+    @Test
+    public void waitForDurabilityAfterCloseThrowsPersistitClosedException() throws Exception {
+        final JournalManager jman = _persistit.getJournalManager();
+        final long flushedTimestamp = _persistit.getTimestampAllocator().updateTimestamp();
+        _persistit.close();
+        try {
+            jman.waitForDurability(flushedTimestamp, 0, 0);
+            fail("Expected PersistitClosedException");
+        } catch (final PersistitClosedException expected) {
+            /*
+             * A commit racing Persistit.close() must observe the documented
+             * closed-state exception, not a raw IllegalStateException that
+             * bypasses callers' shutdown handling (issue #304).
+             */
+        }
+    }
+
+    @Test
+    public void waitForDurabilityOnStoppedFlusherThrowsInsteadOfSpinning() throws Exception {
+        final JournalManager jman = _persistit.getJournalManager();
+        _persistit.crash();
+        /*
+         * crash() stops JOURNAL_FLUSHER without clearing the JournalManager's
+         * reference to it, and a timestamp allocated after the flusher's final
+         * cycle can never be covered by its durability marks - the shape of
+         * the shutdown race in which a committing thread captured the flusher
+         * reference just before it was cleared. Without the stopped-flusher
+         * check this wait polls forever.
+         */
+        final long flushedTimestamp = _persistit.getTimestampAllocator().updateTimestamp();
+        final Thread waiter = createThread("WAIT_FOR_DURABILITY", new ThrowingRunnable() {
+            @Override
+            public void run() throws Exception {
+                try {
+                    jman.waitForDurability(flushedTimestamp, 0, 0);
+                    fail("Expected PersistitClosedException");
+                } catch (final PersistitClosedException expected) {
+                    // expected
+                }
+            }
+        });
+        startAndJoinAssertSuccess(10000, waiter);
     }
 
     private int countKeys(final boolean mvcc) throws PersistitException {
