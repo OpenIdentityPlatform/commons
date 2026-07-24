@@ -26,7 +26,9 @@
 package org.forgerock.script.javascript;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +41,7 @@ import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
+import org.forgerock.json.resource.RequestVisitor;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.script.scope.AbstractFactory;
 import org.forgerock.script.scope.Function;
@@ -98,27 +101,50 @@ class Converter {
         return false;
     }
 
+    /**
+     * A type-specific strategy for wrapping a value into its Rhino
+     * {@code Scriptable} representation.
+     */
+    private interface TypeWrapper {
+        Object wrap(Parameter parameter, Object value, Scriptable scope, boolean doCopy);
+    }
+
+    /**
+     * Wrapping strategies keyed by handled type. Iterated in insertion order,
+     * mirroring the precedence of the previous {@code if}/{@code else if}
+     * type-test chain.
+     */
+    private static final Map<Class<?>, TypeWrapper> WRAPPERS;
+    static {
+        final Map<Class<?>, TypeWrapper> wrappers = new LinkedHashMap<>();
+        wrappers.put(Map.class, (parameter, value, scope, doCopy) ->
+                wrap(parameter, (Map) value, scope, doCopy));
+        wrappers.put(List.class, (parameter, value, scope, doCopy) ->
+                wrap(parameter, (List) value, scope, doCopy));
+        wrappers.put(Function.class, (parameter, value, scope, doCopy) ->
+                wrap(parameter, (Function) value, scope, doCopy));
+        wrappers.put(JsonValue.class, (parameter, value, scope, doCopy) ->
+                wrap(parameter, (JsonValue) value, scope, doCopy));
+        wrappers.put(JsonPointer.class, (parameter, value, scope, doCopy) ->
+                wrap(parameter, value.toString(), scope, doCopy));
+        wrappers.put(Request.class, (parameter, value, scope, doCopy) ->
+                wrap(parameter, (Request) value, scope));
+        wrappers.put(org.forgerock.services.context.Context.class, (parameter, value, scope, doCopy) ->
+                wrap(parameter, (org.forgerock.services.context.Context) value, scope));
+        WRAPPERS = Collections.unmodifiableMap(wrappers);
+    }
+
     public static final Object wrap(final Parameter parameter, final Object value,
             final Scriptable scope, boolean doCopy) {
         if (value == null) {
             return null;
-        } else if (value instanceof Map) {
-            return wrap(parameter, (Map) value, scope, doCopy);
-        } else if (value instanceof List) {
-            return wrap(parameter, (List) value, scope, doCopy);
-        } else if (value instanceof Function) {
-            return wrap(parameter, (Function) value, scope, doCopy);
-        } else if (value instanceof JsonValue) {
-            return wrap(parameter, (JsonValue) value, scope, doCopy);
-        } else if (value instanceof JsonPointer) {
-            return wrap(parameter, value.toString(), scope, doCopy);
-        } else if (value instanceof Request) {
-            return wrap(parameter, (Request) value, scope);
-        } else if (value instanceof org.forgerock.services.context.Context) {
-           return wrap(parameter, (org.forgerock.services.context.Context) value, scope);
-        } else {
-            return Context.javaToJS(value, scope);
         }
+        for (final Map.Entry<Class<?>, TypeWrapper> entry : WRAPPERS.entrySet()) {
+            if (entry.getKey().isInstance(value)) {
+                return entry.getValue().wrap(parameter, value, scope, doCopy);
+            }
+        }
+        return Context.javaToJS(value, scope);
     }
 
     public static final Object wrap(final Parameter parameter, final Map value, final Scriptable scope, boolean doCopy) {
@@ -163,44 +189,49 @@ class Converter {
     }
 
     public static final Object wrap(final Parameter parameter, final Request value, final Scriptable scope) {
-        if (value instanceof CreateRequest) {
-            ScriptableCreateRequest result = new ScriptableCreateRequest(parameter, (CreateRequest) value);
+        final AbstractScriptableRequest result = value.accept(
+                new RequestVisitor<AbstractScriptableRequest, Void>() {
+                    @Override
+                    public AbstractScriptableRequest visitActionRequest(Void p, ActionRequest request) {
+                        return new ScriptableActionRequest(parameter, request);
+                    }
+
+                    @Override
+                    public AbstractScriptableRequest visitCreateRequest(Void p, CreateRequest request) {
+                        return new ScriptableCreateRequest(parameter, request);
+                    }
+
+                    @Override
+                    public AbstractScriptableRequest visitDeleteRequest(Void p, DeleteRequest request) {
+                        return new ScriptableDeleteRequest(parameter, request);
+                    }
+
+                    @Override
+                    public AbstractScriptableRequest visitPatchRequest(Void p, PatchRequest request) {
+                        return new ScriptablePatchRequest(parameter, request);
+                    }
+
+                    @Override
+                    public AbstractScriptableRequest visitQueryRequest(Void p, QueryRequest request) {
+                        return new ScriptableQueryRequest(parameter, request);
+                    }
+
+                    @Override
+                    public AbstractScriptableRequest visitReadRequest(Void p, ReadRequest request) {
+                        return new ScriptableReadRequest(parameter, request);
+                    }
+
+                    @Override
+                    public AbstractScriptableRequest visitUpdateRequest(Void p, UpdateRequest request) {
+                        return new ScriptableUpdateRequest(parameter, request);
+                    }
+                }, null);
+        if (result != null) {
             ScriptRuntime.setBuiltinProtoAndParent(result, scope, TopLevel.Builtins.Object);
             return result;
         }
-        else if (value instanceof DeleteRequest) {
-            ScriptableDeleteRequest result = new ScriptableDeleteRequest(parameter, (DeleteRequest) value);
-            ScriptRuntime.setBuiltinProtoAndParent(result, scope, TopLevel.Builtins.Object);
-            return result;
-        }
-        else if (value instanceof PatchRequest) {
-            ScriptablePatchRequest result = new ScriptablePatchRequest(parameter, (PatchRequest) value);
-            ScriptRuntime.setBuiltinProtoAndParent(result, scope, TopLevel.Builtins.Object);
-            return result;
-        }
-        else if (value instanceof QueryRequest) {
-            ScriptableQueryRequest result = new ScriptableQueryRequest(parameter, (QueryRequest) value);
-            ScriptRuntime.setBuiltinProtoAndParent(result, scope, TopLevel.Builtins.Object);
-            return result;
-        }
-        else if (value instanceof ReadRequest) {
-            ScriptableReadRequest result = new ScriptableReadRequest(parameter, (ReadRequest) value);
-            ScriptRuntime.setBuiltinProtoAndParent(result, scope, TopLevel.Builtins.Object);
-            return result;
-        }
-        else if (value instanceof UpdateRequest) {
-            ScriptableUpdateRequest result = new ScriptableUpdateRequest(parameter, (UpdateRequest) value);
-            ScriptRuntime.setBuiltinProtoAndParent(result, scope, TopLevel.Builtins.Object);
-            return result;
-        }
-        else if (value instanceof ActionRequest) {
-            ScriptableActionRequest result = new ScriptableActionRequest(parameter, (ActionRequest) value);
-            ScriptRuntime.setBuiltinProtoAndParent(result, scope, TopLevel.Builtins.Object);
-            return result;
-        } else {
-            // we shouldn't get here...
-            return Context.javaToJS(value, scope);
-        }
+        // we shouldn't get here...
+        return Context.javaToJS(value, scope);
     }
 
     public static final Object wrap(final Parameter parameter, final org.forgerock.services.context.Context value, final Scriptable scope) {
