@@ -15,9 +15,9 @@
 package com.savage7.maven.plugin.dependency;
 
 import java.io.File;
+import java.util.Objects;
 
 import org.apache.maven.artifact.Artifact;
-import org.codehaus.plexus.util.StringUtils;
 
 /**
  * ArtifactItem represents information specified in the plugin configuration
@@ -357,12 +357,12 @@ public class ArtifactItem
         if (this.classifier == null)
         {
             return groupId + ":" + artifactId + ":"
-                + StringUtils.defaultString(version, "?") + ":" + packaging;
+                + Objects.toString(version, "?") + ":" + packaging;
         }
         else
         {
             return groupId + ":" + artifactId + ":" + classifier + ":"
-                + StringUtils.defaultString(version, "?") + ":" + packaging;
+                + Objects.toString(version, "?") + ":" + packaging;
         }
     }
 

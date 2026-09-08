@@ -45,7 +45,6 @@ import org.codehaus.plexus.digest.Digester;
 import org.codehaus.plexus.digest.DigesterException;
 import org.codehaus.plexus.digest.Md5Digester;
 import org.codehaus.plexus.digest.Sha1Digester;
-import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.WriterFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -155,14 +154,15 @@ public abstract class AbstractExternalDependencyMojo extends
     {
         Model model = generateModel(artifact);
 
-        Writer writer = null;
         try
         {
             File pomFile = File.createTempFile(artifact.getGroupId() + "."
                     + artifact.getArtifactId(), ".pom");
 
-            writer = WriterFactory.newXmlWriter(pomFile);
-            new MavenXpp3Writer().write(writer, model);
+            try (Writer writer = WriterFactory.newXmlWriter(pomFile))
+            {
+                new MavenXpp3Writer().write(writer, model);
+            }
 
             return pomFile;
         }
@@ -170,10 +170,6 @@ public abstract class AbstractExternalDependencyMojo extends
         {
             throw new MojoExecutionException(
                     "Error writing temporary POM file: " + e.getMessage(), e);
-        }
-        finally
-        {
-            IOUtil.close(writer);
         }
     }
 
