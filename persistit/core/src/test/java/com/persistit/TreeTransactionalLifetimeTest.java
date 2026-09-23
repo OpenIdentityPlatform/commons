@@ -1,6 +1,8 @@
 /**
  * Copyright 2013 Akiban Technologies, Inc.
- * 
+ *
+ * Portions Copyrighted 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +22,7 @@ import com.persistit.exception.PersistitException;
 import com.persistit.unit.ConcurrentUtil.ThrowingRunnable;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
 
@@ -191,28 +194,43 @@ public class TreeTransactionalLifetimeTest extends PersistitUnitTestCase {
 
         final Transaction txn = _persistit.getTransaction();
         final Volume volume = _persistit.getVolume("persistit");
+        final StringBuilder history = new StringBuilder();
         if (primordial) {
             volume.getTree(treeName, true);
         }
         txn.begin();
         try {
             txn.setStep(1);
-            volume.getTree(treeName, true);
+            final Tree tree1 = volume.getTree(treeName, true);
+            recordTreeHistory(history, "step 1 created", tree1, txn);
 
             txn.setStep(2);
             final Exchange ex1 = exchange(treeName);
             ex1.getValue().put("step2");
             ex1.to("a").store();
+            recordTreeHistory(history, "step 2 stored", ex1.getTree(), txn);
 
             txn.setStep(3);
             ex1.removeTree();
+            recordTreeHistory(history, "step 3 removed", ex1.getTree(), txn);
 
             txn.setStep(4);
             final Exchange ex2 = exchange(treeName);
             ex2.getValue().put("step4");
             ex2.to("b").store();
+            recordTreeHistory(history, "step 4 stored", ex2.getTree(), txn);
 
-            assertEquals("Expected contents at steps", expected1, computeCreateRemoveState(treeName, 5));
+            final String actual1 = computeCreateRemoveState(treeName, 5);
+            if (!expected1.equals(actual1)) {
+                /*
+                 * Intermittent CI failure (issue #309): a tree created at step
+                 * 1 is reported visible at step 0. Not reproducible locally, so
+                 * capture the MVCC state needed to explain it before failing.
+                 */
+                recordTreeHistory(history, "at failure", ex2.getTree(), txn);
+                assertEquals("Expected contents at steps (tree " + treeName + ")\n"
+                        + treeVisibilityDiagnostics(treeName, ex2.getTree(), history), expected1, actual1);
+            }
 
             if (crash) {
                 _persistit.checkpoint();
@@ -257,6 +275,45 @@ public class TreeTransactionalLifetimeTest extends PersistitUnitTestCase {
             }
         }
         return sb.toString();
+    }
+
+    /*
+     * Diagnostics for issue #309. The TimelyResource is read reflectively
+     * because Tree#toString() calls version(), which can add a version and
+     * so disturb the state being reported.
+     */
+    private void recordTreeHistory(final StringBuilder history, final String label, final Tree tree,
+            final Transaction txn) throws Exception {
+        history.append("  ").append(label).append(": txn step=").append(txn.getStep()).append(" tree@")
+                .append(Integer.toHexString(System.identityHashCode(tree))).append(' ')
+                .append(timelyResource(tree)).append('\n');
+    }
+
+    private String treeVisibilityDiagnostics(final String treeName, final Tree tree, final StringBuilder history)
+            throws Exception {
+        final Transaction txn = _persistit.getTransaction();
+        final TransactionIndex ti = _persistit.getTransactionIndex();
+        final StringBuilder sb = new StringBuilder();
+        sb.append("Transaction: ").append(txn).append(" startTs=").append(txn.getStartTimestamp()).append('\n');
+        sb.append("TimelyResource history:\n").append(history);
+        for (int step = 0; step < 5; step++) {
+            txn.setStep(step);
+            final Tree found = vstruc().getTree(treeName, false);
+            sb.append("  getTree at step ").append(step).append(": ")
+                    .append(found == null ? "null" : "tree@" + Integer.toHexString(System.identityHashCode(found))
+                            + (found == tree ? " (same)" : " (DIFFERENT) " + timelyResource(found)))
+                    .append('\n');
+        }
+        sb.append("ActiveTransactionCache: floor=").append(ti.getActiveTransactionFloor()).append(" ceiling=")
+                .append(ti.getActiveTransactionCeiling()).append('\n');
+        sb.append("TransactionIndex:\n").append(ti);
+        return sb.toString();
+    }
+
+    private static Object timelyResource(final Tree tree) throws Exception {
+        final Field field = Tree.class.getDeclaredField("_timelyResource");
+        field.setAccessible(true);
+        return field.get(tree);
     }
 
     abstract class TExec extends ThrowingRunnable {
