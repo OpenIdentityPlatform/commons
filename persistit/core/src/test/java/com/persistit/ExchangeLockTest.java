@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package com.persistit;
@@ -19,6 +20,7 @@ package com.persistit;
 import com.persistit.exception.InUseException;
 import com.persistit.exception.InvalidKeyException;
 import com.persistit.exception.PersistitException;
+import com.persistit.exception.RollbackException;
 import org.junit.Test;
 
 import java.util.Properties;
@@ -26,6 +28,7 @@ import java.util.Random;
 import java.util.concurrent.Semaphore;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -83,7 +86,7 @@ public class ExchangeLockTest extends PersistitUnitTestCase {
     final Semaphore _semaphore = new Semaphore(0);
     final long _timeout;
     final int[] _sequence;
-    Exception _exception;
+    volatile Exception _exception;
     volatile int _expectedReleases;
 
     volatile boolean _committed;
@@ -205,8 +208,15 @@ public class ExchangeLockTest extends PersistitUnitTestCase {
     }
     join(threads);
     final long end = System.currentTimeMillis();
-    assertTrue(end - start < DMILLIS);
-    assertTrue(a._committed ^ b._committed);
+    final String state = describe(end - start, a, b);
+    assertTrue(state, end - start < DMILLIS);
+    /*
+     * Deadlock detection is distributed: every waiter on the cycle checks for
+     * it, and more than one may detect it before the cycle is broken. So
+     * both lockers may be rolled back, but never can both commit.
+     */
+    assertFalse(state, a._committed && b._committed);
+    assertDeadlockVictims(state, a, b);
   }
 
   @Test
@@ -228,14 +238,35 @@ public class ExchangeLockTest extends PersistitUnitTestCase {
     }
     join(threads);
     final long end = System.currentTimeMillis();
-    assertTrue(end - start < DMILLIS);
+    final Locker[] lockers = {a, b, c, d, e};
+    final String state = describe(end - start, lockers);
+    assertTrue(state, end - start < DMILLIS);
     int succeeded = 0;
-    for (final Locker l : new Locker[] {a, b, c, d, e}) {
+    for (final Locker l : lockers) {
       if (l._committed) {
         succeeded++;
       }
     }
-    assertEquals(1, succeeded);
+    // More than one participant may detect the deadlock; see deadlock()
+    assertTrue(state, succeeded <= 1);
+    assertDeadlockVictims(state, lockers);
+  }
+
+  private static void assertDeadlockVictims(final String state, final Locker... lockers) {
+    for (final Locker l : lockers) {
+      if (!l._committed) {
+        assertTrue(state, l._exception instanceof RollbackException);
+      }
+    }
+  }
+
+  private static String describe(final long elapsed, final Locker... lockers) {
+    final StringBuilder sb = new StringBuilder("elapsed=").append(elapsed);
+    for (int i = 0; i < lockers.length; i++) {
+      sb.append(" locker").append(i).append("[committed=").append(lockers[i]._committed)
+          .append(", exception=").append(lockers[i]._exception).append(']');
+    }
+    return sb.toString();
   }
 
   /**
