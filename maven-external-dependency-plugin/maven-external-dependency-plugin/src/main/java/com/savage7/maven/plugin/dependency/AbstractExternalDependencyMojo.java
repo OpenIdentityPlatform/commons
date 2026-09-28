@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -156,8 +158,9 @@ public abstract class AbstractExternalDependencyMojo extends
 
         try
         {
-            File pomFile = File.createTempFile(artifact.getGroupId() + "."
+            Path pomFilePath = Files.createTempFile(artifact.getGroupId() + "."
                     + artifact.getArtifactId(), ".pom");
+            File pomFile = pomFilePath.toFile();
 
             try (Writer writer = WriterFactory.newXmlWriter(pomFile))
             {
