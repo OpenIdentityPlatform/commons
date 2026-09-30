@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2024 3A Systems LLC.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.openidentityplatform.doc.maven;
@@ -30,7 +31,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -89,6 +92,7 @@ public class AntoraMojo extends AbstractAsciidocMojo {
         File[] docFiles = docDir.listFiles();
         for (File docFile : docFiles) {
             String adoc = FileUtils.readFileToString(docFile, StandardCharsets.UTF_8);
+            warnLegacyLinks(docFile, adoc);
             adoc = convertForAntora(adoc);
 
             Path convertedFilePath = Paths.get(partialsPath.toString(), docFile.getName());
@@ -126,23 +130,24 @@ public class AntoraMojo extends AbstractAsciidocMojo {
                 FileUtils.writeStringToFile(navFilePath.toFile(), nav, StandardCharsets.UTF_8);
             } else {
                 Path convertedFilePath = Paths.get(docModulePagesPath.toString(), docFile.getName());
+                warnLegacyLinks(docFile, adoc);
                 adoc = convertForAntora(adoc);
                 FileUtils.writeStringToFile(convertedFilePath.toFile(), adoc, StandardCharsets.UTF_8);
             }
         }
     }
 
-    private String convertForAntora(String adoc) {
+    static String convertForAntora(String adoc) {
         adoc = adoc.replace("image::images/", "image::ROOT:");
         adoc = adoc.replace("image:images/", "image:ROOT:");
         adoc = adoc.replace("include::../partials/", "include::ROOT:partial$");
         adoc = adoc.replace("link:../attachments/", "xref:ROOT:attachment$");
-        adoc = adoc.replace(":table-caption!:", ":table-caption!:\n:leveloffset: -1\"");
+        adoc = adoc.replace(":table-caption!:", ":table-caption!:\n:leveloffset: -1");
         adoc = convertXrefsToAntora(adoc);
         return adoc;
     }
 
-    private String convertXrefsToAntora(String adoc) {
+    static String convertXrefsToAntora(String adoc) {
         Pattern p = Pattern.compile("xref\\:(.+?)\\[");
 
         Matcher m = p.matcher(adoc);
@@ -152,6 +157,10 @@ public class AntoraMojo extends AbstractAsciidocMojo {
             builder.append(adoc, i, m.start());
             String url = m.group(1);
             url = url.replace("../", "");
+            url = url.replace("/./", "/");
+            while (url.startsWith("./")) {
+                url = url.substring(2);
+            }
             url = url.replace("/", ":");
 
             builder.append("xref:").append(url).append("[");
@@ -160,6 +169,28 @@ public class AntoraMojo extends AbstractAsciidocMojo {
         }
         builder.append(adoc.substring(i));
         return builder.toString();
+    }
+
+    private static final Pattern LEGACY_LINK_PATTERN = Pattern.compile("link:\\.\\./\\.\\./\\.\\./[^\\[\\s]*");
+
+    /**
+     * Finds ForgeRock-era cross-guide links such as {@code link:../../../openam/13/admin-guide/}.
+     * They are not converted and resolve to 404 on the Antora site.
+     */
+    static List<String> findLegacyLinks(String adoc) {
+        List<String> links = new ArrayList<>();
+        Matcher m = LEGACY_LINK_PATTERN.matcher(adoc);
+        while (m.find()) {
+            links.add(m.group());
+        }
+        return links;
+    }
+
+    private void warnLegacyLinks(File docFile, String adoc) {
+        for (String link : findLegacyLinks(adoc)) {
+            getLog().warn("Legacy cross-guide link is not converted and will be broken in Antora: "
+                    + docFile + ": " + link);
+        }
     }
 
     private void createIndexForRoot() throws IOException, MojoExecutionException {

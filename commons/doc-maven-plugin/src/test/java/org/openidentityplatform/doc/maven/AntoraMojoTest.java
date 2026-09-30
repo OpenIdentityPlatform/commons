@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2024 3A Systems LLC.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.openidentityplatform.doc.maven;
@@ -46,5 +47,36 @@ public class AntoraMojoTest extends AbstractMojoTestCase {
         assertThat(antoraMojo).isNotNull();
         this.configureMojo(antoraMojo, "doc-maven-plugin", pom);
         this.getVariablesAndValuesFromObject(antoraMojo);
+    }
+
+    @Test
+    public void testConvertXrefWithCurrentDirPrefix() {
+        assertThat(AntoraMojo.convertXrefsToAntora(
+                "see xref:./chap-jee-agent-config.adoc#configure-j2ee-policy-agent[Configure]"))
+                .isEqualTo("see xref:chap-jee-agent-config.adoc#configure-j2ee-policy-agent[Configure]");
+    }
+
+    @Test
+    public void testConvertXrefToOtherModule() {
+        assertThat(AntoraMojo.convertXrefsToAntora("xref:../reference/./ch02.adoc#anchor[Ref]"))
+                .isEqualTo("xref:reference:ch02.adoc#anchor[Ref]");
+        assertThat(AntoraMojo.convertXrefsToAntora("xref:ch02.adoc[Ref]"))
+                .isEqualTo("xref:ch02.adoc[Ref]");
+    }
+
+    @Test
+    public void testLeveloffsetHasNoStrayQuote() {
+        assertThat(AntoraMojo.convertForAntora(":table-caption!:\n"))
+                .isEqualTo(":table-caption!:\n:leveloffset: -1\n");
+    }
+
+    @Test
+    public void testFindLegacyLinks() {
+        assertThat(AntoraMojo.findLegacyLinks(
+                "link:../../../openam/13/admin-guide/#chap-cdsso[CDSSO] and "
+                        + "link:../attachments/file.zip[file] and "
+                        + "link:../../../opendj/3.5/admin-guide/[OpenDJ]"))
+                .containsExactly("link:../../../openam/13/admin-guide/#chap-cdsso",
+                        "link:../../../opendj/3.5/admin-guide/");
     }
 }
