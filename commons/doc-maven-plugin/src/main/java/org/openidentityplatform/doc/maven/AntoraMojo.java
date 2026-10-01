@@ -157,10 +157,7 @@ public class AntoraMojo extends AbstractAsciidocMojo {
             builder.append(adoc, i, m.start());
             String url = m.group(1);
             url = url.replace("../", "");
-            url = url.replace("/./", "/");
-            while (url.startsWith("./")) {
-                url = url.substring(2);
-            }
+            url = url.replaceAll("(^|/)(\\./)+", "$1");
             url = url.replace("/", ":");
 
             builder.append("xref:").append(url).append("[");
@@ -186,7 +183,7 @@ public class AntoraMojo extends AbstractAsciidocMojo {
         return links;
     }
 
-    private void warnLegacyLinks(File docFile, String adoc) {
+    void warnLegacyLinks(File docFile, String adoc) {
         for (String link : findLegacyLinks(adoc)) {
             getLog().warn("Legacy cross-guide link is not converted and will be broken in Antora: "
                     + docFile + ": " + link);
