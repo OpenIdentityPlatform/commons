@@ -89,6 +89,7 @@ import static com.persistit.Configuration.DEFAULT_SYSTEM_VOLUME_NAME;
 import static com.persistit.Configuration.SYSTEM_PROPERTY_PREFIX;
 import static com.persistit.Configuration.SYSTEM_VOLUME_PROPERTY_NAME;
 import static com.persistit.util.SequencerConstants.CHECKPOINT_CLOSE_A;
+import static com.persistit.util.SequencerConstants.COPYBACK_CLOSE_A;
 import static com.persistit.util.ThreadSequencer.sequence;
 import static com.persistit.util.Util.NS_PER_S;
 
@@ -220,9 +221,9 @@ public class Persistit {
   private final AtomicBoolean _initialized = new AtomicBoolean();
   private final AtomicBoolean _closed = new AtomicBoolean();
   /*
-   * Public checkpoint() calls hold the read lock while they run; close()
-   * holds the write lock, so it waits for checkpoints in progress and a
-   * checkpoint never runs against resources that close() is releasing.
+   * Public checkpoint() calls and each pass of copyBackPages() hold the read
+   * lock while they run; close() holds the write lock, so it waits for them
+   * and they never run against resources that close() is releasing.
    */
   private final ReentrantReadWriteLock _checkpointCloseLock = new ReentrantReadWriteLock();
   private final AtomicBoolean _fatal = new AtomicBoolean();
@@ -1460,7 +1461,9 @@ public class Persistit {
   /**
    * Copy back all pages from the journal to their host Volumes. This
    * condenses the total number of journals as much as possible given the
-   * current activity in the system.
+   * current activity in the system. A concurrent {@link #close()} waits until
+   * the copy-back pass in progress has finished; the next pass then fails
+   * with a {@link PersistitClosedException}.
    * 
    * @throws Exception if an error occurs while copying pages back to their volumes
    */
@@ -1472,18 +1475,28 @@ public class Persistit {
      * enough
      */
     for (int i = 0; i < 5; ++i) {
-      if (!_closed.get() && _initialized.get()) {
-        _transactionIndex.updateActiveTransactionCache();
-        _journalManager.pruneObsoleteTransactions();
-        _checkpointManager.checkpoint();
-        _journalManager.copyBack();
-        final int fileCount = _journalManager.getJournalFileCount();
-        final long size = _journalManager.getCurrentJournalSize();
-        if ((fileCount == 1) && (size < JournalManager.ROLLOVER_THRESHOLD)) {
-          break;
+      /*
+       * Hold off close() for one pass at a time, not for the whole loop: a
+       * pass may copy back a large journal.
+       */
+      _checkpointCloseLock.readLock().lock();
+      try {
+        if (!_closed.get() && _initialized.get()) {
+          sequence(COPYBACK_CLOSE_A);
+          _transactionIndex.updateActiveTransactionCache();
+          _journalManager.pruneObsoleteTransactions();
+          _checkpointManager.checkpoint();
+          _journalManager.copyBack();
+          final int fileCount = _journalManager.getJournalFileCount();
+          final long size = _journalManager.getCurrentJournalSize();
+          if ((fileCount == 1) && (size < JournalManager.ROLLOVER_THRESHOLD)) {
+            break;
+          }
+        } else {
+          throw new PersistitClosedException();
         }
-      } else {
-        throw new PersistitClosedException();
+      } finally {
+        _checkpointCloseLock.readLock().unlock();
       }
     }
   }

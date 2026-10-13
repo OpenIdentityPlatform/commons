@@ -127,4 +127,15 @@ public interface SequencerConstants {
             array(CHECKPOINT_CLOSE_B), array(CHECKPOINT_CLOSE_A, CHECKPOINT_CLOSE_C),
             array(CHECKPOINT_CLOSE_A, CHECKPOINT_CLOSE_C) };
 
+    /*
+     * Used in testing copyBackPages() racing with close() in
+     * CheckpointCloseRaceTest
+     */
+    int COPYBACK_CLOSE_A = allocate("COPYBACK_CLOSE_A");
+    int COPYBACK_CLOSE_B = allocate("COPYBACK_CLOSE_B");
+    int COPYBACK_CLOSE_C = allocate("COPYBACK_CLOSE_C");
+    int[][] COPYBACK_CLOSE_SCHEDULE = new int[][] { array(COPYBACK_CLOSE_A, COPYBACK_CLOSE_B),
+            array(COPYBACK_CLOSE_B), array(COPYBACK_CLOSE_A, COPYBACK_CLOSE_C),
+            array(COPYBACK_CLOSE_A, COPYBACK_CLOSE_C) };
+
 }
