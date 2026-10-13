@@ -83,10 +83,13 @@ import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static com.persistit.Configuration.DEFAULT_SYSTEM_VOLUME_NAME;
 import static com.persistit.Configuration.SYSTEM_PROPERTY_PREFIX;
 import static com.persistit.Configuration.SYSTEM_VOLUME_PROPERTY_NAME;
+import static com.persistit.util.SequencerConstants.CHECKPOINT_CLOSE_A;
+import static com.persistit.util.ThreadSequencer.sequence;
 import static com.persistit.util.Util.NS_PER_S;
 
 /**
@@ -216,6 +219,12 @@ public class Persistit {
 
   private final AtomicBoolean _initialized = new AtomicBoolean();
   private final AtomicBoolean _closed = new AtomicBoolean();
+  /*
+   * Public checkpoint() calls hold the read lock while they run; close()
+   * holds the write lock, so it waits for checkpoints in progress and a
+   * checkpoint never runs against resources that close() is releasing.
+   */
+  private final ReentrantReadWriteLock _checkpointCloseLock = new ReentrantReadWriteLock();
   private final AtomicBoolean _fatal = new AtomicBoolean();
 
   private long _beginCloseTime;
@@ -1413,19 +1422,27 @@ public class Persistit {
   /**
    * Force a new Checkpoint and wait for it to be written. If Persistit is
    * closed or not yet initialized, do nothing and return <code>null</code>.
+   * A concurrent {@link #close()} waits until a checkpoint in progress has
+   * finished.
    * 
    * @return the Checkpoint allocated by this process.
    * @throws PersistitInterruptedException if the thread is interrupted while waiting for the checkpoint to be written
    */
   public Checkpoint checkpoint() throws PersistitException {
-    if (_closed.get() || !_initialized.get()) {
-      return null;
+    _checkpointCloseLock.readLock().lock();
+    try {
+      if (_closed.get() || !_initialized.get()) {
+        return null;
+      }
+      sequence(CHECKPOINT_CLOSE_A);
+      cleanup();
+      _journalManager.pruneObsoleteTransactions();
+      final Checkpoint result = _checkpointManager.checkpoint();
+      _journalManager.pruneObsoleteTransactions();
+      return result;
+    } finally {
+      _checkpointCloseLock.readLock().unlock();
     }
-    cleanup();
-    _journalManager.pruneObsoleteTransactions();
-    final Checkpoint result = _checkpointManager.checkpoint();
-    _journalManager.pruneObsoleteTransactions();
-    return result;
   }
 
   final long earliestLiveTransaction() {
@@ -1629,6 +1646,15 @@ public class Persistit {
    * @throws PersistitException if a persistence error occurs while closing
    */
   public void close(final boolean flush) throws PersistitException {
+    _checkpointCloseLock.writeLock().lock();
+    try {
+      doClose(flush);
+    } finally {
+      _checkpointCloseLock.writeLock().unlock();
+    }
+  }
+
+  private void doClose(final boolean flush) throws PersistitException {
     if (_initialized.get() && !_closed.get()) {
       synchronized (this) {
         // Wait for UI to go down.
