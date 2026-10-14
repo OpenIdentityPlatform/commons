@@ -36,6 +36,7 @@ import static com.persistit.util.ThreadSequencer.enableSequencer;
 import static com.persistit.util.ThreadSequencer.sequence;
 import static com.persistit.util.ThreadSequencer.setCondition;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -58,6 +59,8 @@ public class CheckpointCloseRaceTest extends PersistitUnitTestCase {
     private final static long CLOSE_GRACE_MS = 2_000;
 
     private final static long JOIN_TIMEOUT_MS = 60_000;
+
+    private final static long FAST_CLOSE_WAIT_MS = 200;
 
     private interface Operation {
         void run() throws Exception;
@@ -85,17 +88,121 @@ public class CheckpointCloseRaceTest extends PersistitUnitTestCase {
             }
         });
         final Persistit persistit = _persistit;
+        // Keep the first pass from ending the loop: with copy-back disabled
+        // the journal keeps more than one file, so a second pass follows.
+        final JournalManager jman = persistit.getJournalManager();
+        jman.setAppendOnly(true);
+        jman.rolloverWithNewFile();
+        assertTrue("the journal should span more than one file", jman.getJournalFileCount() > 1);
+        final AtomicReference<PersistitClosedException> closedOnNextPass = new AtomicReference<>();
         try {
             runConcurrentWithClose("copyBackPages()", () -> {
                 try {
                     persistit.copyBackPages();
                 } catch (final PersistitClosedException e) {
-                    // Documented outcome when a later pass sees Persistit closed
+                    closedOnNextPass.set(e);
                 }
             }, COPYBACK_CLOSE_B, COPYBACK_CLOSE_C);
+            // close() waits for the parked pass only, not the whole loop, so
+            // the next pass finds Persistit closed.
+            assertNotNull("the pass after close() should throw PersistitClosedException", closedOnNextPass.get());
         } finally {
             setCondition(COPYBACK_CLOSE_A, new Condition());
         }
+    }
+
+    /**
+     * A fast <code>close(false)</code> waits only a bounded time for a
+     * checkpoint that does not finish, then closes anyway.
+     */
+    @Test
+    public void fastCloseDoesNotWaitForStuckCheckpoint() throws Exception {
+        enableSequencer(false);
+        addSchedules(CHECKPOINT_CLOSE_SCHEDULE);
+        final Persistit persistit = _persistit;
+        persistit.setFastCloseWaitMs(FAST_CLOSE_WAIT_MS);
+        final AtomicReference<Throwable> closeFailure = new AtomicReference<>();
+
+        final Thread operator = new Thread(() -> {
+            try {
+                persistit.checkpoint();
+            } catch (final Throwable t) {
+                // Released resources may fail the checkpoint; not checked here
+            }
+        }, "CheckpointCloseRaceTest-operation");
+        operator.setDaemon(true);
+        final Thread closer = new Thread(() -> {
+            try {
+                persistit.close(false);
+            } catch (final Throwable t) {
+                closeFailure.set(t);
+            }
+        }, "CheckpointCloseRaceTest-close");
+
+        operator.start();
+        sequence(CHECKPOINT_CLOSE_B);
+        try {
+            // The checkpoint stays parked while it holds the lock.
+            closer.start();
+            closer.join(JOIN_TIMEOUT_MS);
+            assertFalse("close(false) should not wait for a stuck checkpoint", closer.isAlive());
+            assertNull("close(false) failed: " + closeFailure.get(), closeFailure.get());
+            assertTrue("Persistit should be closed", persistit.isClosed());
+        } finally {
+            sequence(CHECKPOINT_CLOSE_C);
+            operator.join(JOIN_TIMEOUT_MS);
+        }
+    }
+
+    /**
+     * While shutdown is suspended, management tools keep Persistit open after
+     * the application called <code>close()</code>; a checkpoint, e.g. from a
+     * backup task, must still run in that window.
+     */
+    @Test
+    public void checkpointRunsWhileShutdownSuspended() throws Exception {
+        final Persistit persistit = _persistit;
+        final AtomicReference<Throwable> closeFailure = new AtomicReference<>();
+        final AtomicReference<Object> checkpoint = new AtomicReference<>();
+        final AtomicReference<Throwable> checkpointFailure = new AtomicReference<>();
+
+        persistit.setShutdownSuspended(true);
+        final Thread closer = new Thread(() -> {
+            try {
+                persistit.close();
+            } catch (final Throwable t) {
+                closeFailure.set(t);
+            }
+        }, "CheckpointCloseRaceTest-close");
+        final Thread operator = new Thread(() -> {
+            try {
+                checkpoint.set(persistit.checkpoint());
+            } catch (final Throwable t) {
+                checkpointFailure.set(t);
+            }
+        }, "CheckpointCloseRaceTest-operation");
+        try {
+            closer.start();
+            // Wait until close() is waiting for the suspension to be lifted.
+            final long expires = System.currentTimeMillis() + JOIN_TIMEOUT_MS;
+            while (closer.getState() != Thread.State.TIMED_WAITING && System.currentTimeMillis() < expires) {
+                Thread.sleep(10);
+            }
+            assertTrue("close() should wait while shutdown is suspended", closer.isAlive());
+            operator.start();
+            operator.join(JOIN_TIMEOUT_MS);
+            assertFalse("checkpoint() should not wait for a suspended close()", operator.isAlive());
+            assertNull("checkpoint() failed: " + checkpointFailure.get(), checkpointFailure.get());
+            assertNotNull("checkpoint() should run while shutdown is suspended", checkpoint.get());
+            assertFalse("Persistit should stay open while shutdown is suspended", persistit.isClosed());
+        } finally {
+            persistit.setShutdownSuspended(false);
+            closer.join(JOIN_TIMEOUT_MS);
+            operator.join(JOIN_TIMEOUT_MS);
+        }
+        assertFalse("close() did not finish", closer.isAlive());
+        assertNull("close() failed: " + closeFailure.get(), closeFailure.get());
+        assertTrue("Persistit should be closed", persistit.isClosed());
     }
 
     /**
@@ -130,6 +237,10 @@ public class CheckpointCloseRaceTest extends PersistitUnitTestCase {
         sequence(paused);
         closer.start();
         closer.join(CLOSE_GRACE_MS);
+        // Checked only after the operation is released, so that a failure
+        // does not leave it parked.
+        final boolean closeHeldOff = closer.isAlive();
+        final boolean closedUnderOperation = persistit.isClosed();
         // Let the operation continue.
         sequence(resume);
 
@@ -137,6 +248,8 @@ public class CheckpointCloseRaceTest extends PersistitUnitTestCase {
         closer.join(JOIN_TIMEOUT_MS);
         assertFalse(name + " did not finish", operator.isAlive());
         assertFalse("close() did not finish", closer.isAlive());
+        assertTrue("close() should wait for " + name, closeHeldOff);
+        assertFalse("close() should not close Persistit under a running " + name, closedUnderOperation);
         assertNull(name + " failed under a concurrent close(): " + operationFailure.get(), operationFailure.get());
         assertNull("close() failed under a concurrent " + name + ": " + closeFailure.get(), closeFailure.get());
         assertTrue("Persistit should be closed", persistit.isClosed());
