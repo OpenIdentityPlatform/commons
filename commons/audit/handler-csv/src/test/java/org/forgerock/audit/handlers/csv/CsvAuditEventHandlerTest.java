@@ -53,15 +53,20 @@ import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.FileBasedEventHandlerConfiguration.FileRotation;
 import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration.EventBufferingConfiguration;
+import org.forgerock.audit.handlers.csv.CsvSecureVerifier.VerificationResult;
 import org.forgerock.audit.json.AuditJsonConfig;
 import org.forgerock.audit.providers.DefaultKeyStoreHandlerProvider;
 import org.forgerock.audit.providers.KeyStoreHandlerProvider;
+import org.forgerock.audit.retention.FileNamingPolicy;
+import org.forgerock.audit.retention.TimeStampFileNamingPolicy;
 import org.forgerock.audit.secure.JcaKeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreHandlerDecorator;
+import org.forgerock.audit.secure.KeyStoreSecureStorage;
 import org.forgerock.audit.util.GzipUtil;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.QueryFilters;
@@ -74,10 +79,15 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
+import org.forgerock.util.encode.Base64;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
 import org.forgerock.util.test.assertj.AssertJPromiseAssert;
+import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.mockito.ArgumentCaptor;
+import org.supercsv.prefs.CsvPreference;
 import org.testng.SkipException;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -400,6 +410,94 @@ public class CsvAuditEventHandlerTest {
         try (InputStream in = new GZIPInputStream(new FileInputStream(rotatedFiles[0]))) {
             assertThat(new String(in.readAllBytes(), UTF_8)).as("when " + label).contains("\"A10000\"");
         }
+    }
+
+    @Test(dataProvider = "rotateActionData")
+    public void testActionToRotateTamperEvidentFile(String label, boolean isRotationEnabled) throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final CsvAuditEventHandlerBuilder csvAuditEventHandlerBuilder =
+                csvAuditEventHandler().loggingTo(logDirectory).withSecureLoggingEnabled();
+        if (isRotationEnabled) {
+            csvAuditEventHandlerBuilder.withRotationEnabled();
+        }
+        final CsvAuditEventHandler csvHandler = csvAuditEventHandlerBuilder.build();
+
+        final Context context = new RootContext();
+        try {
+            csvHandler.publishEvent(context, "access", buildEvent(1));
+            ActionRequest actionRequest = Requests.newActionRequest("access", ROTATE_FILE_ACTION_NAME)
+                    .setAdditionalParameter(ACTION_PARAM_TARGET_HANDLER, "csv");
+            csvHandler.handleAction(context, "access", actionRequest);
+        } finally {
+            csvHandler.shutdown();
+        }
+
+        // the archive is verified with its own keystore, as the CLI verifies it
+        final KeyStoreHandlerDecorator keyStoreHandler = new KeyStoreHandlerDecorator(
+                new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, KEYSTORE_FILENAME, KEYSTORE_PASSWORD));
+        final String archiveKeyStorePassword = Base64.encode(
+                keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded());
+        final File liveFile = logDirectory.resolve(SECURE_CSV_FILENAME_PREFIX + "access.csv").toFile();
+        // with the prefix that withRotationEnabled() configures
+        final FileNamingPolicy fileNamingPolicy =
+                new TimeStampFileNamingPolicy(liveFile, null, isRotationEnabled ? "prefix" : null);
+        final List<VerificationResult> verificationResults = new CsvSecureArchiveVerifier(fileNamingPolicy,
+                archiveKeyStorePassword, keyStoreHandler.readPublicKeyFromKeyStore(CsvSecureConstants.ENTRY_SIGNATURE),
+                CsvPreference.EXCEL_PREFERENCE).verify();
+        assertThat(verificationResults).as("when " + label).hasSize(1);
+        final VerificationResult verificationResult = verificationResults.get(0);
+        // the default rotation file suffix ends with .gz
+        assertThat(verificationResult.getArchiveFile().getName()).as("when " + label).endsWith(".gz");
+        assertThat(verificationResult.hasPassedVerification())
+                .as("when " + label + ": " + verificationResult.getFailureReason())
+                .isTrue();
+    }
+
+    @Test
+    public void testActionToRotateTamperEvidentFileKeepsFileWhenKeyStoreCannotBeRenamed() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final File liveFile = logDirectory.resolve(SECURE_CSV_FILENAME_PREFIX + "access.csv").toFile();
+        final CsvAuditEventHandler csvHandler =
+                csvAuditEventHandler().loggingTo(logDirectory).withSecureLoggingEnabled().build();
+
+        final Context context = new RootContext();
+        try {
+            csvHandler.publishEvent(context, "access", buildEvent(1));
+            // A file cannot be renamed onto a directory. The archive name has the current second in the default
+            // rotation suffix, so the keystore name of every archive name of the next 30 s is taken by one.
+            final DateTimeFormatter rotationSuffix = DateTimeFormat.forPattern("-yyyy.MM.dd-HH.mm.ss");
+            final LocalDateTime now = LocalDateTime.now();
+            for (int second = -1; second <= 30; second++) {
+                Files.createDirectory(logDirectory.resolve(
+                        liveFile.getName() + now.plusSeconds(second).toString(rotationSuffix) + ".gz.keystore"));
+            }
+            ActionRequest actionRequest = Requests.newActionRequest("access", ROTATE_FILE_ACTION_NAME)
+                    .setAdditionalParameter(ACTION_PARAM_TARGET_HANDLER, "csv");
+            AssertJPromiseAssert.assertThat(csvHandler.handleAction(context, "access", actionRequest))
+                    .failedWithException()
+                    .isInstanceOf(BadRequestException.class);
+            csvHandler.publishEvent(context, "access", buildEvent(2));
+        } finally {
+            csvHandler.shutdown();
+        }
+
+        // the audit file is not archived, and the writer resumed it with its keys
+        assertThat(logDirectory.toFile().listFiles((dir, name) -> !name.endsWith(".keystore")))
+                .containsExactly(liveFile);
+        assertThat(liveFile).content(UTF_8).contains("\"_id1\"", "\"_id2\"");
+        final KeyStoreHandlerDecorator keyStoreHandler = new KeyStoreHandlerDecorator(
+                new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, KEYSTORE_FILENAME, KEYSTORE_PASSWORD));
+        final KeyStoreHandler liveKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE,
+                CsvSecureUtils.keyStoreFile(liveFile).getPath(), Base64.encode(
+                        keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded()));
+        final VerificationResult verificationResult = new CsvSecureVerifier(liveFile, CsvPreference.EXCEL_PREFERENCE,
+                new KeyStoreSecureStorage(liveKeyStoreHandler,
+                        keyStoreHandler.readPublicKeyFromKeyStore(CsvSecureConstants.ENTRY_SIGNATURE))).verify();
+        assertThat(verificationResult.hasPassedVerification())
+                .as(verificationResult.getFailureReason())
+                .isTrue();
     }
 
     @Test

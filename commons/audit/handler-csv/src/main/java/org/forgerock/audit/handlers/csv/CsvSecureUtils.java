@@ -12,10 +12,12 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.audit.handlers.csv;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
@@ -83,6 +85,15 @@ final class CsvSecureUtils {
             }
         }
         return tmp.toString().getBytes(StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Returns the keystore that holds the keys of a tamper evident CSV file.
+     * @param csvFile The CSV file, current or archived.
+     * @return The keystore file of the CSV file.
+     */
+    static File keyStoreFile(File csvFile) {
+        return new File(csvFile.getPath() + ".keystore");
     }
 
     private CsvSecureUtils() {

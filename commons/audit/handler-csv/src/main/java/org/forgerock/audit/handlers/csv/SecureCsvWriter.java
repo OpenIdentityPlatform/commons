@@ -98,7 +98,7 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
         Reject.ifFalse(config.getSecurity().isEnabled(), "SecureCsvWriter should only be used if security is enabled");
         final boolean fileAlreadyInitialized = csvFile.exists() && csvFile.length() > 0;
         this.random = random;
-        this.keyStoreFile = new File(csvFile.getPath() + ".keystore");
+        this.keyStoreFile = CsvSecureUtils.keyStoreFile(csvFile);
         this.headers = checkNotNull(headers, "The headers can't be null.");
         this.csvFormatter = new CsvFormatter(csvPreference);
         this.csvWriter = constructWriter(csvFile, fileAlreadyInitialized, config);
@@ -411,11 +411,8 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
         @Override
         public void postRotationAction(RotationContext context) throws IOException {
             // Rename the keystore and create a new one.
-            String currentName = keyStoreFile.getName();
-            String nextName = currentName.replaceFirst(context.getInitialFile().getName(),
-                    context.getNextFile().getName());
-            final File nextFile = new File(keyStoreFile.getParent(), nextName);
-            logger.trace("Renaming keystore file {} to {}", currentName, nextName);
+            final File nextFile = CsvSecureUtils.keyStoreFile(context.getNextFile());
+            logger.trace("Renaming keystore file {} to {}", keyStoreFile, nextFile);
             boolean renamed = keyStoreFile.renameTo(nextFile);
             if (!renamed) {
                 logger.error("Unable to rename {} to {}", keyStoreFile.getAbsolutePath(), nextFile.getAbsolutePath());

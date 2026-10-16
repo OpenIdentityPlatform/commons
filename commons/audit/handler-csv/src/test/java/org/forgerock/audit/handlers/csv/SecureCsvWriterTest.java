@@ -35,7 +35,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.PublicKey;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -52,6 +52,7 @@ import org.forgerock.audit.secure.KeyStoreHandlerDecorator;
 import org.forgerock.audit.secure.KeyStoreSecureStorage;
 import org.forgerock.audit.secure.SecureStorage;
 import org.forgerock.audit.secure.SecureStorageException;
+import org.forgerock.audit.util.GzipUtil;
 import org.forgerock.util.encode.Base64;
 import org.forgerock.util.time.Duration;
 import org.slf4j.Logger;
@@ -59,6 +60,7 @@ import org.slf4j.LoggerFactory;
 import org.supercsv.prefs.CsvPreference;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
@@ -345,8 +347,17 @@ public class SecureCsvWriterTest {
         return configuration;
     }
 
-    @Test
-    public void shouldRotateCsvAndKeyStoreFile() throws Exception {
+    @DataProvider
+    private Object[][] rotationFileSuffixes() {
+        return new Object[][] {
+            { "-yyyy.MM.dd-HH.mm.ss.SSS" },
+            // the archives are gzip-compressed
+            { "-yyyy.MM.dd-HH.mm.ss.SSS.gz" }
+        };
+    }
+
+    @Test(dataProvider = "rotationFileSuffixes")
+    public void shouldRotateCsvAndKeyStoreFile(final String rotationFileSuffix) throws Exception {
         final Path logDirectory = Files.createTempDirectory("SecureCsvWriterTest");
         final String filename = CsvAuditEventHandler.SECURE_CSV_FILENAME_PREFIX + "shouldRotateCsvAndKeyStoreFile.csv";
         final File actual = new File(logDirectory.toFile(), filename);
@@ -355,7 +366,7 @@ public class SecureCsvWriterTest {
         config.getSecurity().setEnabled(true);
         config.getSecurity().setSignatureInterval("5 minutes"); // ensure no periodically added signatures during test
         config.getFileRotation().setRotationEnabled(true);
-        config.getFileRotation().setRotationFileSuffix("-yyyy.MM.dd-HH.mm.ss.SSS");
+        config.getFileRotation().setRotationFileSuffix(rotationFileSuffix);
         config.getFileRotation().setMaxFileSize(20);
         config.setRotationRetentionCheckInterval("5 minutes");
         try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
@@ -372,20 +383,22 @@ public class SecureCsvWriterTest {
         final String keystorePassword = Base64.encode(keystorePasswordKey.getEncoded());
         final PublicKey publicKey = keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE);
         final FileNamingPolicy fileNamingPolicy =
-                new TimeStampFileNamingPolicyWithNamedBasedOrdering(actual, "-yyyy.MM.dd-HH.mm.ss.SSS", "");
+                new TimeStampFileNamingPolicyWithNamedBasedOrdering(actual, rotationFileSuffix, "");
         final CsvSecureArchiveVerifier archiveVerifier = new CsvSecureArchiveVerifier(
                 fileNamingPolicy, keystorePassword, publicKey, CsvPreference.EXCEL_PREFERENCE);
 
         // Verify the expected files were created
         assertThat(actual).exists();
-        assertThat(fileNamingPolicy.listFiles()).isNotEmpty().hasSize(6);
+        assertThat(fileNamingPolicy.listFiles()).isNotEmpty().hasSize(6)
+                .allMatch(file -> file.getName().endsWith(".gz") == rotationFileSuffix.endsWith(".gz"),
+                        "compressed if the suffix ends with .gz");
 
         // Verify the contents of the files
         List<VerificationResult> verificationResults = archiveVerifier.verify();
         VerificationResult finalVerificationResult = verificationResults.remove(5);
         for (final VerificationResult verificationResult : verificationResults) {
             assertThat(verificationResult.hasPassedVerification())
-                    .as("File " + verificationResult.getArchiveFile())
+                    .as("File " + verificationResult.getArchiveFile() + ": " + verificationResult.getFailureReason())
                     .isTrue();
         }
         // The final file is not verifiable currently as it doesn't contain any audit events (so no HMAC entry).
@@ -407,7 +420,7 @@ public class SecureCsvWriterTest {
             CsvSecureArchiveVerifierCli.OptionsParser.FLAG_ARCHIVE_DIRECTORY, logDirectory.toString(),
             CsvSecureArchiveVerifierCli.OptionsParser.FLAG_TOPIC, "shouldRotateCsvAndKeyStoreFile",
             CsvSecureArchiveVerifierCli.OptionsParser.FLAG_PREFIX, "",
-            CsvSecureArchiveVerifierCli.OptionsParser.FLAG_SUFFIX, "-yyyy.MM.dd-HH.mm.ss.SSS",
+            CsvSecureArchiveVerifierCli.OptionsParser.FLAG_SUFFIX, rotationFileSuffix,
             CsvSecureArchiveVerifierCli.OptionsParser.FLAG_KEYSTORE_FILE, KEYSTORE_FILENAME,
             CsvSecureArchiveVerifierCli.OptionsParser.FLAG_KEYSTORE_PASSWORD, KEYSTORE_PASSWORD
         };
@@ -436,6 +449,37 @@ public class SecureCsvWriterTest {
         assertThat(err.toString()).isEqualTo("");
     }
 
+    @Test
+    public void shouldRotateKeyStoreFileWhenFileNameHasRegexCharacters() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("SecureCsvWriterTest");
+        // '+' is a regex quantifier
+        final File actual =
+                new File(logDirectory.toFile(), CsvAuditEventHandler.SECURE_CSV_FILENAME_PREFIX + "a+b.csv");
+        final String rotationFileSuffix = "-yyyy.MM.dd-HH.mm.ss.SSS";
+        CsvAuditEventHandlerConfiguration config = new CsvAuditEventHandlerConfiguration();
+        config.getSecurity().setEnabled(true);
+        config.getSecurity().setSignatureInterval("5 minutes");
+        config.getFileRotation().setRotationEnabled(true);
+        config.getFileRotation().setRotationFileSuffix(rotationFileSuffix);
+        config.setRotationRetentionCheckInterval("5 minutes");
+        try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
+                actual, new String[]{"FOO"}, CsvPreference.EXCEL_PREFERENCE, config, keyStoreHandler, random)) {
+            secureCsvWriter.writeEvent(singletonMap("FOO", "one"));
+            assertThat(secureCsvWriter.forceRotation()).isTrue();
+        }
+
+        final String keystorePassword =
+                Base64.encode(keyStoreHandler.readSecretKeyFromKeyStore(ENTRY_PASSWORD).getEncoded());
+        final PublicKey publicKey = keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE);
+        final List<VerificationResult> verificationResults = new CsvSecureArchiveVerifier(
+                new TimeStampFileNamingPolicy(actual, rotationFileSuffix, null), keystorePassword, publicKey,
+                CsvPreference.EXCEL_PREFERENCE).verify();
+        assertThat(verificationResults).hasSize(1);
+        assertThat(verificationResults.get(0).hasPassedVerification())
+                .as(verificationResults.get(0).getFailureReason())
+                .isTrue();
+    }
+
     static class TimeStampFileNamingPolicyWithNamedBasedOrdering extends TimeStampFileNamingPolicy {
 
         public TimeStampFileNamingPolicyWithNamedBasedOrdering(
@@ -451,7 +495,8 @@ public class SecureCsvWriterTest {
         public List<File> listFiles() {
             List<File> fileList = super.listFiles();
             // make sure the files are sorted from oldest to newest by filename - timestamps won't be accurate enough.
-            Collections.sort(fileList);
+            // Without .gz, so that a collision name (<timestamp>.1.gz) sorts after <timestamp>.gz.
+            fileList.sort(Comparator.comparing(file -> GzipUtil.removeGzipSuffix(file).getName()));
             return fileList;
         }
     }

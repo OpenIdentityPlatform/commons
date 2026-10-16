@@ -470,7 +470,8 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
     }
 
     /**
-     * Renames the audit file of a topic to its next timestamped name, and opens a new audit file.
+     * Renames the audit file of a topic to its next timestamped name, and opens a new audit file. With tamper evident
+     * logging, the keystore of the audit file is renamed after the archive, and the new audit file gets a new one.
      *
      * @return The archive name of the rotated file. A file to compress is renamed without the .gz suffix, and the
      *         caller compresses it with {@link GzipUtil#compressRotatedFile(File)}.
@@ -483,6 +484,21 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
         if (!auditLogFile.renameTo(renamedFile)) {
             throw new BadRequestException(
                     format("Unable to rename file %s to %s when rotating", auditLogFile, renamedFile));
+        }
+        if (configuration.getSecurity().isEnabled()) {
+            // named after the archive name, as SecureCsvWriter names it when RotatableWriter rotates the file
+            final File keyStoreFile = CsvSecureUtils.keyStoreFile(auditLogFile);
+            final File archivedKeyStoreFile = CsvSecureUtils.keyStoreFile(rotatedFile);
+            if (!keyStoreFile.renameTo(archivedKeyStoreFile)) {
+                // a new audit file would overwrite the keys of the archived file in its keystore, so the writer
+                // resumes the audit file instead
+                if (!renamedFile.renameTo(auditLogFile)) {
+                    LOGGER.error("Unable to rename {} back to {}", renamedFile, auditLogFile);
+                }
+                resetAndReopenWriter(topic);
+                throw new BadRequestException(
+                        format("Unable to rename file %s to %s when rotating", keyStoreFile, archivedKeyStoreFile));
+            }
         }
         resetAndReopenWriter(topic);
         return rotatedFile;

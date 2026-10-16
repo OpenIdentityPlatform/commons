@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.audit.handlers.csv;
 
@@ -20,17 +21,20 @@ import static org.forgerock.audit.handlers.csv.CsvSecureUtils.*;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 import javax.crypto.SecretKey;
 
 import org.forgerock.audit.secure.SecureStorage;
 import org.forgerock.audit.secure.SecureStorageException;
+import org.forgerock.audit.util.GzipUtil;
 import org.forgerock.util.encode.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +48,8 @@ import org.supercsv.prefs.CsvPreference;
 class CsvSecureVerifier {
 
     private static final Logger logger = LoggerFactory.getLogger(CsvSecureVerifier.class);
+    /** Reads a compressed archive in large chunks, as {@link GzipUtil} writes it. */
+    private static final int GZIP_BUFFER_SIZE = 64 * 1024;
 
     private File csvFile;
     private final CsvPreference csvPreference;
@@ -85,6 +91,10 @@ class CsvSecureVerifier {
         boolean lastRowWasSigned = false;
         try (ICsvMapReader csvReader = newBufferedCsvMapReader()) {
             final String[] header = csvReader.getHeader(true);
+            if (header == null) {
+                // an empty file proves nothing, and a file truncated to nothing must not pass
+                return newVerificationFailureResult("The file contains no CSV header");
+            }
 
             // Ensure header contains HEADER_HMAC and HEADER_SIGNATURE
             int checkCount = 0;
@@ -160,8 +170,19 @@ class CsvSecureVerifier {
         }
     }
 
-    private CsvMapReader newBufferedCsvMapReader() throws FileNotFoundException {
-        return new CsvMapReader(new BufferedReader(new FileReader(csvFile)), csvPreference);
+    private CsvMapReader newBufferedCsvMapReader() throws IOException {
+        // an archive whose rotation suffix ends with .gz is gzip-compressed
+        final InputStream fileIn = new FileInputStream(csvFile);
+        final InputStream in;
+        try {
+            in = csvFile.getName().endsWith(GzipUtil.GZIP_SUFFIX)
+                    ? new GZIPInputStream(fileIn, GZIP_BUFFER_SIZE)
+                    : fileIn;
+        } catch (IOException e) {
+            fileIn.close();
+            throw e;
+        }
+        return new CsvMapReader(new BufferedReader(new InputStreamReader(in)), csvPreference);
     }
 
     private VerificationResult newVerificationFailureResult(String msg) {
