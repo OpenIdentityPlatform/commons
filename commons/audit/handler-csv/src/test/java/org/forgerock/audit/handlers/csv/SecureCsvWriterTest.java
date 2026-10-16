@@ -28,6 +28,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyStore;
@@ -262,6 +265,77 @@ public class SecureCsvWriterTest {
             threads[i].join(5000);
             assertThat(threads[i].isAlive()).as(threads[i].getName() + " alive").isFalse();
         }
+    }
+
+    @Test(timeOut = 60_000)
+    public void shouldForceRotationWhileAnotherThreadWritesAnEvent() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("SecureCsvWriterTest");
+        final File actual =
+                new File(logDirectory.toFile(), CsvAuditEventHandler.SECURE_CSV_FILENAME_PREFIX + "access.csv");
+        final String header = "FOO";
+        CsvAuditEventHandlerConfiguration config = new CsvAuditEventHandlerConfiguration();
+        config.getSecurity().setEnabled(true);
+        config.getSecurity().setSignatureInterval("5 minutes");
+        config.getFileRotation().setRotationEnabled(true);
+        config.getFileRotation().setRotationFileSuffix("-yyyy.MM.dd-HH.mm.ss.SSS");
+        config.setRotationRetentionCheckInterval("5 minutes");
+        final SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
+                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, config, keyStoreHandler, random);
+        // a pending signature, which the rotation writes first
+        secureCsvWriter.writeEvent(singletonMap(header, "one"));
+
+        final FutureTask<Boolean> rotation = new FutureTask<>(secureCsvWriter::forceRotation);
+        final Thread rotator = new Thread(rotation, "rotator");
+        rotator.setDaemon(true);
+        final FutureTask<Void> publication = new FutureTask<>(() -> {
+            // hold the signature lock, and only it, as writeEvent() holds it while it writes to the rotatable writer
+            secureCsvWriter.beforeRollingOver();
+            try {
+                rotator.start();
+                awaitWaitingForLockOf(rotator, Thread.currentThread());
+                secureCsvWriter.writeEvent(singletonMap(header, "two"));
+            } finally {
+                secureCsvWriter.afterRollingOver();
+            }
+            return null;
+        });
+        final Thread publisher = new Thread(publication, "publisher");
+        publisher.setDaemon(true);
+        publisher.start();
+
+        publication.get(10, TimeUnit.SECONDS);
+        assertThat(rotation.get(10, TimeUnit.SECONDS)).isTrue();
+        secureCsvWriter.close();
+
+        // both events are in the archive, before the signature that the rotation writes
+        final SecretKey keystorePasswordKey = keyStoreHandler.readSecretKeyFromKeyStore(ENTRY_PASSWORD);
+        final String keystorePassword = Base64.encode(keystorePasswordKey.getEncoded());
+        final PublicKey publicKey = keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE);
+        final FileNamingPolicy fileNamingPolicy =
+                new TimeStampFileNamingPolicy(actual, "-yyyy.MM.dd-HH.mm.ss.SSS", "");
+        final List<VerificationResult> verificationResults = new CsvSecureArchiveVerifier(
+                fileNamingPolicy, keystorePassword, publicKey, CsvPreference.EXCEL_PREFERENCE).verify();
+        assertThat(verificationResults).hasSize(1);
+        final VerificationResult archive = verificationResults.get(0);
+        assertThat(archive.hasPassedVerification()).as(archive.getFailureReason()).isTrue();
+        assertThat(contentOf(archive.getArchiveFile())).containsPattern("(?m)^one,").containsPattern("(?m)^two,");
+    }
+
+    /** Waits until the thread waits for a lock that the owner holds. */
+    private static void awaitWaitingForLockOf(final Thread thread, final Thread owner) throws InterruptedException {
+        final ThreadMXBean threads = ManagementFactory.getThreadMXBean();
+        final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+        while (!isWaitingForLockOf(threads, thread, owner) && System.nanoTime() < deadline) {
+            Thread.sleep(1);
+        }
+        assertThat(isWaitingForLockOf(threads, thread, owner))
+                .as(thread.getName() + " waits for a lock of " + owner.getName())
+                .isTrue();
+    }
+
+    private static boolean isWaitingForLockOf(final ThreadMXBean threads, final Thread thread, final Thread owner) {
+        final ThreadInfo threadInfo = threads.getThreadInfo(thread.getId());
+        return threadInfo != null && threadInfo.getLockOwnerId() == owner.getId();
     }
 
     private CsvAuditEventHandlerConfiguration createBasicSecureConfig(String interval) {

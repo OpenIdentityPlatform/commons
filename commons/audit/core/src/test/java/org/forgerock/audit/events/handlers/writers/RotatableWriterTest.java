@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.audit.events.handlers.writers;
 
@@ -22,16 +23,24 @@ import static org.assertj.core.util.Files.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 import org.forgerock.audit.events.handlers.FileBasedEventHandlerConfiguration;
+import org.forgerock.audit.events.handlers.writers.RotatableWriter.RolloverLifecycleHook;
 import org.forgerock.audit.retention.TimestampFilenameFilter;
 import org.forgerock.audit.rotation.FixedTimeRotationPolicy;
+import org.forgerock.audit.rotation.RotationContext;
+import org.forgerock.audit.rotation.RotationHooks;
 import org.forgerock.audit.rotation.RotationPolicy;
 import org.forgerock.audit.rotation.SizeBasedRotationPolicy;
 import org.forgerock.audit.rotation.TimeLimitRotationPolicy;
@@ -261,6 +270,101 @@ public class RotatableWriterTest {
     }
 
     // TODO: testRotationForFixedTimeRotationPolicy
+
+    @Test
+    public void testForceRotationRunsTheRolloverLifecycleHook() throws Exception {
+        // given
+        final File file = getTempFile();
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
+        configuration.getFileRotation().setRotationEnabled(true);
+        configuration.getFileRotation().setRotationFileSuffix(ROTATION_FILE_SUFFIX);
+        final List<String> calls = new ArrayList<>();
+        rotatableWriter = new RotatableWriter(file, configuration, true, new RolloverLifecycleHook() {
+            @Override
+            public void beforeRollingOver() {
+                calls.add("beforeRollingOver");
+            }
+
+            @Override
+            public void afterRollingOver() {
+                calls.add("afterRollingOver");
+            }
+        });
+        rotatableWriter.registerRotationHooks(new RotationHooks() {
+            @Override
+            public void preRotationAction(RotationContext context) {
+                calls.add("preRotationAction");
+            }
+
+            @Override
+            public void postRotationAction(RotationContext context) {
+                calls.add("postRotationAction");
+            }
+        });
+
+        // when
+        final boolean rotated = rotatableWriter.forceRotation();
+
+        // then
+        assertThat(rotated).isTrue();
+        assertThat(calls).containsExactly(
+                "beforeRollingOver", "preRotationAction", "postRotationAction", "afterRollingOver");
+    }
+
+    @Test(timeOut = 60_000)
+    public void testFlushWaitsForTheRotationToComplete() throws Exception {
+        // given
+        final File file = getTempFile();
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
+        configuration.getFileRotation().setRotationEnabled(true);
+        configuration.getFileRotation().setRotationFileSuffix(ROTATION_FILE_SUFFIX);
+        rotatableWriter = new RotatableWriter(file, configuration, true);
+        final FutureTask<Void> flush = new FutureTask<>(() -> {
+            rotatableWriter.flush();
+            return null;
+        });
+        final Thread flusher = new Thread(flush, "flusher");
+        flusher.setDaemon(true);
+        final List<Boolean> flushWaitedForTheRotation = new ArrayList<>();
+        rotatableWriter.registerRotationHooks(new RotationHooks() {
+            @Override
+            public void preRotationAction(RotationContext context) throws IOException {
+                // the rotation closes and replaces the writer after this hook
+                flusher.start();
+                flushWaitedForTheRotation.add(awaitWaitingForLockOf(flusher, Thread.currentThread(), flush));
+            }
+
+            @Override
+            public void postRotationAction(RotationContext context) {
+                // nothing to do
+            }
+        });
+
+        // when
+        rotatableWriter.forceRotation();
+
+        // then
+        flush.get(10, SECONDS);
+        assertThat(flushWaitedForTheRotation).containsExactly(true);
+    }
+
+    /**
+     * Waits until the thread waits for a lock that the owner holds, or until the task of the thread is done.
+     *
+     * @return {@code true} if the thread waits for a lock that the owner holds
+     */
+    private static boolean awaitWaitingForLockOf(final Thread thread, final Thread owner, final FutureTask<?> task) {
+        final ThreadMXBean threads = ManagementFactory.getThreadMXBean();
+        final long deadline = System.nanoTime() + SECONDS.toNanos(10);
+        while (!task.isDone() && System.nanoTime() < deadline) {
+            final ThreadInfo threadInfo = threads.getThreadInfo(thread.getId());
+            if (threadInfo != null && threadInfo.getLockOwnerId() == owner.getId()) {
+                return true;
+            }
+            Thread.yield();
+        }
+        return false;
+    }
 
     @Test
     public void testCanForceRotation() throws Exception {
