@@ -90,6 +90,8 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
 
     private String lastHMAC;
     private byte[] lastSignature;
+    /** Whether events were written since the last signature. */
+    private boolean unsignedEvents = false;
     private boolean headerWritten = false;
     private final Random random;
     private File keyStoreFile;
@@ -299,10 +301,12 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
     }
 
     private void forceWriteSignature(Writer writer) throws IOException {
-        if (scheduledSignature != null && scheduledSignature.cancel(false)) {
-            // We were able to cancel it before it starts, so let's generate the signature now.
-            writeSignature(writer);
+        if (scheduledSignature != null) {
+            scheduledSignature.cancel(false);
         }
+        // Sign the events written since the last signature now, whether the scheduled signature has run or not:
+        // a rotation on write can come before any signature is scheduled for the event that triggers it.
+        writeSignature(writer);
     }
 
     public void writeHeader(String... header) throws IOException {
@@ -322,7 +326,13 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
         // and the signature's row write, as the calculation uses the lastHMAC.
         signatureLock.lock();
         try {
+            if (!unsignedEvents) {
+                logger.trace("No event to sign");
+                return;
+            }
             lastSignature = secureStorage.sign(dataToSign(lastSignature, lastHMAC));
+            // Before the row is written: writing it may rotate the file, and the rotation signs the unsigned events.
+            unsignedEvents = false;
             logger.trace("Calculated new Signature");
             Map<String, String> values = singletonMap(HEADER_SIGNATURE, Base64.encode(lastSignature));
             writeEvent(writer, values);
@@ -387,9 +397,8 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
             // Store the current key
             secureStorage.writeCurrentKey(hmacCalculator.getCurrentKey());
 
-            // Schedule a signature task only if needed.
-            if (!values.containsKey(HEADER_SIGNATURE)
-                    && (scheduledSignature == null || scheduledSignature.isDone())) {
+            // Schedule a signature task only if needed: a rotation during the write signed the event already.
+            if (unsignedEvents && (scheduledSignature == null || scheduledSignature.isDone())) {
                 logger.trace("Triggering a new signature task to be executed in {}", signatureInterval);
                 try {
                     scheduledSignature = scheduler.schedule(signatureTask, signatureInterval.getValue(),
@@ -409,6 +418,7 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
         try {
             lastHMAC = hmacCalculator.calculate(dataToSign(logger, values, nameMapping));
             values.put(CsvSecureConstants.HEADER_HMAC, lastHMAC);
+            unsignedEvents = true;
         } catch (SignatureException ex) {
             logger.error(ex.getMessage(), ex);
             throw new IOException(ex);
@@ -473,6 +483,12 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
                 throw new IOException(ex);
             }
 
+            if (lastSignature == null) {
+                // Nothing was signed yet, so there is nothing to chain: the new file stays empty, as a new file does,
+                // and its header is written along with its first event.
+                headerWritten = false;
+                return;
+            }
             Writer writer = context.getWriter();
             writeHeader(writer, headers);
             // ensure the signature chaining along the files
