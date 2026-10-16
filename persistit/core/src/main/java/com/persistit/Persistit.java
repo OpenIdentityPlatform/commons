@@ -1674,7 +1674,9 @@ public class Persistit {
    * Closing waits for {@link #checkpoint()} calls and {@link #copyBackPages()}
    * passes in progress. When <code>flush</code> is false it waits for them at
    * most 30 seconds and then closes anyway. An interrupt does not stop this
-   * wait, so that an interrupted thread still closes Persistit. A
+   * wait, so that an interrupted thread still closes Persistit; an interrupt
+   * while shutdown is suspended still throws a
+   * {@link PersistitInterruptedException}. A
    * <code>close(true)</code> held up by a checkpoint that cannot complete
    * goes on once the thread running that checkpoint is interrupted.
    * </p>
@@ -1712,8 +1714,11 @@ public class Persistit {
   public void close(final boolean flush) throws PersistitException {
     if (!_initialized.get() || _closed.get()) {
       /*
-       * Nothing to wait for: a checkpoint left stuck by a timed-out fast
-       * close may hold the read lock for good.
+       * Not initialized, closed, or another close() is past
+       * _closed.set(true): do not wait, since a checkpoint left stuck by a
+       * timed-out fast close may hold the read lock for good. A close()
+       * arriving mid-close therefore returns without waiting for the first
+       * one to finish.
        */
       doClose(flush);
       return;
@@ -1732,19 +1737,17 @@ public class Persistit {
       }
     }
     final Lock writeLock = _checkpointCloseLock.writeLock();
-    final boolean locked;
     if (flush) {
       writeLock.lock();
-      locked = true;
-    } else {
-      locked = tryLockForFastClose(writeLock);
+    } else if (!tryLockForFastClose(writeLock)) {
+      // Timed out: close anyway, without the lock.
+      doClose(flush);
+      return;
     }
     try {
       doClose(flush);
     } finally {
-      if (locked) {
-        writeLock.unlock();
-      }
+      writeLock.unlock();
     }
   }
 
@@ -1754,11 +1757,11 @@ public class Persistit {
    * <code>_fastCloseWaitMs</code> for the write lock, then close anyway,
    * releasing resources under that checkpoint. An interrupt does not stop the
    * wait, so that an interrupted thread still closes; the interrupt status is
-   * restored afterwards.
+   * restored afterwards. Package-private so that tests can call it directly.
    *
    * @return whether the write lock was acquired
    */
-  private boolean tryLockForFastClose(final Lock writeLock) {
+  boolean tryLockForFastClose(final Lock writeLock) {
     final long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(_fastCloseWaitMs);
     boolean interrupted = false;
     boolean locked;

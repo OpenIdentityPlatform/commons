@@ -22,6 +22,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.persistit.exception.PersistitClosedException;
 import com.persistit.exception.PersistitInterruptedException;
@@ -196,6 +198,28 @@ public class CheckpointCloseRaceTest extends PersistitUnitTestCase {
             Thread.interrupted();
         }
         assertTrue("close(false) on an interrupted thread should close Persistit", persistit.isClosed());
+    }
+
+    /**
+     * The fast-close wait restores the interrupt status it waits out. Called
+     * directly on a free lock, since <code>doClose()</code> consumes the
+     * restored status while it waits for its IO tasks to stop.
+     */
+    @Test
+    public void fastCloseLockRestoresInterruptStatus() throws Exception {
+        final Lock lock = new ReentrantReadWriteLock().writeLock();
+        boolean locked = false;
+        Thread.currentThread().interrupt();
+        try {
+            locked = _persistit.tryLockForFastClose(lock);
+            assertTrue("a free write lock should be acquired", locked);
+            assertTrue("the interrupt status should be restored", Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+            if (locked) {
+                lock.unlock();
+            }
+        }
     }
 
     /**
