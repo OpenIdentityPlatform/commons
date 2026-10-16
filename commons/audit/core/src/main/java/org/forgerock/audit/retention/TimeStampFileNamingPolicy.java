@@ -91,7 +91,10 @@ public class TimeStampFileNamingPolicy implements FileNamingPolicy {
 
     /**
      * Gets the next name for this {@link FileNamingPolicy}. The next name will be formatted with prefix first,
-     * then the initial filename and finally the timestamp will be appended.
+     * then the initial filename and finally the timestamp will be appended. If a file already exists under that
+     * name, with or without the {@code .gz} suffix, a collision counter {@code .N} follows the timestamp. A
+     * {@code .gz} suffix of the timestamp format always comes last:
+     * {@code <prefix><initial filename><timestamp>[.N][.gz]}.
      * @return The next archived file according to this {@link FileNamingPolicy}.
      */
     @Override

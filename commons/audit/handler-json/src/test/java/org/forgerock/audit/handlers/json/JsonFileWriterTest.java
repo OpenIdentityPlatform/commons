@@ -101,6 +101,10 @@ public class JsonFileWriterTest {
         createHistoryFiles(0, 3);
         // well below the default interval, so that a writer which ignores the setting fails
         awaitUntil(() -> historyFiles().size() == 1, TimeUnit.SECONDS.toMillis(2));
+        createHistoryFiles(3, 2);
+        // a writer which ignores the setting may run one check in the first window if it started slowly, but it
+        // cannot run another one in this window as well
+        awaitUntil(() -> historyFiles().size() == 1, TimeUnit.SECONDS.toMillis(2));
     }
 
     @DataProvider
@@ -112,6 +116,14 @@ public class JsonFileWriterTest {
     public void shouldFallBackToDefaultRetentionCheckIntervalWhenInvalid(final String interval) {
         assertThat(JsonFileWriter.parseRetentionCheckInterval(retentionCheckIntervalConfiguration(interval)))
                 .isEqualTo(Duration.duration("5s"));
+    }
+
+    @Test(dataProvider = "invalidRetentionCheckIntervals")
+    public void shouldStartWriterAndEnforceRetentionWhenIntervalIsInvalid(final String interval) throws Exception {
+        createHistoryFiles(0, 3);
+        writer = newWriter(interval);
+        writer.startup();
+        awaitHistoryFiles(1);
     }
 
     @Test

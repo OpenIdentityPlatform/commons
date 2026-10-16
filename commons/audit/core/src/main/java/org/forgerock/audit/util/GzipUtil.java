@@ -18,7 +18,8 @@ package org.forgerock.audit.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.zip.GZIPOutputStream;
@@ -59,9 +60,9 @@ public final class GzipUtil {
     }
 
     /**
-     * Compresses a rotated file into its archive, if the archive name ends with {@link #GZIP_SUFFIX}, and then
-     * deletes the uncompressed file. An existing archive is never overwritten. A failure is logged, and the
-     * uncompressed file is kept.
+     * Compresses a rotated file into its archive, if the archive name ends with {@link #GZIP_SUFFIX}, forces the
+     * archive to disk, and then deletes the uncompressed file. An existing archive is never overwritten. A failure
+     * is logged, and the uncompressed file is kept.
      *
      * @param archivedFile The archive name of the rotated file, which was renamed to
      *                     {@link #removeGzipSuffix(File)} of this name.
@@ -87,10 +88,14 @@ public final class GzipUtil {
     private static void compress(final File source, final File target) throws IOException {
         boolean created = false;
         try (InputStream in = Files.newInputStream(source.toPath());
-                OutputStream fileOut = Files.newOutputStream(target.toPath(), StandardOpenOption.CREATE_NEW)) {
+                FileChannel channel = FileChannel.open(target.toPath(), StandardOpenOption.CREATE_NEW,
+                        StandardOpenOption.WRITE)) {
             created = true;
-            try (OutputStream out = new GZIPOutputStream(fileOut, BUFFER_SIZE)) {
+            try (GZIPOutputStream out = new GZIPOutputStream(Channels.newOutputStream(channel), BUFFER_SIZE)) {
                 in.transferTo(out);
+                out.finish();
+                // the caller deletes the source next, so the archive must be on disk before that
+                channel.force(true);
             }
         } catch (IOException e) {
             if (created) {
