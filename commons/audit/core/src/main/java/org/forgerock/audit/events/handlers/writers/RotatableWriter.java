@@ -21,7 +21,6 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -35,7 +34,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
-import java.util.zip.GZIPOutputStream;
 
 import org.forgerock.audit.events.handlers.FileBasedEventHandlerConfiguration;
 import org.forgerock.audit.retention.FileNamingPolicy;
@@ -44,6 +42,7 @@ import org.forgerock.audit.rotation.RotatableObject;
 import org.forgerock.audit.rotation.RotationContext;
 import org.forgerock.audit.rotation.RotationHooks;
 import org.forgerock.audit.rotation.RotationPolicy;
+import org.forgerock.audit.util.GzipUtil;
 import org.forgerock.util.annotations.VisibleForTesting;
 import org.forgerock.util.time.Duration;
 import org.joda.time.DateTime;
@@ -191,31 +190,14 @@ public class RotatableWriter implements TextWriter, RotatableObject {
             if (logger.isTraceEnabled()) {
                 logger.trace("Renaming {} to {}", currentFile.getAbsolutePath(), newFile.getAbsolutePath());
             }
-            if (currentFile.renameTo(new File(newFile.getAbsolutePath().replace(".gz", "")))) {
+            // a file to compress is renamed without the .gz suffix, and compressed into newFile below
+            if (currentFile.renameTo(GzipUtil.removeGzipSuffix(newFile))) {
                 rotationHappened = true;
                 if (currentFile.createNewFile()) {
                     writer = constructWriter(currentFile, true);
                     context.setWriter(writer);
                     rotationHooks.postRotationAction(context);
-                    if (newFile.getName().endsWith(".gz")) { //need compression
-                    	byte[] buffer = new byte[1024];
-                    	 
-                        try {
-                            FileOutputStream fileOutputStream =new FileOutputStream(newFile);
-                            GZIPOutputStream gzipOuputStream = new GZIPOutputStream(fileOutputStream);
-                            FileInputStream fileInput = new FileInputStream(newFile.getAbsolutePath().replace(".gz", ""));
-                            int bytes_read;
-                            while ((bytes_read = fileInput.read(buffer)) > 0) {
-                                gzipOuputStream.write(buffer, 0, bytes_read);
-                            }
-                            fileInput.close();
-                            gzipOuputStream.finish();
-                            gzipOuputStream.close();
-                            new File(newFile.getAbsolutePath().replace(".gz", "")).delete();
-                        } catch (IOException ex) {
-                        	logger.error("compression {}: {}",newFile,ex.toString(),ex);
-                        }
-                    }
+                    GzipUtil.compressRotatedFile(newFile);
                 } else {
                     logger.error("Unable to resume writing to audit file {}; further events will not be logged",
                             currentFile.toString());

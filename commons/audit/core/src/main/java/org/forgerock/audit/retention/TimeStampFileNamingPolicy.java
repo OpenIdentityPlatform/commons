@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.audit.retention;
 
@@ -105,16 +106,17 @@ public class TimeStampFileNamingPolicy implements FileNamingPolicy {
         newFileName.append(path.getFileName());
 
         if (suffixDateFormat != null) {
-            newFileName.append(LocalDateTime.now().toString(suffixDateFormat)).append(suffix);
+            newFileName.append(LocalDateTime.now().toString(suffixDateFormat));
         }
 
-        Path newFilePath = path.resolveSibling(newFileName.toString());
-        if (Files.exists(newFilePath)) {
-            // prevent filename collision with unique suffix
-            newFileName.append('.').append(collisionCounter.incrementAndGet());
-            newFilePath = path.resolveSibling(newFileName.toString());
+        // a file to compress is renamed without the compression suffix first, so both names must be free
+        final String timestampedName = newFileName.toString();
+        String uniqueName = timestampedName;
+        while (Files.exists(path.resolveSibling(uniqueName + suffix)) || Files.exists(path.resolveSibling(uniqueName))) {
+            // prevent filename collision with unique suffix, which goes before the compression suffix
+            uniqueName = timestampedName + '.' + collisionCounter.incrementAndGet();
         }
-        return newFilePath.toFile();
+        return path.resolveSibling(uniqueName + suffix).toFile();
     }
 
     /**

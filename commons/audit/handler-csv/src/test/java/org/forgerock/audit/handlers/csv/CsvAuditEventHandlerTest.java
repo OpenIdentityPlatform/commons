@@ -29,6 +29,7 @@ import static org.forgerock.json.JsonValue.*;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,6 +37,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.FutureTask;
+import java.util.zip.GZIPInputStream;
 
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceBuilder;
@@ -381,6 +383,14 @@ public class CsvAuditEventHandlerTest {
 
         assertThat(logDirectory.resolve("access.csv").toFile()).as("when " + label + " in " + logDirectory.toString())
             .hasContent("\"_id\",\"timestamp\",\"transactionId\"\n");
+        // the default rotation file suffix ends with .gz
+        final File[] rotatedFiles = logDirectory.toFile().listFiles((dir, name) -> !name.equals("access.csv"));
+        assertThat(rotatedFiles).as("when " + label).hasSize(1);
+        rotatedFiles[0].deleteOnExit();
+        assertThat(rotatedFiles[0].getName()).endsWith(".gz");
+        try (InputStream in = new GZIPInputStream(new FileInputStream(rotatedFiles[0]))) {
+            assertThat(new String(in.readAllBytes(), UTF_8)).as("when " + label).contains("\"A10000\"");
+        }
     }
 
     @Test

@@ -12,24 +12,33 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.audit.retention;
 
+import static org.forgerock.audit.util.GzipUtil.GZIP_SUFFIX;
+
 import java.io.File;
 import java.io.FilenameFilter;
-import java.nio.file.Path;
 
+import org.joda.time.Chronology;
+import org.joda.time.DateTimeUtils;
 import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.DateTimeParser;
+import org.joda.time.format.DateTimeParserBucket;
 
 /**
  * A {@link FilenameFilter} that matches historical log files. The {@link FilenameFilter} matches a filename with a
- * given prefix, filename and timestamp.
+ * given prefix, filename and timestamp, optionally followed by the collision counter and the compression suffix
+ * that {@link TimeStampFileNamingPolicy} appends.
  */
 public class TimestampFilenameFilter implements FilenameFilter {
 
-    private final File initialFile;
-    private final String prefix;
+    /** The prefix followed by the initial file name. */
+    private final String fileNamePrefix;
     private final DateTimeFormatter suffixDateFormat;
+    private final DateTimeParser suffixDateParser;
+    private final Chronology suffixDateChronology;
 
     /**
      * Constructs a {@link TimestampFilenameFilter} given an initial file, prefix and suffix.
@@ -39,9 +48,14 @@ public class TimestampFilenameFilter implements FilenameFilter {
      */
     public TimestampFilenameFilter(final File initialFile, final String prefix,
             final DateTimeFormatter suffixDateFormat) {
-        this.initialFile = initialFile;
-        this.prefix = prefix;
+        this.fileNamePrefix = (prefix != null ? prefix : "") + initialFile.toPath().getFileName();
         this.suffixDateFormat = suffixDateFormat;
+        this.suffixDateParser = suffixDateFormat.getParser();
+        // the chronology that DateTimeFormatter.parseDateTime() parses with
+        final Chronology chronology = DateTimeUtils.getChronology(suffixDateFormat.getChronology());
+        this.suffixDateChronology = suffixDateFormat.getZone() != null
+                ? chronology.withZone(suffixDateFormat.getZone())
+                : chronology;
     }
 
     /**
@@ -50,33 +64,48 @@ public class TimestampFilenameFilter implements FilenameFilter {
      */
     @Override
     public boolean accept(File dir, String name) {
-        // create prefix + filename string
-        final StringBuilder newFileNameBuilder = new StringBuilder();
-        final Path path = initialFile.toPath();
-
-        if (prefix != null) {
-            newFileNameBuilder.append(prefix);
-        }
-        newFileNameBuilder.append(path.getFileName());
-        final String newFileName = newFileNameBuilder.toString();
-
-        if (name.length() < newFileName.length()) {
-            // the filename is smaller or equal to the prefix + filename
+        // the directory may hold many other files, so reject them before allocating anything
+        if (!name.startsWith(fileNamePrefix) || suffixDateParser == null) {
             return false;
         }
+        // strip a trailing compression suffix, unless it is part of the prefix
+        final int compressedEnd = name.length() - GZIP_SUFFIX.length();
+        final int end = name.endsWith(GZIP_SUFFIX) && compressedEnd >= fileNamePrefix.length()
+                ? compressedEnd
+                : name.length();
+        final String timestamp = name.substring(fileNamePrefix.length(), end);
 
-        final String timestamp = name.substring(newFileName.length());
+        // parse as DateTimeFormatter.parseDateTime() does, but allow a collision counter after the timestamp and
+        // reject a malformed timestamp without an exception
+        final DateTimeParserBucket bucket = new DateTimeParserBucket(0L, suffixDateChronology,
+                suffixDateFormat.getLocale(), suffixDateFormat.getPivotYear(), suffixDateFormat.getDefaultYear());
+        final int position = suffixDateParser.parseInto(bucket, timestamp, 0);
+        if (position < 0 || (position < timestamp.length() && !isCollisionCounter(timestamp, position))) {
+            return false;
+        }
         try {
-            suffixDateFormat.parseDateTime(timestamp.replace(".gz",""));
-        } catch (IllegalArgumentException | UnsupportedOperationException e) {
-            // not a valid timestamp for the given timestamp suffix
+            bucket.computeMillis(true, timestamp);
+            return true;
+        } catch (IllegalArgumentException e) {
+            // a field is out of range, e.g. second 70
             return false;
         }
+    }
 
-        // if the file starts with the prefix + initial filename match it.
-        if (name.startsWith(newFileName)) {
-            return true;
+    /**
+     * Checks whether the rest of a timestamp is the unique suffix that {@link TimeStampFileNamingPolicy} appends
+     * when the timestamped name is already taken: a dot followed by digits.
+     */
+    private static boolean isCollisionCounter(final String timestamp, final int start) {
+        if (timestamp.charAt(start) != '.' || start + 1 == timestamp.length()) {
+            return false;
         }
-        return false;
+        for (int i = start + 1; i < timestamp.length(); i++) {
+            final char c = timestamp.charAt(i);
+            if (c < '0' || c > '9') {
+                return false;
+            }
+        }
+        return true;
     }
 }

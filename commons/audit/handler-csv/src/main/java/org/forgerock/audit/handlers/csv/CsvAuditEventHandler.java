@@ -64,6 +64,7 @@ import org.forgerock.audit.providers.KeyStoreHandlerProvider;
 import org.forgerock.audit.retention.TimeStampFileNamingPolicy;
 import org.forgerock.audit.secure.JcaKeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreHandler;
+import org.forgerock.audit.util.GzipUtil;
 import org.forgerock.audit.util.JsonValueUtils;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -463,15 +464,22 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
         closeWriter(topic);
         try {
             File auditLogFile = getAuditLogFile(topic);
+            File rotatedFile = null;
             if (forceRotation) {
                 TimeStampFileNamingPolicy namingPolicy = new TimeStampFileNamingPolicy(auditLogFile, null, null);
-                File rotatedFile = namingPolicy.getNextName();
-                if (!auditLogFile.renameTo(rotatedFile)) {
+                rotatedFile = namingPolicy.getNextName();
+                // a file to compress is renamed without the .gz suffix, and compressed once the writer is open
+                File renamedFile = GzipUtil.removeGzipSuffix(rotatedFile);
+                if (!auditLogFile.renameTo(renamedFile)) {
                     throw new BadRequestException(
-                            format("Unable to rename file %s to %s when rotating", auditLogFile, rotatedFile));
+                            format("Unable to rename file %s to %s when rotating", auditLogFile, renamedFile));
                 }
             }
-            return openWriter(topic, auditLogFile);
+            CsvWriter csvWriter = openWriter(topic, auditLogFile);
+            if (rotatedFile != null) {
+                GzipUtil.compressRotatedFile(rotatedFile);
+            }
+            return csvWriter;
         } catch (IOException e) {
             throw new BadRequestException(e);
         }
