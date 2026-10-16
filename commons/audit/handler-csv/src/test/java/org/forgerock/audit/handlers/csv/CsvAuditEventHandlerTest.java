@@ -35,6 +35,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -435,6 +436,57 @@ public class CsvAuditEventHandlerTest {
         assertThatThrownBy(csvHandler::shutdown).isInstanceOf(InternalServerErrorException.class);
         // The scheduler threads are not daemon threads, they would keep the JVM from exiting.
         assertThreadsTerminate(writerThreads);
+    }
+
+    @Test
+    public void testStartupOpensOtherTopicsWhenTamperEvidentFileCannotBeResumed() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final CsvAuditEventHandlerBuilder builder =
+                csvAuditEventHandler().loggingTo(logDirectory).withSecureLoggingEnabled();
+        // A second topic, so that a topic is left to open after the first one fails.
+        final Map<String, JsonValue> topics = new LinkedHashMap<>();
+        topics.put("access", builder.eventTopicsMetaData.getSchema("access"));
+        topics.put("activity", builder.eventTopicsMetaData.getSchema("access"));
+        final EventTopicsMetaData eventTopicsMetaData = new EventTopicsMetaData(topics);
+        builder.config.setTopics(eventTopicsMetaData.getTopics());
+        final Context context = new RootContext();
+
+        // A file and a keystore for every topic.
+        CsvAuditEventHandler csvHandler =
+                new CsvAuditEventHandler(builder.config, eventTopicsMetaData, builder.keystoreHandlerProvider);
+        csvHandler.startup();
+        for (String topic : topics.keySet()) {
+            AssertJPromiseAssert.assertThat(csvHandler.publishEvent(context, topic, buildEvent(1))).succeeded();
+        }
+        csvHandler.shutdown();
+
+        csvHandler = new CsvAuditEventHandler(builder.config, eventTopicsMetaData, builder.keystoreHandlerProvider);
+        // The topic that startup opens first, so that the other topic is opened only if startup goes on.
+        final List<String> handledTopics = new ArrayList<>(csvHandler.getHandledTopics());
+        final String failingTopic = handledTopics.get(0);
+        final String otherTopic = handledTopics.get(1);
+        // The HMAC of the row no longer matches its value, so the file fails verification when it is resumed.
+        final Path failingFile = logDirectory.resolve(SECURE_CSV_FILENAME_PREFIX + failingTopic + ".csv");
+        final String content = new String(Files.readAllBytes(failingFile), UTF_8);
+        Files.write(failingFile, content.replace("transactionId-X", "transactionId-Y").getBytes(UTF_8));
+
+        final AuditService auditService = newAuditService()
+                .withEventTopicsMetaData(eventTopicsMetaData)
+                .withAuditEventHandler(csvHandler)
+                .build();
+        try {
+            auditService.startup();
+            assertThat(auditService.isRunning()).isTrue();
+
+            AssertJPromiseAssert.assertThat(csvHandler.publishEvent(context, otherTopic, buildEvent(2))).succeeded();
+            assertThat(logDirectory.resolve(SECURE_CSV_FILENAME_PREFIX + otherTopic + ".csv").toFile())
+                    .content().contains("\"_id2\"");
+            AssertJPromiseAssert.assertThat(csvHandler.publishEvent(context, failingTopic, buildEvent(2)))
+                    .failedWithException().isInstanceOf(BadRequestException.class);
+        } finally {
+            auditService.shutdown();
+        }
     }
 
     @DataProvider

@@ -27,10 +27,12 @@ import static org.forgerock.util.time.Duration.duration;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyStore;
@@ -39,6 +41,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
@@ -338,6 +341,86 @@ public class SecureCsvWriterTest {
     private static boolean isWaitingForLockOf(final ThreadMXBean threads, final Thread thread, final Thread owner) {
         final ThreadInfo threadInfo = threads.getThreadInfo(thread.getId());
         return threadInfo != null && threadInfo.getLockOwnerId() == owner.getId();
+    }
+
+    /** Leaves a written file and its keystore in a state that cannot be resumed. */
+    private interface Damage {
+        void apply(File csvFile, File keyStoreFile) throws Exception;
+    }
+
+    @DataProvider
+    private Object[][] unresumableFiles() {
+        return new Object[][] {
+            { "changed row", (Damage) (csvFile, keyStoreFile) -> {
+                // The HMAC of the row no longer matches its value.
+                final String content = new String(Files.readAllBytes(csvFile.toPath()), StandardCharsets.UTF_8);
+                Files.write(csvFile.toPath(),
+                        content.replace("first-event", "forged-event").getBytes(StandardCharsets.UTF_8));
+            }, "The CSV file was tampered" },
+            { "missing keystore", (Damage) (csvFile, keyStoreFile) -> Files.delete(keyStoreFile.toPath()),
+                "no initial key" },
+            { "keystore without current key", (Damage) (csvFile, keyStoreFile) -> {
+                final JcaKeyStoreHandler fileKeyStore = loadFileKeyStore(keyStoreFile);
+                fileKeyStore.getStore().deleteEntry(KeyStoreSecureStorage.ENTRY_CURRENT_KEY);
+                fileKeyStore.store();
+            }, "Final HMAC key is null" },
+            // as left by a crash while the keystore was stored
+            { "empty keystore", (Damage) (csvFile, keyStoreFile) -> Files.write(keyStoreFile.toPath(), new byte[0]),
+                "cannot be loaded" },
+            // as after a change of the Password key in the handler keystore
+            { "keystore of another password", (Damage) (csvFile, keyStoreFile) -> {
+                final KeyStore store = loadFileKeyStore(keyStoreFile).getStore();
+                try (OutputStream out = Files.newOutputStream(keyStoreFile.toPath())) {
+                    store.store(out, "another password".toCharArray());
+                }
+            }, "cannot be loaded" },
+        };
+    }
+
+    /** Loads the keystore of a file with the password that the writer derives from the handler keystore. */
+    private JcaKeyStoreHandler loadFileKeyStore(File keyStoreFile) throws Exception {
+        final String password = Base64.encode(keyStoreHandler.readSecretKeyFromKeyStore(ENTRY_PASSWORD).getEncoded());
+        return new JcaKeyStoreHandler(KEYSTORE_TYPE, keyStoreFile.getPath(), password);
+    }
+
+    @Test(dataProvider = "unresumableFiles")
+    public void shouldStopRotatorAndFailWithIOExceptionWhenFileCannotBeResumed(
+            final String description, final Damage damage, final String reason) throws Exception {
+        final Path logDirectory = Files.createTempDirectory("SecureCsvWriterTest");
+        final File actual = new File(logDirectory.toFile(), "tamper-evident-test.csv");
+        final String[] headers = {"FOO"};
+        final CsvAuditEventHandlerConfiguration config = createBasicSecureConfig("5 minutes");
+        // A rotation policy, so that the RotatableWriter starts its rotator thread; no check runs during the test.
+        config.getFileRotation().setRotationEnabled(true);
+        config.getFileRotation().setMaxFileSize(1024 * 1024);
+        config.setRotationRetentionCheckInterval("5 minutes");
+
+        // The executors of a writer create their threads in the group of the thread that creates the writer.
+        final ThreadGroup writerThreads = new ThreadGroup("SecureCsvWriterTest");
+        final SecureCsvWriter secureCsvWriter = callInThreadGroup(writerThreads, () -> new SecureCsvWriter(
+                actual, headers, CsvPreference.EXCEL_PREFERENCE, config, keyStoreHandler, random));
+        assertThat(writerThreads.activeCount()).as("rotator threads").isEqualTo(1);
+        secureCsvWriter.writeEvent(singletonMap(headers[0], "first-event"));
+        secureCsvWriter.close();
+        assertThreadsTerminate(writerThreads);
+
+        damage.apply(actual, new File(actual.getPath() + ".keystore"));
+
+        final ThreadGroup resumingThreads = new ThreadGroup("SecureCsvWriterTest-resume");
+        final Throwable failure = callInThreadGroup(resumingThreads, () -> catchThrowable(() -> new SecureCsvWriter(
+                actual, headers, CsvPreference.EXCEL_PREFERENCE, config, keyStoreHandler, random)));
+        assertThat(failure).as(description).isInstanceOf(IOException.class).hasMessageContaining(reason);
+        // The rotator thread is not a daemon thread, it would keep the JVM from exiting.
+        assertThreadsTerminate(resumingThreads);
+    }
+
+    /** Runs the task in a new thread of the group, and returns its result once the thread has ended. */
+    private static <T> T callInThreadGroup(ThreadGroup group, Callable<T> task) throws Exception {
+        final FutureTask<T> future = new FutureTask<>(task);
+        final Thread thread = new Thread(group, future);
+        thread.start();
+        thread.join();
+        return future.get();
     }
 
     private CsvAuditEventHandlerConfiguration createBasicSecureConfig(String interval) {
