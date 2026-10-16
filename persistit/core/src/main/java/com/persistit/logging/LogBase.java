@@ -209,7 +209,7 @@ public class LogBase {
     @Message("INFO|Waited %,d seconds for IO operations to finish")
     public final LogItem waitForClose = PersistitLogMessage.empty();
 
-    @Message("WARNING|Fast close proceeding after waiting %,dms for a checkpoint in progress")
+    @Message("WARNING|Fast close proceeding after waiting %,dms for a checkpoint, copy-back pass or close in progress")
     public final LogItem fastCloseCheckpointTimeout = PersistitLogMessage.empty();
 
     @Message("ERROR|Checkpoint %s written to journal before dirty page %d")

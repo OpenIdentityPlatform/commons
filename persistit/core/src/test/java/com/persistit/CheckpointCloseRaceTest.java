@@ -18,10 +18,13 @@ package com.persistit;
 
 import org.junit.Test;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.persistit.exception.PersistitClosedException;
+import com.persistit.exception.PersistitInterruptedException;
 import com.persistit.util.ThreadSequencer.Condition;
 
 import static com.persistit.util.SequencerConstants.CHECKPOINT_CLOSE_B;
@@ -39,6 +42,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * A public {@link Persistit#checkpoint()} or {@link Persistit#copyBackPages()}
@@ -113,7 +117,9 @@ public class CheckpointCloseRaceTest extends PersistitUnitTestCase {
 
     /**
      * A fast <code>close(false)</code> waits only a bounded time for a
-     * checkpoint that does not finish, then closes anyway.
+     * checkpoint that does not finish, then closes anyway. A later
+     * <code>close()</code> of the closed instance returns at once although
+     * the checkpoint still holds the lock.
      */
     @Test
     public void fastCloseDoesNotWaitForStuckCheckpoint() throws Exception {
@@ -122,6 +128,8 @@ public class CheckpointCloseRaceTest extends PersistitUnitTestCase {
         final Persistit persistit = _persistit;
         persistit.setFastCloseWaitMs(FAST_CLOSE_WAIT_MS);
         final AtomicReference<Throwable> closeFailure = new AtomicReference<>();
+        final AtomicLong closeMs = new AtomicLong();
+        final AtomicReference<Throwable> secondCloseFailure = new AtomicReference<>();
 
         final Thread operator = new Thread(() -> {
             try {
@@ -132,12 +140,22 @@ public class CheckpointCloseRaceTest extends PersistitUnitTestCase {
         }, "CheckpointCloseRaceTest-operation");
         operator.setDaemon(true);
         final Thread closer = new Thread(() -> {
+            final long start = System.nanoTime();
             try {
                 persistit.close(false);
             } catch (final Throwable t) {
                 closeFailure.set(t);
             }
+            closeMs.set(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start));
         }, "CheckpointCloseRaceTest-close");
+        final Thread secondCloser = new Thread(() -> {
+            try {
+                persistit.close();
+            } catch (final Throwable t) {
+                secondCloseFailure.set(t);
+            }
+        }, "CheckpointCloseRaceTest-second-close");
+        secondCloser.setDaemon(true);
 
         operator.start();
         sequence(CHECKPOINT_CLOSE_B);
@@ -148,10 +166,116 @@ public class CheckpointCloseRaceTest extends PersistitUnitTestCase {
             assertFalse("close(false) should not wait for a stuck checkpoint", closer.isAlive());
             assertNull("close(false) failed: " + closeFailure.get(), closeFailure.get());
             assertTrue("Persistit should be closed", persistit.isClosed());
+            // A timed tryLock fails only after its timeout has passed.
+            assertTrue("close(false) should wait " + FAST_CLOSE_WAIT_MS + " ms before closing anyway, waited "
+                    + closeMs.get(), closeMs.get() >= FAST_CLOSE_WAIT_MS);
+
+            secondCloser.start();
+            secondCloser.join(JOIN_TIMEOUT_MS);
+            assertFalse("close() of a closed Persistit should not wait for a stuck checkpoint",
+                    secondCloser.isAlive());
+            assertNull("close() of a closed Persistit failed: " + secondCloseFailure.get(),
+                    secondCloseFailure.get());
         } finally {
             sequence(CHECKPOINT_CLOSE_C);
             operator.join(JOIN_TIMEOUT_MS);
+            secondCloser.join(JOIN_TIMEOUT_MS);
         }
+    }
+
+    /**
+     * An interrupt does not keep a fast <code>close(false)</code> from closing.
+     */
+    @Test
+    public void fastCloseOnInterruptedThreadCloses() throws Exception {
+        final Persistit persistit = _persistit;
+        Thread.currentThread().interrupt();
+        try {
+            persistit.close(false);
+        } finally {
+            Thread.interrupted();
+        }
+        assertTrue("close(false) on an interrupted thread should close Persistit", persistit.isClosed());
+    }
+
+    /**
+     * On a closed Persistit, an interrupted thread gets the documented
+     * closed-state result, not a {@link PersistitInterruptedException}.
+     */
+    @Test
+    public void closedStateWinsOverInterrupt() throws Exception {
+        final Persistit persistit = _persistit;
+        persistit.close();
+        Thread.currentThread().interrupt();
+        try {
+            assertNull("checkpoint() after close() should return null", persistit.checkpoint());
+            try {
+                persistit.copyBackPages();
+                fail("copyBackPages() after close() should throw PersistitClosedException");
+            } catch (final PersistitClosedException expected) {
+                // expected
+            }
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    /**
+     * A <code>checkpoint()</code> queued behind a running <code>close()</code>
+     * stops waiting when it is interrupted.
+     */
+    @Test
+    public void checkpointWaitingForCloseIsInterruptible() throws Exception {
+        enableSequencer(false);
+        addSchedules(CHECKPOINT_CLOSE_SCHEDULE);
+        final Persistit persistit = _persistit;
+        final AtomicReference<Throwable> waiterFailure = new AtomicReference<>();
+
+        final Thread operator = new Thread(() -> {
+            try {
+                persistit.checkpoint();
+            } catch (final Throwable t) {
+                // not checked here
+            }
+        }, "CheckpointCloseRaceTest-operation");
+        operator.setDaemon(true);
+        final Thread closer = new Thread(() -> {
+            try {
+                persistit.close();
+            } catch (final Throwable t) {
+                // not checked here
+            }
+        }, "CheckpointCloseRaceTest-close");
+        final Thread waiter = new Thread(() -> {
+            try {
+                persistit.checkpoint();
+            } catch (final Throwable t) {
+                waiterFailure.set(t);
+            }
+        }, "CheckpointCloseRaceTest-waiter");
+        waiter.setDaemon(true);
+
+        operator.start();
+        sequence(CHECKPOINT_CLOSE_B);
+        try {
+            closer.start();
+            // close() is queued for the write lock behind the parked checkpoint.
+            awaitWaiting(closer);
+            waiter.start();
+            // The second checkpoint() is queued behind close().
+            awaitWaiting(waiter);
+            waiter.interrupt();
+            waiter.join(CLOSE_GRACE_MS);
+            assertFalse("an interrupted checkpoint() should stop waiting for close()", waiter.isAlive());
+            assertTrue("expected PersistitInterruptedException, got " + waiterFailure.get(),
+                    waiterFailure.get() instanceof PersistitInterruptedException);
+        } finally {
+            sequence(CHECKPOINT_CLOSE_C);
+            operator.join(JOIN_TIMEOUT_MS);
+            closer.join(JOIN_TIMEOUT_MS);
+            waiter.join(JOIN_TIMEOUT_MS);
+        }
+        assertFalse("close() did not finish", closer.isAlive());
     }
 
     /**
@@ -203,6 +327,14 @@ public class CheckpointCloseRaceTest extends PersistitUnitTestCase {
         assertFalse("close() did not finish", closer.isAlive());
         assertNull("close() failed: " + closeFailure.get(), closeFailure.get());
         assertTrue("Persistit should be closed", persistit.isClosed());
+    }
+
+    private static void awaitWaiting(final Thread thread) throws InterruptedException {
+        final long expires = System.currentTimeMillis() + JOIN_TIMEOUT_MS;
+        while (thread.getState() != Thread.State.WAITING && System.currentTimeMillis() < expires) {
+            Thread.sleep(10);
+        }
+        assertTrue(thread.getName() + " should be waiting for the lock", thread.getState() == Thread.State.WAITING);
     }
 
     /**
