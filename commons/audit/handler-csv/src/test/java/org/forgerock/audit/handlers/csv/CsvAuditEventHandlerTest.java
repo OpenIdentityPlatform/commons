@@ -19,9 +19,12 @@ package org.forgerock.audit.handlers.csv;
 
 import static java.nio.charset.StandardCharsets.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.forgerock.audit.AuditServiceBuilder.*;
 import static org.forgerock.audit.AuditServiceProxy.*;
 import static org.forgerock.audit.handlers.csv.CsvAuditEventHandler.*;
+import static org.forgerock.audit.handlers.csv.SecureCsvWriterTest.KEYSTORE_PASSWORD;
+import static org.forgerock.audit.handlers.csv.SecureCsvWriterTest.assertThreadsTerminate;
 import static org.forgerock.json.JsonValue.*;
 import static org.mockito.Mockito.*;
 
@@ -32,6 +35,7 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.FutureTask;
 
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceBuilder;
@@ -49,6 +53,7 @@ import org.forgerock.audit.secure.KeyStoreHandlerDecorator;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.QueryFilters;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
@@ -298,6 +303,47 @@ public class CsvAuditEventHandlerTest {
         assertThat(logDirectory.resolve("access.csv").toFile()).hasContent(expectedContent);
     }
 
+    @Test
+    public void testShutdownClosesEveryTamperEvidentWriterWhenOneFailsToClose() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final CsvAuditEventHandlerBuilder builder =
+                csvAuditEventHandler().loggingTo(logDirectory).withSecureLoggingEnabled();
+        // A second topic, so that a writer is left to close after the first one fails.
+        final Map<String, JsonValue> topics = new LinkedHashMap<>();
+        topics.put("access", builder.eventTopicsMetaData.getSchema("access"));
+        topics.put("activity", builder.eventTopicsMetaData.getSchema("access"));
+        final EventTopicsMetaData eventTopicsMetaData = new EventTopicsMetaData(topics);
+        builder.config.setTopics(eventTopicsMetaData.getTopics());
+        // The writers open at startup, and their schedulers create their threads in the group of that thread.
+        final ThreadGroup writerThreads = new ThreadGroup("CsvAuditEventHandlerTest");
+        final FutureTask<CsvAuditEventHandler> creation = new FutureTask<>(() -> {
+            final CsvAuditEventHandler handler =
+                    new CsvAuditEventHandler(builder.config, eventTopicsMetaData, builder.keystoreHandlerProvider);
+            handler.startup();
+            return handler;
+        });
+        final Thread creator = new Thread(writerThreads, creation);
+        creator.start();
+        final CsvAuditEventHandler csvHandler = creation.get();
+        creator.join();
+
+        final Context context = new RootContext();
+        for (String topic : topics.keySet()) {
+            csvHandler.publishEvent(context, topic, buildEvent());
+            // A keystore cannot be stored over a directory, so the final signature of every writer fails.
+            final File keyStoreFile =
+                    logDirectory.resolve(SECURE_CSV_FILENAME_PREFIX + topic + ".csv.keystore").toFile();
+            assertThat(keyStoreFile.delete()).isTrue();
+            assertThat(keyStoreFile.mkdir()).isTrue();
+        }
+        assertThat(writerThreads.activeCount()).as("scheduler threads").isEqualTo(topics.size());
+
+        assertThatThrownBy(csvHandler::shutdown).isInstanceOf(InternalServerErrorException.class);
+        // The scheduler threads are not daemon threads, they would keep the JVM from exiting.
+        assertThreadsTerminate(writerThreads);
+    }
+
     @DataProvider
     private Object[][] rotateActionData() {
         return new Object[][] {
@@ -424,6 +470,8 @@ public class CsvAuditEventHandlerTest {
                     new CsvAuditEventHandlerConfiguration.CsvSecurity();
             csvSecurity.setEnabled(true);
             csvSecurity.setKeyStoreHandlerName("csvSecure");
+            // the close of the writer signs its last rows
+            csvSecurity.setSignatureInterval("5 minutes");
             config.setSecurity(csvSecurity);
             keystoreHandlerProvider = setupKeyStoreHandlerProvider();
             return this;
@@ -470,11 +518,9 @@ public class CsvAuditEventHandlerTest {
         }
 
         private KeyStoreHandlerProvider setupKeyStoreHandlerProvider() throws Exception {
-            final String keystorePath = new File(System.getProperty("java.io.tmpdir"), "secure-audit.jks")
-                    .getAbsolutePath();
             DefaultKeyStoreHandlerProvider provider = new DefaultKeyStoreHandlerProvider();
             final KeyStoreHandlerDecorator keyStoreHandler = new KeyStoreHandlerDecorator(
-                    new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, keystorePath, "forgerock"));
+                    new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, KEYSTORE_FILENAME, KEYSTORE_PASSWORD));
             provider.registerKeyStoreHandler("csvSecure", keyStoreHandler);
 
             return provider;

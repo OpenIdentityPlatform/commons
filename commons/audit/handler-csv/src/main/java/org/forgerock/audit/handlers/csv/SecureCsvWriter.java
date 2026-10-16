@@ -228,23 +228,27 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
 
     @Override
     public void close() throws IOException {
-        flush();
-        signatureLock.lock();
         try {
-            forceWriteSignature(csvWriter);
-        } finally {
-            signatureLock.unlock();
-        }
-        scheduler.shutdown();
-        try {
-            while (!scheduler.awaitTermination(500, MILLISECONDS)) {
-                logger.debug("Waiting to terminate the scheduler.");
+            signatureLock.lock();
+            try {
+                forceWriteSignature(csvWriter);
+            } finally {
+                signatureLock.unlock();
             }
-        } catch (InterruptedException ex) {
-            logger.error("Unable to terminate the scheduler", ex);
-            Thread.currentThread().interrupt();
+        } finally {
+            // Also when the final signature fails: the scheduler thread is not a daemon thread, it would keep the JVM
+            // from exiting, and an open file cannot be renamed on Windows.
+            scheduler.shutdown();
+            try {
+                while (!scheduler.awaitTermination(500, MILLISECONDS)) {
+                    logger.debug("Waiting to terminate the scheduler.");
+                }
+            } catch (InterruptedException ex) {
+                logger.error("Unable to terminate the scheduler", ex);
+                Thread.currentThread().interrupt();
+            }
+            csvWriter.close();
         }
-        csvWriter.close();
     }
 
     private void forceWriteSignature(Writer writer) throws IOException {

@@ -484,8 +484,8 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
             try {
                 writerToClose.close();
             } catch (Exception ex) {
-                // Debug level as the writer is expected to potentially be invalid
-                LOGGER.debug("File writer close in closeWriter reported failure ", ex);
+                // A tamper evident file that fails to close lacks its final signature, and fails verification
+                LOGGER.error("Unable to close the CSV file writer of topic {}", topic, ex);
             }
         }
     }
@@ -572,17 +572,24 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
     }
 
     private synchronized void cleanup() throws ResourceException {
-        try {
-            for (CsvWriter csvWriter : writers.values()) {
-                if (csvWriter != null) {
-                    csvWriter.flush();
-                    csvWriter.close();
+        IOException failure = null;
+        for (CsvWriter csvWriter : writers.values()) {
+            // every writer is closed, also when the flush or another writer fails: the scheduler of a tamper evident
+            // writer would keep the JVM from exiting
+            try (CsvWriter writer = csvWriter) {
+                writer.flush();
+            } catch (IOException e) {
+                if (failure == null) {
+                    failure = e;
+                } else {
+                    failure.addSuppressed(e);
                 }
             }
-        } catch (IOException e) {
-            LOGGER.error("Unable to close filewriters during {} cleanup", this.getClass().getName(), e);
+        }
+        if (failure != null) {
+            LOGGER.error("Unable to close filewriters during {} cleanup", this.getClass().getName(), failure);
             throw new InternalServerErrorException(
-                    "Unable to close filewriters during " + this.getClass().getName() + " cleanup", e);
+                    "Unable to close filewriters during " + this.getClass().getName() + " cleanup", failure);
         }
     }
 
