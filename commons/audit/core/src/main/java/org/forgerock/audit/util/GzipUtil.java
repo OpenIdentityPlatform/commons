@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.zip.GZIPOutputStream;
 
@@ -61,8 +62,8 @@ public final class GzipUtil {
 
     /**
      * Compresses a rotated file into its archive, if the archive name ends with {@link #GZIP_SUFFIX}, forces the
-     * archive to disk, and then deletes the uncompressed file. An existing archive is never overwritten. A failure
-     * is logged, and the uncompressed file is kept.
+     * archive and, where the platform allows it, its directory to disk, and then deletes the uncompressed file. An
+     * existing archive is never overwritten. A failure is logged, and the uncompressed file is kept.
      *
      * @param archivedFile The archive name of the rotated file, which was renamed to
      *                     {@link #removeGzipSuffix(File)} of this name.
@@ -78,10 +79,21 @@ public final class GzipUtil {
             logger.error("Unable to compress the rotated audit file {} into {}", renamedFile, archivedFile, e);
             return;
         }
+        // the directory entry of the new archive must be on disk too before the uncompressed file is deleted
+        forceDirectory(archivedFile.getAbsoluteFile().getParentFile().toPath());
         try {
             Files.delete(renamedFile.toPath());
         } catch (IOException e) {
             logger.error("Compressed the rotated audit file {}, but unable to delete it", renamedFile, e);
+        }
+    }
+
+    private static void forceDirectory(final Path directory) {
+        try (FileChannel channel = FileChannel.open(directory, StandardOpenOption.READ)) {
+            channel.force(true);
+        } catch (IOException e) {
+            // a directory cannot be opened as a channel on every platform, Windows among them
+            logger.debug("Unable to force the directory {} to disk", directory, e);
         }
     }
 
