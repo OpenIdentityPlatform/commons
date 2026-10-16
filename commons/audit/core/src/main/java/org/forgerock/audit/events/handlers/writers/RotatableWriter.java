@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.audit.events.handlers.writers;
@@ -329,19 +330,33 @@ public class RotatableWriter implements TextWriter, RotatableObject {
      *          If an error occurs
      */
     public boolean forceRotation() throws IOException {
-        readWriteLock.writeLock().lock();
+        // As the scheduled checks do, run the hook before taking the write lock: the hook may take a lock that the
+        // rotation hooks need, and that writers hold while they wait for the read lock.
+        rolloverLifecycleHook.beforeRollingOver();
         try {
-            isRotating.set(true);
-            return rotate();
+            readWriteLock.writeLock().lock();
+            try {
+                isRotating.set(true);
+                return rotate();
+            } finally {
+                isRotating.set(false);
+                readWriteLock.writeLock().unlock();
+            }
         } finally {
-            isRotating.set(false);
-            readWriteLock.writeLock().unlock();
+            rolloverLifecycleHook.afterRollingOver();
         }
     }
 
     @Override
     public void flush() throws IOException {
-        writer.flush();
+        // The rotation closes and replaces the writer under the write lock.
+        final ReadLock lock = readWriteLock.readLock();
+        lock.lock();
+        try {
+            writer.flush();
+        } finally {
+            lock.unlock();
+        }
     }
 
     private BufferedWriter constructWriter(File csvFile, boolean append)
@@ -435,12 +450,12 @@ public class RotatableWriter implements TextWriter, RotatableObject {
     public interface RolloverLifecycleHook {
 
         /**
-         * This method is called before the rotation and retention checks are done.
+         * This method is called before the rotation and retention checks are done, and before a forced rotation.
          */
         void beforeRollingOver();
 
         /**
-         * This method is called after the rotation and retention checks are done.
+         * This method is called after the rotation and retention checks are done, and after a forced rotation.
          */
         void afterRollingOver();
     }
