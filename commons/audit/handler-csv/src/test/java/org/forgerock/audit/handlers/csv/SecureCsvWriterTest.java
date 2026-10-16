@@ -18,12 +18,15 @@ package org.forgerock.audit.handlers.csv;
 
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.contentOf;
 import static org.forgerock.audit.handlers.csv.CsvSecureConstants.*;
 import static org.forgerock.util.time.Duration.duration;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,6 +36,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 import javax.crypto.SecretKey;
@@ -44,6 +48,7 @@ import org.forgerock.audit.secure.JcaKeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreHandlerDecorator;
 import org.forgerock.audit.secure.KeyStoreSecureStorage;
 import org.forgerock.audit.secure.SecureStorage;
+import org.forgerock.audit.secure.SecureStorageException;
 import org.forgerock.util.encode.Base64;
 import org.forgerock.util.time.Duration;
 import org.slf4j.Logger;
@@ -212,6 +217,51 @@ public class SecureCsvWriterTest {
         // - signature // because of closing the CsvWriter
         assertThat(contentOf(actual)).isEqualToIgnoringWhitespace(contentOf(
                 new File("target/test-classes/shouldGeneratePeriodicallySignature-expected.txt")));
+    }
+
+    @Test
+    public void shouldStopSchedulerAndCloseFileWhenFinalSignatureFails() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("SecureCsvWriterTest");
+        final File actual = new File(logDirectory.toFile(), "tamper-evident-test.csv");
+        final String header = "FOO";
+        // The scheduler of the writer creates its thread in the group of the thread that creates the writer.
+        final ThreadGroup writerThreads = new ThreadGroup("SecureCsvWriterTest");
+        // A signature interval long enough to leave the final signature to close().
+        final FutureTask<SecureCsvWriter> creation = new FutureTask<>(() -> new SecureCsvWriter(
+                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE,
+                createBasicSecureConfig("5 minutes"), keyStoreHandler, random));
+        final Thread creator = new Thread(writerThreads, creation);
+        creator.start();
+        final SecureCsvWriter secureCsvWriter = creation.get();
+        creator.join();
+        secureCsvWriter.writeEvent(singletonMap(header, "one"));
+        assertThat(writerThreads.activeCount()).as("scheduler threads").isPositive();
+
+        // A keystore cannot be stored over a directory, so the final signature fails.
+        final File keyStoreFile = new File(actual.getPath() + ".keystore");
+        assertThat(keyStoreFile.delete()).isTrue();
+        assertThat(keyStoreFile.mkdir()).isTrue();
+        assertThatThrownBy(secureCsvWriter::close)
+                .isInstanceOf(IOException.class)
+                .hasCauseInstanceOf(SecureStorageException.class);
+
+        // The scheduler thread is not a daemon thread, it would keep the JVM from exiting.
+        assertThreadsTerminate(writerThreads);
+
+        // The file is closed: an event written after close() does not reach it, whether the write fails or not.
+        final long length = actual.length();
+        catchThrowable(() -> secureCsvWriter.writeEvent(singletonMap(header, "two")));
+        assertThat(actual.length()).isEqualTo(length);
+    }
+
+    /** Fails if a thread of the group is still alive after 5 s. */
+    static void assertThreadsTerminate(ThreadGroup group) throws InterruptedException {
+        final Thread[] threads = new Thread[group.activeCount() + 1];
+        final int count = group.enumerate(threads);
+        for (int i = 0; i < count; i++) {
+            threads[i].join(5000);
+            assertThat(threads[i].isAlive()).as(threads[i].getName() + " alive").isFalse();
+        }
     }
 
     private CsvAuditEventHandlerConfiguration createBasicSecureConfig(String interval) {
