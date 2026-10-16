@@ -80,13 +80,19 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static com.persistit.Configuration.DEFAULT_SYSTEM_VOLUME_NAME;
 import static com.persistit.Configuration.SYSTEM_PROPERTY_PREFIX;
 import static com.persistit.Configuration.SYSTEM_VOLUME_PROPERTY_NAME;
+import static com.persistit.util.SequencerConstants.CHECKPOINT_CLOSE_A;
+import static com.persistit.util.SequencerConstants.COPYBACK_CLOSE_A;
+import static com.persistit.util.ThreadSequencer.sequence;
 import static com.persistit.util.Util.NS_PER_S;
 
 /**
@@ -143,6 +149,8 @@ public class Persistit {
   final static long SHORT_DELAY = 500;
 
   private final static long CLOSE_LOG_INTERVAL = 30000000000L; // 30 sec
+
+  private final static long DEFAULT_FAST_CLOSE_WAIT_MS = 30000;
 
   private final static int ACCUMULATOR_CHECKPOINT_THRESHOLD = 256;
 
@@ -216,6 +224,14 @@ public class Persistit {
 
   private final AtomicBoolean _initialized = new AtomicBoolean();
   private final AtomicBoolean _closed = new AtomicBoolean();
+  /*
+   * Public checkpoint() calls and each pass of copyBackPages() hold the read
+   * lock while they run; close() holds the write lock, so it waits for them
+   * and they never run against resources that close() is releasing. A fast
+   * close(false) waits at most _fastCloseWaitMs for the write lock.
+   */
+  private final ReentrantReadWriteLock _checkpointCloseLock = new ReentrantReadWriteLock();
+  private volatile long _fastCloseWaitMs = DEFAULT_FAST_CLOSE_WAIT_MS;
   private final AtomicBoolean _fatal = new AtomicBoolean();
 
   private long _beginCloseTime;
@@ -1413,19 +1429,36 @@ public class Persistit {
   /**
    * Force a new Checkpoint and wait for it to be written. If Persistit is
    * closed or not yet initialized, do nothing and return <code>null</code>.
+   * A concurrent {@link #close()} waits until a checkpoint in progress has
+   * finished; a checkpoint requested while <code>close()</code> is running
+   * waits for it to finish and then returns <code>null</code>, unless a fast
+   * {@link #close(boolean) close(false)} has stopped waiting.
    * 
    * @return the Checkpoint allocated by this process.
-   * @throws PersistitInterruptedException if the thread is interrupted while waiting for the checkpoint to be written
+   * @throws PersistitInterruptedException if the thread is interrupted while waiting for a running close() or for the checkpoint to be written
    */
   public Checkpoint checkpoint() throws PersistitException {
+    /*
+     * Checked before the lock too: lockInterruptibly() throws on an
+     * interrupted thread even when Persistit is already closed.
+     */
     if (_closed.get() || !_initialized.get()) {
       return null;
     }
-    cleanup();
-    _journalManager.pruneObsoleteTransactions();
-    final Checkpoint result = _checkpointManager.checkpoint();
-    _journalManager.pruneObsoleteTransactions();
-    return result;
+    lockCheckpointClose();
+    try {
+      if (_closed.get() || !_initialized.get()) {
+        return null;
+      }
+      sequence(CHECKPOINT_CLOSE_A);
+      cleanup();
+      _journalManager.pruneObsoleteTransactions();
+      final Checkpoint result = _checkpointManager.checkpoint();
+      _journalManager.pruneObsoleteTransactions();
+      return result;
+    } finally {
+      _checkpointCloseLock.readLock().unlock();
+    }
   }
 
   final long earliestLiveTransaction() {
@@ -1443,8 +1476,14 @@ public class Persistit {
   /**
    * Copy back all pages from the journal to their host Volumes. This
    * condenses the total number of journals as much as possible given the
-   * current activity in the system.
+   * current activity in the system. A concurrent {@link #close()} waits until
+   * the copy-back pass in progress has finished; the next pass then fails
+   * with a {@link PersistitClosedException}. A pass that starts while
+   * <code>close()</code> is running waits for it to finish and then fails the
+   * same way, unless a fast {@link #close(boolean) close(false)} has stopped
+   * waiting.
    * 
+   * @throws PersistitInterruptedException if the thread is interrupted while waiting for a running close()
    * @throws Exception if an error occurs while copying pages back to their volumes
    */
   public void copyBackPages() throws Exception {
@@ -1455,20 +1494,54 @@ public class Persistit {
      * enough
      */
     for (int i = 0; i < 5; ++i) {
-      if (!_closed.get() && _initialized.get()) {
-        _transactionIndex.updateActiveTransactionCache();
-        _journalManager.pruneObsoleteTransactions();
-        _checkpointManager.checkpoint();
-        _journalManager.copyBack();
-        final int fileCount = _journalManager.getJournalFileCount();
-        final long size = _journalManager.getCurrentJournalSize();
-        if ((fileCount == 1) && (size < JournalManager.ROLLOVER_THRESHOLD)) {
-          break;
-        }
-      } else {
+      /*
+       * Hold off close() for one pass at a time, not for the whole loop: a
+       * pass may copy back a large journal. Checked before the lock too, as
+       * in checkpoint().
+       */
+      if (_closed.get() || !_initialized.get()) {
         throw new PersistitClosedException();
       }
+      lockCheckpointClose();
+      try {
+        if (!_closed.get() && _initialized.get()) {
+          sequence(COPYBACK_CLOSE_A);
+          _transactionIndex.updateActiveTransactionCache();
+          _journalManager.pruneObsoleteTransactions();
+          _checkpointManager.checkpoint();
+          _journalManager.copyBack();
+          final int fileCount = _journalManager.getJournalFileCount();
+          final long size = _journalManager.getCurrentJournalSize();
+          if ((fileCount == 1) && (size < JournalManager.ROLLOVER_THRESHOLD)) {
+            break;
+          }
+        } else {
+          throw new PersistitClosedException();
+        }
+      } finally {
+        _checkpointCloseLock.readLock().unlock();
+      }
     }
+  }
+
+  /**
+   * Take the read side of the checkpoint/close lock, waiting for a running
+   * {@link #close} to finish.
+   */
+  private void lockCheckpointClose() throws PersistitInterruptedException {
+    try {
+      _checkpointCloseLock.readLock().lockInterruptibly();
+    } catch (final InterruptedException ie) {
+      throw new PersistitInterruptedException(ie);
+    }
+  }
+
+  /**
+   * Test only: how long a fast {@link #close(boolean) close(false)} waits for
+   * checkpoints and copy-back passes in progress before it closes anyway.
+   */
+  void setFastCloseWaitMs(final long fastCloseWaitMs) {
+    _fastCloseWaitMs = fastCloseWaitMs;
   }
 
   /**
@@ -1598,6 +1671,16 @@ public class Persistit {
    * applied updates may be missing.
    * </p>
    * <p>
+   * Closing waits for {@link #checkpoint()} calls and {@link #copyBackPages()}
+   * passes in progress. When <code>flush</code> is false it waits for them at
+   * most 30 seconds and then closes anyway. An interrupt does not stop this
+   * wait, so that an interrupted thread still closes Persistit; an interrupt
+   * while shutdown is suspended still throws a
+   * {@link PersistitInterruptedException}. A
+   * <code>close(true)</code> held up by a checkpoint that cannot complete
+   * goes on once the thread running that checkpoint is interrupted.
+   * </p>
+   * <p>
    * Note that Persistit starts non-daemon threads that will keep a JVM from
    * exiting until you close Persistit. This is to ensure that all pending
    * updates are written before the JVM exits. Therefore the recommended
@@ -1629,17 +1712,78 @@ public class Persistit {
    * @throws PersistitException if a persistence error occurs while closing
    */
   public void close(final boolean flush) throws PersistitException {
-    if (_initialized.get() && !_closed.get()) {
-      synchronized (this) {
-        // Wait for UI to go down.
-        while (_suspendShutdown.get()) {
-          try {
-            wait(SHORT_DELAY);
-          } catch (final InterruptedException ie) {
-            throw new PersistitInterruptedException(ie);
-          }
+    if (!_initialized.get() || _closed.get()) {
+      /*
+       * Not initialized, closed, or another close() is past
+       * _closed.set(true): do not wait, since a checkpoint left stuck by a
+       * timed-out fast close may hold the read lock for good. A close()
+       * arriving mid-close therefore returns without waiting for the first
+       * one to finish.
+       */
+      doClose(flush);
+      return;
+    }
+    /*
+     * Wait for UI to go down before taking the write lock: while shutdown is
+     * suspended, management tools may still run checkpoints and backups.
+     */
+    synchronized (this) {
+      while (_suspendShutdown.get()) {
+        try {
+          wait(SHORT_DELAY);
+        } catch (final InterruptedException ie) {
+          throw new PersistitInterruptedException(ie);
         }
       }
+    }
+    final Lock writeLock = _checkpointCloseLock.writeLock();
+    if (flush) {
+      writeLock.lock();
+    } else if (!tryLockForFastClose(writeLock)) {
+      // Timed out: close anyway, without the lock.
+      doClose(flush);
+      return;
+    }
+    try {
+      doClose(flush);
+    } finally {
+      writeLock.unlock();
+    }
+  }
+
+  /**
+   * A fast close must not wait without limit behind a checkpoint that cannot
+   * complete, e.g. after a failed journal write: wait at most
+   * <code>_fastCloseWaitMs</code> for the write lock, then close anyway,
+   * releasing resources under that checkpoint. An interrupt does not stop the
+   * wait, so that an interrupted thread still closes; the interrupt status is
+   * restored afterwards. Package-private so that tests can call it directly.
+   *
+   * @return whether the write lock was acquired
+   */
+  boolean tryLockForFastClose(final Lock writeLock) {
+    final long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(_fastCloseWaitMs);
+    boolean interrupted = false;
+    boolean locked;
+    while (true) {
+      try {
+        locked = writeLock.tryLock(Math.max(0L, deadline - System.nanoTime()), TimeUnit.NANOSECONDS);
+        break;
+      } catch (final InterruptedException ie) {
+        interrupted = true;
+      }
+    }
+    if (interrupted) {
+      Thread.currentThread().interrupt();
+    }
+    if (!locked) {
+      _logBase.fastCloseCheckpointTimeout.log(_fastCloseWaitMs);
+    }
+    return locked;
+  }
+
+  private void doClose(final boolean flush) throws PersistitException {
+    if (_initialized.get() && !_closed.get()) {
       recordBufferPoolInventory();
       _cleanupManager.close(flush);
       waitForIOTaskStop(_cleanupManager);

@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package com.persistit;
@@ -22,6 +23,7 @@ import com.persistit.util.ThreadSequencer.Condition;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.persistit.util.SequencerConstants.ACCUMULATOR_CHECKPOINT_A;
 import static com.persistit.util.SequencerConstants.ACCUMULATOR_CHECKPOINT_B;
@@ -32,6 +34,8 @@ import static com.persistit.util.ThreadSequencer.enableSequencer;
 import static com.persistit.util.ThreadSequencer.sequence;
 import static com.persistit.util.ThreadSequencer.setCondition;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 
 /**
  * https://bugs.launchpad.net/akiban-persistit/+bug/1064565
@@ -53,6 +57,8 @@ public class Bug1064565Test extends PersistitUnitTestCase {
 
     private final static String TREE_NAME = "Bug1064565Test";
 
+    private final static long JOIN_TIMEOUT_MS = 60_000;
+
     private Exchange getExchange() throws PersistitException {
         return _persistit.getExchange(VOLUME_NAME, TREE_NAME, true);
     }
@@ -71,13 +77,14 @@ public class Bug1064565Test extends PersistitUnitTestCase {
 
         Exchange exchange = getExchange();
         Transaction txn = exchange.getTransaction();
+        final AtomicReference<Throwable> checkpointFailure = new AtomicReference<Throwable>();
         final Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     _persistit.checkpoint();
-                } catch (final PersistitException e) {
-                    throw new RuntimeException(e);
+                } catch (final Throwable e) {
+                    checkpointFailure.set(e);
                 }
             }
         });
@@ -90,6 +97,12 @@ public class Bug1064565Test extends PersistitUnitTestCase {
         txn.commit();
         txn.end();
         sequence(ACCUMULATOR_CHECKPOINT_C);
+
+        // Let the background checkpoint finish before closing Persistit;
+        // an exception in that thread must fail the test, not just be logged.
+        t.join(JOIN_TIMEOUT_MS);
+        assertFalse("Checkpoint thread did not finish", t.isAlive());
+        assertNull("Checkpoint thread failed: " + checkpointFailure.get(), checkpointFailure.get());
 
         final Configuration config = _persistit.getConfiguration();
         _persistit.close();
