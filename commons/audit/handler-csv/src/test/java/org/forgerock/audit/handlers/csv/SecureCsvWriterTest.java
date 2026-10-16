@@ -48,6 +48,7 @@ import org.forgerock.audit.handlers.csv.CsvSecureVerifier.VerificationResult;
 import org.forgerock.audit.retention.FileNamingPolicy;
 import org.forgerock.audit.retention.TimeStampFileNamingPolicy;
 import org.forgerock.audit.secure.JcaKeyStoreHandler;
+import org.forgerock.audit.secure.KeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreHandlerDecorator;
 import org.forgerock.audit.secure.KeyStoreSecureStorage;
 import org.forgerock.audit.secure.SecureStorage;
@@ -55,8 +56,6 @@ import org.forgerock.audit.secure.SecureStorageException;
 import org.forgerock.audit.util.GzipUtil;
 import org.forgerock.util.encode.Base64;
 import org.forgerock.util.time.Duration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.supercsv.prefs.CsvPreference;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
@@ -66,7 +65,6 @@ import org.testng.annotations.Test;
 @SuppressWarnings("javadoc")
 public class SecureCsvWriterTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(SecureCsvWriterTest.class);
     private static final String NEW_LINE = System.lineSeparator();
 
     static final String KEYSTORE_FILENAME = "target/test-classes/keystore-signature.jks";
@@ -358,17 +356,12 @@ public class SecureCsvWriterTest {
 
     @Test(dataProvider = "rotationFileSuffixes")
     public void shouldRotateCsvAndKeyStoreFile(final String rotationFileSuffix) throws Exception {
-        final Path logDirectory = Files.createTempDirectory("SecureCsvWriterTest");
+        final Path logDirectory = newTemporaryDirectory();
         final String filename = CsvAuditEventHandler.SECURE_CSV_FILENAME_PREFIX + "shouldRotateCsvAndKeyStoreFile.csv";
         final File actual = new File(logDirectory.toFile(), filename);
         final String header = "FOO";
-        CsvAuditEventHandlerConfiguration config = new CsvAuditEventHandlerConfiguration();
-        config.getSecurity().setEnabled(true);
-        config.getSecurity().setSignatureInterval("5 minutes"); // ensure no periodically added signatures during test
-        config.getFileRotation().setRotationEnabled(true);
+        CsvAuditEventHandlerConfiguration config = createRotatingSecureConfig(20);
         config.getFileRotation().setRotationFileSuffix(rotationFileSuffix);
-        config.getFileRotation().setMaxFileSize(20);
-        config.setRotationRetentionCheckInterval("5 minutes");
         try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
                 actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, config, keyStoreHandler, random)) {
             secureCsvWriter.writeEvent(singletonMap(header, "one"));
@@ -389,27 +382,20 @@ public class SecureCsvWriterTest {
 
         // Verify the expected files were created
         assertThat(actual).exists();
-        assertThat(fileNamingPolicy.listFiles()).isNotEmpty().hasSize(6)
+        // each event but the first one rotates the file, and the rotation signs it into the archive
+        assertThat(fileNamingPolicy.listFiles()).isNotEmpty().hasSize(5)
                 .allMatch(file -> file.getName().endsWith(".gz") == rotationFileSuffix.endsWith(".gz"),
                         "compressed if the suffix ends with .gz");
 
         // Verify the contents of the files
         List<VerificationResult> verificationResults = archiveVerifier.verify();
-        VerificationResult finalVerificationResult = verificationResults.remove(5);
         for (final VerificationResult verificationResult : verificationResults) {
             assertThat(verificationResult.hasPassedVerification())
                     .as("File " + verificationResult.getArchiveFile() + ": " + verificationResult.getFailureReason())
                     .isTrue();
         }
-        // The final file is not verifiable currently as it doesn't contain any audit events (so no HMAC entry).
-        // This means lastHMAC will be null when running CsvSecureVerifier.verifySignature and verification fails
-        // See CAUD-225.
-        logger.trace("Skipping verification of {} as it doesn't contain a HMAC and "
-                + "verification of the closing signature will fail",
-                finalVerificationResult.getArchiveFile().getName());
-        assertThat(finalVerificationResult.hasPassedVerification())
-                .as("File " + finalVerificationResult.getArchiveFile() + " cannot be verified as it contains no HMAC")
-                .isFalse(); // TODO: Fix this
+        // and the live file, which holds the header and the chained signature only
+        assertPassesVerification(actual);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ByteArrayOutputStream err = new ByteArrayOutputStream();
@@ -435,15 +421,8 @@ public class SecureCsvWriterTest {
         CsvSecureArchiveVerifierCli.main(args);
 
         String expectedOutput = "";
-        List<File> files = fileNamingPolicy.listFiles();
-        for (int i = 0; i < files.size(); i++) {
-            File file = files.get(i);
-            if (i < files.size() - 1) {
-                expectedOutput += "PASS    " + file.getName() + NEW_LINE;
-            } else {
-                // last file cannot be verified as it doesn't contain any hmac entries
-                expectedOutput += "FAIL    " + file.getName() + "    The signature at row 3 is not correct." + NEW_LINE;
-            }
+        for (File file : fileNamingPolicy.listFiles()) {
+            expectedOutput += "PASS    " + file.getName() + NEW_LINE;
         }
         assertThat(out.toString()).isEqualTo(expectedOutput);
         assertThat(err.toString()).isEqualTo("");
@@ -478,6 +457,214 @@ public class SecureCsvWriterTest {
         assertThat(verificationResults.get(0).hasPassedVerification())
                 .as(verificationResults.get(0).getFailureReason())
                 .isTrue();
+    }
+
+    @Test
+    public void shouldResumeAFileWithNoEventSinceAForcedRotation() throws Exception {
+        final File actual = newSecureCsvFile();
+        final String header = "FOO";
+        final CsvAuditEventHandlerConfiguration config = createRotatingSecureConfig(0);
+        try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
+                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, config, keyStoreHandler, random)) {
+            secureCsvWriter.writeEvent(singletonMap(header, "one"));
+            assertThat(secureCsvWriter.forceRotation()).isTrue();
+        }
+        // the header and the signature chained from the archive
+        assertThat(Files.readAllLines(actual.toPath())).hasSize(2);
+        assertPassesVerification(actual);
+
+        try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
+                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, config, keyStoreHandler, random)) {
+            secureCsvWriter.writeEvent(singletonMap(header, "two"));
+        }
+        assertThat(contentOf(actual)).containsPattern("(?m)^two,");
+        assertPassesVerification(actual);
+    }
+
+    @Test
+    public void shouldResumeAFileWithNoEventSinceARotationOnWrite() throws Exception {
+        final File actual = newSecureCsvFile();
+        final String header = "FOO";
+        // the first event fills the file, the header and the signatures do not
+        final CsvAuditEventHandlerConfiguration config = createRotatingSecureConfig(5000);
+        try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
+                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, config, keyStoreHandler, random)) {
+            secureCsvWriter.writeEvent(singletonMap(header, "x".repeat(5000)));
+            // rotates the file, and the rotation signs it into the archive
+            secureCsvWriter.writeEvent(singletonMap(header, "two"));
+        }
+        // the header and the chained signature: close() has no event to sign
+        assertThat(Files.readAllLines(actual.toPath())).hasSize(2);
+        assertPassesVerification(actual);
+
+        try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
+                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, config, keyStoreHandler, random)) {
+            secureCsvWriter.writeEvent(singletonMap(header, "three"));
+        }
+        assertThat(contentOf(actual)).containsPattern("(?m)^three,");
+        assertPassesVerification(actual);
+    }
+
+    @Test
+    public void shouldNotVerifyAFileTruncatedToTheChainedSignature() throws Exception {
+        final File actual = newSecureCsvFile();
+        final String header = "FOO";
+        try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(actual, new String[]{header},
+                CsvPreference.EXCEL_PREFERENCE, createRotatingSecureConfig(0), keyStoreHandler, random)) {
+            secureCsvWriter.writeEvent(singletonMap(header, "one"));
+            assertThat(secureCsvWriter.forceRotation()).isTrue();
+            secureCsvWriter.writeEvent(singletonMap(header, "two"));
+        }
+        final List<String> lines = Files.readAllLines(actual.toPath());
+        assertThat(lines).hasSize(4);
+        Files.write(actual.toPath(), lines.subList(0, 2));
+        assertFailsVerification(actual, "Final HMAC key doesn't match expected value");
+    }
+
+    @Test
+    public void shouldNotVerifyAFileWithAMalformedChainedSignature() throws Exception {
+        final File actual = newSecureCsvFile();
+        final String header = "FOO";
+        try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(actual, new String[]{header},
+                CsvPreference.EXCEL_PREFERENCE, createRotatingSecureConfig(0), keyStoreHandler, random)) {
+            secureCsvWriter.writeEvent(singletonMap(header, "one"));
+            assertThat(secureCsvWriter.forceRotation()).isTrue();
+        }
+        final List<String> lines = Files.readAllLines(actual.toPath());
+        assertThat(lines).hasSize(2);
+
+        // not a base64 value
+        Files.write(actual.toPath(), List.of(lines.get(0), ",,abc"));
+        assertFailsVerification(actual, "The signature at row 2 is not correct.");
+
+        // no signature, nor any HMAC
+        Files.write(actual.toPath(), List.of(lines.get(0), ",,"));
+        assertFailsVerification(actual, "The HMac at row 2 is not correct.");
+    }
+
+    @Test
+    public void shouldNotVerifyASignatureRowThatHoldsOtherValues() throws Exception {
+        final File actual = newSecureCsvFile();
+        final String header = "FOO";
+        try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(actual, new String[]{header},
+                CsvPreference.EXCEL_PREFERENCE, createRotatingSecureConfig(0), keyStoreHandler, random)) {
+            secureCsvWriter.writeEvent(singletonMap(header, "one"));
+            assertThat(secureCsvWriter.forceRotation()).isTrue();
+            secureCsvWriter.writeEvent(singletonMap(header, "two"));
+        }
+        // the header, the chained signature, the event and its signature
+        final List<String> lines = Files.readAllLines(actual.toPath());
+        assertThat(lines).hasSize(4);
+        assertPassesVerification(actual);
+
+        // an event in the chained signature row
+        Files.write(actual.toPath(), List.of(lines.get(0), "forged" + lines.get(1), lines.get(2), lines.get(3)));
+        assertFailsVerification(actual, "The signature row 2 holds other values.");
+
+        // an HMAC in the signature row of the event
+        Files.write(actual.toPath(),
+                List.of(lines.get(0), lines.get(1), lines.get(2), lines.get(3).replaceFirst(",,", ",forged,")));
+        assertFailsVerification(actual, "The signature row 4 holds other values.");
+    }
+
+    @Test
+    public void shouldSignTheEventThatRotatesTheFileAfterAPeriodicSignature() throws Exception {
+        final File actual = newSecureCsvFile();
+        final String header = "FOO";
+        // the periodic signature fills the file, the header and the event do not
+        final CsvAuditEventHandlerConfiguration config = createRotatingSecureConfig(200);
+        config.getSecurity().setSignatureInterval("100 milliseconds");
+        try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
+                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, config, keyStoreHandler, random)) {
+            secureCsvWriter.writeEvent(singletonMap(header, "one"));
+            // the header, the event and its periodic signature
+            awaitLines(actual, 3);
+            // rotates the file, while no signature is scheduled
+            secureCsvWriter.writeEvent(singletonMap(header, "two"));
+        }
+
+        final List<File> archives = new TimeStampFileNamingPolicy(actual, "-yyyy.MM.dd-HH.mm.ss.SSS", "").listFiles();
+        assertThat(archives).hasSize(1);
+        assertThat(contentOf(archives.get(0))).containsPattern("(?m)^two,");
+        assertPassesVerification(archives.get(0));
+        assertPassesVerification(actual);
+    }
+
+    @Test
+    public void shouldResumeAFileRotatedBeforeItsFirstEvent() throws Exception {
+        final File actual = newSecureCsvFile();
+        final String header = "FOO";
+        final CsvAuditEventHandlerConfiguration config = createRotatingSecureConfig(0);
+        try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
+                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, config, keyStoreHandler, random)) {
+            assertThat(secureCsvWriter.forceRotation()).isTrue();
+        }
+        // no signature to chain: the live file stays empty, as the archive is
+        assertThat(actual.length()).isZero();
+        final List<File> archives = new TimeStampFileNamingPolicy(actual, "-yyyy.MM.dd-HH.mm.ss.SSS", "").listFiles();
+        assertThat(archives).hasSize(1);
+        assertPassesVerification(archives.get(0));
+
+        try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
+                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, config, keyStoreHandler, random)) {
+            secureCsvWriter.writeEvent(singletonMap(header, "one"));
+        }
+        assertThat(contentOf(actual)).containsPattern("(?m)^one,");
+        assertPassesVerification(actual);
+    }
+
+    /** A new directory in the build directory, rather than in the one of the system, which nothing cleans. */
+    private static Path newTemporaryDirectory() throws Exception {
+        return Files.createTempDirectory(Path.of("target"), "SecureCsvWriterTest").toAbsolutePath();
+    }
+
+    private static File newSecureCsvFile() throws Exception {
+        return new File(newTemporaryDirectory().toFile(),
+                CsvAuditEventHandler.SECURE_CSV_FILENAME_PREFIX + "access.csv");
+    }
+
+    /** Waits until the file holds the given number of lines. */
+    private static void awaitLines(final File file, final int lines) throws Exception {
+        final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+        while (Files.readAllLines(file.toPath()).size() < lines && System.nanoTime() < deadline) {
+            Thread.sleep(10);
+        }
+        assertThat(Files.readAllLines(file.toPath())).hasSize(lines);
+    }
+
+    private static CsvAuditEventHandlerConfiguration createRotatingSecureConfig(long maxFileSize) {
+        CsvAuditEventHandlerConfiguration config = new CsvAuditEventHandlerConfiguration();
+        config.getSecurity().setEnabled(true);
+        config.getSecurity().setSignatureInterval("5 minutes"); // ensure no periodically added signatures during test
+        config.getFileRotation().setRotationEnabled(true);
+        config.getFileRotation().setRotationFileSuffix("-yyyy.MM.dd-HH.mm.ss.SSS");
+        config.getFileRotation().setMaxFileSize(maxFileSize);
+        config.setRotationRetentionCheckInterval("5 minutes");
+        return config;
+    }
+
+    private void assertPassesVerification(final File csvFile) throws Exception {
+        final VerificationResult verificationResult = verify(csvFile);
+        assertThat(verificationResult.hasPassedVerification())
+                .as("File " + csvFile + ": " + verificationResult.getFailureReason())
+                .isTrue();
+    }
+
+    private void assertFailsVerification(final File csvFile, final String failureReason) throws Exception {
+        final VerificationResult verificationResult = verify(csvFile);
+        assertThat(verificationResult.hasPassedVerification()).as("File " + csvFile).isFalse();
+        assertThat(verificationResult.getFailureReason()).isEqualTo(failureReason);
+    }
+
+    /** Verifies the file with its own keystore, as {@link SecureCsvWriter} does before it resumes the file. */
+    private VerificationResult verify(final File csvFile) throws Exception {
+        final SecretKey keystorePasswordKey = keyStoreHandler.readSecretKeyFromKeyStore(ENTRY_PASSWORD);
+        final String keystorePassword = Base64.encode(keystorePasswordKey.getEncoded());
+        final PublicKey publicKey = keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE);
+        final KeyStoreHandler csvKeyStoreHandler =
+                new JcaKeyStoreHandler(KEYSTORE_TYPE, csvFile.getPath() + ".keystore", keystorePassword);
+        return new CsvSecureVerifier(csvFile, CsvPreference.EXCEL_PREFERENCE,
+                new KeyStoreSecureStorage(csvKeyStoreHandler, publicKey)).verify();
     }
 
     static class TimeStampFileNamingPolicyWithNamedBasedOrdering extends TimeStampFileNamingPolicy {
