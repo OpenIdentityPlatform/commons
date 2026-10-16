@@ -334,16 +334,21 @@ public class RotatableWriter implements TextWriter, RotatableObject {
         // rotation hooks need, and that writers hold while they wait for the read lock.
         rolloverLifecycleHook.beforeRollingOver();
         try {
-            readWriteLock.writeLock().lock();
-            try {
-                isRotating.set(true);
-                return rotate();
-            } finally {
-                isRotating.set(false);
-                readWriteLock.writeLock().unlock();
-            }
+            return rotateUnderWriteLock();
         } finally {
             rolloverLifecycleHook.afterRollingOver();
+        }
+    }
+
+    /** Rotates the file under the write lock, whatever the rotation policies say. */
+    private boolean rotateUnderWriteLock() throws IOException {
+        readWriteLock.writeLock().lock();
+        try {
+            isRotating.set(true);
+            return rotate();
+        } finally {
+            isRotating.set(false);
+            readWriteLock.writeLock().unlock();
         }
     }
 
