@@ -18,6 +18,7 @@
 package org.forgerock.audit.handlers.csv;
 
 import static java.nio.charset.StandardCharsets.*;
+import static java.nio.file.StandardOpenOption.APPEND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.forgerock.audit.AuditServiceBuilder.*;
@@ -29,13 +30,21 @@ import static org.forgerock.json.JsonValue.*;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.zip.GZIPInputStream;
 
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceBuilder;
@@ -50,6 +59,7 @@ import org.forgerock.audit.providers.KeyStoreHandlerProvider;
 import org.forgerock.audit.secure.JcaKeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreHandlerDecorator;
+import org.forgerock.audit.util.GzipUtil;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CreateRequest;
@@ -68,6 +78,7 @@ import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
 import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.mockito.ArgumentCaptor;
+import org.testng.SkipException;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -381,6 +392,74 @@ public class CsvAuditEventHandlerTest {
 
         assertThat(logDirectory.resolve("access.csv").toFile()).as("when " + label + " in " + logDirectory.toString())
             .hasContent("\"_id\",\"timestamp\",\"transactionId\"\n");
+        // the default rotation file suffix ends with .gz
+        final File[] rotatedFiles = logDirectory.toFile().listFiles((dir, name) -> !name.equals("access.csv"));
+        assertThat(rotatedFiles).as("when " + label).hasSize(1);
+        rotatedFiles[0].deleteOnExit();
+        assertThat(rotatedFiles[0].getName()).endsWith(".gz");
+        try (InputStream in = new GZIPInputStream(new FileInputStream(rotatedFiles[0]))) {
+            assertThat(new String(in.readAllBytes(), UTF_8)).as("when " + label).contains("\"A10000\"");
+        }
+    }
+
+    @Test
+    public void testActionToRotateFileCompressesOutsideHandlerMonitor() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        final CsvAuditEventHandler csvHandler = csvAuditEventHandler().loggingTo(logDirectory).build();
+        final Context context = new RootContext();
+        final ActionRequest actionRequest = Requests.newActionRequest("access", ROTATE_FILE_ACTION_NAME)
+                .setAdditionalParameter(ACTION_PARAM_TARGET_HANDLER, "csv");
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            csvHandler.publishEvent(context, "access", buildEvent());
+            // random bytes compress slowly, so compressing this file takes far longer than a rotation
+            final byte[] chunk = new byte[1024 * 1024];
+            final Random random = new Random(0);
+            try (OutputStream out = Files.newOutputStream(logDirectory.resolve("access.csv"), APPEND)) {
+                for (int i = 0; i < 16; i++) {
+                    random.nextBytes(chunk);
+                    out.write(chunk);
+                }
+            }
+
+            final Future<?> firstRotation =
+                    executor.submit(() -> csvHandler.handleAction(context, "access", actionRequest).getOrThrow());
+            final File renamedFile = GzipUtil.removeGzipSuffix(awaitArchive(logDirectory));
+            if (!renamedFile.exists()) {
+                throw new SkipException("The rotated file was compressed before the test could observe it");
+            }
+            // the second rotation takes the handler monitor, so it would wait for a compression running under it
+            csvHandler.handleAction(context, "access", actionRequest).getOrThrow();
+            assertThat(renamedFile).as("rotated file still being compressed").exists();
+            firstRotation.get();
+
+            // the second rotation does not take the name of the file still being compressed
+            final File[] rotatedFiles = logDirectory.toFile().listFiles((dir, name) -> !name.equals("access.csv"));
+            assertThat(rotatedFiles).hasSize(2);
+            assertThat(rotatedFiles).allMatch(file -> file.getName().endsWith(".gz"));
+        } finally {
+            executor.shutdown();
+            executor.awaitTermination(30, TimeUnit.SECONDS);
+            csvHandler.shutdown();
+            // the files are large, so do not leave them until the JVM exits
+            for (final File file : logDirectory.toFile().listFiles()) {
+                file.delete();
+            }
+            logDirectory.toFile().delete();
+        }
+    }
+
+    /** Waits until the only rotated file appears under its archive name, and returns it. */
+    private static File awaitArchive(final Path logDirectory) throws InterruptedException {
+        final long deadline = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(30);
+        while (System.currentTimeMillis() < deadline) {
+            final File[] archives = logDirectory.toFile().listFiles((dir, name) -> name.endsWith(".gz"));
+            if (archives.length > 0) {
+                return archives[0];
+            }
+            Thread.sleep(1);
+        }
+        throw new AssertionError("No archive in " + logDirectory);
     }
 
     @Test

@@ -55,8 +55,10 @@ import org.forgerock.audit.retention.RetentionPolicy;
 import org.forgerock.audit.rotation.RotatableObject;
 import org.forgerock.audit.rotation.RotationHooks;
 import org.forgerock.audit.rotation.RotationPolicy;
+import org.forgerock.audit.util.GzipUtil;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.Utils;
+import org.forgerock.util.annotations.VisibleForTesting;
 import org.forgerock.util.time.Duration;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -71,6 +73,7 @@ class JsonFileWriter {
     private static final Logger logger = LoggerFactory.getLogger(JsonFileWriter.class);
 
     private static final int MIN_QUEUE_SIZE = 100_000;
+    private static final Duration DEFAULT_RETENTION_CHECK_INTERVAL = Duration.duration("5s");
 
     static final String LOG_FILE_NAME_SUFFIX = "audit.json";
 
@@ -111,6 +114,23 @@ class JsonFileWriter {
             return POLLING_INTERVAL;
         }
         return writeInterval;
+    }
+
+    @VisibleForTesting
+    static Duration parseRetentionCheckInterval(final JsonAuditEventHandlerConfiguration configuration) {
+        final String intervalString = configuration.getRotationRetentionCheckInterval();
+        Duration interval;
+        try {
+            interval = Duration.duration(intervalString);
+        } catch (Exception e) {
+            interval = null;
+        }
+        if (interval == null || interval.isZero() || interval.isUnlimited()) {
+            logger.info("rotationRetentionCheckInterval '{}' is invalid, so falling back to {}",
+                    intervalString, DEFAULT_RETENTION_CHECK_INTERVAL);
+            return DEFAULT_RETENTION_CHECK_INTERVAL;
+        }
+        return interval;
     }
 
     /**
@@ -242,6 +262,7 @@ class JsonFileWriter {
         private final boolean hasRotationOrRetentionPolicies;
         private final List<RotationPolicy> rotationPolicies;
         private final List<RetentionPolicy> retentionPolicies;
+        private final long retentionCheckIntervalNanos;
         private final Set<File> filesToDelete;
         private final BlockingQueue<QueueEntry> queue;
         private final ScheduledExecutorService scheduler;
@@ -273,6 +294,7 @@ class JsonFileWriter {
             retentionPolicies = configuration.getFileRetention().buildRetentionPolicies();
             hasRotationOrRetentionPolicies = (rotationEnabled && !rotationPolicies.isEmpty())
                     || !retentionPolicies.isEmpty();
+            retentionCheckIntervalNanos = parseRetentionCheckInterval(configuration).to(TimeUnit.NANOSECONDS);
             filesToDelete = new HashSet<>();
 
             // build map of topic files
@@ -397,6 +419,9 @@ class JsonFileWriter {
             private DateTime lastRotationTime;
             private FileChannel fileChannel;
             private long positionInFile;
+            /** Whether retention policies must be enforced on the next check: on startup and after a rotation. */
+            private boolean retentionCheckPending = true;
+            private long lastRetentionCheckNanos;
 
             TopicEntry(final String fileName, final JsonAuditEventHandlerConfiguration configuration) {
                 try {
@@ -476,7 +501,7 @@ class JsonFileWriter {
                         }
                     }
                 }
-                if (!retentionPolicies.isEmpty()) {
+                if (!retentionPolicies.isEmpty() && isRetentionCheckDue()) {
                     filesToDelete.clear();
                     for (final RetentionPolicy retentionPolicy : retentionPolicies) {
                         filesToDelete.addAll(retentionPolicy.deleteFiles(fileNamingPolicy));
@@ -492,20 +517,42 @@ class JsonFileWriter {
             }
 
             /**
+             * Checks whether retention policies must be enforced now, and if so, restarts the check interval.
+             * Each retention policy lists the whole log directory, so this runs after a rotation and otherwise
+             * once per check interval, not on every run of the queue consumer. It cannot run only after a
+             * rotation, because the free disk space policy depends on disk usage outside this writer.
+             *
+             * @return {@code true} if retention policies must be enforced now
+             */
+            private boolean isRetentionCheckDue() {
+                final long now = System.nanoTime();
+                if (retentionCheckPending || now - lastRetentionCheckNanos >= retentionCheckIntervalNanos) {
+                    retentionCheckPending = false;
+                    lastRetentionCheckNanos = now;
+                    return true;
+                }
+                return false;
+            }
+
+            /**
              * Rotates the underlying JSON audit file.
              *
              * @throws IOException error rotating file
              */
             void rotateNow() throws IOException {
-                // close and rename current file
+                // write buffered events to the current file, then close and rename it; a file to compress is
+                // renamed without the .gz suffix, and compressed into archivedFile below
+                flush();
                 fileChannel.close();
-                final Path archivedFilePath = fileNamingPolicy.getNextName().toPath();
-                Files.move(filePath, archivedFilePath);
+                final File archivedFile = fileNamingPolicy.getNextName();
+                Files.move(filePath, GzipUtil.removeGzipSuffix(archivedFile).toPath());
                 // create new file
                 fileChannel = FileChannel.open(filePath, StandardOpenOption.CREATE_NEW,
                         StandardOpenOption.WRITE);
                 positionInFile = 0;
                 lastRotationTime = DateTime.now(DateTimeZone.UTC);
+                retentionCheckPending = true;
+                GzipUtil.compressRotatedFile(archivedFile);
             }
 
             @Override

@@ -64,6 +64,7 @@ import org.forgerock.audit.providers.KeyStoreHandlerProvider;
 import org.forgerock.audit.retention.TimeStampFileNamingPolicy;
 import org.forgerock.audit.secure.JcaKeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreHandler;
+import org.forgerock.audit.util.GzipUtil;
 import org.forgerock.audit.util.JsonValueUtils;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -273,7 +274,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
                 newCsvWriter = writers.get(topic);
                 if (newCsvWriter == csvWriter) {
                     // If both references are the same, the writer hasn't been reset.
-                    newCsvWriter = resetAndReopenWriter(topic, false);
+                    newCsvWriter = resetAndReopenWriter(topic);
                     LOGGER.debug("Resetting writer");
                 } else {
                     LOGGER.debug("Writer reset by another thread");
@@ -303,7 +304,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
                 csvWriter = writers.get(topic);
                 if (csvWriter == null) {
                     LOGGER.debug("CSV file writer for {} topic not reset by another thread; resetting", topic);
-                    csvWriter = resetAndReopenWriter(topic, false);
+                    csvWriter = resetAndReopenWriter(topic);
                 }
             }
         }
@@ -435,8 +436,9 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
                 throw new BadRequestException("Error when rotating file for topic: " + topic, e);
             }
         } else {
-            // use a default rotation instead
-            resetAndReopenWriter(topic, true);
+            // use a default rotation instead, and compress outside the handler monitor, which publishers retrying
+            // on the closed writer and shutdown wait for
+            GzipUtil.compressRotatedFile(rotateAndReopenWriter(topic));
         }
         return Responses.newActionResponse(json(object(field("rotated", "true"))));
     }
@@ -458,23 +460,32 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
         csvWriter.writeEvent(cells);
     }
 
-    private synchronized CsvWriter resetAndReopenWriter(final String topic, boolean forceRotation)
-            throws BadRequestException {
+    private synchronized CsvWriter resetAndReopenWriter(final String topic) throws BadRequestException {
         closeWriter(topic);
         try {
-            File auditLogFile = getAuditLogFile(topic);
-            if (forceRotation) {
-                TimeStampFileNamingPolicy namingPolicy = new TimeStampFileNamingPolicy(auditLogFile, null, null);
-                File rotatedFile = namingPolicy.getNextName();
-                if (!auditLogFile.renameTo(rotatedFile)) {
-                    throw new BadRequestException(
-                            format("Unable to rename file %s to %s when rotating", auditLogFile, rotatedFile));
-                }
-            }
-            return openWriter(topic, auditLogFile);
+            return openWriter(topic, getAuditLogFile(topic));
         } catch (IOException e) {
             throw new BadRequestException(e);
         }
+    }
+
+    /**
+     * Renames the audit file of a topic to its next timestamped name, and opens a new audit file.
+     *
+     * @return The archive name of the rotated file. A file to compress is renamed without the .gz suffix, and the
+     *         caller compresses it with {@link GzipUtil#compressRotatedFile(File)}.
+     */
+    private synchronized File rotateAndReopenWriter(final String topic) throws BadRequestException {
+        closeWriter(topic);
+        final File auditLogFile = getAuditLogFile(topic);
+        final File rotatedFile = new TimeStampFileNamingPolicy(auditLogFile, null, null).getNextName();
+        final File renamedFile = GzipUtil.removeGzipSuffix(rotatedFile);
+        if (!auditLogFile.renameTo(renamedFile)) {
+            throw new BadRequestException(
+                    format("Unable to rename file %s to %s when rotating", auditLogFile, renamedFile));
+        }
+        resetAndReopenWriter(topic);
+        return rotatedFile;
     }
 
     private synchronized void closeWriter(final String topic) {

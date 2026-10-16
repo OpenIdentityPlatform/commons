@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.audit.retention;
 
@@ -90,7 +91,10 @@ public class TimeStampFileNamingPolicy implements FileNamingPolicy {
 
     /**
      * Gets the next name for this {@link FileNamingPolicy}. The next name will be formatted with prefix first,
-     * then the initial filename and finally the timestamp will be appended.
+     * then the initial filename and finally the timestamp will be appended. If a file already exists under that
+     * name, or, when the timestamp format ends with {@code .gz}, under that name without the {@code .gz} suffix,
+     * a collision counter {@code .N} follows the timestamp. A {@code .gz} suffix of the timestamp format always
+     * comes last: {@code <prefix><initial filename><timestamp>[.N][.gz]}.
      * @return The next archived file according to this {@link FileNamingPolicy}.
      */
     @Override
@@ -105,16 +109,17 @@ public class TimeStampFileNamingPolicy implements FileNamingPolicy {
         newFileName.append(path.getFileName());
 
         if (suffixDateFormat != null) {
-            newFileName.append(LocalDateTime.now().toString(suffixDateFormat)).append(suffix);
+            newFileName.append(LocalDateTime.now().toString(suffixDateFormat));
         }
 
-        Path newFilePath = path.resolveSibling(newFileName.toString());
-        if (Files.exists(newFilePath)) {
-            // prevent filename collision with unique suffix
-            newFileName.append('.').append(collisionCounter.incrementAndGet());
-            newFilePath = path.resolveSibling(newFileName.toString());
+        // a file to compress is renamed without the compression suffix first, so both names must be free
+        final String timestampedName = newFileName.toString();
+        String uniqueName = timestampedName;
+        while (Files.exists(path.resolveSibling(uniqueName + suffix)) || Files.exists(path.resolveSibling(uniqueName))) {
+            // prevent filename collision with unique suffix, which goes before the compression suffix
+            uniqueName = timestampedName + '.' + collisionCounter.incrementAndGet();
         }
-        return newFilePath.toFile();
+        return path.resolveSibling(uniqueName + suffix).toFile();
     }
 
     /**

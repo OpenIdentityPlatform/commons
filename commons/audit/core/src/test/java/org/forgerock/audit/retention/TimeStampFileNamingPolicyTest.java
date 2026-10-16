@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.audit.retention;
 
@@ -60,6 +61,69 @@ public class TimeStampFileNamingPolicyTest {
         // then
         final String filename = file.toPath().getFileName().toString();
         assertThat(filename).startsWith(PREFIX + initialFile.toPath().getFileName());
+    }
+
+    @Test
+    public void testGetNextNameKeepsCompressionSuffixLastOnCollision() throws Exception {
+        // given
+        final File initialFile = getTempFile();
+        // the timestamp changes once a year, so the second name collides with the first one
+        final TimeStampFileNamingPolicy fileNamingPolicy =
+                new TimeStampFileNamingPolicy(initialFile, "-yyyy.gz", PREFIX);
+        final File firstFile = fileNamingPolicy.getNextName();
+        assertThat(firstFile.createNewFile()).isTrue();
+        firstFile.deleteOnExit();
+
+        // when
+        final File file = fileNamingPolicy.getNextName();
+
+        // then
+        final String firstName = firstFile.getName();
+        assertThat(firstName).endsWith(".gz");
+        assertThat(file.getName()).isEqualTo(firstName.substring(0, firstName.length() - ".gz".length()) + ".1.gz");
+    }
+
+    @Test
+    public void testGetNextNameSkipsEveryExistingCollisionName() throws Exception {
+        // given
+        final File initialFile = getTempFile();
+        final File firstFile = new TimeStampFileNamingPolicy(initialFile, "-yyyy.gz", PREFIX).getNextName();
+        final String timestampedName = firstFile.getName().substring(0, firstFile.getName().length() - ".gz".length());
+        createFile(initialFile, timestampedName + ".gz");
+        createFile(initialFile, timestampedName + ".1.gz");
+        // a new policy, as after a restart, counts collisions from the start again
+        final TimeStampFileNamingPolicy fileNamingPolicy =
+                new TimeStampFileNamingPolicy(initialFile, "-yyyy.gz", PREFIX);
+
+        // when
+        final File file = fileNamingPolicy.getNextName();
+
+        // then
+        assertThat(file.getName()).isEqualTo(timestampedName + ".2.gz");
+    }
+
+    @Test
+    public void testGetNextNameSkipsNameOfFileLeftUncompressed() throws Exception {
+        // given
+        final File initialFile = getTempFile();
+        final TimeStampFileNamingPolicy fileNamingPolicy =
+                new TimeStampFileNamingPolicy(initialFile, "-yyyy.gz", PREFIX);
+        final File firstFile = fileNamingPolicy.getNextName();
+        final String timestampedName = firstFile.getName().substring(0, firstFile.getName().length() - ".gz".length());
+        // a rotated file is renamed without the .gz suffix before it is compressed
+        createFile(initialFile, timestampedName);
+
+        // when
+        final File file = fileNamingPolicy.getNextName();
+
+        // then
+        assertThat(file.getName()).isEqualTo(timestampedName + ".1.gz");
+    }
+
+    private static void createFile(final File initialFile, final String name) throws Exception {
+        final File file = new File(initialFile.getParentFile(), name);
+        assertThat(file.createNewFile()).isTrue();
+        file.deleteOnExit();
     }
 
     @Test
