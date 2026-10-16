@@ -58,6 +58,7 @@ import org.forgerock.audit.rotation.RotationPolicy;
 import org.forgerock.audit.util.GzipUtil;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.Utils;
+import org.forgerock.util.annotations.VisibleForTesting;
 import org.forgerock.util.time.Duration;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -72,6 +73,7 @@ class JsonFileWriter {
     private static final Logger logger = LoggerFactory.getLogger(JsonFileWriter.class);
 
     private static final int MIN_QUEUE_SIZE = 100_000;
+    private static final Duration DEFAULT_RETENTION_CHECK_INTERVAL = Duration.duration("5s");
 
     static final String LOG_FILE_NAME_SUFFIX = "audit.json";
 
@@ -112,6 +114,23 @@ class JsonFileWriter {
             return POLLING_INTERVAL;
         }
         return writeInterval;
+    }
+
+    @VisibleForTesting
+    static Duration parseRetentionCheckInterval(final JsonAuditEventHandlerConfiguration configuration) {
+        final String intervalString = configuration.getRotationRetentionCheckInterval();
+        Duration interval;
+        try {
+            interval = Duration.duration(intervalString);
+        } catch (Exception e) {
+            interval = null;
+        }
+        if (interval == null || interval.isZero() || interval.isUnlimited()) {
+            logger.info("rotationRetentionCheckInterval '{}' is invalid, so falling back to {}",
+                    intervalString, DEFAULT_RETENTION_CHECK_INTERVAL);
+            return DEFAULT_RETENTION_CHECK_INTERVAL;
+        }
+        return interval;
     }
 
     /**
@@ -237,7 +256,6 @@ class JsonFileWriter {
         private static final int BATCH_SIZE = 5000;
         private static final int OUTPUT_BUF_INITIAL_SIZE = 16 * 1024;
         private static final byte[] NEWLINE_UTF_8_BYTES = "\n".getBytes(UTF_8);
-        private static final Duration DEFAULT_RETENTION_CHECK_INTERVAL = Duration.duration("5s");
 
         private final boolean flushOnShutdown;
         private final boolean rotationEnabled;
@@ -286,22 +304,6 @@ class JsonFileWriter {
                 entriesByTopic.put(topic, new TopicEntry(fileName, configuration));
             }
             this.topicEntryMap = Collections.unmodifiableMap(entriesByTopic);
-        }
-
-        private static Duration parseRetentionCheckInterval(final JsonAuditEventHandlerConfiguration configuration) {
-            final String intervalString = configuration.getRotationRetentionCheckInterval();
-            Duration interval;
-            try {
-                interval = Duration.duration(intervalString);
-            } catch (Exception e) {
-                interval = null;
-            }
-            if (interval == null || interval.isZero() || interval.isUnlimited()) {
-                logger.info("rotationRetentionCheckInterval '{}' is invalid, so falling back to {}",
-                        intervalString, DEFAULT_RETENTION_CHECK_INTERVAL);
-                return DEFAULT_RETENTION_CHECK_INTERVAL;
-            }
-            return interval;
         }
 
         /**

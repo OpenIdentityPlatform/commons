@@ -87,6 +87,28 @@ public class GzipUtilTest {
     }
 
     @Test
+    public void shouldDeletePartlyWrittenArchiveAndKeepRenamedFile() throws IOException {
+        // a directory opens as an input stream on Linux and macOS, so reading it fails after the archive was
+        // created; on Windows opening it fails, and the archive is never created
+        final File renamedFile = Files.createDirectory(directory.resolve("audit.json-2026")).toFile();
+        final File archivedFile = directory.resolve("audit.json-2026.gz").toFile();
+
+        GzipUtil.compressRotatedFile(archivedFile);
+
+        assertThat(archivedFile).doesNotExist();
+        assertThat(renamedFile).exists();
+    }
+
+    @Test
+    public void shouldNotCreateArchiveWhenRenamedFileIsMissing() {
+        final File archivedFile = directory.resolve("audit.json-2026.gz").toFile();
+
+        GzipUtil.compressRotatedFile(archivedFile);
+
+        assertThat(archivedFile).doesNotExist();
+    }
+
+    @Test
     public void shouldNotCompressFileWithoutGzipSuffix() throws IOException {
         final File archivedFile = createFile("audit.json-2026", "content");
 

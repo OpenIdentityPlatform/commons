@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.testng.SkipException;
@@ -89,6 +90,21 @@ public class TimestampFilenameFilterTest {
     @Test(dataProvider = "otherFileNames")
     public void shouldRejectOtherFile(final String name) {
         assertThat(filter.accept(DIRECTORY, name)).isFalse();
+    }
+
+    @Test
+    public void shouldAcceptLocalTimeThatDefaultTimeZoneSkips() {
+        final DateTimeZone defaultZone = DateTimeZone.getDefault();
+        try {
+            // Berlin clocks went from 02:00 to 03:00 on 2016-03-27, so the file was named in another time zone
+            DateTimeZone.setDefault(DateTimeZone.forID("Europe/Berlin"));
+            final TimestampFilenameFilter berlinFilter = new TimestampFilenameFilter(INITIAL_FILE, null,
+                    SUFFIX_FORMAT);
+
+            assertThat(berlinFilter.accept(DIRECTORY, "ldap-access.audit.json.20160327023000")).isTrue();
+        } finally {
+            DateTimeZone.setDefault(defaultZone);
+        }
     }
 
     @Test

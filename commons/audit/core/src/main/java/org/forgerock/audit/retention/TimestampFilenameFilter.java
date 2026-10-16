@@ -51,11 +51,9 @@ public class TimestampFilenameFilter implements FilenameFilter {
         this.fileNamePrefix = (prefix != null ? prefix : "") + initialFile.toPath().getFileName();
         this.suffixDateFormat = suffixDateFormat;
         this.suffixDateParser = suffixDateFormat.getParser();
-        // the chronology that DateTimeFormatter.parseDateTime() parses with
-        final Chronology chronology = DateTimeUtils.getChronology(suffixDateFormat.getChronology());
-        this.suffixDateChronology = suffixDateFormat.getZone() != null
-                ? chronology.withZone(suffixDateFormat.getZone())
-                : chronology;
+        // the timestamp is a local time that only has to be valid, so check it in UTC: no local time is skipped
+        // there, and the result does not depend on the default time zone
+        this.suffixDateChronology = DateTimeUtils.getChronology(suffixDateFormat.getChronology()).withUTC();
     }
 
     /**
@@ -75,8 +73,8 @@ public class TimestampFilenameFilter implements FilenameFilter {
                 : name.length();
         final String timestamp = name.substring(fileNamePrefix.length(), end);
 
-        // parse as DateTimeFormatter.parseDateTime() does, but allow a collision counter after the timestamp and
-        // reject a malformed timestamp without an exception
+        // parse as DateTimeFormatter.parseDateTime() does, but in UTC, allow a collision counter after the
+        // timestamp and reject a malformed timestamp without an exception
         final DateTimeParserBucket bucket = new DateTimeParserBucket(0L, suffixDateChronology,
                 suffixDateFormat.getLocale(), suffixDateFormat.getPivotYear(), suffixDateFormat.getDefaultYear());
         final int position = suffixDateParser.parseInto(bucket, timestamp, 0);

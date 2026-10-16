@@ -37,11 +37,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
+import org.forgerock.util.time.Duration;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class JsonFileWriterTest {
@@ -97,7 +99,25 @@ public class JsonFileWriterTest {
         awaitWriterRuns();
 
         createHistoryFiles(0, 3);
-        awaitHistoryFiles(1);
+        // well below the default interval, so that a writer which ignores the setting fails
+        awaitUntil(() -> historyFiles().size() == 1, TimeUnit.SECONDS.toMillis(2));
+    }
+
+    @DataProvider
+    public Object[][] invalidRetentionCheckIntervals() {
+        return new Object[][] { { null }, { "not-a-duration" }, { "0s" }, { "disabled" }, { "unlimited" } };
+    }
+
+    @Test(dataProvider = "invalidRetentionCheckIntervals")
+    public void shouldFallBackToDefaultRetentionCheckIntervalWhenInvalid(final String interval) {
+        assertThat(JsonFileWriter.parseRetentionCheckInterval(retentionCheckIntervalConfiguration(interval)))
+                .isEqualTo(Duration.duration("5s"));
+    }
+
+    @Test
+    public void shouldUseConfiguredRetentionCheckInterval() {
+        assertThat(JsonFileWriter.parseRetentionCheckInterval(retentionCheckIntervalConfiguration("100 ms")))
+                .isEqualTo(Duration.duration("100 ms"));
     }
 
     @Test
@@ -108,21 +128,32 @@ public class JsonFileWriterTest {
 
         assertThat(writer.rotateFile(TOPIC)).isTrue();
 
-        assertThat(gunzip(awaitCompressedHistoryFile())).contains(id);
+        assertThat(awaitHistoryFileContent(true)).contains(id);
     }
 
-    @Test
-    public void shouldRotateBufferedEventsIntoArchive() throws Exception {
-        writer = newWriter("1h", ROTATION_FILE_SUFFIX + ".gz");
-        writer.startup();
+    @DataProvider
+    public Object[][] rotationFileSuffixes() {
+        return new Object[][] { { ROTATION_FILE_SUFFIX }, { ROTATION_FILE_SUFFIX + ".gz" } };
+    }
+
+    @Test(dataProvider = "rotationFileSuffixes")
+    public void shouldRotateBufferedEventsIntoArchive(final String rotationFileSuffix) throws Exception {
+        writer = newWriter("1h", rotationFileSuffix);
         final String id = UUID.randomUUID().toString();
 
-        // the writer flushes its file buffer on a run that finds the queue empty, so the event is normally still
-        // buffered when the rotation is processed
+        // queued before the writer starts, so that its first run takes both entries at once, and the event is
+        // still buffered when the rotation is processed
         writer.put(TOPIC, json(object(field("_id", id))));
         assertThat(writer.rotateFile(TOPIC)).isTrue();
+        writer.startup();
 
-        assertThat(gunzip(awaitCompressedHistoryFile())).contains(id);
+        assertThat(awaitHistoryFileContent(rotationFileSuffix.endsWith(".gz"))).contains(id);
+    }
+
+    private static JsonAuditEventHandlerConfiguration retentionCheckIntervalConfiguration(final String interval) {
+        final JsonAuditEventHandlerConfiguration configuration = new JsonAuditEventHandlerConfiguration();
+        configuration.setRotationRetentionCheckInterval(interval);
+        return configuration;
     }
 
     private JsonFileWriter newWriter(final String rotationRetentionCheckInterval) {
@@ -164,20 +195,22 @@ public class JsonFileWriterTest {
     }
 
     /**
-     * Waits until the only history file is compressed. The file is renamed first and compressed under its final
-     * name, and the uncompressed file is deleted once the compressed one is complete.
+     * Waits until the only history file is complete and returns its content. A file to compress is renamed first
+     * and compressed under its final name, and the uncompressed file is deleted once the compressed one is
+     * complete.
      */
-    private Path awaitCompressedHistoryFile() throws Exception {
-        final AtomicReference<String> compressedFile = new AtomicReference<>();
+    private String awaitHistoryFileContent(final boolean compressed) throws Exception {
+        final AtomicReference<String> historyFile = new AtomicReference<>();
         awaitUntil(() -> {
             final List<String> files = historyFiles();
-            if (files.size() == 1 && files.get(0).endsWith(".gz")) {
-                compressedFile.set(files.get(0));
+            if (files.size() == 1 && files.get(0).endsWith(".gz") == compressed) {
+                historyFile.set(files.get(0));
                 return true;
             }
             return false;
         });
-        return logDirectory.resolve(compressedFile.get());
+        final Path file = logDirectory.resolve(historyFile.get());
+        return compressed ? gunzip(file) : new String(Files.readAllBytes(file), UTF_8);
     }
 
     /**
@@ -207,10 +240,14 @@ public class JsonFileWriterTest {
     }
 
     private static void awaitUntil(final Callable<Boolean> condition) throws Exception {
-        final long deadline = System.currentTimeMillis() + TIMEOUT_MILLIS;
+        awaitUntil(condition, TIMEOUT_MILLIS);
+    }
+
+    private static void awaitUntil(final Callable<Boolean> condition, final long timeoutMillis) throws Exception {
+        final long deadline = System.currentTimeMillis() + timeoutMillis;
         while (!condition.call()) {
             if (System.currentTimeMillis() > deadline) {
-                throw new AssertionError("Condition not met within " + TIMEOUT_MILLIS + " ms");
+                throw new AssertionError("Condition not met within " + timeoutMillis + " ms");
             }
             Thread.sleep(10);
         }
