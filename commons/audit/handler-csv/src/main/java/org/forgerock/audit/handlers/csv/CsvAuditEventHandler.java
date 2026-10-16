@@ -490,10 +490,12 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
             final File keyStoreFile = CsvSecureUtils.keyStoreFile(auditLogFile);
             final File archivedKeyStoreFile = CsvSecureUtils.keyStoreFile(rotatedFile);
             if (!keyStoreFile.renameTo(archivedKeyStoreFile)) {
+                LOGGER.error("Unable to rename {} to {} when rotating", keyStoreFile, archivedKeyStoreFile);
                 // a new audit file would overwrite the keys of the archived file in its keystore, so the writer
-                // resumes the audit file instead
+                // resumes the audit file instead; if the audit file cannot be put back, the archive loses its keys
                 if (!renamedFile.renameTo(auditLogFile)) {
-                    LOGGER.error("Unable to rename {} back to {}", renamedFile, auditLogFile);
+                    LOGGER.error("Unable to rename {} back to {}; the new audit file overwrites the keys of {} in {}",
+                            renamedFile, auditLogFile, renamedFile, keyStoreFile);
                 }
                 resetAndReopenWriter(topic);
                 throw new BadRequestException(
