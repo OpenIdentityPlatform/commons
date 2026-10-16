@@ -12,12 +12,14 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.audit.handlers.csv;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
+import java.nio.file.Files;
 
 import org.forgerock.audit.secure.JcaKeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreHandlerDecorator;
@@ -52,6 +54,21 @@ public class CsvSecureVerifierTest {
                 new KeyStoreSecureStorage(keyStoreHandler,
                         keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE)));
         assertThat(csvVerifier.verify().hasPassedVerification()).isFalse();
+    }
+
+    @Test
+    public void shouldNotVerifyEmptyFile() throws Exception {
+        // the rotate action archives an audit file that has no event, so its header was never written
+        File csvFile = Files.createTempFile("CsvSecureVerifierTest", ".csv").toFile();
+        csvFile.deleteOnExit();
+        KeyStoreHandlerDecorator keyStoreHandler = new KeyStoreHandlerDecorator(
+                new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, TRUSTSTORE_FILENAME, TRUSTSTORE_PASSWORD));
+        CsvSecureVerifier csvVerifier = new CsvSecureVerifier(csvFile, CsvPreference.EXCEL_PREFERENCE,
+                new KeyStoreSecureStorage(keyStoreHandler,
+                        keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE)));
+        CsvSecureVerifier.VerificationResult verificationResult = csvVerifier.verify();
+        assertThat(verificationResult.hasPassedVerification()).isFalse();
+        assertThat(verificationResult.getFailureReason()).isNotEmpty();
     }
 
     @DataProvider

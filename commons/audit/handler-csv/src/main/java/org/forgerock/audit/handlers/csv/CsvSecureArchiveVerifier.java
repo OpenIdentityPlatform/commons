@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.audit.handlers.csv;
 
@@ -28,6 +29,7 @@ import org.forgerock.audit.secure.JcaKeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreSecureStorage;
 import org.forgerock.audit.secure.SecureStorage;
+import org.forgerock.audit.util.GzipUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.supercsv.prefs.CsvPreference;
@@ -77,8 +79,18 @@ class CsvSecureArchiveVerifier {
 
     private SecureStorage openSecureStorageForCsvFile(File csvFile, String keystorePassword, PublicKey publicKey)
             throws Exception {
-        String keystorePath = csvFile.getPath() + ".keystore";
-        KeyStoreHandler keyStoreHandler = new JcaKeyStoreHandler(KEYSTORE_TYPE, keystorePath, keystorePassword);
+        File keyStoreFile = CsvSecureUtils.keyStoreFile(csvFile);
+        if (!keyStoreFile.exists() && !csvFile.getName().endsWith(GzipUtil.GZIP_SUFFIX)) {
+            // the rotation names the keystore after the archive name before it compresses the file, and keeps the
+            // file under its name without .gz if the compression fails
+            final File compressedKeyStoreFile =
+                    CsvSecureUtils.keyStoreFile(new File(csvFile.getPath() + GzipUtil.GZIP_SUFFIX));
+            if (compressedKeyStoreFile.exists()) {
+                keyStoreFile = compressedKeyStoreFile;
+            }
+        }
+        KeyStoreHandler keyStoreHandler =
+                new JcaKeyStoreHandler(KEYSTORE_TYPE, keyStoreFile.getPath(), keystorePassword);
         return new KeyStoreSecureStorage(keyStoreHandler, publicKey);
     }
 
