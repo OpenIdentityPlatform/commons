@@ -447,12 +447,44 @@ public class CsvAuditEventHandlerTest {
                 .setAdditionalParameter(ACTION_PARAM_TARGET_HANDLER, "csv");
         AssertJPromiseAssert.assertThat(csvHandler.handleAction(context, "access", actionRequest))
                 .failedWithException()
-                .isInstanceOf(BadRequestException.class);
+                .isInstanceOf(ServiceUnavailableException.class);
 
         // the file is not rotated, and no new writer opens a new file
         final File liveFile = logDirectory.resolve("access.csv").toFile();
         assertThat(logDirectory.toFile().listFiles()).as("when " + label).containsExactly(liveFile);
         assertThat(liveFile).as("when " + label).content(UTF_8).containsOnlyOnce("\"_id1\"");
+    }
+
+    @Test
+    public void testFailuresOfAuditFileAreServerErrors() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        // A directory in place of the audit file: it can be neither written nor read.
+        Files.createDirectory(logDirectory.resolve("access.csv")).toFile().deleteOnExit();
+        final CsvAuditEventHandler csvHandler = csvAuditEventHandler().loggingTo(logDirectory).build();
+        final Context context = new RootContext();
+        try {
+            // The request is right: these are failures of the server, which a client may retry.
+            AssertJPromiseAssert.assertThat(csvHandler.publishEvent(context, "access", buildEvent(1)))
+                    .failedWithException()
+                    .isInstanceOf(InternalServerErrorException.class);
+            AssertJPromiseAssert.assertThat(csvHandler.readEvent(context, "access", "_id1"))
+                    .failedWithException()
+                    .isInstanceOf(InternalServerErrorException.class);
+            final QueryRequest queryRequest = Requests.newQueryRequest("access")
+                    .setQueryFilter(QueryFilters.parse("/_id eq \"_id1\""));
+            AssertJPromiseAssert.assertThat(
+                    csvHandler.queryEvents(context, "access", queryRequest, mock(QueryResourceHandler.class)))
+                    .failedWithException()
+                    .isInstanceOf(InternalServerErrorException.class);
+            final ActionRequest actionRequest = Requests.newActionRequest("access", ROTATE_FILE_ACTION_NAME)
+                    .setAdditionalParameter(ACTION_PARAM_TARGET_HANDLER, "csv");
+            AssertJPromiseAssert.assertThat(csvHandler.handleAction(context, "access", actionRequest))
+                    .failedWithException()
+                    .isInstanceOf(InternalServerErrorException.class);
+        } finally {
+            csvHandler.shutdown();
+        }
     }
 
     @Test
@@ -597,7 +629,7 @@ public class CsvAuditEventHandlerTest {
                     .setAdditionalParameter(ACTION_PARAM_TARGET_HANDLER, "csv");
             AssertJPromiseAssert.assertThat(csvHandler.handleAction(context, "access", actionRequest))
                     .failedWithException()
-                    .isInstanceOf(BadRequestException.class);
+                    .isInstanceOf(InternalServerErrorException.class);
             csvHandler.publishEvent(context, "access", buildEvent(2));
         } finally {
             csvHandler.shutdown();
