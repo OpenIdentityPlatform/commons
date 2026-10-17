@@ -238,8 +238,8 @@ public class IntegrityCheckTest extends PersistitUnitTestCase {
         icheck.setFixHolesEnabled(true);
         icheck.checkTree(ex.getTree());
         assertEquals(holeCount, cm.getAcceptedCount());
-        waitForCleanupManager(cm);
-        assertEquals(cm.getPerformedCount(), holeCount);
+        waitForCleanupManager();
+        assertEquals(holeCount, cm.getPerformedCount());
 
         icheck = icheck();
         icheck.checkTree(ex.getTree());
@@ -251,7 +251,6 @@ public class IntegrityCheckTest extends PersistitUnitTestCase {
     @Test
     public void testPrune() throws Exception {
         final Exchange ex = _persistit.getExchange(_volumeName, "mvv", true);
-        final CleanupManager cm = _persistit.getCleanupManager();
         transactionalStore(ex);
         _persistit.getTransactionIndex().updateActiveTransactionCache();
 
@@ -266,7 +265,7 @@ public class IntegrityCheckTest extends PersistitUnitTestCase {
         assertTrue(icheck.getMvvCount() > 0);
         assertTrue(icheck.getPrunedPagesCount() > 0);
 
-        waitForCleanupManager(cm);
+        waitForCleanupManager();
 
         icheck = icheck();
         icheck.checkTree(ex.getTree());
@@ -355,13 +354,6 @@ public class IntegrityCheckTest extends PersistitUnitTestCase {
             ex.to(key(i));
             ex.remove();
         }
-    }
-
-    private void waitForCleanupManager(final CleanupManager cm) throws InterruptedException {
-        for (int wait = 0; wait < 60 && cm.getEnqueuedCount() > 0; wait++) {
-            Thread.sleep(1000);
-        }
-        assertEquals(0, cm.getEnqueuedCount());
     }
 
     private void transactionalStore(final Exchange ex) throws PersistitException {
