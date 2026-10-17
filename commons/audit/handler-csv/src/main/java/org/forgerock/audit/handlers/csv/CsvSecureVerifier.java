@@ -25,6 +25,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.Map;
@@ -147,6 +149,9 @@ class CsvSecureVerifier {
                     }
                 }
             }
+        } catch (CharacterCodingException e) {
+            // such as a file written with rotation disabled before the writer wrote in UTF-8, in the platform charset
+            return newVerificationFailureResult("The file is not valid UTF-8");
         }
 
         try {
@@ -182,7 +187,10 @@ class CsvSecureVerifier {
             fileIn.close();
             throw e;
         }
-        return new CsvMapReader(new BufferedReader(new InputStreamReader(in)), csvPreference);
+        // the writers write in UTF-8, and dataToSign() signs the UTF-8 bytes of the values; the decoder reports
+        // malformed input instead of replacing it, so that bytes that are not UTF-8 cannot pass for U+FFFD
+        return new CsvMapReader(new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8.newDecoder())),
+                csvPreference);
     }
 
     private VerificationResult newVerificationFailureResult(String msg) {
