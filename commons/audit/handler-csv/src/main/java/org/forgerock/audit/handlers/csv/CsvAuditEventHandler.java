@@ -69,6 +69,7 @@ import org.forgerock.audit.secure.JcaKeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreHandler;
 import org.forgerock.audit.util.GzipUtil;
 import org.forgerock.audit.util.JsonValueUtils;
+import org.forgerock.audit.util.ResourceExceptionsUtil;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -325,7 +326,8 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
             // the handler is shut down, or no new writer could be opened
             throw e;
         } catch (IOException e) {
-            throw new BadRequestException(e);
+            // a failure of the server, such as a full disk, not of the request
+            throw new InternalServerErrorException(e);
         } finally {
             writerLock.writeLock().unlock();
         }
@@ -398,7 +400,8 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
             }
             return newQueryResponse().asPromise();
         } catch (Exception e) {
-            return new BadRequestException(e).asPromise();
+            // a failure to read the audit file is a failure of the server
+            return ResourceExceptionsUtil.adapt(e).asPromise();
         }
     }
 
@@ -418,7 +421,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
         } catch (ResourceException e) {
             return e.asPromise();
         } catch (IOException e) {
-            return new BadRequestException(e).asPromise();
+            return new InternalServerErrorException(e).asPromise();
         }
     }
 
@@ -435,13 +438,13 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
             }
             final String error = format("This action is unknown for the CSV handler: %s", action);
             return new BadRequestException(error).asPromise();
-        } catch (BadRequestException e) {
+        } catch (ResourceException e) {
             return e.asPromise();
         }
     }
 
     private ActionResponse handleRotateAction(String topic)
-            throws BadRequestException {
+            throws ResourceException {
         final ReadWriteLock writerLock = writerLockByTopic.get(topic);
         if (writerLock == null) {
             LOGGER.debug("Unable to rotate file for unknown topic: {}", topic);
@@ -458,15 +461,20 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
             CsvWriter csvWriter = writers.get(topic);
             if (csvWriter == null) {
                 LOGGER.debug("Unable to rotate file for topic: {}", topic);
-                throw new BadRequestException("Unable to rotate file for topic: " + topic);
+                if (shutDown) {
+                    throw new ServiceUnavailableException("Unable to rotate file for topic: " + topic
+                            + ", the handler is shut down");
+                }
+                // the writer of the topic could not be opened
+                throw new InternalServerErrorException("Unable to rotate file for topic: " + topic);
             }
             if (rotationEnabled) {
                 try {
                     if (!csvWriter.forceRotation()) {
-                        throw new BadRequestException("Unable to rotate file for topic: " + topic);
+                        throw new InternalServerErrorException("Unable to rotate file for topic: " + topic);
                     }
                 } catch (IOException e) {
-                    throw new BadRequestException("Error when rotating file for topic: " + topic, e);
+                    throw new InternalServerErrorException("Error when rotating file for topic: " + topic, e);
                 }
             } else {
                 // use a default rotation instead
@@ -499,12 +507,12 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
         csvWriter.writeEvent(cells);
     }
 
-    private CsvWriter resetAndReopenWriter(final String topic) throws BadRequestException {
+    private CsvWriter resetAndReopenWriter(final String topic) throws InternalServerErrorException {
         closeWriter(topic);
         try {
             return openWriter(topic, getAuditLogFile(topic));
         } catch (IOException e) {
-            throw new BadRequestException(e);
+            throw new InternalServerErrorException(e);
         }
     }
 
@@ -515,13 +523,13 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
      * @return The archive name of the rotated file. A file to compress is renamed without the .gz suffix, and the
      *         caller compresses it with {@link GzipUtil#compressRotatedFile(File)}.
      */
-    private File rotateAndReopenWriter(final String topic) throws BadRequestException {
+    private File rotateAndReopenWriter(final String topic) throws InternalServerErrorException {
         closeWriter(topic);
         final File auditLogFile = getAuditLogFile(topic);
         final File rotatedFile = new TimeStampFileNamingPolicy(auditLogFile, null, null).getNextName();
         final File renamedFile = GzipUtil.removeGzipSuffix(rotatedFile);
         if (!auditLogFile.renameTo(renamedFile)) {
-            throw new BadRequestException(
+            throw new InternalServerErrorException(
                     format("Unable to rename file %s to %s when rotating", auditLogFile, renamedFile));
         }
         if (configuration.getSecurity().isEnabled()) {
@@ -537,7 +545,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
                             renamedFile, auditLogFile, renamedFile, keyStoreFile);
                 }
                 resetAndReopenWriter(topic);
-                throw new BadRequestException(
+                throw new InternalServerErrorException(
                         format("Unable to rename file %s to %s when rotating", keyStoreFile, archivedKeyStoreFile));
             }
         }
