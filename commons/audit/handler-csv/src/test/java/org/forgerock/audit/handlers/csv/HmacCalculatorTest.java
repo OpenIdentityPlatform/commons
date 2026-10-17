@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.audit.handlers.csv;
 
@@ -56,6 +57,22 @@ public class HmacCalculatorTest {
         // The key is updated after each generated HMAC so the HMAC for the same data must not be the same.
         base64HMAC = hmacCalculator.calculate(data);
         assertThat(base64HMAC).isEqualTo("xDSrLEfpe3V1t5Y9y2I4bCIUIdWcQKum9HiVDHXfHFQ=");
+    }
+
+    @Test
+    public void shouldVerifyHMACOfOneOfTheDataWithOneKey() throws Exception {
+        HmacCalculator hmacCalculator = new HmacCalculator("HmacSHA256");
+        hmacCalculator.setCurrentKey("forgerock".getBytes(StandardCharsets.UTF_8));
+
+        byte[] other = "rock".getBytes(StandardCharsets.UTF_8);
+        byte[] data = "rockstar".getBytes(StandardCharsets.UTF_8);
+
+        // The HMACs of data with the first, second and fourth keys, the first two as in shouldCalculateHMAC.
+        // A match on the second data, a match on the first data and a mismatch each update the key once.
+        assertThat(hmacCalculator.verify("m9Yir8xEvAS4leA6IZGJQ++OGkyMMHnf334N94AlVIs=", other, data)).isTrue();
+        assertThat(hmacCalculator.verify("xDSrLEfpe3V1t5Y9y2I4bCIUIdWcQKum9HiVDHXfHFQ=", data, other)).isTrue();
+        assertThat(hmacCalculator.verify(null, data, other)).isFalse();
+        assertThat(hmacCalculator.verify("vDQb23X5yYDWoL7NcWmSGzrHBBYNWwtvA9w6oGOq58o=", data)).isTrue();
     }
 
 }
