@@ -73,6 +73,7 @@ public class RotatableWriter implements TextWriter, RotatableObject {
     private BufferedWriter writer;
     private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private final RolloverLifecycleHook rolloverLifecycleHook;
+    private final Duration rotationCheckInterval;
 
     /**
      * Constructs a {@link RotatableWriter} given an initial file to manage rotation/retention, and
@@ -99,8 +100,29 @@ public class RotatableWriter implements TextWriter, RotatableObject {
      */
     public RotatableWriter(final File file, final FileBasedEventHandlerConfiguration configuration,
             final boolean append, final RolloverLifecycleHook rolloverLifecycleHook) throws IOException {
+        this(file, configuration, append, rolloverLifecycleHook, true);
+    }
+
+    /**
+     * Constructs a {@link RotatableWriter} given an initial file to manage rotation/retention, a
+     * {@link FileBasedEventHandlerConfiguration} and a {@link RolloverLifecycleHook}, and starts the rotation and
+     * retention checks, or leaves them to {@link #startRotationAndRetentionChecks()}.
+     * <p>
+     * A rotation renames the file: a writer that reads the file before it writes to it starts the checks once it has
+     * read it.
+     *
+     * @param file The initial file to manage rotation/retention.
+     * @param configuration The configuration of the rotation and retention policies.
+     * @param append Whether to append to the rotatable file or not.
+     * @param rolloverLifecycleHook Hook to use before and after rotation/retention checks.
+     * @param startChecks Whether to start the rotation and retention checks now.
+     * @throws IOException If a problem occurs.
+     */
+    public RotatableWriter(final File file, final FileBasedEventHandlerConfiguration configuration,
+            final boolean append, final RolloverLifecycleHook rolloverLifecycleHook, final boolean startChecks)
+            throws IOException {
         this(file, configuration, append, configuration.getFileRotation().buildTimeStampFileNamingPolicy(file),
-                rolloverLifecycleHook);
+                rolloverLifecycleHook, startChecks);
     }
 
     /**
@@ -110,13 +132,13 @@ public class RotatableWriter implements TextWriter, RotatableObject {
     @VisibleForTesting
     RotatableWriter(final File file, final FileBasedEventHandlerConfiguration configuration,
                            final boolean append, final FileNamingPolicy fileNamingPolicy) throws IOException {
-        this(file, configuration, append, fileNamingPolicy, NOOP_ROLLOVER_LIFECYCLE_HOOK);
+        this(file, configuration, append, fileNamingPolicy, NOOP_ROLLOVER_LIFECYCLE_HOOK, true);
     }
 
     /** Constructor with all possible parameters. */
     private RotatableWriter(final File file, final FileBasedEventHandlerConfiguration configuration,
             final boolean append, final FileNamingPolicy fileNamingPolicy,
-            final RolloverLifecycleHook rolloverLifecycleHook) throws IOException {
+            final RolloverLifecycleHook rolloverLifecycleHook, final boolean startChecks) throws IOException {
         this.file = file;
         this.fileNamingPolicy = fileNamingPolicy;
         this.rotationEnabled = configuration.getFileRotation().isRotationEnabled();
@@ -128,7 +150,10 @@ public class RotatableWriter implements TextWriter, RotatableObject {
         this.writer = constructWriter(file, append);
         retentionPolicies = configuration.getFileRetention().buildRetentionPolicies();
         rotationPolicies = configuration.getFileRotation().buildRotationPolicies();
-        scheduleRotationAndRetentionChecks(configuration);
+        rotationCheckInterval = parseRotationCheckInterval(configuration);
+        if (startChecks) {
+            startRotationAndRetentionChecks();
+        }
     }
 
     /**
@@ -355,21 +380,30 @@ public class RotatableWriter implements TextWriter, RotatableObject {
     }
 
     /**
-     * Schedule checks for rotations and retention policies.
+     * Parses the interval of the checks for rotations and retention policies.
      * <p>
      * The check interval is provided by the RotationRetentionCheckInterval property, which must have
      * a non-zero value if at least one policy is enabled.
      */
-    private void scheduleRotationAndRetentionChecks(FileBasedEventHandlerConfiguration configuration)
+    private Duration parseRotationCheckInterval(FileBasedEventHandlerConfiguration configuration)
             throws IOException {
         final Duration rotationCheckInterval = parseDuration("rotation and retention check interval",
                 configuration.getRotationRetentionCheckInterval(), FIVE_SECONDS);
 
-        if (!rotationPolicies.isEmpty() || !retentionPolicies.isEmpty()) {
-            if (rotationCheckInterval.isUnlimited() || rotationCheckInterval.isZero()) {
-                throw new IOException("Rotation and retention check interval set to an invalid value: "
-                        + rotationCheckInterval);
-            }
+        if ((!rotationPolicies.isEmpty() || !retentionPolicies.isEmpty())
+                && (rotationCheckInterval.isUnlimited() || rotationCheckInterval.isZero())) {
+            throw new IOException("Rotation and retention check interval set to an invalid value: "
+                    + rotationCheckInterval);
+        }
+        return rotationCheckInterval;
+    }
+
+    /**
+     * Schedules the checks for rotations and retention policies, if at least one policy is enabled, at the check
+     * interval. Does nothing if they are scheduled already.
+     */
+    public void startRotationAndRetentionChecks() {
+        if (rotator == null && (!rotationPolicies.isEmpty() || !retentionPolicies.isEmpty())) {
             rotator = Executors.newScheduledThreadPool(1);
             rotator.scheduleAtFixedRate(
                     new Runnable() {

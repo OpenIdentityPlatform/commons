@@ -176,6 +176,11 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
         } catch (Exception e) {
             throw new RuntimeException("Error when initializing a secure CSV writer", e);
         }
+        if (rotatableWriter != null) {
+            // Only once the keys are read and the file is verified: a rotation renames the file and its keystore,
+            // and writes new keys into the secure storage that the verifier reads.
+            rotatableWriter.startRotationAndRetentionChecks();
+        }
     }
 
     @Override
@@ -208,7 +213,8 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
             throws IOException {
         TextWriter textWriter;
         if (config.getFileRotation().isRotationEnabled()) {
-            rotatableWriter = new RotatableWriter(csvFile, config, append, this);
+            // the checks are started at the end of the constructor
+            rotatableWriter = new RotatableWriter(csvFile, config, append, this, false);
             rotatableWriter.registerRotationHooks(new SecureCsvWriterRotationHooks());
             textWriter = rotatableWriter;
         } else {

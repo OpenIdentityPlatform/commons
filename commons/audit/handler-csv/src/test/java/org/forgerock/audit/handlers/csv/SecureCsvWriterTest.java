@@ -270,6 +270,59 @@ public class SecureCsvWriterTest {
     }
 
     @Test(timeOut = 60_000)
+    public void shouldRotateResumedFileOnlyOnceItIsVerified() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("SecureCsvWriterTest");
+        final File actual =
+                new File(logDirectory.toFile(), CsvAuditEventHandler.SECURE_CSV_FILENAME_PREFIX + "access.csv");
+        final String header = "FOO";
+        final String rotationFileSuffix = "-yyyy.MM.dd-HH.mm.ss.SSS";
+        try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(actual, new String[]{header},
+                CsvPreference.EXCEL_PREFERENCE, createBasicSecureConfig("5 minutes"), keyStoreHandler, random)) {
+            secureCsvWriter.writeEvent(singletonMap(header, "one"));
+        }
+        // the time limit policy rotates the file at the first check after it is resumed
+        assertThat(actual.setLastModified(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(2))).isTrue();
+
+        CsvAuditEventHandlerConfiguration config = createBasicSecureConfig("5 minutes");
+        config.getFileRotation().setRotationEnabled(true);
+        config.getFileRotation().setRotationFileSuffix(rotationFileSuffix);
+        config.getFileRotation().setRotationInterval("1 hour");
+        config.setRotationRetentionCheckInterval("10 milliseconds");
+        // a keystore slow to read, so that the construction outlasts many check intervals
+        final KeyStoreHandlerDecorator slowKeyStoreHandler = new KeyStoreHandlerDecorator(keyStoreHandler) {
+            @Override
+            public KeyStore getStore() {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                return super.getStore();
+            }
+        };
+        final FileNamingPolicy fileNamingPolicy = new TimeStampFileNamingPolicy(actual, rotationFileSuffix, null);
+        try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(actual, new String[]{header},
+                CsvPreference.EXCEL_PREFERENCE, config, slowKeyStoreHandler, random)) {
+            // close() waits for the rotation that renamed the file to end
+            final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+            while (fileNamingPolicy.listFiles().isEmpty() && System.nanoTime() < deadline) {
+                Thread.sleep(10);
+            }
+        }
+
+        // the resumed file is archived with its own keystore
+        final String keystorePassword =
+                Base64.encode(keyStoreHandler.readSecretKeyFromKeyStore(ENTRY_PASSWORD).getEncoded());
+        final PublicKey publicKey = keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE);
+        final List<VerificationResult> verificationResults = new CsvSecureArchiveVerifier(
+                fileNamingPolicy, keystorePassword, publicKey, CsvPreference.EXCEL_PREFERENCE).verify();
+        assertThat(verificationResults).hasSize(1);
+        final VerificationResult archive = verificationResults.get(0);
+        assertThat(archive.hasPassedVerification()).as(archive.getFailureReason()).isTrue();
+        assertThat(contentOf(archive.getArchiveFile())).containsPattern("(?m)^one,");
+    }
+
+    @Test(timeOut = 60_000)
     public void shouldForceRotationWhileAnotherThreadWritesAnEvent() throws Exception {
         final Path logDirectory = Files.createTempDirectory("SecureCsvWriterTest");
         final File actual =

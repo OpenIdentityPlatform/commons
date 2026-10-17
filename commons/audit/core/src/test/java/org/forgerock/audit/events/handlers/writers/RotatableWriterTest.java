@@ -442,6 +442,34 @@ public class RotatableWriterTest {
         assertThat(rotatableWriter.getBytesWritten()).isEqualTo(0L);
     }
 
+    @Test
+    public void testEvaluatesPoliciesPeriodicallyOnlyOnceTheChecksAreStarted() throws Exception {
+        // given
+        final File file = getTempFile();
+        final String prefix = "testEvaluatesPoliciesPeriodicallyOnlyOnceTheChecksAreStarted";
+        assertThat(file.setLastModified(System.currentTimeMillis() - HOURS.toMillis(2))).isTrue();
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
+        configuration.setRotationRetentionCheckInterval("10 ms");
+        configuration.getFileRotation().setRotationEnabled(true);
+        configuration.getFileRotation().setRotationFilePrefix(prefix);
+        configuration.getFileRotation().setRotationFileSuffix(ROTATION_FILE_SUFFIX.replace(".gz", ""));
+        configuration.getFileRotation().setRotationInterval("1 hour");
+        rotatableWriter = new RotatableWriter(
+                file, configuration, true, RotatableWriter.NOOP_ROLLOVER_LIFECYCLE_HOOK, false);
+
+        // when
+        Thread.sleep(500);
+
+        // then
+        assertThat(getRetainedHistoricalFiles(file, prefix)).isEmpty();
+
+        // when
+        rotatableWriter.startRotationAndRetentionChecks();
+
+        // then
+        assertRetainedHistoricalFiles(file, prefix, 1);
+    }
+
     private void writeThenFlushBytes(final RotatableWriter writer, final int bytesToWrite) throws IOException {
         writer.write(new String(new byte[bytesToWrite]));
         writer.flush();
