@@ -12,9 +12,11 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.audit.handlers.csv;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.forgerock.audit.handlers.csv.SecureCsvWriterTest.KEYSTORE_FILENAME;
@@ -42,6 +44,7 @@ import org.forgerock.util.encode.Base64;
 import org.joda.time.format.DateTimeFormat;
 import org.supercsv.prefs.CsvPreference;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
@@ -146,6 +149,47 @@ public class CsvWriterTest {
             fail("Should have failed because headers do not match.");
         } catch (RuntimeException e) {
             // This is ok, we expect to have this exception.
+        }
+    }
+
+    @DataProvider
+    private Object[][] headersOfOtherLength() {
+        return new Object[][] {
+            // a field was removed from the end of the topic schema
+            { "child1,child2,child3,child4" },
+            // a field was added to the end of the topic schema
+            { "child1,child2" },
+        };
+    }
+
+    @Test(dataProvider = "headersOfOtherLength")
+    public void shouldNotResumeCsvFileWithHeadersOfOtherLength(String fileHeaders) throws Exception {
+        final Path csvFile = Files.createTempFile("CsvWriterTest", ".csv");
+        csvFile.toFile().deleteOnExit();
+        Files.write(csvFile, List.of(fileHeaders));
+
+        try {
+            new StandardCsvWriter(csvFile.toFile(), new String[] { "child1", "child2", "child3" },
+                    CsvPreference.EXCEL_PREFERENCE, new CsvAuditEventHandlerConfiguration());
+            fail("Should have failed because headers do not match.");
+        } catch (IOException e) {
+            assertThat(e).hasMessage("Resuming an existing CSV file but the headers do not match.");
+        }
+        assertThat(Files.readAllLines(csvFile, UTF_8)).containsExactly(fileHeaders);
+    }
+
+    @Test
+    public void shouldRejectNullHeadersWhenResumingCsvFile() throws Exception {
+        final Path csvFile = Files.createTempFile("CsvWriterTest", ".csv");
+        csvFile.toFile().deleteOnExit();
+        Files.write(csvFile, List.of("child1,child2,child3"));
+
+        try {
+            new StandardCsvWriter(csvFile.toFile(), null, CsvPreference.EXCEL_PREFERENCE,
+                    new CsvAuditEventHandlerConfiguration());
+            fail("Should have failed because headers are null.");
+        } catch (NullPointerException e) {
+            assertThat(e).hasMessage("The headers can't be null.");
         }
     }
 
