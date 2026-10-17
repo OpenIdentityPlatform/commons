@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.audit.handlers.csv;
 
@@ -144,8 +145,9 @@ public class CsvWriterTest {
             new SecureCsvWriter(csvFile, new String[] { "child1", "child2", "child3", "enfant4" }, csvPreference,
                     configuration, keyStoreHandler, random);
             fail("Should have failed because headers do not match.");
-        } catch (RuntimeException e) {
+        } catch (IOException e) {
             // This is ok, we expect to have this exception.
+            assertThat(e).hasMessageContaining("the headers do not match");
         }
     }
 

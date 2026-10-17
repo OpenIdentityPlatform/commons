@@ -27,18 +27,23 @@ import static org.forgerock.util.time.Duration.duration;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.security.KeyStore;
 import java.security.PublicKey;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
@@ -338,6 +343,135 @@ public class SecureCsvWriterTest {
     private static boolean isWaitingForLockOf(final ThreadMXBean threads, final Thread thread, final Thread owner) {
         final ThreadInfo threadInfo = threads.getThreadInfo(thread.getId());
         return threadInfo != null && threadInfo.getLockOwnerId() == owner.getId();
+    }
+
+    /** Leaves a file and its keystore in a state that a writer cannot reopen. */
+    private interface Damage {
+        void apply(File csvFile, File keyStoreFile) throws Exception;
+    }
+
+    @DataProvider
+    private Object[][] unresumableFiles() {
+        return new Object[][] {
+            { "changed row", (Damage) (csvFile, keyStoreFile) -> {
+                // The HMAC of the row no longer matches its value.
+                final String content = new String(Files.readAllBytes(csvFile.toPath()), StandardCharsets.UTF_8);
+                Files.write(csvFile.toPath(),
+                        content.replace("first-event", "forged-event").getBytes(StandardCharsets.UTF_8));
+            }, "The CSV file was tampered" },
+            { "missing keystore", (Damage) (csvFile, keyStoreFile) -> Files.delete(keyStoreFile.toPath()),
+                "no initial key" },
+            { "keystore without current key", (Damage) (csvFile, keyStoreFile) -> {
+                final JcaKeyStoreHandler fileKeyStore = loadFileKeyStore(keyStoreFile);
+                fileKeyStore.getStore().deleteEntry(KeyStoreSecureStorage.ENTRY_CURRENT_KEY);
+                fileKeyStore.store();
+            }, "Final HMAC key is null" },
+            // as left by a crash while the keystore was stored
+            { "empty keystore", (Damage) (csvFile, keyStoreFile) -> Files.write(keyStoreFile.toPath(), new byte[0]),
+                "cannot be loaded" },
+            // as after a change of the Password key in the handler keystore
+            { "keystore of another password",
+                (Damage) (csvFile, keyStoreFile) -> storeUnderAnotherPassword(keyStoreFile), "cannot be loaded" },
+            // The verifier fails with a RuntimeException on the rows below.
+            // as left by a crash while the last row was written: a row with fewer columns than the header
+            { "row cut short", (Damage) (csvFile, keyStoreFile) -> Files.write(csvFile.toPath(),
+                    "cut-short-event\n".getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND),
+                "cannot be verified" },
+            { "quoted value cut short", (Damage) (csvFile, keyStoreFile) -> Files.write(csvFile.toPath(),
+                    "\"cut, short".getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND),
+                "cannot be verified" },
+            // the padding of the final signature is cut, so that it no longer decodes as Base64
+            { "signature cut short", (Damage) (csvFile, keyStoreFile) -> {
+                final byte[] content = Files.readAllBytes(csvFile.toPath());
+                Files.write(csvFile.toPath(), Arrays.copyOf(content, content.length - 3));
+            }, "cannot be verified" },
+            // as left by a crash while the header was written along with the first event
+            { "header cut short", (Damage) (csvFile, keyStoreFile) ->
+                    Files.write(csvFile.toPath(), "FOO".getBytes(StandardCharsets.UTF_8)), "cannot be verified" },
+        };
+    }
+
+    /** Loads the keystore of a file with the password that the writer derives from the handler keystore. */
+    private JcaKeyStoreHandler loadFileKeyStore(File keyStoreFile) throws Exception {
+        final String password = Base64.encode(keyStoreHandler.readSecretKeyFromKeyStore(ENTRY_PASSWORD).getEncoded());
+        return new JcaKeyStoreHandler(KEYSTORE_TYPE, keyStoreFile.getPath(), password);
+    }
+
+    private void storeUnderAnotherPassword(File keyStoreFile) throws Exception {
+        final KeyStore store = loadFileKeyStore(keyStoreFile).getStore();
+        try (OutputStream out = Files.newOutputStream(keyStoreFile.toPath())) {
+            store.store(out, "another password".toCharArray());
+        }
+    }
+
+    @Test(dataProvider = "unresumableFiles")
+    public void shouldStopRotatorAndFailWithIOExceptionWhenFileCannotBeResumed(
+            final String description, final Damage damage, final String reason) throws Exception {
+        assertReopeningFailsWithIOException(true, description, damage, reason);
+    }
+
+    @DataProvider
+    private Object[][] unloadableKeystoresOfEmptyFiles() {
+        return new Object[][] {
+            { "keystore replaced by a directory", (Damage) (csvFile, keyStoreFile) -> {
+                Files.delete(keyStoreFile.toPath());
+                Files.createDirectory(keyStoreFile.toPath());
+            }, "cannot be loaded" },
+            // as after a change of the Password key in the handler keystore
+            { "keystore of another password",
+                (Damage) (csvFile, keyStoreFile) -> storeUnderAnotherPassword(keyStoreFile), "cannot be loaded" },
+        };
+    }
+
+    @Test(dataProvider = "unloadableKeystoresOfEmptyFiles")
+    public void shouldStopRotatorAndFailWithIOExceptionWhenKeystoreOfEmptyFileCannotBeLoaded(
+            final String description, final Damage damage, final String reason) throws Exception {
+        // A topic that got no event keeps an empty file next to its keystore.
+        assertReopeningFailsWithIOException(false, description, damage, reason);
+    }
+
+    /** Writes a file, with an event or without, damages it, and asserts that a writer fails to reopen it. */
+    private void assertReopeningFailsWithIOException(final boolean withEvent, final String description,
+            final Damage damage, final String reason) throws Exception {
+        final Path logDirectory = Files.createTempDirectory("SecureCsvWriterTest");
+        final File actual = new File(logDirectory.toFile(), "tamper-evident-test.csv");
+        final String[] headers = {"FOO"};
+        final CsvAuditEventHandlerConfiguration config = createBasicSecureConfig("5 minutes");
+        // A rotation policy, so that the RotatableWriter starts its rotator thread; no check runs during the test.
+        config.getFileRotation().setRotationEnabled(true);
+        config.getFileRotation().setMaxFileSize(1024 * 1024);
+        config.setRotationRetentionCheckInterval("5 minutes");
+
+        // The executors of a writer create their threads in the group of the thread that creates the writer.
+        final ThreadGroup writerThreads = new ThreadGroup("SecureCsvWriterTest");
+        final SecureCsvWriter secureCsvWriter = callInThreadGroup(writerThreads, () -> new SecureCsvWriter(
+                actual, headers, CsvPreference.EXCEL_PREFERENCE, config, keyStoreHandler, random));
+        assertThat(writerThreads.activeCount()).as("rotator threads").isEqualTo(1);
+        if (withEvent) {
+            secureCsvWriter.writeEvent(singletonMap(headers[0], "first-event"));
+        }
+        secureCsvWriter.close();
+        assertThreadsTerminate(writerThreads);
+        // An empty file is not resumed: a writer reopens it as a new file.
+        assertThat(actual.length() > 0).as("file written").isEqualTo(withEvent);
+
+        damage.apply(actual, new File(actual.getPath() + ".keystore"));
+
+        final ThreadGroup resumingThreads = new ThreadGroup("SecureCsvWriterTest-resume");
+        final Throwable failure = callInThreadGroup(resumingThreads, () -> catchThrowable(() -> new SecureCsvWriter(
+                actual, headers, CsvPreference.EXCEL_PREFERENCE, config, keyStoreHandler, random)));
+        assertThat(failure).as(description).isInstanceOf(IOException.class).hasMessageContaining(reason);
+        // The rotator thread is not a daemon thread, it would keep the JVM from exiting.
+        assertThreadsTerminate(resumingThreads);
+    }
+
+    /** Runs the task in a new thread of the group, and returns its result once the thread has ended. */
+    private static <T> T callInThreadGroup(ThreadGroup group, Callable<T> task) throws Exception {
+        final FutureTask<T> future = new FutureTask<>(task);
+        final Thread thread = new Thread(group, future);
+        thread.start();
+        thread.join();
+        return future.get();
     }
 
     private CsvAuditEventHandlerConfiguration createBasicSecureConfig(String interval) {
