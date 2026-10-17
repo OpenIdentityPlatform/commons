@@ -68,10 +68,10 @@ public interface TextWriter {
         private final MeteredStream stream;
         private final Writer writer;
         /**
-         * Set by the first write or flush that fails. The buffers of the writer are unusable after it: a later flush
-         * may write nothing and return, or write a part of the failed text.
+         * The first write or flush that failed. The buffers of the writer are unusable after it: a later flush may
+         * write nothing and return, or write a part of the failed text.
          */
-        private volatile boolean failed;
+        private volatile IOException failure;
 
         /**
          * Creates a new text writer that will write to the provided output stream.
@@ -91,8 +91,7 @@ public interface TextWriter {
             try {
                 writer.write(text);
             } catch (IOException e) {
-                failed = true;
-                throw e;
+                throw fail(e);
             }
         }
 
@@ -103,15 +102,14 @@ public interface TextWriter {
             try {
                 writer.flush();
             } catch (IOException e) {
-                failed = true;
-                throw e;
+                throw fail(e);
             }
         }
 
         @Override
         public void shutdown() {
             try {
-                if (failed) {
+                if (failure != null) {
                     // Close the stream without writing what the buffers still hold: the failed events are retried.
                     stream.close();
                 } else {
@@ -122,9 +120,17 @@ public interface TextWriter {
             }
         }
 
+        private synchronized IOException fail(final IOException e) {
+            if (failure == null) {
+                failure = e;
+            }
+            return e;
+        }
+
         private void checkNotFailed() throws IOException {
-            if (failed) {
-                throw new IOException("A previous write to the stream failed");
+            final IOException firstFailure = failure;
+            if (firstFailure != null) {
+                throw new IOException("A previous write to the stream failed", firstFailure);
             }
         }
 
