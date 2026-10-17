@@ -84,13 +84,8 @@
         	 <dependency>
 			    <groupId>org.glassfish.corba</groupId>
 			    <artifactId>rmic</artifactId>
-			    <version>4.2.0-b007</version>
+			    <version>4.2.5</version>
 			</dependency>
-            <dependency>
-              <groupId>org.ow2.asm</groupId>
-              <artifactId>asm</artifactId>
-              <version>7.3.1</version>
-            </dependency>
         </dependencies>
       </plugin>
      
