@@ -1,6 +1,8 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
  * 
+ * Portions Copyright 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,12 +30,15 @@ import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.Properties;
 
+import static org.junit.Assert.fail;
+
 public abstract class PersistitUnitTestCase {
 
   @Rule
   public TemporaryFolder temp = new TemporaryFolder(new File(System.getProperty("buildDirectory")));
 
   private final static long TEN_SECONDS = 10L * 1000L * 1000L * 1000L;
+  private final static long SIXTY_SECONDS = 60L * 1000L * 1000L * 1000L;
   protected String DATA_PATH;
   public final static String VOLUME_NAME = "persistit";
   protected final static String RED_FOX = "The quick red fox jumped over the lazy brown dog.";
@@ -238,6 +243,28 @@ public abstract class PersistitUnitTestCase {
   protected void disableBackgroundCleanup() {
     _persistit.getCleanupManager().setPollInterval(-1);
     _persistit.getJournalManager().setWritePagePruningEnabled(false);
+  }
+
+  /**
+   * Waits until the CleanupManager has performed, or failed to perform, every
+   * action it accepted. An empty queue does not mean that: poll() drains the
+   * queue into a work list first and counts each action only after
+   * performing it. The actions are performed by the background
+   * CLEANUP_MANAGER thread, so this method cannot be used after
+   * {@link #disableBackgroundCleanup()}.
+   */
+  protected void waitForCleanupManager() throws InterruptedException {
+    final CleanupManager cm = _persistit.getCleanupManager();
+    final long expires = System.nanoTime() + SIXTY_SECONDS;
+    while (cm.getPerformedCount() + cm.getErrorCount() < cm.getAcceptedCount()) {
+      if (System.nanoTime() > expires) {
+        fail(String.format("CleanupManager performed %,d and failed %,d of %,d accepted actions in 60 seconds,"
+            + " last exception: %s", cm.getPerformedCount(), cm.getErrorCount(), cm.getAcceptedCount(),
+            cm.getLastException()));
+      }
+      cm.kick();
+      Thread.sleep(50);
+    }
   }
 
   protected void drainJournal() throws Exception {
