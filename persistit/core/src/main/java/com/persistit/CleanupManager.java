@@ -1,6 +1,7 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
  * Copyright 2015 ForgeRock AS
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +17,9 @@
  */
 
 package com.persistit;
+
+import static com.persistit.util.SequencerConstants.CLEANUP_OFFER_A;
+import static com.persistit.util.ThreadSequencer.sequence;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -62,6 +66,8 @@ class CleanupManager extends IOTaskRunnable implements CleanupManagerMXBean {
 
     private final AtomicLong _errors = new AtomicLong();
 
+    private final AtomicLong _discarded = new AtomicLong();
+
     private final AtomicLong _minimumPruningDelay = new AtomicLong(DEFAULT_MINIMUM_PRUNING_DELAY_NS);
 
     private long _lastMaintenance;
@@ -95,14 +101,22 @@ class CleanupManager extends IOTaskRunnable implements CleanupManagerMXBean {
     }
 
     synchronized boolean offer(final CleanupAction action) {
-        final boolean accepted = _cleanupActionQueue.offer(action);
-        if (accepted) {
-            _accepted.incrementAndGet();
-        } else {
+        /*
+         * poll() drains the queue without this monitor, so it can perform the
+         * action, and count it as performed, as soon as the action is in the
+         * queue: count it as accepted first. Only offer() adds to the queue,
+         * under this monitor, so the capacity checked here is still there when
+         * the action is added.
+         */
+        if (_cleanupActionQueue.remainingCapacity() == 0) {
             _refused.incrementAndGet();
             kick();
+            return false;
         }
-        return accepted;
+        _accepted.incrementAndGet();
+        _cleanupActionQueue.add(action);
+        sequence(CLEANUP_OFFER_A);
+        return true;
     }
 
     @Override
@@ -123,6 +137,11 @@ class CleanupManager extends IOTaskRunnable implements CleanupManagerMXBean {
     @Override
     public long getErrorCount() {
         return _errors.get();
+    }
+
+    @Override
+    public long getDiscardedCount() {
+        return _discarded.get();
     }
 
     @Override
@@ -171,7 +190,12 @@ class CleanupManager extends IOTaskRunnable implements CleanupManagerMXBean {
             try {
                 action.performAction(_persistit, null);
                 _performed.incrementAndGet();
-            } catch (final PersistitException e) {
+            } catch (final PersistitException | RuntimeException e) {
+                /*
+                 * A RuntimeException must not end the loop either: the rest of
+                 * the work list is already out of the queue and would never be
+                 * performed or counted.
+                 */
                 lastException(e);
                 _persistit.getAlertMonitor().post(
                         new Event(AlertLevel.ERROR, _persistit.getLogBase().cleanupException, e, action),
@@ -183,7 +207,14 @@ class CleanupManager extends IOTaskRunnable implements CleanupManagerMXBean {
 
     @Override
     public synchronized void clear() {
-        _cleanupActionQueue.clear();
+        /*
+         * Count the discarded actions as such, so that the accepted count
+         * still adds up. drainTo() hands each action either to this list or
+         * to a concurrent poll(), never to both.
+         */
+        final List<CleanupAction> discarded = new ArrayList<>();
+        _cleanupActionQueue.drainTo(discarded);
+        _discarded.addAndGet(discarded.size());
     }
 
     @Override
