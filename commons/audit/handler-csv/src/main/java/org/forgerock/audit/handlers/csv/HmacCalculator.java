@@ -65,6 +65,36 @@ class HmacCalculator {
      * @throws SignatureException if the HMAC cannot be generated.
      */
     public String calculate(byte[] data) throws SignatureException {
+        String result = hmac(data);
+
+        // Compute the next key's iteration
+        computeNextKeyIteration();
+
+        return result;
+    }
+
+    /**
+     * Tells whether the HMAC of one of the given data is the expected one. The current key computes the HMAC of
+     * each data, then the next key's iteration is computed once, as {@link #calculate(byte[])} does.
+     *
+     * @param expectedHmac the expected HMAC, base64 encoded
+     * @param data the data that the expected HMAC may have been calculated for, in the order they are tried
+     * @return {@code true} if the HMAC of one of the data is the expected one.
+     * @throws SignatureException if the HMAC cannot be generated.
+     */
+    public boolean verify(String expectedHmac, byte[]... data) throws SignatureException {
+        boolean verified = false;
+        for (int i = 0; i < data.length && !verified; i++) {
+            verified = hmac(data[i]).equals(expectedHmac);
+        }
+
+        // Compute the next key's iteration
+        computeNextKeyIteration();
+
+        return verified;
+    }
+
+    private String hmac(byte[] data) throws SignatureException {
         try {
             mac.reset();
             mac.init(currentKey);
@@ -73,12 +103,7 @@ class HmacCalculator {
             byte[] rawHmac = mac.doFinal(data);
 
             // base64-encode the hmac
-            String result = Base64.encode(rawHmac);
-
-            // Compute the next key's iteration
-            computeNextKeyIteration();
-
-            return result;
+            return Base64.encode(rawHmac);
         } catch (InvalidKeyException | IllegalStateException e) {
             throw new SignatureException("Failed to generate HMAC : " + e.getMessage());
         }
