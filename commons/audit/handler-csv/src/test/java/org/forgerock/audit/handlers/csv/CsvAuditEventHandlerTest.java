@@ -31,20 +31,26 @@ import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.zip.GZIPInputStream;
 
 import org.forgerock.audit.AuditService;
@@ -67,6 +73,7 @@ import org.forgerock.audit.secure.KeyStoreSecureStorage;
 import org.forgerock.audit.util.GzipUtil;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -94,7 +101,11 @@ import org.testng.SkipException;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializable;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 
 @SuppressWarnings("javadoc")
 public class CsvAuditEventHandlerTest {
@@ -647,7 +658,7 @@ public class CsvAuditEventHandlerTest {
     }
 
     @Test
-    public void testActionToRotateFileCompressesOutsideHandlerMonitor() throws Exception {
+    public void testActionToRotateFileCompressesOutsideWriteLock() throws Exception {
         final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
         final CsvAuditEventHandler csvHandler = csvAuditEventHandler().loggingTo(logDirectory).build();
         final Context context = new RootContext();
@@ -672,7 +683,7 @@ public class CsvAuditEventHandlerTest {
             if (!renamedFile.exists()) {
                 throw new SkipException("The rotated file was compressed before the test could observe it");
             }
-            // the second rotation takes the handler monitor, so it would wait for a compression running under it
+            // the second rotation takes the write lock, so it would wait for a compression running under it
             csvHandler.handleAction(context, "access", actionRequest).getOrThrow();
             assertThat(renamedFile).as("rotated file still being compressed").exists();
             firstRotation.get();
@@ -704,6 +715,202 @@ public class CsvAuditEventHandlerTest {
             Thread.sleep(1);
         }
         throw new AssertionError("No archive in " + logDirectory);
+    }
+
+    @DataProvider
+    private Object[][] tamperEvidentData() {
+        return new Object[][] {
+                // label, is tamper evident logging enabled ?
+                { "standard", false },
+                { "tamper evident", true }
+        };
+    }
+
+    @Test(dataProvider = "tamperEvidentData", timeOut = 60_000)
+    public void testActionToRotateFileKeepsEventBeingPublished(String label, boolean isTamperEvident)
+            throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final CsvAuditEventHandlerBuilder csvAuditEventHandlerBuilder = csvAuditEventHandler().loggingTo(logDirectory);
+        if (isTamperEvident) {
+            csvAuditEventHandlerBuilder.withSecureLoggingEnabled();
+        }
+        final CsvAuditEventHandler csvHandler = csvAuditEventHandlerBuilder.build();
+        final Context context = new RootContext();
+        final ActionRequest actionRequest = Requests.newActionRequest("access", ROTATE_FILE_ACTION_NAME)
+                .setAdditionalParameter(ACTION_PARAM_TARGET_HANDLER, "csv");
+        final BlockingValue transactionId = new BlockingValue("transactionId-X");
+        try {
+            csvHandler.publishEvent(context, "access", buildEvent(1));
+            // the handler formats the event once it has the writer of the topic, and before it writes to it
+            final FutureTask<ResourceResponse> publication = new FutureTask<>(() -> csvHandler.publishEvent(context,
+                    "access", json(object(field("_id", "_id2"), field("timestamp", "timestamp"),
+                            field("transactionId", transactionId)))).getOrThrow());
+            final Thread publisher = new Thread(publication, "publisher");
+            publisher.setDaemon(true);
+            publisher.start();
+            transactionId.awaitSerialization();
+
+            final FutureTask<ActionResponse> rotation =
+                    new FutureTask<>(() -> csvHandler.handleAction(context, "access", actionRequest).getOrThrow());
+            final Thread rotator = new Thread(rotation, "rotator");
+            rotator.setDaemon(true);
+            rotator.start();
+            // the rotation either closes the writer, or waits for the event being written to it
+            awaitTerminationOrReadWriteLock(rotator);
+            transactionId.release();
+            publication.get(10, TimeUnit.SECONDS);
+            rotation.get(10, TimeUnit.SECONDS);
+            csvHandler.publishEvent(context, "access", buildEvent(3));
+        } finally {
+            transactionId.release();
+            csvHandler.shutdown();
+        }
+
+        // every event is written once, to the archive or to the new file
+        final File liveFile =
+                logDirectory.resolve((isTamperEvident ? SECURE_CSV_FILENAME_PREFIX : "") + "access.csv").toFile();
+        final File[] archives = logDirectory.toFile().listFiles((dir, name) -> name.endsWith(".gz"));
+        assertThat(archives).as("when " + label).hasSize(1);
+        final String content;
+        try (InputStream in = new GZIPInputStream(new FileInputStream(archives[0]))) {
+            content = new String(in.readAllBytes(), UTF_8) + new String(Files.readAllBytes(liveFile.toPath()), UTF_8);
+        }
+        assertThat(content).as("when " + label)
+                .containsOnlyOnce("\"_id1\"")
+                .containsOnlyOnce("\"_id2\"")
+                .containsOnlyOnce("\"_id3\"");
+        if (isTamperEvident) {
+            // the archive and the new file are verified with their own keystores
+            final KeyStoreHandlerDecorator keyStoreHandler = new KeyStoreHandlerDecorator(
+                    new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, KEYSTORE_FILENAME, KEYSTORE_PASSWORD));
+            final String keyStorePassword = Base64.encode(
+                    keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded());
+            final PublicKey publicKey = keyStoreHandler.readPublicKeyFromKeyStore(CsvSecureConstants.ENTRY_SIGNATURE);
+            final List<VerificationResult> archiveResults = new CsvSecureArchiveVerifier(
+                    new TimeStampFileNamingPolicy(liveFile, null, null), keyStorePassword, publicKey,
+                    CsvPreference.EXCEL_PREFERENCE).verify();
+            assertThat(archiveResults).hasSize(1);
+            assertThat(archiveResults.get(0).hasPassedVerification())
+                    .as("archive: " + archiveResults.get(0).getFailureReason())
+                    .isTrue();
+            final KeyStoreHandler liveKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE,
+                    CsvSecureUtils.keyStoreFile(liveFile).getPath(), keyStorePassword);
+            final VerificationResult liveResult = new CsvSecureVerifier(liveFile, CsvPreference.EXCEL_PREFERENCE,
+                    new KeyStoreSecureStorage(liveKeyStoreHandler, publicKey)).verify();
+            assertThat(liveResult.hasPassedVerification())
+                    .as("new file: " + liveResult.getFailureReason())
+                    .isTrue();
+        }
+    }
+
+    @Test(timeOut = 60_000)
+    public void testActionToRotateFileLetsOtherTopicsPublish() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final CsvAuditEventHandlerBuilder builder = csvAuditEventHandler().loggingTo(logDirectory);
+        // A second topic, to publish to while the file of the first one rotates.
+        final Map<String, JsonValue> topics = new LinkedHashMap<>();
+        topics.put("access", builder.eventTopicsMetaData.getSchema("access"));
+        topics.put("activity", builder.eventTopicsMetaData.getSchema("access"));
+        final EventTopicsMetaData eventTopicsMetaData = new EventTopicsMetaData(topics);
+        builder.config.setTopics(eventTopicsMetaData.getTopics());
+        final CsvAuditEventHandler csvHandler =
+                new CsvAuditEventHandler(builder.config, eventTopicsMetaData, builder.keystoreHandlerProvider);
+        csvHandler.startup();
+        final Context context = new RootContext();
+        final ActionRequest actionRequest = Requests.newActionRequest("access", ROTATE_FILE_ACTION_NAME)
+                .setAdditionalParameter(ACTION_PARAM_TARGET_HANDLER, "csv");
+        final BlockingValue transactionId = new BlockingValue("transactionId-X");
+        try {
+            final FutureTask<ResourceResponse> publication = new FutureTask<>(() -> csvHandler.publishEvent(context,
+                    "access", json(object(field("_id", "_id1"), field("timestamp", "timestamp"),
+                            field("transactionId", transactionId)))).getOrThrow());
+            final Thread publisher = new Thread(publication, "publisher");
+            publisher.setDaemon(true);
+            publisher.start();
+            transactionId.awaitSerialization();
+
+            final FutureTask<ActionResponse> rotation =
+                    new FutureTask<>(() -> csvHandler.handleAction(context, "access", actionRequest).getOrThrow());
+            final Thread rotator = new Thread(rotation, "rotator");
+            rotator.setDaemon(true);
+            rotator.start();
+            awaitTerminationOrReadWriteLock(rotator);
+            assertThat(rotator.isAlive()).as("rotation waits for the event being written").isTrue();
+
+            // an event of another topic is written while the rotation waits
+            final FutureTask<ResourceResponse> otherPublication = new FutureTask<>(
+                    () -> csvHandler.publishEvent(context, "activity", buildEvent(2)).getOrThrow());
+            final Thread otherPublisher = new Thread(otherPublication, "other publisher");
+            otherPublisher.setDaemon(true);
+            otherPublisher.start();
+            otherPublication.get(10, TimeUnit.SECONDS);
+            assertThat(rotator.isAlive()).as("rotation waits for the event being written").isTrue();
+
+            transactionId.release();
+            publication.get(10, TimeUnit.SECONDS);
+            rotation.get(10, TimeUnit.SECONDS);
+        } finally {
+            transactionId.release();
+            csvHandler.shutdown();
+        }
+        assertThat(new String(Files.readAllBytes(logDirectory.resolve("activity.csv")), UTF_8))
+                .containsOnlyOnce("\"_id2\"");
+    }
+
+    /** Waits until the thread terminates, or waits for a read-write lock. */
+    private static void awaitTerminationOrReadWriteLock(final Thread thread) throws InterruptedException {
+        final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+        while (thread.isAlive() && !isWaitingForReadWriteLock(thread) && System.nanoTime() < deadline) {
+            Thread.sleep(1);
+        }
+        assertThat(!thread.isAlive() || isWaitingForReadWriteLock(thread))
+                .as(thread.getName() + " terminates or waits for a read-write lock")
+                .isTrue();
+    }
+
+    private static boolean isWaitingForReadWriteLock(final Thread thread) {
+        final Object blocker = LockSupport.getBlocker(thread);
+        return blocker != null && blocker.getClass().getEnclosingClass() == ReentrantReadWriteLock.class;
+    }
+
+    /** A value whose serialization, when the handler formats an event, waits until the value is released. */
+    private static final class BlockingValue implements JsonSerializable {
+        private final String value;
+        private final CountDownLatch serialization = new CountDownLatch(1);
+        private final CountDownLatch release = new CountDownLatch(1);
+
+        private BlockingValue(final String value) {
+            this.value = value;
+        }
+
+        void awaitSerialization() throws InterruptedException {
+            assertThat(serialization.await(10, TimeUnit.SECONDS)).as("serialization started").isTrue();
+        }
+
+        void release() {
+            release.countDown();
+        }
+
+        @Override
+        public void serialize(final JsonGenerator generator, final SerializerProvider serializers)
+                throws IOException {
+            serialization.countDown();
+            try {
+                release.await();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new InterruptedIOException();
+            }
+            generator.writeString(value);
+        }
+
+        @Override
+        public void serializeWithType(final JsonGenerator generator, final SerializerProvider serializers,
+                final TypeSerializer typeSerializer) throws IOException {
+            serialize(generator, serializers);
+        }
     }
 
     @Test
