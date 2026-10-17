@@ -84,6 +84,7 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.encode.Base64;
@@ -374,6 +375,114 @@ public class CsvAuditEventHandlerTest {
         assertThatThrownBy(csvHandler::shutdown).isInstanceOf(InternalServerErrorException.class);
         // The scheduler threads are not daemon threads, they would keep the JVM from exiting.
         assertThreadsTerminate(writerThreads);
+    }
+
+    @DataProvider
+    private Object[][] publishAfterShutdownData() {
+        return new Object[][] {
+                // label, is tamper evident logging enabled ?, is rotation enabled ?
+                { "standard", false, false },
+                { "tamper evident", true, false },
+                { "standard with rotation", false, true },
+                { "tamper evident with rotation", true, true }
+        };
+    }
+
+    @Test(dataProvider = "publishAfterShutdownData")
+    public void testPublishEventAfterShutdownFails(String label, boolean isTamperEvident, boolean isRotationEnabled)
+            throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final CsvAuditEventHandlerBuilder csvAuditEventHandlerBuilder = csvAuditEventHandler().loggingTo(logDirectory);
+        if (isTamperEvident) {
+            csvAuditEventHandlerBuilder.withSecureLoggingEnabled();
+        }
+        if (isRotationEnabled) {
+            csvAuditEventHandlerBuilder.withRotationEnabled();
+        }
+        final CsvAuditEventHandler csvHandler = csvAuditEventHandlerBuilder.build();
+        final Context context = new RootContext();
+        csvHandler.publishEvent(context, "access", buildEvent(1)).getOrThrow();
+        csvHandler.shutdown();
+
+        // the event is reported as lost, and is written neither to the closed writer nor to a new one
+        AssertJPromiseAssert.assertThat(csvHandler.publishEvent(context, "access", buildEvent(2)))
+                .failedWithException()
+                .isInstanceOf(ServiceUnavailableException.class);
+
+        final File liveFile =
+                logDirectory.resolve((isTamperEvident ? SECURE_CSV_FILENAME_PREFIX : "") + "access.csv").toFile();
+        assertThat(liveFile).as("when " + label).content(UTF_8)
+                .containsOnlyOnce("\"_id1\"")
+                .doesNotContain("\"_id2\"");
+        if (isTamperEvident) {
+            final KeyStoreHandlerDecorator keyStoreHandler = new KeyStoreHandlerDecorator(
+                    new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, KEYSTORE_FILENAME, KEYSTORE_PASSWORD));
+            final KeyStoreHandler liveKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE,
+                    CsvSecureUtils.keyStoreFile(liveFile).getPath(), Base64.encode(
+                            keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded()));
+            final VerificationResult verificationResult = new CsvSecureVerifier(liveFile,
+                    CsvPreference.EXCEL_PREFERENCE, new KeyStoreSecureStorage(liveKeyStoreHandler,
+                            keyStoreHandler.readPublicKeyFromKeyStore(CsvSecureConstants.ENTRY_SIGNATURE))).verify();
+            assertThat(verificationResult.hasPassedVerification())
+                    .as("when " + label + ": " + verificationResult.getFailureReason())
+                    .isTrue();
+        }
+    }
+
+    @Test(dataProvider = "rotateActionData")
+    public void testActionToRotateFileAfterShutdownFails(String label, boolean isRotationEnabled) throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final CsvAuditEventHandlerBuilder csvAuditEventHandlerBuilder = csvAuditEventHandler().loggingTo(logDirectory);
+        if (isRotationEnabled) {
+            csvAuditEventHandlerBuilder.withRotationEnabled();
+        }
+        final CsvAuditEventHandler csvHandler = csvAuditEventHandlerBuilder.build();
+        final Context context = new RootContext();
+        csvHandler.publishEvent(context, "access", buildEvent(1)).getOrThrow();
+        csvHandler.shutdown();
+
+        final ActionRequest actionRequest = Requests.newActionRequest("access", ROTATE_FILE_ACTION_NAME)
+                .setAdditionalParameter(ACTION_PARAM_TARGET_HANDLER, "csv");
+        AssertJPromiseAssert.assertThat(csvHandler.handleAction(context, "access", actionRequest))
+                .failedWithException()
+                .isInstanceOf(BadRequestException.class);
+
+        // the file is not rotated, and no new writer opens a new file
+        final File liveFile = logDirectory.resolve("access.csv").toFile();
+        assertThat(logDirectory.toFile().listFiles()).as("when " + label).containsExactly(liveFile);
+        assertThat(liveFile).as("when " + label).content(UTF_8).containsOnlyOnce("\"_id1\"");
+    }
+
+    @Test
+    public void testPublishEventAfterShutdownAndStartup() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final CsvAuditEventHandler csvHandler = csvAuditEventHandler().loggingTo(logDirectory).build();
+        final Context context = new RootContext();
+        final File liveFile = logDirectory.resolve("access.csv").toFile();
+        final File movedFile = logDirectory.resolve("access.csv.moved").toFile();
+        csvHandler.publishEvent(context, "access", buildEvent(1)).getOrThrow();
+        csvHandler.shutdown();
+        // A file cannot be opened over a directory, so the topic gets no writer at startup, and its next event opens
+        // one: after the shutdown, startup() lets an event open the writer again.
+        assertThat(liveFile.renameTo(movedFile)).isTrue();
+        assertThat(liveFile.mkdir()).isTrue();
+        csvHandler.startup();
+        try {
+            assertThat(liveFile.delete()).isTrue();
+            assertThat(movedFile.renameTo(liveFile)).isTrue();
+            csvHandler.publishEvent(context, "access", buildEvent(2)).getOrThrow();
+            csvHandler.publishEvent(context, "access", buildEvent(3)).getOrThrow();
+        } finally {
+            csvHandler.shutdown();
+        }
+
+        assertThat(liveFile).content(UTF_8)
+                .containsOnlyOnce("\"_id1\"")
+                .containsOnlyOnce("\"_id2\"")
+                .containsOnlyOnce("\"_id3\"");
     }
 
     @DataProvider
