@@ -69,6 +69,7 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.QueryFilters;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
@@ -262,6 +263,77 @@ public class CsvAuditEventHandlerTest {
 
         final ResourceResponse resource = resourceCaptor.getValue();
         assertResourceEquals(resource, event);
+    }
+
+    @DataProvider
+    private Object[][] noEventYetData() {
+        return new Object[][] {
+                // label, rotate action before the read ?
+                { "after startup", false },
+                { "after the rotate action", true }
+        };
+    }
+
+    @Test(dataProvider = "noEventYetData")
+    public void testReadingTamperEvidentAuditLogWithNoEventYet(String label, boolean rotate) throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final CsvAuditEventHandler csvHandler =
+                csvAuditEventHandler().loggingTo(logDirectory).withSecureLoggingEnabled().build();
+        final Context context = new RootContext();
+        try {
+            leaveTamperEvidentFileWithNoEvent(csvHandler, logDirectory, label, rotate);
+
+            final Promise<ResourceResponse, ResourceException> promise =
+                    csvHandler.readEvent(context, "access", "_id1");
+
+            AssertJPromiseAssert.assertThat(promise)
+                    .as("when " + label)
+                    .failedWithException()
+                    .isInstanceOf(NotFoundException.class);
+        } finally {
+            csvHandler.shutdown();
+        }
+    }
+
+    @Test(dataProvider = "noEventYetData")
+    public void testQueryOnTamperEvidentAuditLogWithNoEventYet(String label, boolean rotate) throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final CsvAuditEventHandler csvHandler =
+                csvAuditEventHandler().loggingTo(logDirectory).withSecureLoggingEnabled().build();
+        final Context context = new RootContext();
+        final QueryResourceHandler queryResourceHandler = mock(QueryResourceHandler.class);
+        try {
+            leaveTamperEvidentFileWithNoEvent(csvHandler, logDirectory, label, rotate);
+
+            final Promise<QueryResponse, ResourceException> promise = csvHandler.queryEvents(context, "access",
+                    Requests.newQueryRequest("access").setQueryFilter(QueryFilters.parse("true")),
+                    queryResourceHandler);
+
+            AssertJPromiseAssert.assertThat(promise).as("when " + label).succeeded();
+            verify(queryResourceHandler, never()).handleResource(any(ResourceResponse.class));
+        } finally {
+            csvHandler.shutdown();
+        }
+    }
+
+    /**
+     * The tamper evident writer writes the header with the first event, so the audit file is empty after startup, and
+     * after the rotate action of a topic without file rotation until the next event.
+     */
+    private void leaveTamperEvidentFileWithNoEvent(CsvAuditEventHandler csvHandler, Path logDirectory, String label,
+            boolean rotate) throws Exception {
+        if (rotate) {
+            final Context context = new RootContext();
+            csvHandler.publishEvent(context, "access", buildEvent(1)).getOrThrow();
+            final ActionRequest actionRequest = Requests.newActionRequest("access", ROTATE_FILE_ACTION_NAME)
+                    .setAdditionalParameter(ACTION_PARAM_TARGET_HANDLER, "csv");
+            csvHandler.handleAction(context, "access", actionRequest).getOrThrow();
+        }
+        assertThat(logDirectory.resolve(SECURE_CSV_FILENAME_PREFIX + "access.csv").toFile())
+                .as("when " + label)
+                .isEmpty();
     }
 
     private CreateRequest makeCreateRequest() {
