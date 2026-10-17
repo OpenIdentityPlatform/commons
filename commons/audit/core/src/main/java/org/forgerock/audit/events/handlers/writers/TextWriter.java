@@ -12,12 +12,18 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.audit.events.handlers.writers;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A TextWriter provides a character-based stream which can be queried for number of bytes written.
@@ -57,8 +63,15 @@ public interface TextWriter {
      * A TextWriter implementation which writes to a given output stream.
      */
     public class Stream implements TextWriter {
+        private static final Logger logger = LoggerFactory.getLogger(Stream.class);
+
         private final MeteredStream stream;
-        private final PrintWriter writer;
+        private final Writer writer;
+        /**
+         * Set by the first write or flush that fails. The buffers of the writer are unusable after it: a later flush
+         * may write nothing and return, or write a part of the failed text.
+         */
+        private volatile boolean failed;
 
         /**
          * Creates a new text writer that will write to the provided output stream.
@@ -68,22 +81,51 @@ public interface TextWriter {
          */
         public Stream(OutputStream outputStream) {
             stream = new MeteredStream(outputStream, 0);
-            writer = new PrintWriter(stream, true);
+            // Not a PrintWriter, which sets an error flag instead of throwing: a write that fails must fail the event.
+            writer = new BufferedWriter(new OutputStreamWriter(stream));
         }
 
         @Override
-        public void write(String text) {
-            writer.print(text);
+        public void write(String text) throws IOException {
+            checkNotFailed();
+            try {
+                writer.write(text);
+            } catch (IOException e) {
+                failed = true;
+                throw e;
+            }
         }
 
         @Override
-        public void flush() {
-            writer.flush();
+        public void flush() throws IOException {
+            // Also fails the flush of a text written before the failure, which the failure may have dropped.
+            checkNotFailed();
+            try {
+                writer.flush();
+            } catch (IOException e) {
+                failed = true;
+                throw e;
+            }
         }
 
         @Override
         public void shutdown() {
-            writer.close();
+            try {
+                if (failed) {
+                    // Close the stream without writing what the buffers still hold: the failed events are retried.
+                    stream.close();
+                } else {
+                    writer.close();
+                }
+            } catch (IOException e) {
+                logger.error("Error when performing shutdown", e);
+            }
+        }
+
+        private void checkNotFailed() throws IOException {
+            if (failed) {
+                throw new IOException("A previous write to the stream failed");
+            }
         }
 
         @Override

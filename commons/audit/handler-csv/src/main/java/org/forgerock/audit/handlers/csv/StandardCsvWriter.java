@@ -82,8 +82,18 @@ class StandardCsvWriter implements CsvWriter {
         }
 
         if (!fileAlreadyInitialized) {
-            writeHeader(headers);
-            csvWriter.flush();
+            try {
+                writeHeader(headers);
+                csvWriter.flush();
+            } catch (IOException e) {
+                // The caller gets no writer to close: close the file, and the rotator thread with rotation.
+                try {
+                    csvWriter.close();
+                } catch (IOException | RuntimeException closeFailure) {
+                    e.addSuppressed(closeFailure);
+                }
+                throw e;
+            }
         }
     }
 
