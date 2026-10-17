@@ -19,11 +19,10 @@ package org.forgerock.audit.events.handlers.writers;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
@@ -69,10 +68,14 @@ public class RotatableWriter implements TextWriter, RotatableObject {
     private final AtomicBoolean isRotating = new AtomicBoolean(false);
     /** The underlying output stream. */
     private MeteredStream meteredStream;
-    /** The underlying buffered writer using the output stream. */
-    private BufferedWriter writer;
+    /**
+     * The underlying buffered writer using the output stream. After a failure, it is not replaced until this writer
+     * is closed: its next writes and flushes fail too, also for the texts that the failure dropped.
+     */
+    private FailFastWriter writer;
     private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private final RolloverLifecycleHook rolloverLifecycleHook;
+    private final FileStreamOpener fileStreamOpener;
 
     /**
      * Constructs a {@link RotatableWriter} given an initial file to manage rotation/retention, and
@@ -110,15 +113,31 @@ public class RotatableWriter implements TextWriter, RotatableObject {
     @VisibleForTesting
     RotatableWriter(final File file, final FileBasedEventHandlerConfiguration configuration,
                            final boolean append, final FileNamingPolicy fileNamingPolicy) throws IOException {
-        this(file, configuration, append, fileNamingPolicy, NOOP_ROLLOVER_LIFECYCLE_HOOK);
+        this(file, configuration, append, fileNamingPolicy, NOOP_ROLLOVER_LIFECYCLE_HOOK, FileOutputStream::new);
+    }
+
+    /** This constructor allows tests to open streams that fail, as on a full disk. */
+    @VisibleForTesting
+    RotatableWriter(final File file, final FileBasedEventHandlerConfiguration configuration,
+            final boolean append, final FileStreamOpener fileStreamOpener) throws IOException {
+        this(file, configuration, append, configuration.getFileRotation().buildTimeStampFileNamingPolicy(file),
+                NOOP_ROLLOVER_LIFECYCLE_HOOK, fileStreamOpener);
+    }
+
+    private RotatableWriter(final File file, final FileBasedEventHandlerConfiguration configuration,
+            final boolean append, final FileNamingPolicy fileNamingPolicy,
+            final RolloverLifecycleHook rolloverLifecycleHook) throws IOException {
+        this(file, configuration, append, fileNamingPolicy, rolloverLifecycleHook, FileOutputStream::new);
     }
 
     /** Constructor with all possible parameters. */
     private RotatableWriter(final File file, final FileBasedEventHandlerConfiguration configuration,
             final boolean append, final FileNamingPolicy fileNamingPolicy,
-            final RolloverLifecycleHook rolloverLifecycleHook) throws IOException {
+            final RolloverLifecycleHook rolloverLifecycleHook, final FileStreamOpener fileStreamOpener)
+            throws IOException {
         this.file = file;
         this.fileNamingPolicy = fileNamingPolicy;
+        this.fileStreamOpener = fileStreamOpener;
         this.rotationEnabled = configuration.getFileRotation().isRotationEnabled();
         final long lastModified = file.lastModified();
         this.lastRotationTime = lastModified > 0
@@ -177,6 +196,12 @@ public class RotatableWriter implements TextWriter, RotatableObject {
     }
 
     private boolean rotate() throws IOException {
+        final IOException failure = writer.getFailure();
+        if (failure != null) {
+            // A new writer would succeed the flush of a text that the failure dropped, and closing this one would write
+            // a part of a failed text into the archive.
+            throw new IOException("The file is not rotated: a previous write to it failed", failure);
+        }
         boolean rotationHappened = false;
         RotationContext context = new RotationContext();
         context.setWriter(writer);
@@ -291,6 +316,12 @@ public class RotatableWriter implements TextWriter, RotatableObject {
         this.rotationHooks = rotationHooks;
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * A failure of the rotation that follows the write is logged, as the scheduled checks log it: the text is written,
+     * and a caller that gets a failure writes it again. A failure of the writer itself fails the next flush and write.
+     */
     @Override
     public void write(String str) throws IOException {
         ReadLock lock = readWriteLock.readLock();
@@ -301,7 +332,11 @@ public class RotatableWriter implements TextWriter, RotatableObject {
         } finally {
             lock.unlock();
         }
-        rotateIfNeeded();
+        try {
+            rotateIfNeeded();
+        } catch (IOException e) {
+            logger.error("Failure when applying a rotation policy to file {}", fileNamingPolicy.getInitialName(), e);
+        }
     }
 
     /**
@@ -346,12 +381,11 @@ public class RotatableWriter implements TextWriter, RotatableObject {
         }
     }
 
-    private BufferedWriter constructWriter(File csvFile, boolean append)
+    private FailFastWriter constructWriter(File csvFile, boolean append)
             throws IOException {
-        FileOutputStream stream = new FileOutputStream(csvFile, append);
+        OutputStream stream = fileStreamOpener.open(csvFile, append);
         meteredStream = new MeteredStream(stream, file.length());
-        OutputStreamWriter osw = new OutputStreamWriter(meteredStream, StandardCharsets.UTF_8);
-        return new BufferedWriter(osw);
+        return new FailFastWriter(meteredStream, StandardCharsets.UTF_8);
     }
 
     /**
@@ -445,6 +479,20 @@ public class RotatableWriter implements TextWriter, RotatableObject {
          * This method is called after the rotation and retention checks are done, and after a forced rotation.
          */
         void afterRollingOver();
+    }
+
+    /** Opens the output stream of the files that the writer writes to. */
+    @VisibleForTesting
+    interface FileStreamOpener {
+        /**
+         * Opens the output stream of a file.
+         *
+         * @param file The file to write to.
+         * @param append Whether to append to the file or not.
+         * @return The output stream of the file.
+         * @throws IOException If the file cannot be opened.
+         */
+        OutputStream open(File file, boolean append) throws IOException;
     }
 
 }

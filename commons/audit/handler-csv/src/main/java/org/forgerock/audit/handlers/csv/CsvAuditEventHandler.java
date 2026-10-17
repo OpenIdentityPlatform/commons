@@ -52,6 +52,9 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import jakarta.inject.Inject;
 
@@ -66,6 +69,7 @@ import org.forgerock.audit.secure.JcaKeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreHandler;
 import org.forgerock.audit.util.GzipUtil;
 import org.forgerock.audit.util.JsonValueUtils;
+import org.forgerock.audit.util.ResourceExceptionsUtil;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -80,6 +84,7 @@ import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Responses;
+import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
@@ -123,6 +128,19 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
     private final CsvAuditEventHandlerConfiguration configuration;
     private final CsvPreference csvPreference;
     private final ConcurrentMap<String, CsvWriter> writers = new ConcurrentHashMap<>();
+    /**
+     * Guards the writer of each topic in {@link #writers}: the writer is used under the read lock of its topic, and
+     * opened, closed and replaced under the write lock, so that it is not closed while an event is written to it or
+     * while it rotates its file. The methods that open, close or replace a writer expect the caller to hold that write
+     * lock. A lock per topic lets the other topics publish while the writer of one topic is replaced.
+     */
+    private final Map<String, ReadWriteLock> writerLockByTopic;
+    /**
+     * Set by {@link #shutdown()} before it closes the writers, and cleared by {@link #startup()} once it has opened
+     * them. Meanwhile, a topic left without a writer gets no new one, so that its events fail instead of being written
+     * to a writer that nothing closes.
+     */
+    private volatile boolean shutDown;
     private final Map<String, Set<String>> fieldOrderByTopic;
     /** Caches a JSON pointer for each field. */
     private final Map<String, JsonPointer> jsonPointerByField;
@@ -168,10 +186,12 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
             }
         }
 
+        Map<String, ReadWriteLock> lockByTopic = new HashMap<>();
         Map<String, Set<String>> orderByTopic = new HashMap<>();
         Map<String, JsonPointer> pointerByField = new HashMap<>();
         Map<String, String> dotNotationByField = new HashMap<>();
         for (String topic : this.eventTopicsMetaData.getTopics()) {
+            lockByTopic.put(topic, new ReentrantReadWriteLock());
             try {
                 Set<String> fieldOrder = getFieldOrder(topic, this.eventTopicsMetaData);
                 for (String field : fieldOrder) {
@@ -185,6 +205,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
                 LOGGER.error(topic + " topic schema meta-data misconfigured.");
             }
         }
+        this.writerLockByTopic = Collections.unmodifiableMap(lockByTopic);
         this.fieldOrderByTopic = Collections.unmodifiableMap(orderByTopic);
         this.jsonPointerByField = Collections.unmodifiableMap(pointerByField);
         this.fieldDotNotationByField = Collections.unmodifiableMap(dotNotationByField);
@@ -217,12 +238,17 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
         }
         for (String topic : eventTopicsMetaData.getTopics()) {
             File auditLogFile = getAuditLogFile(topic);
+            final Lock writeLock = writerLockByTopic.get(topic).writeLock();
+            writeLock.lock();
             try {
                 openWriter(topic, auditLogFile);
             } catch (IOException e) {
                 LOGGER.error("Error when creating audit file: {}", auditLogFile, e);
+            } finally {
+                writeLock.unlock();
             }
         }
+        shutDown = false;
     }
 
     /** {@inheritDoc} */
@@ -255,60 +281,56 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
     }
 
     /**
-     * Publishes the provided event, and returns the writer used.
+     * Publishes the provided event to the writer of the topic, under the read lock of the topic. If the topic has no
+     * writer, or if the write fails, the event is written under the write lock, to a new writer unless another thread
+     * has replaced the writer meanwhile. Once the handler is shut down, the event fails instead.
      */
     private void publishEventWithRetry(final String topic, final JsonValue event)
                     throws ResourceException {
-        final CsvWriter csvWriter = getWriter(topic);
+        final ReadWriteLock writerLock = writerLockByTopic.get(topic);
+        CsvWriter csvWriter = null;
+        writerLock.readLock().lock();
         try {
-            writeEvent(topic, csvWriter, event);
+            csvWriter = writers.get(topic);
+            if (csvWriter != null) {
+                writeEvent(topic, csvWriter, event);
+                return;
+            }
+            LOGGER.debug("CSV file writer for {} topic is null", topic);
         } catch (IOException ex) {
             // Re-try once in case the writer stream became closed for some reason
             LOGGER.debug("IOException while writing ({})", ex.getMessage());
-            CsvWriter newCsvWriter;
-            // An IOException may be thrown if the csvWriter reference we have above was reset by another thread.
-            // Synchronize to ensure that we wait for any reset to complete before proceeding - Otherwise, we may
-            // lose multiple events or have multiple threads attempting to reset the writer.
-            synchronized (this) {
-                // Lookup the current writer directly from the map so we can check if another thread has reset it.
-                newCsvWriter = writers.get(topic);
-                if (newCsvWriter == csvWriter) {
-                    // If both references are the same, the writer hasn't been reset.
-                    newCsvWriter = resetAndReopenWriter(topic);
-                    LOGGER.debug("Resetting writer");
-                } else {
-                    LOGGER.debug("Writer reset by another thread");
-                }
-            }
-            try {
-                writeEvent(topic, newCsvWriter, event);
-            } catch (IOException e) {
-                throw new BadRequestException(e);
-            }
+        } finally {
+            writerLock.readLock().unlock();
         }
-    }
-
-    /**
-     * Lookup CsvWriter for specified topic.
-     * <br>
-     * Uses lazy synchronization in case another thread may be resetting the writer. If the writer is still null
-     * after synchronizing then the writer is reset.
-     * <br>
-     * This method is only intended for use by {@link #publishEventWithRetry(String, JsonValue)}.
-     */
-    private CsvWriter getWriter(String topic) throws BadRequestException {
-        CsvWriter csvWriter = writers.get(topic);
-        if (csvWriter == null) {
-            LOGGER.debug("CSV file writer for {} topic is null; checking for reset by another thread", topic);
-            synchronized (this) {
-                csvWriter = writers.get(topic);
-                if (csvWriter == null) {
-                    LOGGER.debug("CSV file writer for {} topic not reset by another thread; resetting", topic);
-                    csvWriter = resetAndReopenWriter(topic);
-                }
+        // The write lock waits for any reset to complete before proceeding - Otherwise, we may lose multiple events
+        // or have multiple threads attempting to reset the writer.
+        writerLock.writeLock().lock();
+        try {
+            if (shutDown) {
+                // shutdown() removes the writers it closes, so the event ends here instead of in a new writer
+                throw new ServiceUnavailableException("Unable to publish event for topic: " + topic
+                        + ", the handler is shut down");
             }
+            // Lookup the current writer directly from the map so we can check if another thread has reset it.
+            CsvWriter newCsvWriter = writers.get(topic);
+            if (newCsvWriter == null || newCsvWriter == csvWriter) {
+                // No writer, or the one that failed: the writer hasn't been reset.
+                newCsvWriter = resetAndReopenWriter(topic);
+                LOGGER.debug("Resetting writer");
+            } else {
+                LOGGER.debug("Writer reset by another thread");
+            }
+            writeEvent(topic, newCsvWriter, event);
+        } catch (ResourceException e) {
+            // the handler is shut down, or no new writer could be opened
+            throw e;
+        } catch (IOException e) {
+            // a failure of the server, such as a full disk, not of the request
+            throw new InternalServerErrorException(e);
+        } finally {
+            writerLock.writeLock().unlock();
         }
-        return csvWriter;
     }
 
     private CsvWriter writeEvent(final String topic, CsvWriter csvWriter, final JsonValue event)
@@ -328,13 +350,13 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
         return fieldOrder;
     }
 
-    private synchronized CsvWriter openWriter(final String topic, final File auditFile) throws IOException {
+    private CsvWriter openWriter(final String topic, final File auditFile) throws IOException {
         final CsvWriter writer = createCsvWriter(auditFile, topic);
         writers.put(topic, writer);
         return writer;
     }
 
-    private synchronized CsvWriter createCsvWriter(final File auditFile, String topic) throws IOException {
+    private CsvWriter createCsvWriter(final File auditFile, String topic) throws IOException {
         String[] headers = buildHeaders(fieldOrderByTopic.get(topic));
         if (configuration.getSecurity().isEnabled()) {
             return new SecureCsvWriter(auditFile, headers, csvPreference, configuration, keyStoreHandler, RANDOM);
@@ -378,7 +400,8 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
             }
             return newQueryResponse().asPromise();
         } catch (Exception e) {
-            return new BadRequestException(e).asPromise();
+            // a failure to read the audit file is a failure of the server
+            return ResourceExceptionsUtil.adapt(e).asPromise();
         }
     }
 
@@ -398,7 +421,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
         } catch (ResourceException e) {
             return e.asPromise();
         } catch (IOException e) {
-            return new BadRequestException(e).asPromise();
+            return new InternalServerErrorException(e).asPromise();
         }
     }
 
@@ -415,30 +438,54 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
             }
             final String error = format("This action is unknown for the CSV handler: %s", action);
             return new BadRequestException(error).asPromise();
-        } catch (BadRequestException e) {
+        } catch (ResourceException e) {
             return e.asPromise();
         }
     }
 
     private ActionResponse handleRotateAction(String topic)
-            throws BadRequestException {
-        CsvWriter csvWriter = writers.get(topic);
-        if (csvWriter == null) {
-            LOGGER.debug("Unable to rotate file for topic: {}", topic);
+            throws ResourceException {
+        final ReadWriteLock writerLock = writerLockByTopic.get(topic);
+        if (writerLock == null) {
+            LOGGER.debug("Unable to rotate file for unknown topic: {}", topic);
             throw new BadRequestException("Unable to rotate file for topic: " + topic);
         }
-        if (configuration.getFileRotation().isRotationEnabled()) {
-            try {
-                if (!csvWriter.forceRotation()) {
-                    throw new BadRequestException("Unable to rotate file for topic: " + topic);
+        final boolean rotationEnabled = configuration.getFileRotation().isRotationEnabled();
+        // With rotation enabled, the writer rotates its own file while publishers keep writing to it, and the read lock
+        // keeps a reset from closing it meanwhile. The default rotation closes and replaces the writer, so it waits for
+        // the events being written to it.
+        final Lock lock = rotationEnabled ? writerLock.readLock() : writerLock.writeLock();
+        File rotatedFile = null;
+        lock.lock();
+        try {
+            CsvWriter csvWriter = writers.get(topic);
+            if (csvWriter == null) {
+                LOGGER.debug("Unable to rotate file for topic: {}", topic);
+                if (shutDown) {
+                    throw new ServiceUnavailableException("Unable to rotate file for topic: " + topic
+                            + ", the handler is shut down");
                 }
-            } catch (IOException e) {
-                throw new BadRequestException("Error when rotating file for topic: " + topic, e);
+                // the writer of the topic could not be opened
+                throw new InternalServerErrorException("Unable to rotate file for topic: " + topic);
             }
-        } else {
-            // use a default rotation instead, and compress outside the handler monitor, which publishers retrying
-            // on the closed writer and shutdown wait for
-            GzipUtil.compressRotatedFile(rotateAndReopenWriter(topic));
+            if (rotationEnabled) {
+                try {
+                    if (!csvWriter.forceRotation()) {
+                        throw new InternalServerErrorException("Unable to rotate file for topic: " + topic);
+                    }
+                } catch (IOException e) {
+                    throw new InternalServerErrorException("Error when rotating file for topic: " + topic, e);
+                }
+            } else {
+                // use a default rotation instead
+                rotatedFile = rotateAndReopenWriter(topic);
+            }
+        } finally {
+            lock.unlock();
+        }
+        if (rotatedFile != null) {
+            // compress outside the write lock, which publishers and shutdown wait for
+            GzipUtil.compressRotatedFile(rotatedFile);
         }
         return Responses.newActionResponse(json(object(field("rotated", "true"))));
     }
@@ -460,12 +507,12 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
         csvWriter.writeEvent(cells);
     }
 
-    private synchronized CsvWriter resetAndReopenWriter(final String topic) throws BadRequestException {
+    private CsvWriter resetAndReopenWriter(final String topic) throws InternalServerErrorException {
         closeWriter(topic);
         try {
             return openWriter(topic, getAuditLogFile(topic));
         } catch (IOException e) {
-            throw new BadRequestException(e);
+            throw new InternalServerErrorException(e);
         }
     }
 
@@ -476,13 +523,13 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
      * @return The archive name of the rotated file. A file to compress is renamed without the .gz suffix, and the
      *         caller compresses it with {@link GzipUtil#compressRotatedFile(File)}.
      */
-    private synchronized File rotateAndReopenWriter(final String topic) throws BadRequestException {
+    private File rotateAndReopenWriter(final String topic) throws InternalServerErrorException {
         closeWriter(topic);
         final File auditLogFile = getAuditLogFile(topic);
         final File rotatedFile = new TimeStampFileNamingPolicy(auditLogFile, null, null).getNextName();
         final File renamedFile = GzipUtil.removeGzipSuffix(rotatedFile);
         if (!auditLogFile.renameTo(renamedFile)) {
-            throw new BadRequestException(
+            throw new InternalServerErrorException(
                     format("Unable to rename file %s to %s when rotating", auditLogFile, renamedFile));
         }
         if (configuration.getSecurity().isEnabled()) {
@@ -498,7 +545,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
                             renamedFile, auditLogFile, renamedFile, keyStoreFile);
                 }
                 resetAndReopenWriter(topic);
-                throw new BadRequestException(
+                throw new InternalServerErrorException(
                         format("Unable to rename file %s to %s when rotating", keyStoreFile, archivedKeyStoreFile));
             }
         }
@@ -506,7 +553,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
         return rotatedFile;
     }
 
-    private synchronized void closeWriter(final String topic) {
+    private void closeWriter(final String topic) {
         CsvWriter writerToClose = writers.remove(topic);
         if (writerToClose != null) {
             // attempt clean-up close
@@ -600,19 +647,27 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
 
     }
 
-    private synchronized void cleanup() throws ResourceException {
+    private void cleanup() throws ResourceException {
         IOException failure = null;
-        for (CsvWriter csvWriter : writers.values()) {
+        shutDown = true;
+        for (Map.Entry<String, ReadWriteLock> topicLock : writerLockByTopic.entrySet()) {
+            final Lock writeLock = topicLock.getValue().writeLock();
+            writeLock.lock();
             // every writer is closed, also when the flush or another writer fails: the scheduler of a tamper evident
-            // writer would keep the JVM from exiting
-            try (CsvWriter writer = csvWriter) {
-                writer.flush();
+            // writer would keep the JVM from exiting. The closed writer leaves the map, so that neither an event nor
+            // the rotate action reaches it.
+            try (CsvWriter writer = writers.remove(topicLock.getKey())) {
+                if (writer != null) {
+                    writer.flush();
+                }
             } catch (IOException e) {
                 if (failure == null) {
                     failure = e;
                 } else {
                     failure.addSuppressed(e);
                 }
+            } finally {
+                writeLock.unlock();
             }
         }
         if (failure != null) {

@@ -337,8 +337,14 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
 
             writer.write(csvFormatter.formatEvent(extendedValues, extendedHeaders));
             writer.flush();
-            // Store the current key
-            secureStorage.writeCurrentKey(hmacCalculator.getCurrentKey());
+            try {
+                // Store the current key
+                secureStorage.writeCurrentKey(hmacCalculator.getCurrentKey());
+            } catch (SecureStorageException ex) {
+                // The row is in the file, and a caller that gets a failure writes it again. The keystore keeps the
+                // previous key until the next row stores the current one, and the file fails verification meanwhile.
+                logger.error("Unable to store the current HMAC key after the row is written", ex);
+            }
 
             // Schedule a signature task only if needed.
             if (!values.containsKey(HEADER_SIGNATURE)
@@ -351,8 +357,6 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
                     logger.error(e.getMessage(), e);
                 }
             }
-        } catch (SecureStorageException ex) {
-            throw new IOException(ex);
         } finally {
             signatureLock.unlock();
         }

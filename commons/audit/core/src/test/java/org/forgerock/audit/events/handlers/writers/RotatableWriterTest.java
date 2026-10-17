@@ -24,8 +24,11 @@ import static org.assertj.core.util.Files.*;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
@@ -420,6 +423,99 @@ public class RotatableWriterTest {
     }
 
     @Test
+    public void testFailsEveryWriteAndFlushAfterAFailure() throws Exception {
+        // given
+        final File file = getTempFile();
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
+        rotatableWriter = new RotatableWriter(file, configuration, true, FailingOnceOutputStream::open);
+        // two publishers write their events, and the flush of the first one fails
+        rotatableWriter.write("event1");
+        rotatableWriter.write("event2");
+        assertThatThrownBy(rotatableWriter::flush).hasMessage("No space left on device");
+
+        // then the second publisher learns that its event is lost too, and so does any later one
+        assertThatThrownBy(rotatableWriter::flush).hasRootCauseMessage("No space left on device");
+        assertThatThrownBy(() -> rotatableWriter.write("event3")).hasRootCauseMessage("No space left on device");
+        assertThat(file.length()).isZero();
+    }
+
+    @Test
+    public void testDoesNotWriteTheTextOfAFailedWriteWhenClosed() throws Exception {
+        // given
+        final File file = getTempFile();
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
+        rotatableWriter = new RotatableWriter(file, configuration, true, FailingOnceOutputStream::open);
+        // longer than the buffers, so that the write itself reaches the output stream
+        final String event = new String(new char[100_000]).replace('\0', 'x');
+        assertThatThrownBy(() -> rotatableWriter.write(event)).isInstanceOf(IOException.class);
+
+        // when
+        rotatableWriter.close();
+
+        // then
+        assertThat(file.length()).isZero();
+    }
+
+    @Test
+    public void testDoesNotRotateAfterAFailure() throws Exception {
+        // given
+        final File file = getTempFile();
+        final String prefix = "testDoesNotRotateAfterAFailure";
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
+        configuration.setRotationRetentionCheckInterval("1 hour"); // ensure asynchronous check is inactive
+        configuration.getFileRotation().setRotationEnabled(true);
+        configuration.getFileRotation().setRotationFilePrefix(prefix);
+        configuration.getFileRotation().setRotationFileSuffix(ROTATION_FILE_SUFFIX);
+        rotatableWriter = new RotatableWriter(file, configuration, true, FailingOnceOutputStream::open);
+        rotatableWriter.write("event");
+        assertThatThrownBy(rotatableWriter::flush).isInstanceOf(IOException.class);
+
+        // when the rotation would write what the buffers hold into the archive, and go on with a writer that has not
+        // failed, so that the flush of an event that the failure dropped would succeed
+        assertThatThrownBy(rotatableWriter::forceRotation).hasRootCauseMessage("No space left on device");
+
+        // then
+        assertThat(file.getParentFile().listFiles((dir, name) -> name.startsWith(prefix + file.getName()))).isEmpty();
+    }
+
+    @Test
+    public void testDoesNotFailTheWriteOfATextWhenTheRotationAfterItFails() throws Exception {
+        // given
+        final File file = getTempFile();
+        final String prefix = "testDoesNotFailTheWriteOfATextWhenTheRotationAfterItFails";
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
+        configuration.setRotationRetentionCheckInterval("1 hour"); // ensure asynchronous check is inactive
+        configuration.getFileRotation().setRotationEnabled(true);
+        configuration.getFileRotation().setRotationFilePrefix(prefix);
+        configuration.getFileRotation().setRotationFileSuffix(ROTATION_FILE_SUFFIX);
+        configuration.getFileRotation().setMaxFileSize(MAX_BYTES_TO_WRITE);
+        rotatableWriter = new RotatableWriter(file, configuration, true);
+        rotatableWriter.registerRotationHooks(new RotationHooks() {
+            @Override
+            public void preRotationAction(RotationContext context) throws IOException {
+                // as the final signature of a tamper evident file does when its keystore cannot be stored
+                throw new IOException("Unable to store the keystore");
+            }
+
+            @Override
+            public void postRotationAction(RotationContext context) {
+                // nothing to do
+            }
+        });
+        final String text = new String(new char[MAX_BYTES_TO_WRITE]).replace('\0', 'x');
+        rotatableWriter.write(text);
+        rotatableWriter.flush();
+
+        // when the size of the file makes the next write rotate it, and the rotation fails
+        rotatableWriter.write("event");
+        rotatableWriter.flush();
+
+        // then the write does not fail, as its caller would write the text again, and the text is in the file once
+        assertThat(file).hasContent(text + "event");
+        assertThat(file.getParentFile().listFiles((dir, name) -> name.startsWith(prefix + file.getName()))).isEmpty();
+    }
+
+    @Test
     public void testAutomaticallyEvaluatesPolicesPeriodicallyIfRotationIntervalSpecified() throws Exception {
         // given
         final File file = getTempFile();
@@ -502,6 +598,33 @@ public class RotatableWriterTest {
             for (File file: files) {
                 file.deleteOnExit();
             }
+        }
+    }
+
+    /** Writes to a file, and fails its first write, as a full disk does. */
+    private static final class FailingOnceOutputStream extends FilterOutputStream {
+        private boolean failed;
+
+        private FailingOnceOutputStream(final OutputStream out) {
+            super(out);
+        }
+
+        private static OutputStream open(final File file, final boolean append) throws IOException {
+            return new FailingOnceOutputStream(new FileOutputStream(file, append));
+        }
+
+        @Override
+        public void write(final int b) throws IOException {
+            write(new byte[] { (byte) b }, 0, 1);
+        }
+
+        @Override
+        public void write(final byte[] b, final int off, final int len) throws IOException {
+            if (!failed) {
+                failed = true;
+                throw new IOException("No space left on device");
+            }
+            out.write(b, off, len);
         }
     }
 
