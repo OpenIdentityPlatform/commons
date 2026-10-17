@@ -104,7 +104,9 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
         this.keyStoreFile = CsvSecureUtils.keyStoreFile(csvFile);
         this.headers = checkNotNull(headers, "The headers can't be null.");
         this.csvFormatter = new CsvFormatter(csvPreference);
-        this.csvWriter = constructWriter(csvFile, fileAlreadyInitialized, config);
+        // A file that cannot be opened fails here, with an IOException that the handler reports for the topic: storing
+        // its keystore would fail first, with a RuntimeException that fails the startup. The writer is constructed last.
+        new FileOutputStream(csvFile, true).close();
 
         try {
             this.hmacCalculator = new HmacCalculator(CsvSecureConstants.HMAC_ALGORITHM);
@@ -209,13 +211,6 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
                 }
             };
         } catch (Exception e) {
-            // Nothing else closes a writer that fails to construct: the file would stay open, and with rotation the
-            // rotator thread, which is not a daemon thread, would keep running.
-            try {
-                csvWriter.close();
-            } catch (IOException | RuntimeException closeFailure) {
-                e.addSuppressed(closeFailure);
-            }
             if (e instanceof IOException) {
                 // The file cannot be resumed, or its keystore cannot be loaded: the handler reports it for the topic,
                 // and opens the other topics.
@@ -223,6 +218,9 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
             }
             throw new RuntimeException("Error when initializing a secure CSV writer", e);
         }
+        // Last: with rotation, the writer starts the rotation checks, and a rotation renames the file and its keystore,
+        // and writes new keys. It needs the keys read, and the file it resumes verified.
+        this.csvWriter = constructWriter(csvFile, fileAlreadyInitialized, config);
     }
 
     @Override

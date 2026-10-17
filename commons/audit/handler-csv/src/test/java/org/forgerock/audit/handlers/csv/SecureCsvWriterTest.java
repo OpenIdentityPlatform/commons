@@ -49,6 +49,7 @@ import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.crypto.SecretKey;
 
@@ -305,6 +306,100 @@ public class SecureCsvWriterTest {
             threads[i].join(5000);
             assertThat(threads[i].isAlive()).as(threads[i].getName() + " alive").isFalse();
         }
+    }
+
+    @DataProvider
+    private Object[][] rotationsDueOnResume() {
+        return new Object[][] {
+            // the resumed file is at the maximum size, the file that its rotation starts is under it
+            { "maxFileSize" },
+            // the resumed file was last written before the maximum lifetime
+            { "rotationInterval" }
+        };
+    }
+
+    @Test(dataProvider = "rotationsDueOnResume", timeOut = 60_000)
+    public void shouldNotRotateResumedFileWhileVerifyingIt(final String rotationPolicy) throws Exception {
+        final Path logDirectory = Files.createTempDirectory("SecureCsvWriterTest");
+        final File actual =
+                new File(logDirectory.toFile(), CsvAuditEventHandler.SECURE_CSV_FILENAME_PREFIX + "access.csv");
+        final String header = "FOO";
+        final String rotationFileSuffix = "-yyyy.MM.dd-HH.mm.ss.SSS";
+        try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(actual, new String[]{header},
+                CsvPreference.EXCEL_PREFERENCE, createBasicSecureConfig("5 minutes"), keyStoreHandler, random)) {
+            for (int i = 0; i < 10; i++) {
+                secureCsvWriter.writeEvent(singletonMap(header, "before" + i));
+            }
+        }
+
+        final CsvAuditEventHandlerConfiguration config = createBasicSecureConfig("5 minutes");
+        config.getFileRotation().setRotationEnabled(true);
+        config.getFileRotation().setRotationFileSuffix(rotationFileSuffix);
+        if ("maxFileSize".equals(rotationPolicy)) {
+            config.getFileRotation().setMaxFileSize(actual.length());
+        } else {
+            config.getFileRotation().setRotationInterval("1 hour");
+            assertThat(actual.setLastModified(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(2))).isTrue();
+        }
+        config.setRotationRetentionCheckInterval("50 milliseconds");
+        // The verifier passes each line it reads to the comment matcher: the first one holds the verification for
+        // 10 rotation checks.
+        final AtomicBoolean held = new AtomicBoolean();
+        final CsvPreference slowToVerify = new CsvPreference.Builder(CsvPreference.EXCEL_PREFERENCE)
+                .skipComments(line -> {
+                    if (held.compareAndSet(false, true)) {
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                    return false;
+                })
+                .build();
+        final SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
+                actual, new String[]{header}, slowToVerify, config, keyStoreHandler, random);
+        assertThat(held.get()).as("verification held").isTrue();
+
+        // the first check after the construction rotates the file
+        final FileNamingPolicy fileNamingPolicy = new TimeStampFileNamingPolicy(actual, rotationFileSuffix, "");
+        final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+        while (fileNamingPolicy.listFiles().isEmpty() && System.nanoTime() < deadline) {
+            Thread.sleep(10);
+        }
+        secureCsvWriter.writeEvent(singletonMap(header, "after"));
+        secureCsvWriter.close();
+
+        final String keystorePassword =
+                Base64.encode(keyStoreHandler.readSecretKeyFromKeyStore(ENTRY_PASSWORD).getEncoded());
+        final PublicKey publicKey = keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE);
+        final List<VerificationResult> verificationResults = new CsvSecureArchiveVerifier(
+                fileNamingPolicy, keystorePassword, publicKey, CsvPreference.EXCEL_PREFERENCE).verify();
+        assertThat(verificationResults).hasSize(1);
+        final VerificationResult archive = verificationResults.get(0);
+        assertThat(archive.hasPassedVerification()).as(archive.getFailureReason()).isTrue();
+        assertThat(contentOf(archive.getArchiveFile()))
+                .containsPattern("(?m)^before0,").containsPattern("(?m)^before9,").doesNotContain("after");
+
+        // the live file goes on from the last signature of the archive
+        final SecureStorage liveStorage = new KeyStoreSecureStorage(new JcaKeyStoreHandler(KEYSTORE_TYPE,
+                CsvSecureUtils.keyStoreFile(actual).getPath(), keystorePassword), publicKey);
+        final VerificationResult live =
+                new CsvSecureVerifier(actual, CsvPreference.EXCEL_PREFERENCE, liveStorage).verify();
+        assertThat(live.hasPassedVerification()).as(live.getFailureReason()).isTrue();
+        assertThat(contentOf(actual)).containsPattern("(?m)^after,").doesNotContain("before");
+    }
+
+    @Test
+    public void shouldFailWithIOExceptionWhenFileCannotBeOpened() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("SecureCsvWriterTest");
+        // neither the file nor its keystore can be created under a file
+        final File parent = Files.createFile(logDirectory.resolve("file")).toFile();
+        final File actual = new File(parent, CsvAuditEventHandler.SECURE_CSV_FILENAME_PREFIX + "access.csv");
+        // the handler reports an IOException for the topic, and opens the other topics
+        assertThatThrownBy(() -> new SecureCsvWriter(actual, new String[]{"FOO"}, CsvPreference.EXCEL_PREFERENCE,
+                createBasicSecureConfig("5 minutes"), keyStoreHandler, random))
+                .isInstanceOf(IOException.class);
     }
 
     @Test(timeOut = 60_000)
