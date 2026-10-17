@@ -79,6 +79,16 @@ public class TextWriterTest {
     }
 
     @Test
+    public void testStreamGivesTheFirstFailureAsTheCauseOfTheNextOnes() throws Exception {
+        final TextWriter.Stream writer = new TextWriter.Stream(new FailingOnceOutputStream());
+        writer.write("event1");
+        assertThatThrownBy(writer::flush).hasMessage("No space left on device");
+
+        // a caller that logs only the next failure, such as a flush in a finally block, still logs why
+        assertThatThrownBy(writer::flush).hasRootCauseMessage("No space left on device");
+    }
+
+    @Test
     public void testStreamDropsTheTextOfAFailedWriteAtShutdown() throws Exception {
         final FailingOnceOutputStream outputStream = new FailingOnceOutputStream();
         final TextWriter.Stream writer = new TextWriter.Stream(outputStream);
