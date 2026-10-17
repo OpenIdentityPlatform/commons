@@ -101,7 +101,9 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
         this.keyStoreFile = CsvSecureUtils.keyStoreFile(csvFile);
         this.headers = checkNotNull(headers, "The headers can't be null.");
         this.csvFormatter = new CsvFormatter(csvPreference);
-        this.csvWriter = constructWriter(csvFile, fileAlreadyInitialized, config);
+        // A file that cannot be opened fails here, with an IOException that the handler reports for the topic: storing
+        // its keystore would fail first, with a RuntimeException that fails the startup. The writer is constructed last.
+        new FileOutputStream(csvFile, true).close();
         this.hmacCalculator = new HmacCalculator(CsvSecureConstants.HMAC_ALGORITHM);
 
         try {
@@ -176,6 +178,9 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
         } catch (Exception e) {
             throw new RuntimeException("Error when initializing a secure CSV writer", e);
         }
+        // Last: with rotation, the writer starts the rotation checks, and a rotation renames the file and its keystore,
+        // and writes new keys. It needs the keys read, and the file it resumes verified.
+        this.csvWriter = constructWriter(csvFile, fileAlreadyInitialized, config);
     }
 
     @Override
