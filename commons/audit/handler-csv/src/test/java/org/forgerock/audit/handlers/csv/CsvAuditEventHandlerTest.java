@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.forgerock.audit.AuditServiceBuilder.*;
 import static org.forgerock.audit.AuditServiceProxy.*;
 import static org.forgerock.audit.handlers.csv.CsvAuditEventHandler.*;
+import static org.forgerock.audit.handlers.csv.CsvWriterTest.NON_ASCII_VALUE;
 import static org.forgerock.audit.handlers.csv.SecureCsvWriterTest.KEYSTORE_PASSWORD;
 import static org.forgerock.audit.handlers.csv.SecureCsvWriterTest.assertThreadsTerminate;
 import static org.forgerock.json.JsonValue.*;
@@ -233,6 +234,26 @@ public class CsvAuditEventHandlerTest {
         // TODO should use AssertJResourceResponseAssert
         final ResourceResponse resource = promise.get();
         assertResourceEquals(resource, event);
+    }
+
+    @Test
+    public void testReadingAuditLogEntryWithNonAsciiValue() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final CsvAuditEventHandler csvHandler = csvAuditEventHandler().loggingTo(logDirectory).build();
+        final Context context = new RootContext();
+        try {
+            final JsonValue content = json(object(
+                    field("_id", "1"),
+                    field("timestamp", "123456"),
+                    field("transactionId", NON_ASCII_VALUE)));
+            csvHandler.publishEvent(context, "access", content).getOrThrow();
+
+            final ResourceResponse resource = csvHandler.readEvent(context, "access", "1").getOrThrow();
+            assertThat(resource.getContent().get("transactionId").asString()).isEqualTo(NON_ASCII_VALUE);
+        } finally {
+            csvHandler.shutdown();
+        }
     }
 
     private static void assertResourceEquals(ResourceResponse left, ResourceResponse right) {

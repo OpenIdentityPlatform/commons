@@ -18,7 +18,7 @@ package org.forgerock.audit.events.handlers.writers;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +58,7 @@ public interface TextWriter {
     long getBytesWritten();
 
     /**
-     * A TextWriter implementation which writes to a given output stream.
+     * A TextWriter implementation which writes to a given output stream in UTF-8, as {@link RotatableWriter} does.
      */
     public class Stream implements TextWriter {
         private static final Logger logger = LoggerFactory.getLogger(Stream.class);
@@ -75,7 +75,7 @@ public interface TextWriter {
         public Stream(OutputStream outputStream) {
             stream = new MeteredStream(outputStream, 0);
             // Not a PrintWriter, which sets an error flag instead of throwing: a write that fails must fail the event.
-            writer = new FailFastWriter(stream, Charset.defaultCharset());
+            writer = new FailFastWriter(stream, StandardCharsets.UTF_8);
         }
 
         @Override

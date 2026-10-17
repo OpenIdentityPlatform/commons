@@ -13,7 +13,7 @@
   ~ information: "Portions copyright [year] [name of copyright owner]".
   ~
   ~ Copyright 2015-2016 ForgeRock AS.
-  ~ Portions copyright 2020-2025 3A Systems, LLC
+  ~ Portions copyright 2020-2026 3A Systems, LLC
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -108,6 +108,17 @@
                     <instructions>
                         <Main-Class>org.forgerock.audit.handlers.csv.CsvSecureArchiveVerifierCli</Main-Class>
                     </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <environmentVariables>
+                        <!-- A default charset other than UTF-8, as on Windows before JDK 18, so that the tests catch
+                             a reader or a writer of the audit files that uses the default charset. -->
+                        <JAVA_TOOL_OPTIONS>-Dfile.encoding=windows-1252</JAVA_TOOL_OPTIONS>
+                    </environmentVariables>
                 </configuration>
             </plugin>
         </plugins>
