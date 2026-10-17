@@ -17,7 +17,9 @@
 
 package org.forgerock.audit.handlers.csv;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
@@ -29,6 +31,13 @@ import org.slf4j.Logger;
  * Holds the methods shared between the CsvSecure classes.
  */
 final class CsvSecureUtils {
+
+    /**
+     * The first byte of the data that the HMAC of a row covers. UTF-8 never holds it, so these data never equal
+     * {@link #concatenatedValues(Map, String...)}, the UTF-8 bytes of a row that a previous version signed: an HMAC
+     * verifies a row in one format only.
+     */
+    private static final int DATA_TO_SIGN_MARKER = 0xFF;
 
     /**
      * Obtain the data to sign.
@@ -71,12 +80,38 @@ final class CsvSecureUtils {
     }
 
     /**
-     * Get the data to sign.
+     * Get the data to sign: the byte 0xFF, then the name and the value of each column in UTF-8, each one after the
+     * number of its bytes as a big-endian int.
+     * <p>
+     * The CSV reader reads an empty name or value as {@code null}, so both are signed as empty.
      * @param logger the value of logger
      * @param values the value of values
      * @param nameMapping the value of nameMapping
      */
     static byte[] dataToSign(Logger logger, Map<String, ?> values, String... nameMapping) {
+        ByteArrayOutputStream data = new ByteArrayOutputStream();
+        data.write(DATA_TO_SIGN_MARKER);
+        for (String h : nameMapping) {
+            final Object value = values.get(h);
+            writeLengthAndBytes(data, h != null ? h : "");
+            writeLengthAndBytes(data, value != null ? value.toString() : "");
+        }
+        return data.toByteArray();
+    }
+
+    private static void writeLengthAndBytes(ByteArrayOutputStream data, String field) {
+        final byte[] bytes = field.getBytes(StandardCharsets.UTF_8);
+        data.write(ByteBuffer.allocate(Integer.BYTES).putInt(bytes.length).array(), 0, Integer.BYTES);
+        data.write(bytes, 0, bytes.length);
+    }
+
+    /**
+     * Get the data that the HMAC of a row covered before {@link #dataToSign(Logger, Map, String...)}: the values
+     * concatenated, which do not tell where a value ends, nor its column.
+     * @param values the value of values
+     * @param nameMapping the value of nameMapping
+     */
+    static byte[] concatenatedValues(Map<String, ?> values, String... nameMapping) {
         StringBuilder tmp = new StringBuilder();
         for (String h : nameMapping) {
             final Object value = values.get(h);

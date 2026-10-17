@@ -33,6 +33,7 @@ import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.PublicKey;
 import java.util.Comparator;
@@ -222,6 +223,36 @@ public class SecureCsvWriterTest {
         // - signature // because of closing the CsvWriter
         assertThat(contentOf(actual)).isEqualToIgnoringWhitespace(contentOf(
                 new File("target/test-classes/shouldGeneratePeriodicallySignature-expected.txt")));
+    }
+
+    @Test
+    public void shouldResumeFileWithHmacOfConcatenatedValues() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("SecureCsvWriterTest");
+        final File actual = new File(logDirectory.toFile(), "tamper-evident-test.csv");
+        // written before the HMAC of a row covered the column names and where each value ends
+        Files.copy(Paths.get("target/test-classes/secureCsvLegacyHmac.csv"), actual.toPath());
+        // the keystore of the file holds the keys that the truststore of CsvSecureVerifierTest holds
+        final KeyStoreHandlerDecorator truststore = new KeyStoreHandlerDecorator(new JcaKeyStoreHandler(KEYSTORE_TYPE,
+                CsvSecureVerifierTest.TRUSTSTORE_FILENAME, CsvSecureVerifierTest.TRUSTSTORE_PASSWORD));
+        final String keystorePassword =
+                Base64.encode(keyStoreHandler.readSecretKeyFromKeyStore(ENTRY_PASSWORD).getEncoded());
+        final PublicKey publicKey = keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE);
+        final SecureStorage fileSecureStorage = new KeyStoreSecureStorage(
+                new JcaKeyStoreHandler(KEYSTORE_TYPE, actual.getPath() + ".keystore", keystorePassword), publicKey);
+        fileSecureStorage.writeInitialKey(truststore.readSecretKeyFromKeyStore(ENTRY_INITIAL_KEY));
+        fileSecureStorage.writeCurrentKey(truststore.readSecretKeyFromKeyStore(ENTRY_CURRENT_KEY));
+
+        try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
+                actual, new String[]{"FOO"}, CsvPreference.EXCEL_PREFERENCE,
+                createBasicSecureConfig("5 minutes"), keyStoreHandler, random)) {
+            secureCsvWriter.writeEvent(singletonMap("FOO", "resumed"));
+        }
+
+        final VerificationResult verificationResult = new CsvSecureVerifier(actual, CsvPreference.EXCEL_PREFERENCE,
+                new KeyStoreSecureStorage(new JcaKeyStoreHandler(KEYSTORE_TYPE, actual.getPath() + ".keystore",
+                        keystorePassword), publicKey)).verify();
+        assertThat(verificationResult.hasPassedVerification()).as(verificationResult.getFailureReason()).isTrue();
+        assertThat(contentOf(actual)).containsPattern("(?m)^quix,").containsPattern("(?m)^resumed,");
     }
 
     @Test
