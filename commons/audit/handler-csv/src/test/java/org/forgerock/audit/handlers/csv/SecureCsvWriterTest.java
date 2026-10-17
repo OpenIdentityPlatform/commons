@@ -35,8 +35,10 @@ import java.lang.management.ThreadMXBean;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.security.KeyStore;
 import java.security.PublicKey;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -343,7 +345,7 @@ public class SecureCsvWriterTest {
         return threadInfo != null && threadInfo.getLockOwnerId() == owner.getId();
     }
 
-    /** Leaves a written file and its keystore in a state that cannot be resumed. */
+    /** Leaves a file and its keystore in a state that a writer cannot reopen. */
     private interface Damage {
         void apply(File csvFile, File keyStoreFile) throws Exception;
     }
@@ -368,12 +370,24 @@ public class SecureCsvWriterTest {
             { "empty keystore", (Damage) (csvFile, keyStoreFile) -> Files.write(keyStoreFile.toPath(), new byte[0]),
                 "cannot be loaded" },
             // as after a change of the Password key in the handler keystore
-            { "keystore of another password", (Damage) (csvFile, keyStoreFile) -> {
-                final KeyStore store = loadFileKeyStore(keyStoreFile).getStore();
-                try (OutputStream out = Files.newOutputStream(keyStoreFile.toPath())) {
-                    store.store(out, "another password".toCharArray());
-                }
-            }, "cannot be loaded" },
+            { "keystore of another password",
+                (Damage) (csvFile, keyStoreFile) -> storeUnderAnotherPassword(keyStoreFile), "cannot be loaded" },
+            // The verifier fails with a RuntimeException on the rows below.
+            // as left by a crash while the last row was written: a row with fewer columns than the header
+            { "row cut short", (Damage) (csvFile, keyStoreFile) -> Files.write(csvFile.toPath(),
+                    "cut-short-event\n".getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND),
+                "cannot be verified" },
+            { "quoted value cut short", (Damage) (csvFile, keyStoreFile) -> Files.write(csvFile.toPath(),
+                    "\"cut, short".getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND),
+                "cannot be verified" },
+            // the padding of the final signature is cut, so that it no longer decodes as Base64
+            { "signature cut short", (Damage) (csvFile, keyStoreFile) -> {
+                final byte[] content = Files.readAllBytes(csvFile.toPath());
+                Files.write(csvFile.toPath(), Arrays.copyOf(content, content.length - 3));
+            }, "cannot be verified" },
+            // as left by a crash while the header was written along with the first event
+            { "header cut short", (Damage) (csvFile, keyStoreFile) ->
+                    Files.write(csvFile.toPath(), "FOO".getBytes(StandardCharsets.UTF_8)), "cannot be verified" },
         };
     }
 
@@ -383,9 +397,42 @@ public class SecureCsvWriterTest {
         return new JcaKeyStoreHandler(KEYSTORE_TYPE, keyStoreFile.getPath(), password);
     }
 
+    private void storeUnderAnotherPassword(File keyStoreFile) throws Exception {
+        final KeyStore store = loadFileKeyStore(keyStoreFile).getStore();
+        try (OutputStream out = Files.newOutputStream(keyStoreFile.toPath())) {
+            store.store(out, "another password".toCharArray());
+        }
+    }
+
     @Test(dataProvider = "unresumableFiles")
     public void shouldStopRotatorAndFailWithIOExceptionWhenFileCannotBeResumed(
             final String description, final Damage damage, final String reason) throws Exception {
+        assertReopeningFailsWithIOException(true, description, damage, reason);
+    }
+
+    @DataProvider
+    private Object[][] unloadableKeystoresOfEmptyFiles() {
+        return new Object[][] {
+            { "keystore replaced by a directory", (Damage) (csvFile, keyStoreFile) -> {
+                Files.delete(keyStoreFile.toPath());
+                Files.createDirectory(keyStoreFile.toPath());
+            }, "cannot be loaded" },
+            // as after a change of the Password key in the handler keystore
+            { "keystore of another password",
+                (Damage) (csvFile, keyStoreFile) -> storeUnderAnotherPassword(keyStoreFile), "cannot be loaded" },
+        };
+    }
+
+    @Test(dataProvider = "unloadableKeystoresOfEmptyFiles")
+    public void shouldStopRotatorAndFailWithIOExceptionWhenKeystoreOfEmptyFileCannotBeLoaded(
+            final String description, final Damage damage, final String reason) throws Exception {
+        // A topic that got no event keeps an empty file next to its keystore.
+        assertReopeningFailsWithIOException(false, description, damage, reason);
+    }
+
+    /** Writes a file, with an event or without, damages it, and asserts that a writer fails to reopen it. */
+    private void assertReopeningFailsWithIOException(final boolean withEvent, final String description,
+            final Damage damage, final String reason) throws Exception {
         final Path logDirectory = Files.createTempDirectory("SecureCsvWriterTest");
         final File actual = new File(logDirectory.toFile(), "tamper-evident-test.csv");
         final String[] headers = {"FOO"};
@@ -400,9 +447,13 @@ public class SecureCsvWriterTest {
         final SecureCsvWriter secureCsvWriter = callInThreadGroup(writerThreads, () -> new SecureCsvWriter(
                 actual, headers, CsvPreference.EXCEL_PREFERENCE, config, keyStoreHandler, random));
         assertThat(writerThreads.activeCount()).as("rotator threads").isEqualTo(1);
-        secureCsvWriter.writeEvent(singletonMap(headers[0], "first-event"));
+        if (withEvent) {
+            secureCsvWriter.writeEvent(singletonMap(headers[0], "first-event"));
+        }
         secureCsvWriter.close();
         assertThreadsTerminate(writerThreads);
+        // An empty file is not resumed: a writer reopens it as a new file.
+        assertThat(actual.length() > 0).as("file written").isEqualTo(withEvent);
 
         damage.apply(actual, new File(actual.getPath() + ".keystore"));
 
