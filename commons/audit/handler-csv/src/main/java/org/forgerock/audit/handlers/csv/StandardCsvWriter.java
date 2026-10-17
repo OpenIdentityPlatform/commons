@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import org.forgerock.audit.events.handlers.writers.AsynchronousTextWriter;
@@ -55,7 +56,8 @@ class StandardCsvWriter implements CsvWriter {
         Reject.ifTrue(config.getSecurity().isEnabled(), "StandardCsvWriter should not be used if security is enabled");
         boolean fileAlreadyInitialized = csvFile.exists();
         if (fileAlreadyInitialized) {
-            try (ICsvMapReader reader = new CsvMapReader(new BufferedReader(new FileReader(csvFile)), csvPreference)) {
+            try (ICsvMapReader reader = new CsvMapReader(
+                    new BufferedReader(new FileReader(csvFile, StandardCharsets.UTF_8)), csvPreference)) {
                 final String[] actualHeaders = reader.getHeader(true);
                 // Assert that the 2 headers equals.
                 if (actualHeaders == null) {

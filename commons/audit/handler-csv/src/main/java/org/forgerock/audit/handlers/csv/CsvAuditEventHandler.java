@@ -37,6 +37,7 @@ import static org.forgerock.json.resource.Responses.newResourceResponse;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -344,7 +345,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
     }
 
     private ICsvMapReader createCsvMapReader(final File auditFile) throws IOException {
-        CsvMapReader csvReader = new CsvMapReader(new FileReader(auditFile), csvPreference);
+        CsvMapReader csvReader = new CsvMapReader(new FileReader(auditFile, StandardCharsets.UTF_8), csvPreference);
 
         if (configuration.getSecurity().isEnabled()) {
             return new CsvSecureMapReader(csvReader);

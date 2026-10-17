@@ -12,12 +12,14 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.audit.events.handlers.writers;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 
 /**
  * A TextWriter provides a character-based stream which can be queried for number of bytes written.
@@ -54,7 +56,7 @@ public interface TextWriter {
     long getBytesWritten();
 
     /**
-     * A TextWriter implementation which writes to a given output stream.
+     * A TextWriter implementation which writes to a given output stream in UTF-8, as {@link RotatableWriter} does.
      */
     public class Stream implements TextWriter {
         private final MeteredStream stream;
@@ -68,7 +70,7 @@ public interface TextWriter {
          */
         public Stream(OutputStream outputStream) {
             stream = new MeteredStream(outputStream, 0);
-            writer = new PrintWriter(stream, true);
+            writer = new PrintWriter(stream, true, StandardCharsets.UTF_8);
         }
 
         @Override
