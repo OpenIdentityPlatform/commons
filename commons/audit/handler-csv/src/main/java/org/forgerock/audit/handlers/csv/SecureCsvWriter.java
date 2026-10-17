@@ -117,14 +117,12 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
             try {
                 hmacKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, keyStoreFile.getPath(),
                         keyStorePassword);
-            } catch (IllegalStateException e) {
-                // KeyStoreBuilder throws it for a keystore it cannot load: an empty one, left by a crash while it was
-                // stored, or one stored under another password, after a change of the Password key.
-                if (!fileAlreadyInitialized) {
-                    throw e;
-                }
-                throw new IOException(
-                        "Resuming an existing CSV file but its keystore " + keyStoreFile + " cannot be loaded.", e);
+            } catch (IOException | IllegalStateException e) {
+                // KeyStoreBuilder cannot open a directory or a file it may not read, and throws an IllegalStateException
+                // for a keystore it cannot load: an empty one, left by a crash while it was stored, or one stored under
+                // another password, after a change of the Password key. Also when the file is not resumed: a topic
+                // that got no event keeps an empty file next to its keystore.
+                throw new IOException("The keystore " + keyStoreFile + " of the CSV file cannot be loaded.", e);
             }
             PublicKey publicSignatureKey =
                     keyStoreHandlerDecorated.readPublicKeyFromKeyStore(CsvSecureConstants.ENTRY_SIGNATURE);
@@ -147,7 +145,15 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
                 }
                 // Run the CsvVerifier to check that the file was not tampered.
                 CsvSecureVerifier verifier = new CsvSecureVerifier(csvFile, csvPreference, secureStorage);
-                CsvSecureVerifier.VerificationResult verificationResult = verifier.verify();
+                final CsvSecureVerifier.VerificationResult verificationResult;
+                try {
+                    verificationResult = verifier.verify();
+                } catch (RuntimeException e) {
+                    // The verifier fails this way on a row it cannot parse or decode: a row, a header or a signature
+                    // cut short by a crash while it was written, or a row edited. As CsvSecureArchiveVerifier does, it
+                    // is a file that fails verification.
+                    throw new IOException("Resuming an existing CSV file but it cannot be verified: " + csvFile, e);
+                }
                 if (!verificationResult.hasPassedVerification()) {
                     throw new IOException("The CSV file was tampered: " + verificationResult.getFailureReason());
                 }
@@ -199,7 +205,8 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
                 e.addSuppressed(closeFailure);
             }
             if (e instanceof IOException) {
-                // The file cannot be resumed: the handler reports it for the topic, and opens the other topics.
+                // The file cannot be resumed, or its keystore cannot be loaded: the handler reports it for the topic,
+                // and opens the other topics.
                 throw (IOException) e;
             }
             throw new RuntimeException("Error when initializing a secure CSV writer", e);
