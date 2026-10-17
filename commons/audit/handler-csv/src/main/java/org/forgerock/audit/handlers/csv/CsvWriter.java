@@ -37,6 +37,9 @@ interface CsvWriter extends AutoCloseable {
 
     /**
      * Write a row into the CSV files.
+     * <p>
+     * A failure once the row is written does not throw: the handler writes the row again, to a new writer, after an
+     * {@link IOException}.
      * @param values The keys of the {@link Map} have to match the column's header.
      * @throws IOException if an I/O error occurs while writing the row.
      */

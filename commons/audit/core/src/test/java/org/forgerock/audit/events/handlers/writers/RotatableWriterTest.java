@@ -479,6 +479,43 @@ public class RotatableWriterTest {
     }
 
     @Test
+    public void testDoesNotFailTheWriteOfATextWhenTheRotationAfterItFails() throws Exception {
+        // given
+        final File file = getTempFile();
+        final String prefix = "testDoesNotFailTheWriteOfATextWhenTheRotationAfterItFails";
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
+        configuration.setRotationRetentionCheckInterval("1 hour"); // ensure asynchronous check is inactive
+        configuration.getFileRotation().setRotationEnabled(true);
+        configuration.getFileRotation().setRotationFilePrefix(prefix);
+        configuration.getFileRotation().setRotationFileSuffix(ROTATION_FILE_SUFFIX);
+        configuration.getFileRotation().setMaxFileSize(MAX_BYTES_TO_WRITE);
+        rotatableWriter = new RotatableWriter(file, configuration, true);
+        rotatableWriter.registerRotationHooks(new RotationHooks() {
+            @Override
+            public void preRotationAction(RotationContext context) throws IOException {
+                // as the final signature of a tamper evident file does when its keystore cannot be stored
+                throw new IOException("Unable to store the keystore");
+            }
+
+            @Override
+            public void postRotationAction(RotationContext context) {
+                // nothing to do
+            }
+        });
+        final String text = new String(new char[MAX_BYTES_TO_WRITE]).replace('\0', 'x');
+        rotatableWriter.write(text);
+        rotatableWriter.flush();
+
+        // when the size of the file makes the next write rotate it, and the rotation fails
+        rotatableWriter.write("event");
+        rotatableWriter.flush();
+
+        // then the write does not fail, as its caller would write the text again, and the text is in the file once
+        assertThat(file).hasContent(text + "event");
+        assertThat(file.getParentFile().listFiles((dir, name) -> name.startsWith(prefix + file.getName()))).isEmpty();
+    }
+
+    @Test
     public void testAutomaticallyEvaluatesPolicesPeriodicallyIfRotationIntervalSpecified() throws Exception {
         // given
         final File file = getTempFile();

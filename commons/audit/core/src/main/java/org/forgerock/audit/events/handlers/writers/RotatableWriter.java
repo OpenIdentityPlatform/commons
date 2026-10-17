@@ -316,6 +316,12 @@ public class RotatableWriter implements TextWriter, RotatableObject {
         this.rotationHooks = rotationHooks;
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * A failure of the rotation that follows the write is logged, as the scheduled checks log it: the text is written,
+     * and a caller that gets a failure writes it again. A failure of the writer itself fails the next flush and write.
+     */
     @Override
     public void write(String str) throws IOException {
         ReadLock lock = readWriteLock.readLock();
@@ -326,7 +332,11 @@ public class RotatableWriter implements TextWriter, RotatableObject {
         } finally {
             lock.unlock();
         }
-        rotateIfNeeded();
+        try {
+            rotateIfNeeded();
+        } catch (IOException e) {
+            logger.error("Failure when applying a rotation policy to file {}", fileNamingPolicy.getInitialName(), e);
+        }
     }
 
     /**
