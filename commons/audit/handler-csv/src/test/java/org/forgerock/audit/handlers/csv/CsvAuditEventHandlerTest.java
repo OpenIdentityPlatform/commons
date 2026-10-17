@@ -798,6 +798,112 @@ public class CsvAuditEventHandlerTest {
                 .isTrue();
     }
 
+    @Test(dataProvider = "rotateActionData")
+    public void testPublishEventKeepsTamperEvidentWriterWhenKeyStoreCannotBeStored(String label,
+            boolean isRotationEnabled) throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final CsvAuditEventHandlerBuilder csvAuditEventHandlerBuilder =
+                csvAuditEventHandler().loggingTo(logDirectory).withSecureLoggingEnabled();
+        if (isRotationEnabled) {
+            csvAuditEventHandlerBuilder.withRotationEnabled();
+        }
+        final CsvAuditEventHandler csvHandler = csvAuditEventHandlerBuilder.build();
+        final File liveFile = logDirectory.resolve(SECURE_CSV_FILENAME_PREFIX + "access.csv").toFile();
+        final File keyStoreFile = CsvSecureUtils.keyStoreFile(liveFile);
+        final File movedKeyStoreFile = new File(keyStoreFile.getPath() + ".moved");
+        final Context context = new RootContext();
+        try {
+            csvHandler.publishEvent(context, "access", buildEvent(1)).getOrThrow();
+            // A keystore cannot be stored over a directory: the row of the event is written, and its key is not stored.
+            assertThat(keyStoreFile.renameTo(movedKeyStoreFile)).isTrue();
+            assertThat(keyStoreFile.mkdir()).isTrue();
+            csvHandler.publishEvent(context, "access", buildEvent(2)).getOrThrow();
+            assertThat(keyStoreFile.delete()).isTrue();
+            assertThat(movedKeyStoreFile.renameTo(keyStoreFile)).isTrue();
+            // the writer stores the key with the next row
+            csvHandler.publishEvent(context, "access", buildEvent(3)).getOrThrow();
+        } finally {
+            csvHandler.shutdown();
+        }
+
+        assertThat(liveFile).as("when " + label).content(UTF_8)
+                .containsOnlyOnce("\"_id1\"")
+                .containsOnlyOnce("\"_id2\"")
+                .containsOnlyOnce("\"_id3\"");
+        final KeyStoreHandlerDecorator keyStoreHandler = new KeyStoreHandlerDecorator(
+                new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, KEYSTORE_FILENAME, KEYSTORE_PASSWORD));
+        final KeyStoreHandler liveKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE,
+                keyStoreFile.getPath(), Base64.encode(
+                        keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded()));
+        final VerificationResult verificationResult = new CsvSecureVerifier(liveFile, CsvPreference.EXCEL_PREFERENCE,
+                new KeyStoreSecureStorage(liveKeyStoreHandler,
+                        keyStoreHandler.readPublicKeyFromKeyStore(CsvSecureConstants.ENTRY_SIGNATURE))).verify();
+        assertThat(verificationResult.hasPassedVerification())
+                .as("when " + label + ": " + verificationResult.getFailureReason())
+                .isTrue();
+    }
+
+    @Test
+    public void testPublishEventKeepsTamperEvidentWriterWhenRotationAfterItFails() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        // A file that holds an event is rotated at the write of the next event, and a new file that holds only the
+        // header and the last signature is not.
+        final FileRotation fileRotation = new FileRotation();
+        fileRotation.setRotationEnabled(true);
+        fileRotation.setRotationFilePrefix("prefix");
+        fileRotation.setRotationInterval("disabled");
+        fileRotation.setMaxFileSize(1000);
+        final CsvAuditEventHandlerBuilder csvAuditEventHandlerBuilder = csvAuditEventHandler()
+                .loggingTo(logDirectory).withSecureLoggingEnabled().withRotationConfig(fileRotation);
+        // the file is rotated by the writes only
+        csvAuditEventHandlerBuilder.config.setRotationRetentionCheckInterval("1 hour");
+        final CsvAuditEventHandler csvHandler = csvAuditEventHandlerBuilder.build();
+        final File liveFile = logDirectory.resolve(SECURE_CSV_FILENAME_PREFIX + "access.csv").toFile();
+        final File keyStoreFile = CsvSecureUtils.keyStoreFile(liveFile);
+        final File movedKeyStoreFile = new File(keyStoreFile.getPath() + ".moved");
+        final String transactionId = new String(new char[1000]).replace('\0', 'x');
+        final Context context = new RootContext();
+        try {
+            csvHandler.publishEvent(context, "access", buildEvent(1).put("transactionId", transactionId)).getOrThrow();
+            // The rotation signs the file before it renames it, and the signature fails when the keystore cannot be
+            // stored over a directory: the rotation fails after the row of the event is written.
+            assertThat(keyStoreFile.renameTo(movedKeyStoreFile)).isTrue();
+            assertThat(keyStoreFile.mkdir()).isTrue();
+            csvHandler.publishEvent(context, "access", buildEvent(2).put("transactionId", transactionId)).getOrThrow();
+            assertThat(keyStoreFile.delete()).isTrue();
+            assertThat(movedKeyStoreFile.renameTo(keyStoreFile)).isTrue();
+            // the write of the next event rotates the file
+            csvHandler.publishEvent(context, "access", buildEvent(3).put("transactionId", transactionId)).getOrThrow();
+        } finally {
+            csvHandler.shutdown();
+        }
+
+        // the archive is verified with its own keystore, as the CLI verifies it
+        final KeyStoreHandlerDecorator keyStoreHandler = new KeyStoreHandlerDecorator(
+                new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, KEYSTORE_FILENAME, KEYSTORE_PASSWORD));
+        final String archiveKeyStorePassword = Base64.encode(
+                keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded());
+        final List<VerificationResult> verificationResults = new CsvSecureArchiveVerifier(
+                new TimeStampFileNamingPolicy(liveFile, null, "prefix"), archiveKeyStorePassword,
+                keyStoreHandler.readPublicKeyFromKeyStore(CsvSecureConstants.ENTRY_SIGNATURE),
+                CsvPreference.EXCEL_PREFERENCE).verify();
+        assertThat(verificationResults).hasSize(1);
+        final VerificationResult verificationResult = verificationResults.get(0);
+        assertThat(verificationResult.hasPassedVerification())
+                .as(verificationResult.getFailureReason())
+                .isTrue();
+        // every event is written once, to the archive
+        try (InputStream in = new GZIPInputStream(new FileInputStream(verificationResult.getArchiveFile()))) {
+            assertThat(new String(in.readAllBytes(), UTF_8))
+                    .containsOnlyOnce("\"_id1\"")
+                    .containsOnlyOnce("\"_id2\"")
+                    .containsOnlyOnce("\"_id3\"");
+        }
+        assertThat(liveFile).content(UTF_8).doesNotContain("\"_id1\"", "\"_id2\"", "\"_id3\"");
+    }
+
     @Test
     public void testActionToRotateFileCompressesOutsideWriteLock() throws Exception {
         final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
