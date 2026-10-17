@@ -26,6 +26,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.forgerock.util.Reject;
 import org.slf4j.Logger;
@@ -73,6 +74,13 @@ public class AsynchronousTextWriter implements TextWriter {
     private final boolean autoFlush;
     /** Flag for notifying the WriterTask to exit. */
     private volatile boolean stopRequested;
+    /**
+     * The first write or flush of the wrapped writer that failed. The next records fail, so that the caller learns of
+     * it and replaces this writer: the records are written later, so their caller cannot be told.
+     */
+    private volatile IOException failure;
+    /** The number of records that the wrapped writer failed to write. */
+    private final AtomicLong failedRecords = new AtomicLong();
 
     /**
      * Construct a new AsynchronousTextWriter wrapper.
@@ -128,7 +136,7 @@ public class AsynchronousTextWriter implements TextWriter {
                         drainList.clear();
                     }
                     if (autoFlush) {
-                        flush();
+                        flushWrappedWriter();
                     }
 				} catch (InterruptedException e) {
 					stopRequested=true;
@@ -141,7 +149,40 @@ public class AsynchronousTextWriter implements TextWriter {
         try {
             writer.write(message);
         } catch (IOException e) {
-            logger.error("Error when writing a message, message size: " + message.length(), e);
+            failedRecords.incrementAndGet();
+            fail(e, "Error when writing a message, message size: " + message.length());
+        }
+    }
+
+    private void flushWrappedWriter() {
+        try {
+            writer.flush();
+        } catch (IOException e) {
+            fail(e, "Error when flushing the writer");
+        }
+    }
+
+    /** Logs the first failure of the wrapped writer with its stack trace, and only counts the next ones. */
+    private IOException fail(final IOException e, final String message) {
+        final boolean first;
+        synchronized (this) {
+            first = failure == null;
+            if (first) {
+                failure = e;
+            }
+        }
+        if (first) {
+            logger.error(message, e);
+        } else {
+            logger.debug(message, e);
+        }
+        return e;
+    }
+
+    private void checkNotFailed() throws IOException {
+        final IOException firstFailure = failure;
+        if (firstFailure != null) {
+            throw new IOException("A previous write of the buffered records failed", firstFailure);
         }
     }
 
@@ -153,6 +194,7 @@ public class AsynchronousTextWriter implements TextWriter {
      */
     @Override
     public void write(String record) throws IOException {
+        checkNotFailed();
         boolean interrupted = false;
         boolean enqueued = false;
         while (!stopRequested) {
@@ -177,11 +219,12 @@ public class AsynchronousTextWriter implements TextWriter {
     }
 
     @Override
-    public void flush() {
+    public void flush() throws IOException {
+        checkNotFailed();
         try {
             writer.flush();
         } catch (IOException e) {
-            logger.error("Error  when flushing the writer", e);
+            throw fail(e, "Error when flushing the writer");
         }
     }
 
@@ -224,6 +267,11 @@ public class AsynchronousTextWriter implements TextWriter {
             } catch (InterruptedException e) {
                 interrupted = true;
             }
+        }
+
+        final long lostRecords = failedRecords.get();
+        if (lostRecords > 0) {
+            logger.error("{} buffered records could not be written", lostRecords);
         }
 
         // Shutdown the wrapped writer.
