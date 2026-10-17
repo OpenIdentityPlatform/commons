@@ -83,6 +83,7 @@ import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Responses;
+import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
@@ -133,6 +134,12 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
      * lock. A lock per topic lets the other topics publish while the writer of one topic is replaced.
      */
     private final Map<String, ReadWriteLock> writerLockByTopic;
+    /**
+     * Set by {@link #shutdown()} before it closes the writers, and cleared by {@link #startup()} once it has opened
+     * them. Meanwhile, a topic left without a writer gets no new one, so that its events fail instead of being written
+     * to a writer that nothing closes.
+     */
+    private volatile boolean shutDown;
     private final Map<String, Set<String>> fieldOrderByTopic;
     /** Caches a JSON pointer for each field. */
     private final Map<String, JsonPointer> jsonPointerByField;
@@ -240,6 +247,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
                 writeLock.unlock();
             }
         }
+        shutDown = false;
     }
 
     /** {@inheritDoc} */
@@ -274,7 +282,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
     /**
      * Publishes the provided event to the writer of the topic, under the read lock of the topic. If the topic has no
      * writer, or if the write fails, the event is written under the write lock, to a new writer unless another thread
-     * has replaced the writer meanwhile.
+     * has replaced the writer meanwhile. Once the handler is shut down, the event fails instead.
      */
     private void publishEventWithRetry(final String topic, final JsonValue event)
                     throws ResourceException {
@@ -298,6 +306,11 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
         // or have multiple threads attempting to reset the writer.
         writerLock.writeLock().lock();
         try {
+            if (shutDown) {
+                // shutdown() removes the writers it closes, so the event ends here instead of in a new writer
+                throw new ServiceUnavailableException("Unable to publish event for topic: " + topic
+                        + ", the handler is shut down");
+            }
             // Lookup the current writer directly from the map so we can check if another thread has reset it.
             CsvWriter newCsvWriter = writers.get(topic);
             if (newCsvWriter == null || newCsvWriter == csvWriter) {
@@ -308,6 +321,9 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
                 LOGGER.debug("Writer reset by another thread");
             }
             writeEvent(topic, newCsvWriter, event);
+        } catch (ResourceException e) {
+            // the handler is shut down, or no new writer could be opened
+            throw e;
         } catch (IOException e) {
             throw new BadRequestException(e);
         } finally {
@@ -630,12 +646,14 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
 
     private void cleanup() throws ResourceException {
         IOException failure = null;
+        shutDown = true;
         for (Map.Entry<String, ReadWriteLock> topicLock : writerLockByTopic.entrySet()) {
             final Lock writeLock = topicLock.getValue().writeLock();
             writeLock.lock();
             // every writer is closed, also when the flush or another writer fails: the scheduler of a tamper evident
-            // writer would keep the JVM from exiting
-            try (CsvWriter writer = writers.get(topicLock.getKey())) {
+            // writer would keep the JVM from exiting. The closed writer leaves the map, so that neither an event nor
+            // the rotate action reaches it.
+            try (CsvWriter writer = writers.remove(topicLock.getKey())) {
                 if (writer != null) {
                     writer.flush();
                 }
