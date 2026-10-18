@@ -1,6 +1,8 @@
 /**
  * Copyright 2005-2013 Akiban Technologies, Inc.
  * 
+ * Portions Copyright 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,6 +76,12 @@ public class TransactionAbandonedTest extends PersistitUnitTestCase {
         return persistit.getExchange(VOLUME_NAME, TREE, true);
     }
 
+    private static Exchange getRawExchange(final Persistit persistit) throws PersistitException {
+        final Exchange ex = getExchange(persistit);
+        ex.ignoreMVCCFetch(true);
+        return ex;
+    }
+
     private static void loadData(final Persistit persistit, final int keyOffset, final int count)
             throws PersistitException {
         final Exchange ex = getExchange(persistit);
@@ -97,15 +105,19 @@ public class TransactionAbandonedTest extends PersistitUnitTestCase {
         loadData(_persistit, KEY_START, KEY_RANGE);
     }
 
-    private void runAndCleanup(final String name, final boolean doRead, final boolean doWrite) {
-        final Thread t = ConcurrentUtil.createThread(name, new TxnAbandoner(_persistit, false, false));
+    private void runAndCleanup(final String name, final boolean doRead, final boolean doWrite)
+            throws PersistitException {
+        final Thread t = ConcurrentUtil.createThread(name, new TxnAbandoner(_persistit, doRead, doWrite));
         ConcurrentUtil.startAndJoinAssertSuccess(MAX_TIMEOUT_MS, t);
+        // The abandoned transaction is still open, so nothing it wrote can be pruned yet
+        assertEquals("Raw traversed before cleanup", doWrite ? 2 * KEY_RANGE : KEY_RANGE,
+                scanAndCount(getRawExchange(_persistit)));
         // Threw exception before fix
         _persistit.cleanup();
     }
 
     @Test
-    public void noReadsOrWrites() {
+    public void noReadsOrWrites() throws PersistitException {
         runAndCleanup("NoReadNoWrite", false, false);
     }
 
@@ -119,13 +131,9 @@ public class TransactionAbandonedTest extends PersistitUnitTestCase {
     public void readAndWrite() throws Exception {
         runAndCleanup("ReadAndWrite", true, true);
         assertEquals("Traversed after abandoned", KEY_RANGE, scanAndCount(getExchange(_persistit)));
-        // Check that the abandoned was pruned
-        final CleanupManager cm = _persistit.getCleanupManager();
-        for (int i = 0; i < 5 && cm.getEnqueuedCount() > 0; ++i) {
-            cm.runTask();
-        }
-        final Exchange rawEx = getExchange(_persistit);
-        rawEx.ignoreMVCCFetch(true);
-        assertEquals("Raw traversed after abandoned", KEY_RANGE, scanAndCount(rawEx));
+        // Check that the abandoned was pruned. Rollback pruning replays it from
+        // the journal, which CleanupManager.poll() does at most every two seconds.
+        _persistit.getJournalManager().pruneObsoleteTransactions(true);
+        assertEquals("Raw traversed after abandoned", KEY_RANGE, scanAndCount(getRawExchange(_persistit)));
     }
 }
