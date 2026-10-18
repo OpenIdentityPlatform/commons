@@ -116,7 +116,10 @@
                 <configuration>
                     <environmentVariables>
                         <!-- A default charset other than UTF-8, as on Windows before JDK 18, so that the tests catch
-                             a reader or a writer of the audit files that uses the default charset. -->
+                             a reader or a writer of the audit files that uses the default charset. It replaces a
+                             JAVA_TOOL_OPTIONS of the environment in the test JVMs of this module. It is not in
+                             argLine: the root pom sets argLine on JDK 16 and later only, with options that an argLine
+                             of this module would replace. -->
                         <JAVA_TOOL_OPTIONS>-Dfile.encoding=windows-1252</JAVA_TOOL_OPTIONS>
                     </environmentVariables>
                 </configuration>
