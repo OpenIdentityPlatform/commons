@@ -1,6 +1,8 @@
 /**
  * Copyright 2012 Akiban Technologies, Inc.
  * 
+ * Portions Copyright 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -140,10 +142,7 @@ public class TreeLifetimeTest extends PersistitUnitTestCase {
         final CleanupManager cm = _persistit.getCleanupManager();
         final boolean accepted = cm.offer(new CleanupManager.CleanupPruneAction(treeHandle, rootPage));
         assertTrue("CleanupPruneAction was accepted", accepted);
-        cm.kick();
-        while (cm.getEnqueuedCount() > 0) {
-            Thread.sleep(50);
-        }
+        waitForCleanupManager();
         assertNull("Tree should not exist after cleanup action", getVolume().getTree(TREE_NAME, false));
     }
 
