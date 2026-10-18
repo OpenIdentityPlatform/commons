@@ -310,6 +310,10 @@ public class SecureCsvWriterTest {
 
     @DataProvider
     private Object[][] rotationsDueOnResume() {
+        // On Windows a file that the verifier holds open cannot be renamed, and a rotation that fails to rename it
+        // still resets the time of the last rotation. With the writer constructed before the verification, only the
+        // rotationInterval row then fails for sure: the maxFileSize row fails when a check renames the file before
+        // the verifier opens it.
         return new Object[][] {
             // the resumed file is at the maximum size, the file that its rotation starts is under it
             { "maxFileSize" },
@@ -357,18 +361,18 @@ public class SecureCsvWriterTest {
                     return false;
                 })
                 .build();
-        final SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
-                actual, new String[]{header}, slowToVerify, config, keyStoreHandler, random);
-        assertThat(held.get()).as("verification held").isTrue();
-
-        // the first check after the construction rotates the file
         final FileNamingPolicy fileNamingPolicy = new TimeStampFileNamingPolicy(actual, rotationFileSuffix, "");
-        final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
-        while (fileNamingPolicy.listFiles().isEmpty() && System.nanoTime() < deadline) {
-            Thread.sleep(10);
+        try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
+                actual, new String[]{header}, slowToVerify, config, keyStoreHandler, random)) {
+            assertThat(held.get()).as("verification held").isTrue();
+
+            // the first check after the construction rotates the file
+            final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+            while (fileNamingPolicy.listFiles().isEmpty() && System.nanoTime() < deadline) {
+                Thread.sleep(10);
+            }
+            secureCsvWriter.writeEvent(singletonMap(header, "after"));
         }
-        secureCsvWriter.writeEvent(singletonMap(header, "after"));
-        secureCsvWriter.close();
 
         final String keystorePassword =
                 Base64.encode(keyStoreHandler.readSecretKeyFromKeyStore(ENTRY_PASSWORD).getEncoded());
@@ -400,6 +404,23 @@ public class SecureCsvWriterTest {
         assertThatThrownBy(() -> new SecureCsvWriter(actual, new String[]{"FOO"}, CsvPreference.EXCEL_PREFERENCE,
                 createBasicSecureConfig("5 minutes"), keyStoreHandler, random))
                 .isInstanceOf(IOException.class);
+    }
+
+    @Test
+    public void shouldFailWithIOExceptionWhenCheckIntervalIsInvalidForNewFile() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("SecureCsvWriterTest");
+        final File actual =
+                new File(logDirectory.toFile(), CsvAuditEventHandler.SECURE_CSV_FILENAME_PREFIX + "access.csv");
+        final CsvAuditEventHandlerConfiguration config = createBasicSecureConfig("5 minutes");
+        config.getFileRotation().setRotationEnabled(true);
+        config.getFileRotation().setMaxFileSize(1000);
+        config.setRotationRetentionCheckInterval("unlimited");
+        // The writer is constructed after the keys, out of the block that reports its failures as a RuntimeException:
+        // the handler reports this IOException for the topic, and opens the other topics.
+        assertThatThrownBy(() -> new SecureCsvWriter(actual, new String[]{"FOO"}, CsvPreference.EXCEL_PREFERENCE,
+                config, keyStoreHandler, random))
+                .isInstanceOf(IOException.class)
+                .hasMessageContaining("Rotation and retention check interval set to an invalid value");
     }
 
     @Test(timeOut = 60_000)

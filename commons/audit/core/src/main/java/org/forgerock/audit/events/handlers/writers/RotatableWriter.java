@@ -125,10 +125,12 @@ public class RotatableWriter implements TextWriter, RotatableObject {
                 ? new DateTime(file.lastModified(), DateTimeZone.UTC)
                 : DateTime.now(DateTimeZone.UTC);
         this.rolloverLifecycleHook = rolloverLifecycleHook;
-        this.writer = constructWriter(file, append);
         retentionPolicies = configuration.getFileRetention().buildRetentionPolicies();
         rotationPolicies = configuration.getFileRotation().buildRotationPolicies();
-        scheduleRotationAndRetentionChecks(configuration);
+        final Duration rotationCheckInterval = getRotationCheckInterval(configuration);
+        // Once the configuration is checked: a constructor that throws gives the caller no writer to close.
+        this.writer = constructWriter(file, append);
+        scheduleRotationAndRetentionChecks(rotationCheckInterval);
     }
 
     /**
@@ -355,21 +357,28 @@ public class RotatableWriter implements TextWriter, RotatableObject {
     }
 
     /**
-     * Schedule checks for rotations and retention policies.
+     * Returns the interval of the checks for rotations and retention policies.
      * <p>
      * The check interval is provided by the RotationRetentionCheckInterval property, which must have
      * a non-zero value if at least one policy is enabled.
      */
-    private void scheduleRotationAndRetentionChecks(FileBasedEventHandlerConfiguration configuration)
+    private Duration getRotationCheckInterval(FileBasedEventHandlerConfiguration configuration)
             throws IOException {
         final Duration rotationCheckInterval = parseDuration("rotation and retention check interval",
                 configuration.getRotationRetentionCheckInterval(), FIVE_SECONDS);
 
+        // The checks are scheduled in milliseconds: an interval under one millisecond is zero.
+        if ((!rotationPolicies.isEmpty() || !retentionPolicies.isEmpty())
+                && (rotationCheckInterval.isUnlimited() || rotationCheckInterval.to(TimeUnit.MILLISECONDS) == 0)) {
+            throw new IOException("Rotation and retention check interval set to an invalid value: "
+                    + rotationCheckInterval);
+        }
+        return rotationCheckInterval;
+    }
+
+    /** Schedule checks for rotations and retention policies. */
+    private void scheduleRotationAndRetentionChecks(final Duration rotationCheckInterval) {
         if (!rotationPolicies.isEmpty() || !retentionPolicies.isEmpty()) {
-            if (rotationCheckInterval.isUnlimited() || rotationCheckInterval.isZero()) {
-                throw new IOException("Rotation and retention check interval set to an invalid value: "
-                        + rotationCheckInterval);
-            }
             rotator = Executors.newScheduledThreadPool(1);
             rotator.scheduleAtFixedRate(
                     new Runnable() {
