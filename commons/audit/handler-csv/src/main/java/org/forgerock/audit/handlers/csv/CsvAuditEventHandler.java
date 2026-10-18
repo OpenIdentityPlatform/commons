@@ -222,6 +222,10 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
 
     /**
      * {@inheritDoc}
+     * <p>
+     * After a {@link #shutdown()}, the handler stays shut down until this method returns: an event published, or a
+     * {@code rotate} action, meanwhile on a topic that it has not opened yet fails with a
+     * {@link ServiceUnavailableException}.
      */
     @Override
     public void startup() throws ResourceException {
@@ -236,19 +240,23 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
                 }
             }
         }
-        for (String topic : eventTopicsMetaData.getTopics()) {
-            File auditLogFile = getAuditLogFile(topic);
-            final Lock writeLock = writerLockByTopic.get(topic).writeLock();
-            writeLock.lock();
-            try {
-                openWriter(topic, auditLogFile);
-            } catch (IOException e) {
-                LOGGER.error("Error when creating audit file: {}", auditLogFile, e);
-            } finally {
-                writeLock.unlock();
+        try {
+            for (String topic : eventTopicsMetaData.getTopics()) {
+                File auditLogFile = getAuditLogFile(topic);
+                final Lock writeLock = writerLockByTopic.get(topic).writeLock();
+                writeLock.lock();
+                try {
+                    openWriter(topic, auditLogFile);
+                } catch (IOException e) {
+                    LOGGER.error("Error when creating audit file: {}", auditLogFile, e);
+                } finally {
+                    writeLock.unlock();
+                }
             }
+        } finally {
+            // also when a writer throws a RuntimeException: the topics that are not opened open at their next event
+            shutDown = false;
         }
-        shutDown = false;
     }
 
     /** {@inheritDoc} */
@@ -469,12 +477,15 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
                 throw new InternalServerErrorException("Unable to rotate file for topic: " + topic);
             }
             if (rotationEnabled) {
+                final boolean rotated;
                 try {
-                    if (!csvWriter.forceRotation()) {
-                        throw new InternalServerErrorException("Unable to rotate file for topic: " + topic);
-                    }
+                    rotated = csvWriter.forceRotation();
                 } catch (IOException e) {
                     throw new InternalServerErrorException("Error when rotating file for topic: " + topic, e);
+                }
+                if (!rotated) {
+                    // outside the try: a ResourceException is an IOException
+                    throw new InternalServerErrorException("Unable to rotate file for topic: " + topic);
                 }
             } else {
                 // use a default rotation instead

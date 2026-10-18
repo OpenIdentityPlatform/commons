@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.PublicKey;
@@ -661,6 +662,138 @@ public class CsvAuditEventHandlerTest {
                 .containsOnlyOnce("\"_id1\"")
                 .containsOnlyOnce("\"_id2\"")
                 .containsOnlyOnce("\"_id3\"");
+    }
+
+    @Test
+    public void testRestartLetsOtherTopicsPublishWhenTamperEvidentFileCannotBeResumed() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final CsvAuditEventHandlerBuilder builder =
+                csvAuditEventHandler().loggingTo(logDirectory).withSecureLoggingEnabled();
+        // A second topic, so that a topic is left to open after the first one fails.
+        final Map<String, JsonValue> topics = new LinkedHashMap<>();
+        topics.put("access", builder.eventTopicsMetaData.getSchema("access"));
+        topics.put("activity", builder.eventTopicsMetaData.getSchema("access"));
+        final EventTopicsMetaData eventTopicsMetaData = new EventTopicsMetaData(topics);
+        builder.config.setTopics(eventTopicsMetaData.getTopics());
+        final CsvAuditEventHandler csvHandler =
+                new CsvAuditEventHandler(builder.config, eventTopicsMetaData, builder.keystoreHandlerProvider);
+        final Context context = new RootContext();
+        csvHandler.startup();
+        for (String topic : topics.keySet()) {
+            csvHandler.publishEvent(context, topic, buildEvent(1)).getOrThrow();
+        }
+        csvHandler.shutdown();
+        // The topic that startup opens first, so that the other topic is opened only if startup goes on.
+        final List<String> handledTopics = new ArrayList<>(csvHandler.getHandledTopics());
+        final String failingTopic = handledTopics.get(0);
+        final String otherTopic = handledTopics.get(1);
+        // The HMAC of the row no longer matches its value, so the file fails verification when it is resumed.
+        final Path failingFile = logDirectory.resolve(SECURE_CSV_FILENAME_PREFIX + failingTopic + ".csv");
+        final String content = new String(Files.readAllBytes(failingFile), UTF_8);
+        Files.write(failingFile, content.replace("transactionId-X", "transactionId-Y").getBytes(UTF_8));
+
+        try {
+            csvHandler.startup();
+        } catch (RuntimeException e) {
+            // The writer throws it for a file that it cannot resume (#340), and startup() opens no other topic.
+        }
+        try {
+            // The handler is no longer shut down: the topics that startup() did not open open at their next event.
+            csvHandler.publishEvent(context, otherTopic, buildEvent(2)).getOrThrow();
+        } finally {
+            csvHandler.shutdown();
+        }
+
+        assertThat(logDirectory.resolve(SECURE_CSV_FILENAME_PREFIX + otherTopic + ".csv").toFile())
+                .content(UTF_8).containsOnlyOnce("\"_id2\"");
+    }
+
+    @Test
+    public void testPublishEventOpensWriterWhenTopicIsLeftWithoutOne() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final CsvAuditEventHandler csvHandler = csvAuditEventHandler().loggingTo(logDirectory).build();
+        final Context context = new RootContext();
+        final Map<String, CsvWriter> writers = writersOf(csvHandler);
+        final CsvWriter failingWriter = mock(CsvWriter.class);
+        // As when another publisher resets this writer meanwhile, and fails to open a new one: the topic is left
+        // without a writer.
+        doAnswer(invocation -> {
+            writers.remove("access", failingWriter);
+            throw new IOException("Stream closed");
+        }).when(failingWriter).writeEvent(anyMap());
+        writers.put("access", failingWriter).close();
+        try {
+            csvHandler.publishEvent(context, "access", buildEvent(1)).getOrThrow();
+        } finally {
+            csvHandler.shutdown();
+        }
+
+        assertThat(logDirectory.resolve("access.csv").toFile()).content(UTF_8).containsOnlyOnce("\"_id1\"");
+    }
+
+    @Test
+    public void testActionsThatTheRequestGetsWrongAreBadRequests() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final CsvAuditEventHandler csvHandler = csvAuditEventHandler().loggingTo(logDirectory).build();
+        final Context context = new RootContext();
+        final ActionRequest rotateRequest = Requests.newActionRequest("access", ROTATE_FILE_ACTION_NAME)
+                .setAdditionalParameter(ACTION_PARAM_TARGET_HANDLER, "csv");
+        final ActionRequest unknownRequest = Requests.newActionRequest("access", "unknown")
+                .setAdditionalParameter(ACTION_PARAM_TARGET_HANDLER, "csv");
+        try {
+            // The same request would fail again: no topic, an unknown action, an unknown topic.
+            AssertJPromiseAssert.assertThat(csvHandler.handleAction(context, null, rotateRequest))
+                    .failedWithException()
+                    .isInstanceOf(BadRequestException.class);
+            AssertJPromiseAssert.assertThat(csvHandler.handleAction(context, "access", unknownRequest))
+                    .failedWithException()
+                    .isInstanceOf(BadRequestException.class);
+            AssertJPromiseAssert.assertThat(csvHandler.handleAction(context, "unknown", rotateRequest))
+                    .failedWithException()
+                    .isInstanceOf(BadRequestException.class);
+        } finally {
+            csvHandler.shutdown();
+        }
+    }
+
+    @Test
+    public void testActionToRotateFileThatFailsIsServerError() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final CsvAuditEventHandler csvHandler =
+                csvAuditEventHandler().loggingTo(logDirectory).withRotationEnabled().build();
+        final Context context = new RootContext();
+        final ActionRequest rotateRequest = Requests.newActionRequest("access", ROTATE_FILE_ACTION_NAME)
+                .setAdditionalParameter(ACTION_PARAM_TARGET_HANDLER, "csv");
+        final Map<String, CsvWriter> writers = writersOf(csvHandler);
+        // A writer whose file cannot be written, and one whose file cannot be renamed.
+        final CsvWriter failingWriter = mock(CsvWriter.class);
+        when(failingWriter.forceRotation()).thenThrow(new IOException("No space left on device"));
+        final CsvWriter notRotatingWriter = mock(CsvWriter.class);
+        when(notRotatingWriter.forceRotation()).thenReturn(false);
+        writers.put("access", failingWriter).close();
+        try {
+            AssertJPromiseAssert.assertThat(csvHandler.handleAction(context, "access", rotateRequest))
+                    .failedWithException()
+                    .isInstanceOf(InternalServerErrorException.class);
+            writers.put("access", notRotatingWriter);
+            AssertJPromiseAssert.assertThat(csvHandler.handleAction(context, "access", rotateRequest))
+                    .failedWithException()
+                    .isInstanceOf(InternalServerErrorException.class);
+        } finally {
+            csvHandler.shutdown();
+        }
+    }
+
+    /** The writers of the handler, so that a test can put a writer that fails as it needs. */
+    @SuppressWarnings("unchecked")
+    private static Map<String, CsvWriter> writersOf(final CsvAuditEventHandler handler) throws Exception {
+        final Field field = CsvAuditEventHandler.class.getDeclaredField("writers");
+        field.setAccessible(true);
+        return (Map<String, CsvWriter>) field.get(handler);
     }
 
     @DataProvider
