@@ -536,8 +536,13 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
         }
         if (auditFile.exists()) {
             try (ICsvMapReader reader = createCsvMapReader(auditFile)) {
+                final String[] fileHeader = reader.getHeader(true);
+                if (fileHeader == null) {
+                    // a tamper evident writer writes the header with the first event, so the file holds no event yet
+                    return results;
+                }
                 // the header elements are used to map the values to the bean (names must match)
-                final String[] header = convertDotNotationToSlashes(reader.getHeader(true));
+                final String[] header = convertDotNotationToSlashes(fileHeader);
                 final CellProcessor[] processors = createCellProcessors(auditEntryType, header);
                 Map<String, Object> entry;
                 while ((entry = reader.read(header, processors)) != null) {
