@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.GZIPInputStream;
 
 import org.forgerock.audit.events.handlers.FileBasedEventHandlerConfiguration;
@@ -516,6 +517,37 @@ public class RotatableWriterTest {
     }
 
     @Test
+    public void testDoesNotRotateAfterTheRotationFailsToCloseTheFile() throws Exception {
+        // given
+        final File file = getTempFile();
+        final String prefix = "testDoesNotRotateAfterTheRotationFailsToCloseTheFile";
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
+        configuration.setRotationRetentionCheckInterval("1 hour"); // ensure asynchronous check is inactive
+        configuration.getFileRotation().setRotationEnabled(true);
+        configuration.getFileRotation().setRotationFilePrefix(prefix);
+        configuration.getFileRotation().setRotationFileSuffix(ROTATION_FILE_SUFFIX);
+        configuration.getFileRotation().setMaxFileSize(MAX_BYTES_TO_WRITE);
+        final AtomicBoolean diskFull = new AtomicBoolean();
+        rotatableWriter = new RotatableWriter(file, configuration, true,
+                (target, append) -> new FullDiskOutputStream(new FileOutputStream(target, append), diskFull));
+        final String text = new String(new char[MAX_BYTES_TO_WRITE]).replace('\0', 'x');
+        rotatableWriter.write(text);
+        rotatableWriter.flush();
+
+        // when the size of the file makes the next write rotate it, and the close of the file fails to write the text
+        diskFull.set(true);
+        rotatableWriter.write("event");
+        diskFull.set(false);
+
+        // then a rotation that runs before the flush of the text does not go on with a new writer, on which the flush
+        // would succeed for the text that the failure dropped
+        assertThatThrownBy(rotatableWriter::forceRotation).hasRootCauseMessage("No space left on device");
+        assertThatThrownBy(rotatableWriter::flush).hasRootCauseMessage("No space left on device");
+        assertThat(file).hasContent(text);
+        assertThat(file.getParentFile().listFiles((dir, name) -> name.startsWith(prefix + file.getName()))).isEmpty();
+    }
+
+    @Test
     public void testAutomaticallyEvaluatesPolicesPeriodicallyIfRotationIntervalSpecified() throws Exception {
         // given
         final File file = getTempFile();
@@ -627,6 +659,29 @@ public class RotatableWriterTest {
         public void write(final byte[] b, final int off, final int len) throws IOException {
             if (!failed) {
                 failed = true;
+                throw new IOException("No space left on device");
+            }
+            out.write(b, off, len);
+        }
+    }
+
+    /** Writes to a file, and fails its writes while the disk is full. */
+    private static final class FullDiskOutputStream extends FilterOutputStream {
+        private final AtomicBoolean diskFull;
+
+        private FullDiskOutputStream(final OutputStream out, final AtomicBoolean diskFull) {
+            super(out);
+            this.diskFull = diskFull;
+        }
+
+        @Override
+        public void write(final int b) throws IOException {
+            write(new byte[] { (byte) b }, 0, 1);
+        }
+
+        @Override
+        public void write(final byte[] b, final int off, final int len) throws IOException {
+            if (diskFull.get()) {
                 throw new IOException("No space left on device");
             }
             out.write(b, off, len);

@@ -21,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.FutureTask;
 
 import org.testng.annotations.Test;
 
@@ -102,10 +104,90 @@ public class TextWriterTest {
         assertThat(outputStream.written.size()).isZero();
     }
 
+    @Test(timeOut = 10_000)
+    public void testStreamFailsTheFlushThatWaitsForAFailingFlush() throws Exception {
+        final FailingOnReleaseOutputStream outputStream = new FailingOnReleaseOutputStream();
+        final TextWriter.Stream writer = new TextWriter.Stream(outputStream);
+        // two publishers write their events, and flush them at the same time
+        writer.write("event1");
+        writer.write("event2");
+        final FutureTask<Void> firstFlush = newFlush(writer);
+        final FutureTask<Void> secondFlush = newFlush(writer);
+        new Thread(firstFlush).start();
+        outputStream.entered.await();
+        final Thread secondPublisher = new Thread(secondFlush);
+        secondPublisher.start();
+        // the second flush waits for the first one, which is writing to the stream
+        while (secondPublisher.getState() != Thread.State.BLOCKED
+                && secondPublisher.getState() != Thread.State.WAITING) {
+            Thread.yield();
+        }
+        outputStream.release.countDown();
+
+        assertThatThrownBy(firstFlush::get).hasRootCauseMessage("No space left on device");
+        // the event of the second publisher is lost too: its flush fails, instead of returning as if it was written
+        assertThatThrownBy(secondFlush::get).hasRootCauseMessage("No space left on device");
+        assertThat(outputStream.written.size()).isZero();
+    }
+
+    @Test
+    public void testStreamClosesTheOutputStreamWhenTheShutdownFails() throws Exception {
+        final FailingOnceOutputStream outputStream = new FailingOnceOutputStream();
+        final TextWriter.Stream writer = new TextWriter.Stream(outputStream);
+        // the text is still in the buffers, so the close writes it, and fails
+        writer.write("event");
+
+        writer.shutdown();
+
+        // on JDK 11, the close of the buffers leaves the stream open when its write fails, and the file with it
+        assertThat(outputStream.closed).isTrue();
+    }
+
+    private static FutureTask<Void> newFlush(final TextWriter writer) {
+        return new FutureTask<>(() -> {
+            writer.flush();
+            return null;
+        });
+    }
+
+    /** Fails its first write once the test releases it, as a full disk does, and keeps what is written afterwards. */
+    private static final class FailingOnReleaseOutputStream extends OutputStream {
+        private final ByteArrayOutputStream written = new ByteArrayOutputStream();
+        private final CountDownLatch entered = new CountDownLatch(1);
+        private final CountDownLatch release = new CountDownLatch(1);
+        private boolean failed;
+
+        @Override
+        public void write(int b) throws IOException {
+            write(new byte[] { (byte) b }, 0, 1);
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            if (!failed) {
+                failed = true;
+                entered.countDown();
+                try {
+                    release.await();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                throw new IOException("No space left on device");
+            }
+            written.write(b, off, len);
+        }
+    }
+
     /** Fails its first write, as a full disk does, and keeps what is written to it afterwards. */
     private static final class FailingOnceOutputStream extends OutputStream {
         private final ByteArrayOutputStream written = new ByteArrayOutputStream();
         private boolean failed;
+        private boolean closed;
+
+        @Override
+        public void close() {
+            closed = true;
+        }
 
         @Override
         public void write(int b) throws IOException {

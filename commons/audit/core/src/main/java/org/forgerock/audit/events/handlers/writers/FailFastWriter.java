@@ -23,7 +23,8 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 
 /**
- * A buffered writer of text to an output stream, which fails every write and flush after the first one that fails.
+ * A buffered writer of text to an output stream, which fails every write and flush after the first write, flush or
+ * close that fails.
  * <p>
  * After an {@link IOException}, the buffers of a {@link BufferedWriter} over an {@link OutputStreamWriter} are
  * unusable: the encoder is left with its byte buffer flipped, so a later flush writes nothing and returns, and a
@@ -35,7 +36,7 @@ final class FailFastWriter extends Writer {
 
     private final OutputStream stream;
     private final Writer writer;
-    /** The first write or flush that failed. */
+    /** The first write, flush or close that failed. */
     private volatile IOException failure;
 
     /**
@@ -49,51 +50,74 @@ final class FailFastWriter extends Writer {
         this.writer = new BufferedWriter(new OutputStreamWriter(stream, charset));
     }
 
+    // Each write and flush checks for a failure, and records its own, under the lock: a flush that waits for a flush
+    // that fails would otherwise find the buffers empty, and return.
+
     @Override
     public void write(final char[] cbuf, final int off, final int len) throws IOException {
-        checkNotFailed();
-        try {
-            writer.write(cbuf, off, len);
-        } catch (IOException e) {
-            throw fail(e);
+        synchronized (lock) {
+            checkNotFailed();
+            try {
+                writer.write(cbuf, off, len);
+            } catch (IOException e) {
+                throw fail(e);
+            }
         }
     }
 
     @Override
     public void write(final String str, final int off, final int len) throws IOException {
-        checkNotFailed();
-        try {
-            writer.write(str, off, len);
-        } catch (IOException e) {
-            throw fail(e);
+        synchronized (lock) {
+            checkNotFailed();
+            try {
+                writer.write(str, off, len);
+            } catch (IOException e) {
+                throw fail(e);
+            }
         }
     }
 
     @Override
     public void flush() throws IOException {
-        // Also fails the flush of a text written before the failure, which the failure may have dropped.
-        checkNotFailed();
-        try {
-            writer.flush();
-        } catch (IOException e) {
-            throw fail(e);
+        synchronized (lock) {
+            // Also fails the flush of a text written before the failure, which the failure may have dropped.
+            checkNotFailed();
+            try {
+                writer.flush();
+            } catch (IOException e) {
+                throw fail(e);
+            }
         }
     }
 
     @Override
     public void close() throws IOException {
-        if (failure != null) {
-            // What the buffers still hold is not written: the events of the failed texts are retried.
-            stream.close();
-        } else {
-            writer.close();
+        synchronized (lock) {
+            if (failure != null) {
+                // What the buffers still hold is not written: the events of the failed texts are retried.
+                stream.close();
+                return;
+            }
+            try {
+                writer.close();
+            } catch (IOException e) {
+                // The text that the close failed to write is lost: the next flush and the rotations fail with it.
+                fail(e);
+                try {
+                    // on JDK 11, the close of the buffers leaves the stream open when its write fails
+                    stream.close();
+                } catch (IOException suppressed) {
+                    e.addSuppressed(suppressed);
+                }
+                throw e;
+            }
         }
     }
 
     /**
-     * Returns the first write or flush that failed.
+     * Returns the first write, flush or close that failed.
      *
-     * @return The first failure, or {@code null} if no write or flush failed.
+     * @return The first failure, or {@code null} if no write, flush or close failed.
      */
     IOException getFailure() {
         return failure;
