@@ -1,5 +1,6 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
+ * Portions Copyright 2026 3A Systems, LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -240,12 +241,17 @@ public class PersistitLogMessage {
             final StringBuilder sb = new StringBuilder(String.format("[%s] %s ", Thread.currentThread().getName(),
                     _level));
             try {
-                for (int i = 0; i < args.length; i++) {
-                    if (args[i] instanceof RuntimeException) {
-                        args[i] = throwableFormatter((RuntimeException) args[i]);
+                /*
+                 * Format a copy: an AlertMonitor Event passes its own argument
+                 * array, which must keep the exception itself.
+                 */
+                final Object[] formatted = args.clone();
+                for (int i = 0; i < formatted.length; i++) {
+                    if (formatted[i] instanceof RuntimeException) {
+                        formatted[i] = throwableFormatter((RuntimeException) formatted[i]);
                     }
                 }
-                sb.append(String.format(_message, args));
+                sb.append(String.format(_message, formatted));
             } catch (final Exception e) {
                 sb.append("Bad log message ");
                 sb.append(_message);

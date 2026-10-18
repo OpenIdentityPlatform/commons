@@ -114,8 +114,8 @@ class CleanupManager extends IOTaskRunnable implements CleanupManagerMXBean {
             return false;
         }
         _accepted.incrementAndGet();
-        _cleanupActionQueue.add(action);
         sequence(CLEANUP_OFFER_A);
+        _cleanupActionQueue.add(action);
         return true;
     }
 
@@ -194,7 +194,9 @@ class CleanupManager extends IOTaskRunnable implements CleanupManagerMXBean {
                 /*
                  * A RuntimeException must not end the loop either: the rest of
                  * the work list is already out of the queue and would never be
-                 * performed or counted.
+                 * performed or counted. An Error still ends the loop and the
+                 * CLEANUP_MANAGER thread, and the rest of the work list is lost
+                 * uncounted, as before.
                  */
                 lastException(e);
                 _persistit.getAlertMonitor().post(

@@ -139,8 +139,8 @@ public interface SequencerConstants {
             array(COPYBACK_CLOSE_A, COPYBACK_CLOSE_C) };
 
     /*
-     * Used in testing CleanupManager.offer() racing with poll() in
-     * CleanupManagerTest
+     * Used in testing that CleanupManager.offer() counts an action as accepted
+     * before poll() can see it in CleanupManagerTest
      */
     int CLEANUP_OFFER_A = allocate("CLEANUP_OFFER_A");
     int CLEANUP_OFFER_B = allocate("CLEANUP_OFFER_B");

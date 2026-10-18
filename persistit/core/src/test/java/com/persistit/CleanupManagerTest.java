@@ -25,11 +25,7 @@ import org.junit.Test;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static com.persistit.util.SequencerConstants.CLEANUP_OFFER_A;
 import static com.persistit.util.SequencerConstants.CLEANUP_OFFER_B;
@@ -41,7 +37,7 @@ import static com.persistit.util.ThreadSequencer.sequence;
 import static com.persistit.util.ThreadSequencer.setCondition;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -190,6 +186,10 @@ public class CleanupManagerTest extends PersistitUnitTestCase {
         assertEquals(1, cm.getPerformedCount());
         assertEquals("the action after the failed one should be performed", 1, _counter);
         assertSame(failure, cm.getLastException());
+        final AlertMonitor.History history = _persistit.getAlertMonitor().getHistory(AlertMonitor.CLEANUP_CATEGORY);
+        assertNotNull("the RuntimeException should be posted to the AlertMonitor", history);
+        assertEquals(1, history.getCount());
+        assertSame(failure, history.getLastEvent().getFirstArg());
     }
 
     /**
@@ -216,45 +216,20 @@ public class CleanupManagerTest extends PersistitUnitTestCase {
 
     /**
      * poll() drains the queue without the monitor that offer() holds, so it
-     * can perform an action before offer() returns. Before the fix offer()
-     * counted the action as accepted only after it was in the queue, so for
-     * that moment the performed count included an action the accepted count
-     * did not.
+     * can perform an action as soon as the action is in the queue. Before the
+     * fix offer() counted the action as accepted only after it was in the
+     * queue, so for that moment the performed count could include an action
+     * the accepted count did not. offer() parks at CLEANUP_OFFER_A between
+     * counting the action and adding it to the queue.
      */
-    @Test
+    @Test(timeout = 4 * JOIN_TIMEOUT_MS)
     public void testActionAcceptedBeforePerformed() throws Exception {
         final CleanupManager cm = unstartedCleanupManager();
-        final AtomicLong acceptedWhenPerformed = new AtomicLong(-1);
-        final CountDownLatch performed = new CountDownLatch(1);
-        final CleanupAction action = new CleanupAction() {
-            @Override
-            public int compareTo(final CleanupAction other) {
-                return 0;
-            }
-
-            @Override
-            public void performAction(final Persistit persistit, final List<CleanupAction> consequentActions) {
-                acceptedWhenPerformed.set(cm.getAcceptedCount());
-                performed.countDown();
-            }
-        };
         final AtomicBoolean offered = new AtomicBoolean();
-        final AtomicReference<Throwable> pollFailure = new AtomicReference<>();
-
-        final Thread offerer = new Thread(() -> offered.set(cm.offer(action)), "CleanupManagerTest-offer");
+        final Thread offerer = new Thread(() -> offered.set(cm.offer(new CleanupMockAction(1))),
+                "CleanupManagerTest-offer");
         offerer.setDaemon(true);
-        // No CLEANUP_MANAGER thread polls this CleanupManager, so another thread does
-        final Thread poller = new Thread(() -> {
-            try {
-                cm.poll();
-            } catch (final Throwable t) {
-                pollFailure.set(t);
-            }
-        }, "CleanupManagerTest-poll");
-        poller.setDaemon(true);
 
-        enableSequencer(false);
-        addSchedules(CLEANUP_OFFER_SCHEDULE);
         // Park only the test's offer(), not one that a Persistit thread makes to its own CleanupManager
         setCondition(CLEANUP_OFFER_A, new Condition() {
             @Override
@@ -262,25 +237,22 @@ public class CleanupManagerTest extends PersistitUnitTestCase {
                 return Thread.currentThread() == offerer;
             }
         });
+        enableSequencer(false);
+        addSchedules(CLEANUP_OFFER_SCHEDULE);
         offerer.start();
-        // Returns once offer() has put the action into the queue; offer() stays parked there
+        // Returns once offer() has counted the action; offer() stays parked there
         sequence(CLEANUP_OFFER_B);
         try {
-            poller.start();
-            assertTrue("poll() should perform the action while offer() is running",
-                    performed.await(JOIN_TIMEOUT_MS, TimeUnit.MILLISECONDS));
-            assertEquals("the action should count as accepted by the time poll() performs it", 1,
-                    acceptedWhenPerformed.get());
+            assertEquals("the action should count as accepted before it is in the queue", 1, cm.getAcceptedCount());
+            assertEquals("the action should not be in the queue yet", 0, cm.getEnqueuedCount());
         } finally {
             sequence(CLEANUP_OFFER_C);
             offerer.join(JOIN_TIMEOUT_MS);
-            poller.join(JOIN_TIMEOUT_MS);
             setCondition(CLEANUP_OFFER_A, new Condition());
         }
         assertFalse("offer() did not return", offerer.isAlive());
-        assertFalse("poll() did not return", poller.isAlive());
-        assertNull("poll() failed: " + pollFailure.get(), pollFailure.get());
         assertTrue("offer() should accept the action", offered.get());
+        cm.poll();
         assertEquals(1, cm.getAcceptedCount());
         assertEquals(1, cm.getPerformedCount());
     }
