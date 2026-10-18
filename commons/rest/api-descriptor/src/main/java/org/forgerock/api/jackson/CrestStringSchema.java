@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
- * Portions copyright 2024-2025 3A Systems LLC.
+ * Portions copyright 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.api.jackson;
@@ -24,11 +24,13 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
 import javax.validation.ValidationException;
-import javax.xml.bind.DatatypeConverter;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
 
 import org.forgerock.api.enums.ReadPolicy;
 import com.google.common.net.InetAddresses;
@@ -44,6 +46,19 @@ import org.forgerock.api.enums.WritePolicy;
  */
 class CrestStringSchema extends StringSchema implements CrestReadWritePoliciesSchema, OrderedFieldSchema, EnumSchema,
         ValidatableSchema, PropertyFormatSchema, WithExampleSchema<String> {
+    /** The XML white space that {@code DatatypeConverter.parseDateTime} trimmed and {@code parseDate} did not. */
+    private static final Pattern XML_WHITE_SPACE_AROUND = Pattern.compile("\\A[ \\t\\n\\r]+|[ \\t\\n\\r]+\\z");
+    /** Shared like the one in {@code DatatypeConverterImpl}, which parsed these formats before. */
+    private static final DatatypeFactory DATATYPE_FACTORY;
+
+    static {
+        try {
+            DATATYPE_FACTORY = DatatypeFactory.newInstance();
+        } catch (DatatypeConfigurationException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     private WritePolicy writePolicy;
     private ReadPolicy readPolicy;
     private Boolean errorOnWritePolicyFailure;
@@ -138,7 +153,8 @@ class CrestStringSchema extends StringSchema implements CrestReadWritePoliciesSc
         case "date-time":
             // http://tools.ietf.org/html/rfc3339#section-5.6
             try {
-                DatatypeConverter.parseDateTime(s);
+                DATATYPE_FACTORY.newXMLGregorianCalendar(XML_WHITE_SPACE_AROUND.matcher(s).replaceAll(""))
+                        .toGregorianCalendar();
             } catch (IllegalArgumentException e) {
                 throw new ValidationException("Expected date-time format, but got " + s, e);
             }
@@ -148,7 +164,7 @@ class CrestStringSchema extends StringSchema implements CrestReadWritePoliciesSc
             // NOTE: supported by OpenAPI, but not defined by JSON Schema v4 spec
             // http://tools.ietf.org/html/rfc3339#section-5.6
             try {
-                DatatypeConverter.parseDate(s);
+                DATATYPE_FACTORY.newXMLGregorianCalendar(s).toGregorianCalendar();
             } catch (IllegalArgumentException e) {
                 throw new ValidationException("Expected date/full-date format, but got " + s, e);
             }

@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
- * Portions copyright 2024-2025 3A Systems LLC.
+ * Portions copyright 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.json.jose.jws;
@@ -24,7 +24,6 @@ import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.EllipticCurve;
 import java.util.Objects;
-import javax.xml.bind.DatatypeConverter;
 
 /**
  * Enumerates all supported elliptic curve parameters for ESXXX signature formats.
@@ -281,7 +280,12 @@ public enum SupportedEllipticCurve {
         }
 
         private static byte[] seed(final String hex) {
-            return DatatypeConverter.parseHexBinary(hex.replaceAll("\\s+", ""));
+            final String digits = hex.replaceAll("\\s+", "");
+            final byte[] seed = new byte[digits.length() / 2];
+            for (int i = 0; i < seed.length; i++) {
+                seed[i] = (byte) Integer.parseInt(digits.substring(2 * i, 2 * i + 2), 16);
+            }
+            return seed;
         }
     }
 }

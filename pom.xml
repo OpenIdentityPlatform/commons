@@ -763,22 +763,19 @@
 				<artifactId>FastInfoset</artifactId>
 				<version>1.2.17</version>
 			</dependency>
-            <!-- Not javax.xml.bind:jaxb-api / com.sun.xml.bind:jaxb-core: their parent net.java:jvnet-parent
-                 declares the defunct maven.java.net repositories -->
+            <!-- JAXB is managed for consumers that declare it without a version (OpenDJ opendj-core,
+                 OpenAM openam-core); no module of this build depends on it. jaxb-api and jaxb-core inherit
+                 net.java:jvnet-parent, which declares the defunct maven.java.net repositories, and the
+                 ban-jvnet-parent rule below keeps them out of this build -->
             <dependency>
-                <groupId>jakarta.xml.bind</groupId>
-                <artifactId>jakarta.xml.bind-api</artifactId>
-                <version>2.3.3</version>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>2.3.1</version>
             </dependency>
             <dependency>
-                <groupId>org.glassfish.jaxb</groupId>
-                <artifactId>txw2</artifactId>
-                <version>2.3.2</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.istack</groupId>
-                <artifactId>istack-commons-runtime</artifactId>
-                <version>3.0.8</version>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-core</artifactId>
+                <version>2.3.0.1</version>
             </dependency>
             <dependency>
                 <groupId>com.sun.xml.bind</groupId>
@@ -1424,6 +1421,31 @@
                     <autoPublish>true</autoPublish>
                     <waitMaxTime>5400</waitMaxTime>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>ban-jvnet-parent</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <bannedDependencies>
+                                    <!-- Their parent net.java:jvnet-parent declares the defunct maven.java.net
+                                         repositories, which Maven then queries on every build -->
+                                    <excludes>
+                                        <exclude>javax.xml.bind:jaxb-api</exclude>
+                                        <exclude>com.sun.xml.bind:jaxb-core</exclude>
+                                        <exclude>javax.activation:javax.activation-api</exclude>
+                                    </excludes>
+                                </bannedDependencies>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
