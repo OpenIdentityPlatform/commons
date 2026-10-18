@@ -436,6 +436,9 @@ public class RotatableWriterTest {
 
         // when
         Thread.sleep(3000);
+        // close() stops the rotator and waits for a running rotation and retention check, so that the archives are
+        // listed in a stable state
+        rotatableWriter.close();
 
         // then
         assertRetainedHistoricalFiles(file, prefix, 1);
@@ -470,16 +473,18 @@ public class RotatableWriterTest {
     }
 
     private void assertRetainedHistoricalFiles(File file, String prefix, int expectedNumber) throws Exception {
-        Set<File> retainedHistoricalFiles = getAllHistoricalFiles(file, prefix, expectedNumber, new HashSet<File>());
+        Set<File> retainedHistoricalFiles = getAllHistoricalFiles(file, prefix, expectedNumber);
         assertThat(retainedHistoricalFiles).isNotEmpty().hasSize(expectedNumber);
     }
 
-    private Set<File> getAllHistoricalFiles(File file, String prefix, int expectedNumber, Set<File> existingFiles)
+    private Set<File> getAllHistoricalFiles(File file, String prefix, int expectedNumber)
             throws InterruptedException {
-        // try to load the expected number of historical files, give up if unsuccessful after 1 second
-        Set<File> allHistoricalFiles = new HashSet<>(existingFiles);
+        // try to load the expected number of historical files, give up if unsuccessful after 1 second; keep only the
+        // last listing, as one taken during a rotation also holds the uncompressed file and the previous archive,
+        // which the rotation and then the retention check delete
+        Set<File> allHistoricalFiles = new HashSet<>();
         for (int iteration = 0; iteration < 20; iteration++) {
-            allHistoricalFiles.addAll(getRetainedHistoricalFiles(file, prefix));
+            allHistoricalFiles = getRetainedHistoricalFiles(file, prefix);
             if (allHistoricalFiles.size() == expectedNumber) {
                 return allHistoricalFiles;
             }
