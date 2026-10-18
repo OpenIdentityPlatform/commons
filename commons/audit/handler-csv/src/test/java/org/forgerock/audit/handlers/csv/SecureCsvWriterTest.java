@@ -25,8 +25,10 @@ import static org.forgerock.audit.handlers.csv.CsvSecureConstants.*;
 import static org.forgerock.util.time.Duration.duration;
 
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
@@ -372,6 +374,8 @@ public class SecureCsvWriterTest {
             // as after a change of the Password key in the handler keystore
             { "keystore of another password",
                 (Damage) (csvFile, keyStoreFile) -> storeUnderAnotherPassword(keyStoreFile), "cannot be loaded" },
+            { "corrupted keystore", (Damage) (csvFile, keyStoreFile) -> corruptKeyStore(keyStoreFile),
+                "cannot be loaded" },
             // The verifier fails with a RuntimeException on the rows below.
             // as left by a crash while the last row was written: a row with fewer columns than the header
             { "row cut short", (Damage) (csvFile, keyStoreFile) -> Files.write(csvFile.toPath(),
@@ -404,7 +408,26 @@ public class SecureCsvWriterTest {
         }
     }
 
-    @Test(dataProvider = "unresumableFiles")
+    /**
+     * Replaces the keystore by a JCEKS keystore whose secret key entry holds a string in place of the sealed key.
+     * {@link KeyStore#load} fails on it with a {@link ClassCastException}, as it lets a {@link RuntimeException}
+     * through for some corrupted keystores, before it checks the digest of the keystore.
+     */
+    private static void corruptKeyStore(File keyStoreFile) throws IOException {
+        try (DataOutputStream out = new DataOutputStream(Files.newOutputStream(keyStoreFile.toPath()))) {
+            out.writeInt(0xcececece); // the magic number of JCEKS
+            out.writeInt(2); // the version
+            out.writeInt(1); // the number of entries
+            out.writeInt(3); // a secret key entry
+            out.writeUTF(KeyStoreSecureStorage.ENTRY_INITIAL_KEY);
+            out.writeLong(0L); // the creation date
+            final ObjectOutputStream objects = new ObjectOutputStream(out);
+            objects.writeObject("not a sealed key");
+            objects.flush();
+        }
+    }
+
+    @Test(dataProvider = "unresumableFiles", timeOut = 60_000)
     public void shouldStopRotatorAndFailWithIOExceptionWhenFileCannotBeResumed(
             final String description, final Damage damage, final String reason) throws Exception {
         assertReopeningFailsWithIOException(true, description, damage, reason);
@@ -420,10 +443,12 @@ public class SecureCsvWriterTest {
             // as after a change of the Password key in the handler keystore
             { "keystore of another password",
                 (Damage) (csvFile, keyStoreFile) -> storeUnderAnotherPassword(keyStoreFile), "cannot be loaded" },
+            { "corrupted keystore", (Damage) (csvFile, keyStoreFile) -> corruptKeyStore(keyStoreFile),
+                "cannot be loaded" },
         };
     }
 
-    @Test(dataProvider = "unloadableKeystoresOfEmptyFiles")
+    @Test(dataProvider = "unloadableKeystoresOfEmptyFiles", timeOut = 60_000)
     public void shouldStopRotatorAndFailWithIOExceptionWhenKeystoreOfEmptyFileCannotBeLoaded(
             final String description, final Damage damage, final String reason) throws Exception {
         // A topic that got no event keeps an empty file next to its keystore.

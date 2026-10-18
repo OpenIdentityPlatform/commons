@@ -29,6 +29,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Writer;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
@@ -117,11 +119,20 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
             try {
                 hmacKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, keyStoreFile.getPath(),
                         keyStorePassword);
-            } catch (IOException | IllegalStateException e) {
-                // KeyStoreBuilder cannot open a directory or a file it may not read, and throws an IllegalStateException
-                // for a keystore it cannot load: an empty one, left by a crash while it was stored, or one stored under
-                // another password, after a change of the Password key. Also when the file is not resumed: a topic
-                // that got no event keeps an empty file next to its keystore.
+            } catch (IllegalStateException e) {
+                if (e.getCause() instanceof KeyStoreException || e.getCause() instanceof NoSuchAlgorithmException) {
+                    // The JVM cannot create a keystore of this type, or find the digest that checks it: a
+                    // configuration error, not the state of the file.
+                    throw e;
+                }
+                // KeyStoreBuilder throws it for a keystore it cannot load: an empty one, left by a crash while it was
+                // stored, or one stored under another password, after a change of the Password key. Also when the
+                // file is not resumed: a topic that got no event keeps an empty file next to its keystore.
+                throw new IOException("The keystore " + keyStoreFile + " of the CSV file cannot be loaded.", e);
+            } catch (IOException | RuntimeException e) {
+                // KeyStoreBuilder cannot open a directory or a file it may not read, and KeyStore.load lets a
+                // RuntimeException, such as a ClassCastException or a NullPointerException, through for a corrupted
+                // keystore.
                 throw new IOException("The keystore " + keyStoreFile + " of the CSV file cannot be loaded.", e);
             }
             PublicKey publicSignatureKey =
