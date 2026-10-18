@@ -40,6 +40,11 @@ import static org.forgerock.audit.batch.CommonAuditBatchConfiguration.POLLING_TI
  * The records are buffered in a queue and written asynchronously. If maximum CAPACITY of the queue is
  * reached, then calls to {@code write()} method are blocked. This prevent OOM errors while allowing
  * good write performances.
+ * <p>
+ * The records are written later, so the failure of a record cannot reach its caller. Once the wrapped writer fails,
+ * every later {@code write()} and {@code flush()} fails instead, with that first failure as its cause, for the life of
+ * this writer: the caller replaces it after a failure, as it replaces the writers of this package that it wraps, which
+ * fail their later writes too.
  */
 public class AsynchronousTextWriter implements TextWriter {
 
