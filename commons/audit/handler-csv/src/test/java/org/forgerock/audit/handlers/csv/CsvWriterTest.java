@@ -153,17 +153,20 @@ public class CsvWriterTest {
     }
 
     @DataProvider
-    private Object[][] headersOfOtherLength() {
+    private Object[][] headersThatDoNotMatch() {
         return new Object[][] {
             // a field was removed from the end of the topic schema
             { "child1,child2,child3,child4" },
             // a field was added to the end of the topic schema
             { "child1,child2" },
+            // Super CSV reads an empty column name as null
+            { "child1,,child3" },
+            { "child1,child2," },
         };
     }
 
-    @Test(dataProvider = "headersOfOtherLength")
-    public void shouldNotResumeCsvFileWithHeadersOfOtherLength(String fileHeaders) throws Exception {
+    @Test(dataProvider = "headersThatDoNotMatch")
+    public void shouldNotResumeCsvFileWithHeadersThatDoNotMatch(String fileHeaders) throws Exception {
         final Path csvFile = Files.createTempFile("CsvWriterTest", ".csv");
         csvFile.toFile().deleteOnExit();
         Files.write(csvFile, List.of(fileHeaders));
@@ -191,6 +194,49 @@ public class CsvWriterTest {
         } catch (NullPointerException e) {
             assertThat(e).hasMessage("The headers can't be null.");
         }
+    }
+
+    @Test
+    public void shouldNotResumeCsvSecureFileWithEmptyColumnName() throws Exception {
+        final CsvPreference csvPreference = CsvPreference.EXCEL_PREFERENCE;
+        final String[] header = new String[] { "child1", "child2", "child3" };
+
+        final Path logDirectory = Files.createTempDirectory("CsvWriterTest");
+        logDirectory.toFile().deleteOnExit();
+        File csvFile = new File(logDirectory.toFile(), "shouldNotResumeCsvSecureFileWithEmptyColumnName.csv");
+
+        EventBufferingConfiguration bufferConfig = new EventBufferingConfiguration();
+        bufferConfig.setEnabled(false);
+        CsvSecurity csvSecurity = new CsvSecurity();
+        csvSecurity.setEnabled(true);
+        csvSecurity.setSignatureInterval("3 seconds");
+        CsvAuditEventHandlerConfiguration configuration = new CsvAuditEventHandlerConfiguration();
+        configuration.setBufferingConfiguration(bufferConfig);
+        configuration.setSecurity(csvSecurity);
+        try (SecureCsvWriter writer = new SecureCsvWriter(csvFile, header, csvPreference, configuration,
+                keyStoreHandler, random)) {
+            Map<String, String> values = new HashMap<>(2);
+            values.put(header[0], "one-a");
+            values.put(header[2], "one-c");
+            writer.writeEvent(values);
+        }
+
+        // child2 is empty in every row, so a row HMAC of the values alone does not change without its name
+        final List<String> lines = Files.readAllLines(csvFile.toPath(), UTF_8);
+        lines.set(0, lines.get(0).replace("child2", ""));
+        Files.write(csvFile.toPath(), lines, UTF_8);
+
+        try {
+            new SecureCsvWriter(csvFile, header, csvPreference, configuration, keyStoreHandler, random);
+            fail("Should have failed because headers do not match.");
+        } catch (IOException | RuntimeException e) {
+            // The constructor throws the IOException as it is, or wraps it in a RuntimeException. The file fails the
+            // header check, or the verification when the row HMAC covers the column names.
+            final Throwable failure = e instanceof IOException ? e : e.getCause();
+            assertThat(failure).isInstanceOf(IOException.class).hasMessageMatching(
+                    "Resuming an existing CSV file but the headers do not match\\.|The CSV file was tampered: .*");
+        }
+        assertThat(Files.readAllLines(csvFile.toPath(), UTF_8)).isEqualTo(lines);
     }
 
     @Test
