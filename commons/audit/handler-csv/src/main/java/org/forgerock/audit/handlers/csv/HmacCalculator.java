@@ -74,8 +74,9 @@ class HmacCalculator {
     }
 
     /**
-     * Tells whether the HMAC of one of the given data is the expected one. The current key computes the HMAC of
-     * each data, then the next key's iteration is computed once, as {@link #calculate(byte[])} does.
+     * Tells whether the HMAC of one of the given data is the expected one. With the current key, computes the HMAC
+     * of each data in turn until one is the expected HMAC, then computes the next key's iteration once, as
+     * {@link #calculate(byte[])} does.
      *
      * @param expectedHmac the expected HMAC, base64 encoded
      * @param data the data that the expected HMAC may have been calculated for, in the order they are tried

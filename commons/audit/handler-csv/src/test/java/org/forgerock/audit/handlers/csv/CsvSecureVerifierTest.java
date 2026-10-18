@@ -120,6 +120,29 @@ public class CsvSecureVerifierTest {
         assertThat(verificationResult.getFailureReason()).isEqualTo("The HMac at row 2 is not correct.");
     }
 
+    @Test
+    public void shouldVerifyLineBreaksInValues() throws Exception {
+        // The CSV writer writes a CR, a CRLF and a LF in a value as its end of line symbols, read back as LF.
+        final File csvFile = writeSecureCsvFile(new String[] { "a\rb", "c\r\nd" }, new String[] { "e\nf", "g\r\r\nh" });
+
+        final VerificationResult verificationResult = verifySecureCsvFile(csvFile);
+        assertThat(verificationResult.hasPassedVerification()).as(verificationResult.getFailureReason()).isTrue();
+    }
+
+    @Test
+    public void shouldVerifyAndResumeFileWithLineBreaksInColumnNames() throws Exception {
+        final String[] header = { "first\rname", "second\r\nname" };
+        final File csvFile = newSecureCsvFile();
+        writeSecureCsvFile(csvFile, header, new String[] { "a", "b" });
+        VerificationResult verificationResult = verifySecureCsvFile(csvFile);
+        assertThat(verificationResult.hasPassedVerification()).as(verificationResult.getFailureReason()).isTrue();
+
+        // the writer compares the names it reads back from the file with the names it writes
+        writeSecureCsvFile(csvFile, header, new String[] { "c", "d" });
+        verificationResult = verifySecureCsvFile(csvFile);
+        assertThat(verificationResult.hasPassedVerification()).as(verificationResult.getFailureReason()).isTrue();
+    }
+
     @Test(dataProvider = "invalidContent")
     public void shouldNotVerify(String filename) throws Exception {
         File csvFile = new File(filename);
@@ -162,9 +185,18 @@ public class CsvSecureVerifierTest {
 
     /** Writes a tamper evident file with the columns first and second, one row per array of values. */
     private static File writeSecureCsvFile(String[]... rows) throws Exception {
-        final String[] header = { "first", "second" };
+        final File csvFile = newSecureCsvFile();
+        writeSecureCsvFile(csvFile, new String[] { "first", "second" }, rows);
+        return csvFile;
+    }
+
+    private static File newSecureCsvFile() throws Exception {
         final File logDirectory = Files.createTempDirectory("CsvSecureVerifierTest").toFile();
-        final File csvFile = new File(logDirectory, "tamper-evident.csv");
+        return new File(logDirectory, "tamper-evident.csv");
+    }
+
+    /** Writes one row per array of values to a tamper evident file, which the writer resumes if it exists. */
+    private static void writeSecureCsvFile(File csvFile, String[] header, String[]... rows) throws Exception {
         final CsvAuditEventHandlerConfiguration config = new CsvAuditEventHandlerConfiguration();
         config.getSecurity().setEnabled(true);
         // leave the final signature to close()
@@ -181,7 +213,6 @@ public class CsvSecureVerifierTest {
                 writer.writeEvent(values);
             }
         }
-        return csvFile;
     }
 
     /** Verifies a file that {@link #writeSecureCsvFile} wrote, with its own keystore. */

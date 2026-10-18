@@ -23,6 +23,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.forgerock.util.encode.Base64;
 import org.slf4j.Logger;
@@ -38,6 +39,12 @@ final class CsvSecureUtils {
      * verifies a row in one format only.
      */
     private static final int DATA_TO_SIGN_MARKER = 0xFF;
+
+    /**
+     * A line break that the CSV writer writes as its end of line symbols: a CR, a CRLF, or a LF, which the CSV reader
+     * reads back as a LF. The writer writes a CR followed by a LF as one line break.
+     */
+    private static final Pattern LINE_BREAK = Pattern.compile("\r\n?");
 
     /**
      * Obtain the data to sign.
@@ -80,10 +87,11 @@ final class CsvSecureUtils {
     }
 
     /**
-     * Get the data to sign: the byte 0xFF, then the name and the value of each column in UTF-8, each one after the
-     * number of its bytes as a big-endian int.
+     * Get the data to sign: the byte 0xFF, then the name and the value of each column, as the CSV reader reads them
+     * back, in UTF-8, each one after the number of its bytes as a big-endian int.
      * <p>
-     * The CSV reader reads an empty name or value as {@code null}, so both are signed as empty.
+     * The CSV reader reads an empty name or value as {@code null}, so both are signed as empty, and a line break
+     * as a LF, so a CR or a CRLF is signed as a LF.
      * @param logger the value of logger
      * @param values the value of values
      * @param nameMapping the value of nameMapping
@@ -93,8 +101,8 @@ final class CsvSecureUtils {
         data.write(DATA_TO_SIGN_MARKER);
         for (String h : nameMapping) {
             final Object value = values.get(h);
-            writeLengthAndBytes(data, h != null ? h : "");
-            writeLengthAndBytes(data, value != null ? value.toString() : "");
+            writeLengthAndBytes(data, readBack(h));
+            writeLengthAndBytes(data, readBack(value != null ? value.toString() : null));
         }
         return data.toByteArray();
     }
@@ -103,6 +111,16 @@ final class CsvSecureUtils {
         final byte[] bytes = field.getBytes(StandardCharsets.UTF_8);
         data.write(ByteBuffer.allocate(Integer.BYTES).putInt(bytes.length).array(), 0, Integer.BYTES);
         data.write(bytes, 0, bytes.length);
+    }
+
+    /**
+     * Returns a name or a value as the CSV reader reads it back once written: empty if it is {@code null} or empty,
+     * with each line break as a LF.
+     * @param field the name or the value, may be {@code null}
+     * @return the name or the value as the CSV reader reads it back, empty for {@code null}
+     */
+    static String readBack(String field) {
+        return field != null ? LINE_BREAK.matcher(field).replaceAll("\n") : "";
     }
 
     /**
