@@ -1485,10 +1485,21 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      * @param size
      *            Size of record to be written
      * @return <code>true</code> if and only if a new journal file was started
+     * @throws PersistitClosedException if {@link #close()} has released the
+     *             write buffer
      * @throws PersistitException if a persistence error occurs
      */
     private boolean prepareWriteBuffer(final int size) throws PersistitException {
         _persistit.checkFatal();
+        //
+        // close() rolls the journal over to a block boundary and then
+        // releases the write buffer. A writer racing Persistit.close() must
+        // observe the closed state rather than start a new journal file in
+        // the released buffer.
+        //
+        if (_writeBuffer == null) {
+            throw new PersistitClosedException("Journal is closed");
+        }
         boolean newJournalFile = false;
         if (getCurrentJournalSize() == 0) {
             flush();

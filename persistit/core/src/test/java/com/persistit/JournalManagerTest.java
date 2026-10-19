@@ -29,6 +29,7 @@ import com.persistit.util.Util;
 import org.junit.Test;
 
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -721,6 +722,27 @@ public class JournalManagerTest extends PersistitUnitTestCase {
             }
         });
         startAndJoinAssertSuccess(10000, waiter);
+    }
+
+    @Test
+    public void writeTransactionAfterCloseThrowsPersistitClosedException() throws Exception {
+        final JournalManager jman = _persistit.getJournalManager();
+        final long timestamp = _persistit.getTimestampAllocator().updateTimestamp();
+        final ByteBuffer updates = ByteBuffer.allocate(64);
+        updates.position(updates.capacity());
+        _persistit.close();
+        try {
+            jman.writeTransactionToJournal(updates, timestamp, timestamp + 1, 0);
+            fail("Expected PersistitClosedException");
+        } catch (final PersistitClosedException expected) {
+            /*
+             * close() rolls the journal over to a block boundary and then
+             * releases the write buffer. A commit racing Persistit.close()
+             * that writes its TX record afterwards must observe the
+             * closed-state exception, not a NullPointerException from
+             * starting a new journal file in the released buffer (issue #374).
+             */
+        }
     }
 
     private int countKeys(final boolean mvcc) throws PersistitException {
