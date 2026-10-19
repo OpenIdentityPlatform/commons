@@ -25,6 +25,8 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.forgerock.audit.AuditServiceBuilder.*;
 import static org.forgerock.audit.AuditServiceProxy.*;
 import static org.forgerock.audit.handlers.csv.CsvAuditEventHandler.*;
+import static org.forgerock.audit.handlers.csv.CsvWriterTest.NON_ASCII_VALUE;
+import static org.forgerock.audit.handlers.csv.CsvWriterTest.reencodeInWindows1252;
 import static org.forgerock.audit.handlers.csv.SecureCsvWriterTest.KEYSTORE_PASSWORD;
 import static org.forgerock.audit.handlers.csv.SecureCsvWriterTest.assertThreadsTerminate;
 import static org.forgerock.json.JsonValue.*;
@@ -233,6 +235,61 @@ public class CsvAuditEventHandlerTest {
         // TODO should use AssertJResourceResponseAssert
         final ResourceResponse resource = promise.get();
         assertResourceEquals(resource, event);
+    }
+
+    @Test
+    public void testReadingAuditLogEntryWithNonAsciiValue() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final CsvAuditEventHandler csvHandler = csvAuditEventHandler().loggingTo(logDirectory).build();
+        final Context context = new RootContext();
+        try {
+            final JsonValue content = json(object(
+                    field("_id", "1"),
+                    field("timestamp", "123456"),
+                    field("transactionId", NON_ASCII_VALUE)));
+            csvHandler.publishEvent(context, "access", content).getOrThrow();
+
+            final ResourceResponse resource = csvHandler.readEvent(context, "access", "1").getOrThrow();
+            assertThat(resource.getContent().get("transactionId").asString()).isEqualTo(NON_ASCII_VALUE);
+        } finally {
+            csvHandler.shutdown();
+        }
+    }
+
+    @Test
+    public void testReadingAuditLogEntryNotInUtf8() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final Context context = new RootContext();
+        CsvAuditEventHandler csvHandler = csvAuditEventHandler().loggingTo(logDirectory).build();
+        try {
+            // "Grüße": letters that windows-1252 holds
+            csvHandler.publishEvent(context, "access", json(object(
+                    field("_id", "1"),
+                    field("timestamp", "123456"),
+                    field("transactionId", "Grüße")))).getOrThrow();
+        } finally {
+            csvHandler.shutdown();
+        }
+        reencodeInWindows1252(logDirectory.resolve("access.csv").toFile());
+
+        csvHandler = csvAuditEventHandler().loggingTo(logDirectory).build();
+        try {
+            csvHandler.publishEvent(context, "access", json(object(
+                    field("_id", "2"),
+                    field("timestamp", "123456"),
+                    field("transactionId", NON_ASCII_VALUE)))).getOrThrow();
+
+            // the file is resumed as it is: the row written before reads back with U+FFFD in place of each byte that
+            // is not UTF-8, the row appended after it is in UTF-8
+            assertThat(csvHandler.readEvent(context, "access", "1").getOrThrow()
+                    .getContent().get("transactionId").asString()).isEqualTo("Gr\uFFFD\uFFFDe");
+            assertThat(csvHandler.readEvent(context, "access", "2").getOrThrow()
+                    .getContent().get("transactionId").asString()).isEqualTo(NON_ASCII_VALUE);
+        } finally {
+            csvHandler.shutdown();
+        }
     }
 
     private static void assertResourceEquals(ResourceResponse left, ResourceResponse right) {
