@@ -18,6 +18,7 @@ package org.forgerock.audit.handlers.csv;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
 import static org.forgerock.audit.handlers.csv.SecureCsvWriterTest.KEYSTORE_FILENAME;
 import static org.forgerock.audit.handlers.csv.SecureCsvWriterTest.KEYSTORE_PASSWORD;
@@ -259,6 +260,64 @@ public class CsvWriterTest {
         final List<String> contents = Files.readAllLines(csvFile.toPath(), Charset.defaultCharset());
         assertThat(contents.size()).isEqualTo(1);
         assertThat(contents.get(0)).isEqualTo("child1,child2,child3");
+    }
+
+    @Test
+    public void shouldFailToWriteEventToClosedStandardCsvWriter() throws Exception {
+        final File csvFile = org.assertj.core.util.Files.newTemporaryFile();
+        final String[] header = new String[] { "child1", "child2", "child3" };
+        final EventBufferingConfiguration bufferConfig = new EventBufferingConfiguration();
+        bufferConfig.setEnabled(false);
+        CsvSecurity csvSecurity = new CsvSecurity();
+        csvSecurity.setEnabled(false);
+        CsvAuditEventHandlerConfiguration configuration = new CsvAuditEventHandlerConfiguration();
+        configuration.setBufferingConfiguration(bufferConfig);
+        configuration.setSecurity(csvSecurity);
+        final StandardCsvWriter writer =
+                new StandardCsvWriter(csvFile, header, CsvPreference.EXCEL_PREFERENCE, configuration);
+        writer.writeEvent(getValues(header, "one-a", "one-b", "one-c"));
+        // A closed stream stands for any write failure, such as a full disk.
+        writer.close();
+
+        // The handler retries an event whose write fails, with a new writer.
+        assertThatThrownBy(() -> writer.writeEvent(getValues(header, "two-a", "two-b", "two-c")))
+                .isInstanceOf(IOException.class);
+    }
+
+    @Test
+    public void shouldKeepSecureCsvFileVerifiableWhenWriteToClosedWriterFails() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvWriterTest");
+        logDirectory.toFile().deleteOnExit();
+        final File csvFile =
+                new File(logDirectory.toFile(), "shouldKeepSecureCsvFileVerifiableWhenWriteToClosedWriterFails.csv");
+        final String[] header = new String[] { "child1", "child2", "child3" };
+        EventBufferingConfiguration bufferConfig = new EventBufferingConfiguration();
+        bufferConfig.setEnabled(false);
+        CsvSecurity csvSecurity = new CsvSecurity();
+        csvSecurity.setEnabled(true);
+        csvSecurity.setSignatureInterval("3 seconds");
+        CsvAuditEventHandlerConfiguration configuration = new CsvAuditEventHandlerConfiguration();
+        configuration.setBufferingConfiguration(bufferConfig);
+        configuration.setSecurity(csvSecurity);
+        final SecureCsvWriter writer = new SecureCsvWriter(csvFile, header, CsvPreference.EXCEL_PREFERENCE,
+                configuration, keyStoreHandler, random);
+        writer.writeEvent(getValues(header, "one-a", "one-b", "one-c"));
+        // Writes the final signature. A closed stream stands for any write failure, such as a full disk.
+        writer.close();
+
+        assertThatThrownBy(() -> writer.writeEvent(getValues(header, "two-a", "two-b", "two-c")))
+                .isInstanceOf(IOException.class);
+
+        // The key of the row that was not written is not stored, so the file still passes verification.
+        String password = Base64.encode(
+                keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded());
+        KeyStoreHandler csvKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE,
+                csvFile.getPath() + ".keystore", password);
+        SecureStorage secureStorage = new KeyStoreSecureStorage(csvKeyStoreHandler,
+                keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE));
+        CsvSecureVerifier.VerificationResult result =
+                new CsvSecureVerifier(csvFile, CsvPreference.EXCEL_PREFERENCE, secureStorage).verify();
+        assertThat(result.hasPassedVerification()).as(result.getFailureReason()).isTrue();
     }
 
     @Test

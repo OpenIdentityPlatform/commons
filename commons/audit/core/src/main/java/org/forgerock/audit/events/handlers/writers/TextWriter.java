@@ -12,12 +12,16 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.audit.events.handlers.writers;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.nio.charset.Charset;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A TextWriter provides a character-based stream which can be queried for number of bytes written.
@@ -57,8 +61,10 @@ public interface TextWriter {
      * A TextWriter implementation which writes to a given output stream.
      */
     public class Stream implements TextWriter {
+        private static final Logger logger = LoggerFactory.getLogger(Stream.class);
+
         private final MeteredStream stream;
-        private final PrintWriter writer;
+        private final FailFastWriter writer;
 
         /**
          * Creates a new text writer that will write to the provided output stream.
@@ -68,22 +74,27 @@ public interface TextWriter {
          */
         public Stream(OutputStream outputStream) {
             stream = new MeteredStream(outputStream, 0);
-            writer = new PrintWriter(stream, true);
+            // Not a PrintWriter, which sets an error flag instead of throwing: a write that fails must fail the event.
+            writer = new FailFastWriter(stream, Charset.defaultCharset());
         }
 
         @Override
-        public void write(String text) {
-            writer.print(text);
+        public void write(String text) throws IOException {
+            writer.write(text);
         }
 
         @Override
-        public void flush() {
+        public void flush() throws IOException {
             writer.flush();
         }
 
         @Override
         public void shutdown() {
-            writer.close();
+            try {
+                writer.close();
+            } catch (IOException e) {
+                logger.error("Error when performing shutdown", e);
+            }
         }
 
         @Override
