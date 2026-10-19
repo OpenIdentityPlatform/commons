@@ -1,5 +1,6 @@
 /**
  * Copyright 2012 Akiban Technologies, Inc.
+ * Portions Copyright 2026 3A Systems, LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +31,7 @@ import javax.management.NotificationListener;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 public class AlertMonitorTest extends PersistitUnitTestCase {
@@ -130,6 +132,23 @@ public class AlertMonitorTest extends PersistitUnitTestCase {
         assertEquals("History should have been cleared", "", monitor.getDetailedHistory(CATEGORY));
         assertEquals("History should have been cleared", "", monitor.toString());
         assertEquals("Level should be NORMAL", AlertLevel.NORMAL.toString(), monitor.getAlertLevel());
+    }
+
+    /**
+     * Logging an event formats a RuntimeException among its arguments as a
+     * stack trace. Before the fix the formatted text replaced the exception in
+     * the event's own arguments.
+     */
+    @Test
+    public void testLoggingKeepsEventArguments() throws Exception {
+        final AlertMonitor monitor = _persistit.getAlertMonitor();
+        final RuntimeException exception = new RuntimeException("Bogus");
+        monitor.post(new Event(AlertLevel.ERROR, _persistit.getLogBase().exception, exception), CATEGORY);
+        monitor.poll(true);
+        assertNotNull("At AlertLevel.ERROR there should be a log message", _lastMessage);
+        assertTrue("Log message should contain the stack trace", _lastMessage.contains(getClass().getName()));
+        assertSame("The event should keep the exception", exception,
+                monitor.getHistory(CATEGORY).getLastEvent().getFirstArg());
     }
 
     @Test

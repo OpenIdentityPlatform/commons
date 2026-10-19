@@ -82,8 +82,6 @@ public class CheckpointCloseRaceTest extends PersistitUnitTestCase {
 
     @Test
     public void copyBackPagesConcurrentWithClose() throws Exception {
-        enableSequencer(false);
-        addSchedules(COPYBACK_CLOSE_SCHEDULE);
         // copyBackPages() reaches COPYBACK_CLOSE_A on every pass of its loop;
         // only the first pass is sequenced against close().
         final AtomicBoolean once = new AtomicBoolean(true);
@@ -93,6 +91,8 @@ public class CheckpointCloseRaceTest extends PersistitUnitTestCase {
                 return once.getAndSet(false);
             }
         });
+        enableSequencer(false);
+        addSchedules(COPYBACK_CLOSE_SCHEDULE);
         final Persistit persistit = _persistit;
         // Keep the first pass from ending the loop: with copy-back disabled
         // the journal keeps more than one file, so a second pass follows.

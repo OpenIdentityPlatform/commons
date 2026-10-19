@@ -57,6 +57,13 @@ public interface CleanupManagerMXBean {
     public long getErrorCount();
 
     /**
+     * @return the number of <code>CleanupAction</code>s discarded by
+     *         {@link #clear()} since Persistit started.
+     */
+    @Description("The number of CleanupAction items discarded by clear() since Persistit started")
+    public long getDiscardedCount();
+
+    /**
      * @return the number of <code>CleanupAction</code>s currently enqueued.
      */
     @Description("The number ofCleanupAction items currently enqueued")
