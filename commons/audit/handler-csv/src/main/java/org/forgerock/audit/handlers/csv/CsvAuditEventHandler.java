@@ -246,6 +246,9 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
                 final Lock writeLock = writerLockByTopic.get(topic).writeLock();
                 writeLock.lock();
                 try {
+                    // an event may have opened a writer, before this startup() or after one that threw: openWriter()
+                    // would replace it without closing it
+                    closeWriter(topic);
                     openWriter(topic, auditLogFile);
                 } catch (IOException e) {
                     LOGGER.error("Error when creating audit file: {}", auditLogFile, e);
@@ -291,7 +294,8 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
     /**
      * Publishes the provided event to the writer of the topic, under the read lock of the topic. If the topic has no
      * writer, or if the write fails, the event is written under the write lock, to a new writer unless another thread
-     * has replaced the writer meanwhile. Once the handler is shut down, the event fails instead.
+     * has replaced the writer meanwhile. Once the handler is shut down, the event of a topic without a writer fails
+     * instead.
      */
     private void publishEventWithRetry(final String topic, final JsonValue event)
                     throws ResourceException {
@@ -315,13 +319,14 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
         // or have multiple threads attempting to reset the writer.
         writerLock.writeLock().lock();
         try {
-            if (shutDown) {
-                // shutdown() removes the writers it closes, so the event ends here instead of in a new writer
+            // Lookup the current writer directly from the map so we can check if another thread has reset it.
+            CsvWriter newCsvWriter = writers.get(topic);
+            if (shutDown && newCsvWriter == null) {
+                // shutdown() removes the writers it closes, so the event ends here instead of in a new writer. A topic
+                // that startup() has reopened meanwhile resets its writer as usual.
                 throw new ServiceUnavailableException("Unable to publish event for topic: " + topic
                         + ", the handler is shut down");
             }
-            // Lookup the current writer directly from the map so we can check if another thread has reset it.
-            CsvWriter newCsvWriter = writers.get(topic);
             if (newCsvWriter == null || newCsvWriter == csvWriter) {
                 // No writer, or the one that failed: the writer hasn't been reset.
                 newCsvWriter = resetAndReopenWriter(topic);

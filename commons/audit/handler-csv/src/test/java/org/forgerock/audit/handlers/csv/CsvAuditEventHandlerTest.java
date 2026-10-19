@@ -21,6 +21,7 @@ import static java.nio.charset.StandardCharsets.*;
 import static java.nio.file.StandardOpenOption.APPEND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
 import static org.forgerock.audit.AuditServiceBuilder.*;
 import static org.forgerock.audit.AuditServiceProxy.*;
 import static org.forgerock.audit.handlers.csv.CsvAuditEventHandler.*;
@@ -695,6 +696,9 @@ public class CsvAuditEventHandlerTest {
 
         try {
             csvHandler.startup();
+            // With #341, the writer throws an IOException instead, and startup() opens the other topic: this test
+            // then needs a failure of the writer that is still a RuntimeException.
+            fail("startup() does not throw for a file that the writer cannot resume");
         } catch (RuntimeException e) {
             // The writer throws it for a file that it cannot resume (#340), and startup() opens no other topic.
         }
@@ -731,6 +735,43 @@ public class CsvAuditEventHandlerTest {
         }
 
         assertThat(logDirectory.resolve("access.csv").toFile()).content(UTF_8).containsOnlyOnce("\"_id1\"");
+    }
+
+    @Test
+    public void testPublishEventDuringStartupResetsWriterOfReopenedTopic() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final CsvAuditEventHandler csvHandler = csvAuditEventHandler().loggingTo(logDirectory).build();
+        final Context context = new RootContext();
+        csvHandler.shutdown();
+        final CsvWriter failingWriter = mock(CsvWriter.class);
+        doThrow(new IOException("Stream closed")).when(failingWriter).writeEvent(anyMap());
+        // As when startup() has reopened the topic, and has not returned yet: the handler is still shut down.
+        writersOf(csvHandler).put("access", failingWriter);
+        try {
+            csvHandler.publishEvent(context, "access", buildEvent(1)).getOrThrow();
+        } finally {
+            csvHandler.shutdown();
+        }
+
+        assertThat(logDirectory.resolve("access.csv").toFile()).content(UTF_8).containsOnlyOnce("\"_id1\"");
+    }
+
+    @Test
+    public void testStartupClosesTheWriterThatItReplaces() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final CsvAuditEventHandler csvHandler = csvAuditEventHandler().loggingTo(logDirectory).build();
+        final CsvWriter openedWriter = mock(CsvWriter.class);
+        // As when an event opened it after a startup() that threw, and startup() is called again.
+        writersOf(csvHandler).put("access", openedWriter).close();
+        try {
+            csvHandler.startup();
+        } finally {
+            csvHandler.shutdown();
+        }
+
+        verify(openedWriter).close();
     }
 
     @Test
