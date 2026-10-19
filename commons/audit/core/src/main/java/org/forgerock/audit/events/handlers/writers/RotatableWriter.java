@@ -367,9 +367,10 @@ public class RotatableWriter implements TextWriter, RotatableObject {
         final Duration rotationCheckInterval = parseDuration("rotation and retention check interval",
                 configuration.getRotationRetentionCheckInterval(), FIVE_SECONDS);
 
-        // The checks are scheduled in milliseconds: an interval under one millisecond is zero.
+        // The checks are scheduled in milliseconds: an interval under one millisecond is zero, and one whose parts
+        // overflow when Duration adds them is negative.
         if ((!rotationPolicies.isEmpty() || !retentionPolicies.isEmpty())
-                && (rotationCheckInterval.isUnlimited() || rotationCheckInterval.to(TimeUnit.MILLISECONDS) == 0)) {
+                && (rotationCheckInterval.isUnlimited() || rotationCheckInterval.to(TimeUnit.MILLISECONDS) <= 0)) {
             throw new IOException("Rotation and retention check interval set to an invalid value: "
                     + rotationCheckInterval);
         }
