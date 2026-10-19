@@ -83,10 +83,11 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
     private HmacCalculator hmacCalculator;
     private final ScheduledExecutorService scheduler;
     private final ReentrantLock signatureLock = new ReentrantLock();
-    private final Runnable signatureTask;
     private KeyStoreSecureStorage secureStorage;
     private final Duration signatureInterval;
     private ScheduledFuture<?> scheduledSignature;
+    /** The scheduled signature task until it starts, as it signs the events written until then. */
+    private SignatureTask pendingSignature;
 
     private String lastHMAC;
     private byte[] lastSignature;
@@ -201,16 +202,6 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
 
             this.signatureInterval = securityConfiguration.getSignatureIntervalDuration();
             this.scheduler = Executors.newScheduledThreadPool(1);
-            this.signatureTask = new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        writeSignature(csvWriter);
-                    } catch (Exception ex) {
-                        logger.error("An error occurred while writing the signature", ex);
-                    }
-                }
-            };
         } catch (Exception e) {
             // Nothing else closes a writer that fails to construct: the file would stay open, and with rotation the
             // rotator thread, which is not a daemon thread, would keep running.
@@ -307,8 +298,8 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
     }
 
     private void forceWriteSignature(Writer writer) throws IOException {
-        if (scheduledSignature != null) {
-            scheduledSignature.cancel(false);
+        if (scheduledSignature != null && scheduledSignature.cancel(false)) {
+            pendingSignature = null;
         }
         // Sign the events written since the last signature now, whether the scheduled signature has run or not:
         // a rotation on write can come before any signature is scheduled for the event that triggers it.
@@ -407,12 +398,15 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
             // Store the current key
             secureStorage.writeCurrentKey(hmacCalculator.getCurrentKey());
 
-            // Schedule a signature task only if needed: a rotation during the write signed the event already.
-            if (unsignedEvents && (scheduledSignature == null || scheduledSignature.isDone())) {
+            // Schedule a signature task only if needed: a rotation during the write signed the event already, and
+            // a task that has started may have signed already, while it is not done yet.
+            if (unsignedEvents && pendingSignature == null) {
                 logger.trace("Triggering a new signature task to be executed in {}", signatureInterval);
                 try {
+                    final SignatureTask signatureTask = new SignatureTask();
                     scheduledSignature = scheduler.schedule(signatureTask, signatureInterval.getValue(),
                             signatureInterval.getUnit());
+                    pendingSignature = signatureTask;
                 } catch (RejectedExecutionException e) {
                     logger.error(e.getMessage(), e);
                 }
@@ -505,6 +499,28 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
             writeLastSignature(writer);
             // In case of low traffic we still want the headers to be written into the file
             writer.flush();
+        }
+    }
+
+    private class SignatureTask implements Runnable {
+
+        @Override
+        public void run() {
+            signatureLock.lock();
+            try {
+                // The events written from now on come after this signature, so they schedule the next one, even
+                // before this task is done. A rotation or close() may have cancelled this task while it waited for
+                // the lock, as cancel(false) does not stop a started task, and an event may have scheduled another
+                // one since: that one stays pending.
+                if (pendingSignature == this) {
+                    pendingSignature = null;
+                }
+                writeSignature(csvWriter);
+            } catch (Exception ex) {
+                logger.error("An error occurred while writing the signature", ex);
+            } finally {
+                signatureLock.unlock();
+            }
         }
     }
 }

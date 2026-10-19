@@ -47,8 +47,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.crypto.SecretKey;
 
@@ -841,6 +843,113 @@ public class SecureCsvWriterTest {
         secureCsvWriter.close();
         assertThat(actual.length()).isEqualTo(length);
         assertPassesVerification(actual);
+    }
+
+    @Test(timeOut = 60_000)
+    public void shouldSignAnEventWrittenWhileThePeriodicSignatureCompletes() throws Exception {
+        final File actual = newSecureCsvFile();
+        final String header = "FOO";
+        final AtomicBoolean eventWritten = new AtomicBoolean();
+        final CountDownLatch signatures = new CountDownLatch(2);
+        final SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
+                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE,
+                createBasicSecureConfig(signatureInterval.toString()), keyStoreHandler, random) {
+            @Override
+            public void flush() throws IOException {
+                super.flush();
+                // writeSignature() flushes once the signature row is written, before the periodic task is done
+                if (!eventWritten.getAndSet(true)) {
+                    writeEvent(singletonMap(header, "two"));
+                }
+                signatures.countDown();
+            }
+        };
+        try {
+            secureCsvWriter.writeEvent(singletonMap(header, "one"));
+            // the periodic signature of "one", then the one that "two" schedules
+            assertThat(signatures.await(10, TimeUnit.SECONDS)).as("both signatures written").isTrue();
+            // a process killed now leaves a file that the next start resumes
+            assertPassesVerification(actual);
+        } finally {
+            secureCsvWriter.close();
+        }
+    }
+
+    @Test(timeOut = 60_000)
+    public void shouldSignPeriodicallyAnEventWrittenAfterARotationCancelledTheScheduledSignature()
+            throws Exception {
+        final File actual = newSecureCsvFile();
+        final String header = "FOO";
+        final CsvAuditEventHandlerConfiguration config = createRotatingSecureConfig(0);
+        // long enough for the rotation to cancel the signature that "one" schedules
+        config.getSecurity().setSignatureInterval("1 second");
+        try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
+                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, config, keyStoreHandler, random)) {
+            secureCsvWriter.writeEvent(singletonMap(header, "one"));
+            assertThat(secureCsvWriter.forceRotation()).isTrue();
+            secureCsvWriter.writeEvent(singletonMap(header, "two"));
+
+            // the header, the signature chained from the archive, "two" and its periodic signature
+            awaitLines(actual, 4);
+            // a process killed now leaves a file that the next start resumes
+            assertPassesVerification(actual);
+        }
+    }
+
+    @Test(timeOut = 60_000)
+    public void shouldScheduleNoOtherSignatureWhenARotationSignsWhileTheScheduledOneWaitsForTheLock()
+            throws Exception {
+        final File actual = newSecureCsvFile();
+        final String header = "FOO";
+        final CsvAuditEventHandlerConfiguration config = createRotatingSecureConfig(0);
+        final Duration interval = duration("3 seconds");
+        config.getSecurity().setSignatureInterval(interval.toString());
+        final SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
+                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, config, keyStoreHandler, random);
+        secureCsvWriter.writeEvent(singletonMap(header, "one"));
+        // hold the signature lock, as a rotation does, until the scheduled signature waits for it
+        secureCsvWriter.beforeRollingOver();
+        try {
+            awaitAThreadWaitingForLockOf(Thread.currentThread());
+            // the rotation signs "one" and cancels the scheduled signature, which has started, so it still runs
+            assertThat(secureCsvWriter.forceRotation()).isTrue();
+            // schedules a signature, although the started one signs "two" as well
+            secureCsvWriter.writeEvent(singletonMap(header, "two"));
+        } finally {
+            secureCsvWriter.afterRollingOver();
+        }
+        // the header, the signature chained from the archive, "two" and the started signature
+        awaitLines(actual, 4);
+        // schedules none, as the one that "two" scheduled is pending
+        secureCsvWriter.writeEvent(singletonMap(header, "three"));
+
+        final long start = System.nanoTime();
+        secureCsvWriter.close();
+        // close() cancels the signature scheduled for "two", and leaves no other one to wait for
+        assertThat(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start))
+                .isLessThan(interval.to(TimeUnit.MILLISECONDS) / 2);
+        assertPassesVerification(actual);
+    }
+
+    /** Waits until a thread waits for a lock that the owner holds. */
+    private static void awaitAThreadWaitingForLockOf(final Thread owner) throws InterruptedException {
+        final ThreadMXBean threads = ManagementFactory.getThreadMXBean();
+        final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+        while (!isAThreadWaitingForLockOf(threads, owner) && System.nanoTime() < deadline) {
+            Thread.sleep(1);
+        }
+        assertThat(isAThreadWaitingForLockOf(threads, owner))
+                .as("a thread waits for a lock of " + owner.getName())
+                .isTrue();
+    }
+
+    private static boolean isAThreadWaitingForLockOf(final ThreadMXBean threads, final Thread owner) {
+        for (final ThreadInfo threadInfo : threads.getThreadInfo(threads.getAllThreadIds())) {
+            if (threadInfo != null && threadInfo.getLockOwnerId() == owner.getId()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** A new directory in the build directory, rather than in the one of the system, which nothing cleans. */
