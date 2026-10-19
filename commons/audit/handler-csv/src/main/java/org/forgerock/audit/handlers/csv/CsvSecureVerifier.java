@@ -196,9 +196,11 @@ class CsvSecureVerifier {
     private boolean verifyHMAC(Map<String, String> values, String[] header) throws IOException {
         try {
             String actualHMAC = values.get(HEADER_HMAC);
-            String expectedHMAC = hmacCalculator.calculate(dataToSign(logger, values, dropExtraHeaders(header)));
-            if (!actualHMAC.equals(expectedHMAC)) {
-                logger.trace("The HMAC is not valid. Expected : {} Found : {}", expectedHMAC, actualHMAC);
+            String[] columns = dropExtraHeaders(header);
+            // A row that a previous version wrote has the HMAC of its values concatenated.
+            if (!hmacCalculator.verify(actualHMAC, dataToSign(logger, values, columns),
+                    concatenatedValues(values, columns))) {
+                logger.trace("The HMAC is not valid. Found : {}", actualHMAC);
                 return false;
             } else {
                 lastHMAC = actualHMAC;

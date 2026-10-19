@@ -23,6 +23,7 @@ import static org.forgerock.audit.handlers.csv.CsvSecureConstants.HEADER_HMAC;
 import static org.forgerock.audit.handlers.csv.CsvSecureConstants.HEADER_SIGNATURE;
 import static org.forgerock.audit.handlers.csv.CsvSecureConstants.SIGNATURE_ALGORITHM;
 import static org.forgerock.audit.handlers.csv.CsvSecureUtils.dataToSign;
+import static org.forgerock.audit.handlers.csv.CsvSecureUtils.readBack;
 import static org.forgerock.util.Reject.checkNotNull;
 
 import java.io.File;
@@ -169,15 +170,14 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
                     throw new IOException("The CSV file was tampered: " + verificationResult.getFailureReason());
                 }
 
-                // Assert that the 2 headers are equal.
+                // Assert that the 2 headers are equal, as the CSV reader reads them back.
                 final String[] actualHeaders = verifier.getHeaders();
                 if (actualHeaders != null) {
                     if (actualHeaders.length != headers.length) {
                         throw new IOException("Resuming an existing CSV file but the headers do not match.");
                     }
                     for (int idx = 0; idx < actualHeaders.length; idx++) {
-                        // Super CSV reads an empty column name as null, the expected headers hold none
-                        if (!headers[idx].equals(actualHeaders[idx])) {
+                        if (!readBack(actualHeaders[idx]).equals(readBack(headers[idx]))) {
                             throw new IOException("Resuming an existing CSV file but the headers do not match.");
                         }
                     }
