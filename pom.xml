@@ -766,7 +766,8 @@
             <!-- JAXB is managed for consumers that declare it without a version (OpenDJ opendj-core,
                  OpenAM openam-core); no module of this build depends on it. jaxb-api and jaxb-core inherit
                  net.java:jvnet-parent, which declares the defunct maven.java.net repositories, and the
-                 ban-jvnet-parent rule below keeps them out of this build -->
+                 ban-jvnet-parent rule below keeps them out of this build and of the projects that inherit
+                 this POM as their parent -->
             <dependency>
                 <groupId>javax.xml.bind</groupId>
                 <artifactId>jaxb-api</artifactId>
@@ -1426,6 +1427,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
                 <executions>
+                    <!-- Inherited by the projects that use this POM as their parent; one that has to depend on
+                         these artifacts can redeclare the execution with <skip>true</skip> -->
                     <execution>
                         <id>ban-jvnet-parent</id>
                         <goals>
