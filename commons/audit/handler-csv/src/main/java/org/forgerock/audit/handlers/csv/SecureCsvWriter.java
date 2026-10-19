@@ -29,6 +29,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Writer;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
@@ -102,9 +104,9 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
         this.headers = checkNotNull(headers, "The headers can't be null.");
         this.csvFormatter = new CsvFormatter(csvPreference);
         this.csvWriter = constructWriter(csvFile, fileAlreadyInitialized, config);
-        this.hmacCalculator = new HmacCalculator(CsvSecureConstants.HMAC_ALGORITHM);
 
         try {
+            this.hmacCalculator = new HmacCalculator(CsvSecureConstants.HMAC_ALGORITHM);
             KeyStoreHandlerDecorator keyStoreHandlerDecorated = new KeyStoreHandlerDecorator(keyStoreHandler);
             SecretKey password = keyStoreHandlerDecorated.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD);
             if (password == null) {
@@ -113,8 +115,26 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
                         CsvSecureConstants.ENTRY_PASSWORD, keyStoreHandlerDecorated.getLocation()));
             }
             this.keyStorePassword = Base64.encode(password.getEncoded());
-            KeyStoreHandler hmacKeyStoreHandler =
-                    new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, keyStoreFile.getPath(), keyStorePassword);
+            final KeyStoreHandler hmacKeyStoreHandler;
+            try {
+                hmacKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, keyStoreFile.getPath(),
+                        keyStorePassword);
+            } catch (IllegalStateException e) {
+                if (e.getCause() instanceof KeyStoreException || e.getCause() instanceof NoSuchAlgorithmException) {
+                    // The JVM cannot create a keystore of this type, or find the digest that checks it: a
+                    // configuration error, not the state of the file.
+                    throw e;
+                }
+                // KeyStoreBuilder throws it for a keystore it cannot load: an empty one, left by a crash while it was
+                // stored, or one stored under another password, after a change of the Password key. Also when the
+                // file is not resumed: a topic that got no event keeps an empty file next to its keystore.
+                throw new IOException("The keystore " + keyStoreFile + " of the CSV file cannot be loaded.", e);
+            } catch (IOException | RuntimeException e) {
+                // KeyStoreBuilder cannot open a directory or a file it may not read, and KeyStore.load lets a
+                // RuntimeException, such as a ClassCastException or a NullPointerException, through for a corrupted
+                // keystore.
+                throw new IOException("The keystore " + keyStoreFile + " of the CSV file cannot be loaded.", e);
+            }
             PublicKey publicSignatureKey =
                     keyStoreHandlerDecorated.readPublicKeyFromKeyStore(CsvSecureConstants.ENTRY_SIGNATURE);
             PrivateKey privateSignatureKey =
@@ -128,9 +148,23 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
                     privateSignatureKey);
             final CsvAuditEventHandlerConfiguration.CsvSecurity securityConfiguration = config.getSecurity();
             if (fileAlreadyInitialized) {
+                // A missing keystore file reads as an empty keystore. Without the keys of the file, the file cannot be
+                // verified, nor resumed: this is the state of the file, not a configuration error.
+                if (secureStorage.readInitialKey() == null) {
+                    throw new IOException("Resuming an existing CSV file but its keystore " + keyStoreFile
+                            + " is missing or holds no initial key.");
+                }
                 // Run the CsvVerifier to check that the file was not tampered.
                 CsvSecureVerifier verifier = new CsvSecureVerifier(csvFile, csvPreference, secureStorage);
-                CsvSecureVerifier.VerificationResult verificationResult = verifier.verify();
+                final CsvSecureVerifier.VerificationResult verificationResult;
+                try {
+                    verificationResult = verifier.verify();
+                } catch (RuntimeException e) {
+                    // The verifier fails this way on a row it cannot parse or decode: a row, a header or a signature
+                    // cut short by a crash while it was written, or a row edited. As CsvSecureArchiveVerifier does, it
+                    // is a file that fails verification.
+                    throw new IOException("Resuming an existing CSV file but it cannot be verified: " + csvFile, e);
+                }
                 if (!verificationResult.hasPassedVerification()) {
                     throw new IOException("The CSV file was tampered: " + verificationResult.getFailureReason());
                 }
@@ -150,7 +184,7 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
 
                 SecretKey currentKey = secureStorage.readCurrentKey();
                 if (currentKey == null) {
-                    throw new IllegalStateException("We are supposed to resume but there is not entry for CurrentKey.");
+                    throw new IOException("We are supposed to resume but there is not entry for CurrentKey.");
                 }
                 this.hmacCalculator.setCurrentKey(currentKey.getEncoded());
 
@@ -174,6 +208,18 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
                 }
             };
         } catch (Exception e) {
+            // Nothing else closes a writer that fails to construct: the file would stay open, and with rotation the
+            // rotator thread, which is not a daemon thread, would keep running.
+            try {
+                csvWriter.close();
+            } catch (IOException | RuntimeException closeFailure) {
+                e.addSuppressed(closeFailure);
+            }
+            if (e instanceof IOException) {
+                // The file cannot be resumed, or its keystore cannot be loaded: the handler reports it for the topic,
+                // and opens the other topics.
+                throw (IOException) e;
+            }
             throw new RuntimeException("Error when initializing a secure CSV writer", e);
         }
     }
