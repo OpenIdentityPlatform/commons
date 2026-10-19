@@ -229,6 +229,90 @@ public class RotatableWriterTest {
         assertThat(rotationPolicies.isEmpty()).isTrue();
     }
 
+    @DataProvider
+    private Object[][] invalidRotationRetentionCheckIntervals() {
+        return new Object[][] {
+                {"unlimited"},
+                {"zero"},
+                // the checks are scheduled in whole milliseconds
+                {"500 microseconds"},
+                // Duration adds the parts of a composite without an overflow check: this one is negative
+                {"9223372036854775807 ms, 1 ms"}
+        };
+    }
+
+    @Test(dataProvider = "invalidRotationRetentionCheckIntervals")
+    public void testRejectsInvalidRotationRetentionCheckIntervalBeforeOpeningTheFile(
+            String rotationRetentionCheckInterval) throws IOException {
+        // given
+        final File file = getTempFile();
+        Files.delete(file.toPath());
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
+        configuration.setRotationRetentionCheckInterval(rotationRetentionCheckInterval);
+        configuration.getFileRotation().setRotationEnabled(true);
+        configuration.getFileRotation().setMaxFileSize(MAX_BYTES_TO_WRITE);
+
+        // when
+        assertThatThrownBy(() -> new RotatableWriter(file, configuration, true))
+                .isInstanceOf(IOException.class)
+                .hasMessageContaining("Rotation and retention check interval set to an invalid value");
+
+        // then
+        // a constructor that throws gives the caller no writer to close: it does not open the file
+        assertThat(file).doesNotExist();
+    }
+
+    @Test(dataProvider = "invalidRotationRetentionCheckIntervals")
+    public void testRejectsInvalidRotationRetentionCheckIntervalWithRetentionOnlyBeforeOpeningTheFile(
+            String rotationRetentionCheckInterval) throws IOException {
+        // given
+        final File file = getTempFile();
+        Files.delete(file.toPath());
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
+        configuration.setRotationRetentionCheckInterval(rotationRetentionCheckInterval);
+        configuration.getFileRetention().setMaxNumberOfHistoryFiles(1);
+
+        // when
+        assertThatThrownBy(() -> new RotatableWriter(file, configuration, true))
+                .isInstanceOf(IOException.class)
+                .hasMessageContaining("Rotation and retention check interval set to an invalid value");
+
+        // then
+        assertThat(file).doesNotExist();
+    }
+
+    @Test(dataProvider = "invalidRotationRetentionCheckIntervals")
+    public void testAcceptsAnyRotationRetentionCheckIntervalWithoutPolicy(String rotationRetentionCheckInterval)
+            throws IOException {
+        // given
+        final File file = getTempFile();
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
+        configuration.setRotationRetentionCheckInterval(rotationRetentionCheckInterval);
+
+        // when
+        // with no policy, no check is scheduled: the interval is not used
+        rotatableWriter = new RotatableWriter(file, configuration, true);
+
+        // then
+        assertThat(rotatableWriter.getRotationPolicies()).isEmpty();
+    }
+
+    @Test
+    public void testAcceptsOneMillisecondRotationRetentionCheckInterval() throws IOException {
+        // given
+        final File file = getTempFile();
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
+        configuration.setRotationRetentionCheckInterval("1 millisecond");
+        configuration.getFileRotation().setRotationEnabled(true);
+        configuration.getFileRotation().setMaxFileSize(MAX_BYTES_TO_WRITE);
+
+        // when
+        rotatableWriter = new RotatableWriter(file, configuration, true);
+
+        // then
+        assertThat(rotatableWriter.getRotationPolicies()).hasSize(1);
+    }
+
     @Test
     public void testRotationForSizeBasedRotationPolicy() throws Exception {
         // given
