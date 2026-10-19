@@ -424,9 +424,11 @@ public class CsvWriterTest {
         final File csvFile = org.assertj.core.util.Files.newTemporaryFile();
         // "Grüße": letters that windows-1252 holds
         final String[] headers = new String[] { "child1", "Grüße" };
+        // the header as the writer wrote it with a windows-1252 default charset, before it wrote in UTF-8; not
+        // re-encoded from the writer, so that the case does not depend on the charset of the writer under test
+        Files.write(csvFile.toPath(), new CsvFormatter(CsvPreference.EXCEL_PREFERENCE).formatHeader(headers)
+                .getBytes(Charset.forName("windows-1252")));
         final CsvAuditEventHandlerConfiguration configuration = new CsvAuditEventHandlerConfiguration();
-        new StandardCsvWriter(csvFile, headers, CsvPreference.EXCEL_PREFERENCE, configuration).close();
-        reencodeInWindows1252(csvFile);
 
         // the header is read in UTF-8, with U+FFFD in place of the bytes that are not UTF-8
         assertThatThrownBy(() -> new StandardCsvWriter(csvFile, headers, CsvPreference.EXCEL_PREFERENCE,
