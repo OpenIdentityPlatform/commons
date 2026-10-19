@@ -161,13 +161,15 @@ public class SecureCsvWriterTest {
 //        }
     }
 
-    @Test
+    @Test(timeOut = 60_000)
     public void shouldGenerateHMACColumn() throws Exception {
         final File actual = new File("target/test-classes/shouldGenerateHMACColumn-actual.txt");
         actual.delete();
         final String header = "FOO";
         // Use a signature interval long enough to never fire during the test, so that the final
         // signature is deterministically written by close() and the file content is predictable.
+        // The time-out fails a close() that waits for this interval, as it would for a signature
+        // scheduled by the signature row that close() writes.
         try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
                 actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE,
                 createBasicSecureConfig("5 minutes"), keyStoreHandler, random)) {
@@ -781,6 +783,29 @@ public class SecureCsvWriterTest {
     }
 
     @Test
+    public void shouldSignTheFirstEventWhenItsWriteRotatesTheFile() throws Exception {
+        final File actual = newSecureCsvFile();
+        // an empty live file last rotated a day ago: with a 1 hour interval, the first write rotates it
+        assertThat(actual.createNewFile()).isTrue();
+        assertThat(actual.setLastModified(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1))).isTrue();
+        final String header = "FOO";
+        final CsvAuditEventHandlerConfiguration config = createRotatingSecureConfig(0);
+        config.getFileRotation().setRotationInterval("1 hour");
+        try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
+                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, config, keyStoreHandler, random)) {
+            secureCsvWriter.writeEvent(singletonMap(header, "one"));
+        }
+
+        // the header, the event and the signature that the rotation writes
+        final List<File> archives = new TimeStampFileNamingPolicy(actual, "-yyyy.MM.dd-HH.mm.ss.SSS", "").listFiles();
+        assertThat(archives).hasSize(1);
+        assertThat(contentOf(archives.get(0))).containsPattern("(?m)^one,");
+        assertPassesVerification(archives.get(0));
+        // the header and the chained signature
+        assertPassesVerification(actual);
+    }
+
+    @Test
     public void shouldResumeAFileRotatedBeforeItsFirstEvent() throws Exception {
         final File actual = newSecureCsvFile();
         final String header = "FOO";
@@ -800,6 +825,21 @@ public class SecureCsvWriterTest {
             secureCsvWriter.writeEvent(singletonMap(header, "one"));
         }
         assertThat(contentOf(actual)).containsPattern("(?m)^one,");
+        assertPassesVerification(actual);
+    }
+
+    @Test
+    public void shouldDoNothingWhenClosedTwice() throws Exception {
+        final File actual = newSecureCsvFile();
+        // with rotation, the writer under it throws once it is closed
+        final SecureCsvWriter secureCsvWriter = new SecureCsvWriter(actual, new String[]{"FOO"},
+                CsvPreference.EXCEL_PREFERENCE, createRotatingSecureConfig(0), keyStoreHandler, random);
+        secureCsvWriter.writeEvent(singletonMap("FOO", "one"));
+        secureCsvWriter.close();
+        final long length = actual.length();
+
+        secureCsvWriter.close();
+        assertThat(actual.length()).isEqualTo(length);
         assertPassesVerification(actual);
     }
 

@@ -93,6 +93,7 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
     /** Whether events were written since the last signature. */
     private boolean unsignedEvents = false;
     private boolean headerWritten = false;
+    private boolean closed = false;
     private final Random random;
     private File keyStoreFile;
     private String keyStorePassword;
@@ -277,6 +278,11 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
 
     @Override
     public void close() throws IOException {
+        // The final signature flushes the writer, which throws once it is closed.
+        if (closed) {
+            return;
+        }
+        closed = true;
         try {
             signatureLock.lock();
             try {
@@ -382,9 +388,6 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
     public void writeEvent(Writer writer, Map<String, String> values) throws IOException {
         signatureLock.lock();
         try {
-            if (!headerWritten) {
-                writeHeader(headers);
-            }
             String[] extendedHeaders = addExtraColumns(headers);
 
             Map<String, String> extendedValues = new HashMap<>(values);
@@ -392,7 +395,14 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
                 insertHMACSignature(extendedValues, headers);
             }
 
-            writer.write(csvFormatter.formatEvent(extendedValues, extendedHeaders));
+            String row = csvFormatter.formatEvent(extendedValues, extendedHeaders);
+            if (!headerWritten) {
+                // The header and the first event in one write, so that a rotation this write triggers archives both
+                // and signs the event; set first, as the signature that this rotation writes comes from inside it.
+                row = csvFormatter.formatHeader(extendedHeaders) + row;
+                headerWritten = true;
+            }
+            writer.write(row);
             writer.flush();
             // Store the current key
             secureStorage.writeCurrentKey(hmacCalculator.getCurrentKey());
