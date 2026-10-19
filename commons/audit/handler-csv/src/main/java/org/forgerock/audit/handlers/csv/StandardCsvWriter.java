@@ -53,6 +53,7 @@ class StandardCsvWriter implements CsvWriter {
     StandardCsvWriter(File csvFile, String[] headers, CsvPreference csvPreference,
             CsvAuditEventHandlerConfiguration config) throws IOException {
         Reject.ifTrue(config.getSecurity().isEnabled(), "StandardCsvWriter should not be used if security is enabled");
+        this.headers = checkNotNull(headers, "The headers can't be null.");
         boolean fileAlreadyInitialized = csvFile.exists();
         if (fileAlreadyInitialized) {
             try (ICsvMapReader reader = new CsvMapReader(new BufferedReader(new FileReader(csvFile)), csvPreference)) {
@@ -61,18 +62,18 @@ class StandardCsvWriter implements CsvWriter {
                 if (actualHeaders == null) {
                     fileAlreadyInitialized = false;
                 } else {
-//                    if (actualHeaders.length != headers.length) {
-//                        throw new IOException("Resuming an existing CSV file but the headers do not match.");
-//                     }
+                    if (actualHeaders.length != headers.length) {
+                        throw new IOException("Resuming an existing CSV file but the headers do not match.");
+                    }
                     for (int idx = 0; idx < actualHeaders.length; idx++) {
-                        if (!actualHeaders[idx].equals(headers[idx])) {
+                        // Super CSV reads an empty column name as null, the expected headers hold none
+                        if (!headers[idx].equals(actualHeaders[idx])) {
                             throw new IOException("Resuming an existing CSV file but the headers do not match.");
                         }
                     }
                 }
             }
         }
-        this.headers = checkNotNull(headers, "The headers can't be null.");
         csvFormatter = new CsvFormatter(csvPreference);
         csvWriter = constructWriter(csvFile, fileAlreadyInitialized, config);
 

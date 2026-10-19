@@ -398,6 +398,28 @@ public class CsvAuditEventHandlerTest {
     }
 
     @Test
+    public void testStartupWithAuditFileOfMoreColumnsThanTopicSchema() throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final Path auditFile = logDirectory.resolve("access.csv");
+        // written before the last field was removed from the topic schema
+        final String fileHeaders = "\"_id\",\"timestamp\",\"transactionId\",\"userId\"";
+        Files.write(auditFile, List.of(fileHeaders));
+
+        // the writer of the topic fails to open, and the handler starts without it
+        final CsvAuditEventHandler csvHandler = csvAuditEventHandler().loggingTo(logDirectory).build();
+        try {
+            AssertJPromiseAssert.assertThat(csvHandler.publishEvent(new RootContext(), "access", buildEvent()))
+                    .failedWithException()
+                    .isInstanceOf(BadRequestException.class);
+        } finally {
+            csvHandler.shutdown();
+        }
+
+        assertThat(Files.readAllLines(auditFile, UTF_8)).containsExactly(fileHeaders);
+    }
+
+    @Test
     public void testShutdownClosesEveryTamperEvidentWriterWhenOneFailsToClose() throws Exception {
         final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();

@@ -176,7 +176,8 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
                         throw new IOException("Resuming an existing CSV file but the headers do not match.");
                     }
                     for (int idx = 0; idx < actualHeaders.length; idx++) {
-                        if (!actualHeaders[idx].equals(headers[idx])) {
+                        // Super CSV reads an empty column name as null, the expected headers hold none
+                        if (!headers[idx].equals(actualHeaders[idx])) {
                             throw new IOException("Resuming an existing CSV file but the headers do not match.");
                         }
                     }
