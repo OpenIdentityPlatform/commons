@@ -118,15 +118,37 @@ public class TextWriterTest {
         final Thread secondPublisher = new Thread(secondFlush);
         secondPublisher.start();
         // the second flush waits for the first one, which is writing to the stream
-        while (secondPublisher.getState() != Thread.State.BLOCKED
-                && secondPublisher.getState() != Thread.State.WAITING) {
-            Thread.yield();
-        }
+        awaitWaiting(secondPublisher);
         outputStream.release.countDown();
 
         assertThatThrownBy(firstFlush::get).hasRootCauseMessage("No space left on device");
         // the event of the second publisher is lost too: its flush fails, instead of returning as if it was written
         assertThatThrownBy(secondFlush::get).hasRootCauseMessage("No space left on device");
+        assertThat(outputStream.written.size()).isZero();
+    }
+
+    @Test(timeOut = 10_000)
+    public void testStreamFailsTheWriteThatWaitsForAFailingFlush() throws Exception {
+        final FailingOnReleaseOutputStream outputStream = new FailingOnReleaseOutputStream();
+        final TextWriter.Stream writer = new TextWriter.Stream(outputStream);
+        // a publisher flushes its event while another one writes its own
+        writer.write("event1");
+        final FutureTask<Void> flush = newFlush(writer);
+        final FutureTask<Void> write = new FutureTask<>(() -> {
+            writer.write("event2");
+            return null;
+        });
+        new Thread(flush).start();
+        outputStream.entered.await();
+        final Thread secondPublisher = new Thread(write);
+        secondPublisher.start();
+        // the write waits for the flush, which is writing to the stream
+        awaitWaiting(secondPublisher);
+        outputStream.release.countDown();
+
+        assertThatThrownBy(flush::get).hasRootCauseMessage("No space left on device");
+        // the write fails, instead of putting its event into the buffers that the failure left unusable
+        assertThatThrownBy(write::get).hasRootCauseMessage("No space left on device");
         assertThat(outputStream.written.size()).isZero();
     }
 
@@ -139,7 +161,8 @@ public class TextWriterTest {
 
         writer.shutdown();
 
-        // on JDK 11, the close of the buffers leaves the stream open when its write fails, and the file with it
+        // on JDK 8 and 11, and on older updates of 17 and 21, the close of the buffers leaves the stream open when its
+        // write fails, and the file with it
         assertThat(outputStream.closed).isTrue();
     }
 
@@ -148,6 +171,13 @@ public class TextWriterTest {
             writer.flush();
             return null;
         });
+    }
+
+    /** Waits until the thread waits for a lock: a monitor, or the lock of a BufferedWriter, which JDK 21 parks on. */
+    private static void awaitWaiting(final Thread thread) {
+        while (thread.getState() != Thread.State.BLOCKED && thread.getState() != Thread.State.WAITING) {
+            Thread.yield();
+        }
     }
 
     /** Fails its first write once the test releases it, as a full disk does, and keeps what is written afterwards. */

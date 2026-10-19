@@ -104,7 +104,8 @@ final class FailFastWriter extends Writer {
                 // The text that the close failed to write is lost: the next flush and the rotations fail with it.
                 fail(e);
                 try {
-                    // on JDK 11, the close of the buffers leaves the stream open when its write fails
+                    // on JDK 8 and 11, and on older updates of 17 and 21, the close of the buffers leaves the stream
+                    // open when its write fails
                     stream.close();
                 } catch (IOException suppressed) {
                     e.addSuppressed(suppressed);
