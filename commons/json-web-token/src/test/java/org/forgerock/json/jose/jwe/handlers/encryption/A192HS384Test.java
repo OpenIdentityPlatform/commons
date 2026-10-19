@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
- * Portions copyright 2024-2025 3A Systems LLC.
+ * Portions copyright 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.json.jose.jwe.handlers.encryption;
@@ -24,7 +24,6 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
-import javax.xml.bind.DatatypeConverter;
 
 import org.forgerock.json.jose.exceptions.JweDecryptionException;
 import org.forgerock.json.jose.jwe.EncryptionMethod;
@@ -127,7 +126,12 @@ public class A192HS384Test {
     }
 
     private byte[] hexToBytes(String hex) {
-        return DatatypeConverter.parseHexBinary(hex.replaceAll("\\s+", ""));
+        final String digits = hex.replaceAll("\\s+", "");
+        final byte[] bytes = new byte[digits.length() / 2];
+        for (int i = 0; i < bytes.length; i++) {
+            bytes[i] = (byte) Integer.parseInt(digits.substring(2 * i, 2 * i + 2), 16);
+        }
+        return bytes;
     }
 
 

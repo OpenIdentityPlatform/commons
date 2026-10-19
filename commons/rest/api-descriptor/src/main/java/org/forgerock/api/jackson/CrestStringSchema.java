@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
- * Portions copyright 2024-2025 3A Systems LLC.
+ * Portions copyright 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.api.jackson;
@@ -28,7 +28,8 @@ import java.util.Map;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
 import javax.validation.ValidationException;
-import javax.xml.bind.DatatypeConverter;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
 
 import org.forgerock.api.enums.ReadPolicy;
 import com.google.common.net.InetAddresses;
@@ -138,7 +139,8 @@ class CrestStringSchema extends StringSchema implements CrestReadWritePoliciesSc
         case "date-time":
             // http://tools.ietf.org/html/rfc3339#section-5.6
             try {
-                DatatypeConverter.parseDateTime(s);
+                DatatypeFactoryHolder.DATATYPE_FACTORY.newXMLGregorianCalendar(trimXmlWhiteSpace(s))
+                        .toGregorianCalendar();
             } catch (IllegalArgumentException e) {
                 throw new ValidationException("Expected date-time format, but got " + s, e);
             }
@@ -148,7 +150,7 @@ class CrestStringSchema extends StringSchema implements CrestReadWritePoliciesSc
             // NOTE: supported by OpenAPI, but not defined by JSON Schema v4 spec
             // http://tools.ietf.org/html/rfc3339#section-5.6
             try {
-                DatatypeConverter.parseDate(s);
+                DatatypeFactoryHolder.DATATYPE_FACTORY.newXMLGregorianCalendar(s).toGregorianCalendar();
             } catch (IllegalArgumentException e) {
                 throw new ValidationException("Expected date/full-date format, but got " + s, e);
             }
@@ -190,6 +192,26 @@ class CrestStringSchema extends StringSchema implements CrestReadWritePoliciesSc
         }
     }
 
+    /**
+     * Strips the XML white space around {@code s}, which {@code DatatypeConverter.parseDateTime} trimmed and
+     * {@code parseDate} did not, in linear time.
+     */
+    private static String trimXmlWhiteSpace(final String s) {
+        int start = 0;
+        int end = s.length();
+        while (start < end && isXmlWhiteSpace(s.charAt(start))) {
+            start++;
+        }
+        while (end > start && isXmlWhiteSpace(s.charAt(end - 1))) {
+            end--;
+        }
+        return s.substring(start, end);
+    }
+
+    private static boolean isXmlWhiteSpace(final char c) {
+        return c == ' ' || c == '\t' || c == '\n' || c == '\r';
+    }
+
     // This method overrides the superclass' definition of "format" via JsonProperty annotation
     @JsonProperty("format")
     @Override
@@ -214,5 +236,21 @@ class CrestStringSchema extends StringSchema implements CrestReadWritePoliciesSc
     @Override
     public void setExample(String example) {
         this.example = example;
+    }
+
+    /**
+     * Shared like the one in {@code DatatypeConverterImpl}, which parsed these formats before, and created, as there,
+     * on the first date validation, so a failing lookup fails only date validation.
+     */
+    private static final class DatatypeFactoryHolder {
+        private static final DatatypeFactory DATATYPE_FACTORY;
+
+        static {
+            try {
+                DATATYPE_FACTORY = DatatypeFactory.newInstance();
+            } catch (DatatypeConfigurationException e) {
+                throw new IllegalStateException(e);
+            }
+        }
     }
 }

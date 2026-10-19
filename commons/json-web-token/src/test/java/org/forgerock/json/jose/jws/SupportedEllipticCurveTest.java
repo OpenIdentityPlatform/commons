@@ -12,13 +12,12 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
- * Portions copyright 2024-2025 3A Systems LLC.
+ * Portions copyright 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.json.jose.jws;
 
 import static java.math.BigInteger.ONE;
-import static javax.xml.bind.DatatypeConverter.printHexBinary;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigInteger;
@@ -98,6 +97,14 @@ public class SupportedEllipticCurveTest {
         // Then
         // Ensure that b^2 * r == a^3 (mod p)
         assertThat(b.modPow(BigInteger.valueOf(2), p).multiply(r).mod(p)).isEqualTo(a.modPow(BigInteger.valueOf(3), p));
+    }
+
+    private static String printHexBinary(byte[] data) {
+        final StringBuilder hex = new StringBuilder(data.length * 2);
+        for (byte b : data) {
+            hex.append(String.format("%02X", b));
+        }
+        return hex.toString();
     }
 
     private static byte[] removeSignByte(byte[] data, int bits) {
