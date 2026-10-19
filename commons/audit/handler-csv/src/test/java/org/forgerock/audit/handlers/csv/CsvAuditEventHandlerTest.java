@@ -425,7 +425,7 @@ public class CsvAuditEventHandlerTest {
         try {
             AssertJPromiseAssert.assertThat(csvHandler.publishEvent(new RootContext(), "access", buildEvent()))
                     .failedWithException()
-                    .isInstanceOf(BadRequestException.class);
+                    .isInstanceOf(InternalServerErrorException.class);
         } finally {
             csvHandler.shutdown();
         }
@@ -519,7 +519,7 @@ public class CsvAuditEventHandlerTest {
             assertThat(logDirectory.resolve(SECURE_CSV_FILENAME_PREFIX + otherTopic + ".csv").toFile())
                     .content().contains("\"_id2\"");
             AssertJPromiseAssert.assertThat(csvHandler.publishEvent(context, failingTopic, buildEvent(2)))
-                    .failedWithException().isInstanceOf(BadRequestException.class);
+                    .failedWithException().isInstanceOf(InternalServerErrorException.class);
         } finally {
             auditService.shutdown();
         }
@@ -666,7 +666,7 @@ public class CsvAuditEventHandlerTest {
     }
 
     @Test
-    public void testRestartLetsOtherTopicsPublishWhenTamperEvidentFileCannotBeResumed() throws Exception {
+    public void testRestartLetsOtherTopicsPublishWhenTamperEvidentKeyStoreCannotBeStored() throws Exception {
         final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
         final CsvAuditEventHandlerBuilder builder =
@@ -689,24 +689,29 @@ public class CsvAuditEventHandlerTest {
         final List<String> handledTopics = new ArrayList<>(csvHandler.getHandledTopics());
         final String failingTopic = handledTopics.get(0);
         final String otherTopic = handledTopics.get(1);
-        // The HMAC of the row no longer matches its value, so the file fails verification when it is resumed.
-        final Path failingFile = logDirectory.resolve(SECURE_CSV_FILENAME_PREFIX + failingTopic + ".csv");
-        final String content = new String(Files.readAllBytes(failingFile), UTF_8);
-        Files.write(failingFile, content.replace("transactionId-X", "transactionId-Y").getBytes(UTF_8));
+        // Without its file, the writer starts a new one, and stores its first keys into a keystore that it loads but
+        // cannot write. A file that cannot be resumed, or a keystore that cannot be loaded, fails with an IOException
+        // (#341), which startup() reports for the topic; a keystore that cannot be stored is still a RuntimeException.
+        Files.delete(logDirectory.resolve(SECURE_CSV_FILENAME_PREFIX + failingTopic + ".csv"));
+        final File failingKeyStore =
+                logDirectory.resolve(SECURE_CSV_FILENAME_PREFIX + failingTopic + ".csv.keystore").toFile();
+        if (!failingKeyStore.setWritable(false) || failingKeyStore.canWrite()) {
+            // As root, a file without the write permission can still be written.
+            throw new SkipException("The keystore of the CSV file cannot be made read-only");
+        }
 
         try {
-            csvHandler.startup();
-            // With #341, the writer throws an IOException instead, and startup() opens the other topic: this test
-            // then needs a failure of the writer that is still a RuntimeException.
-            fail("startup() does not throw for a file that the writer cannot resume");
-        } catch (RuntimeException e) {
-            // The writer throws it for a file that it cannot resume (#340), and startup() opens no other topic.
-        }
-        try {
+            try {
+                csvHandler.startup();
+                fail("startup() does not throw for a keystore that the writer cannot store");
+            } catch (RuntimeException e) {
+                // The writer throws it for the keys that it cannot store (#340), and startup() opens no other topic.
+            }
             // The handler is no longer shut down: the topics that startup() did not open open at their next event.
             csvHandler.publishEvent(context, otherTopic, buildEvent(2)).getOrThrow();
         } finally {
             csvHandler.shutdown();
+            failingKeyStore.setWritable(true);
         }
 
         assertThat(logDirectory.resolve(SECURE_CSV_FILENAME_PREFIX + otherTopic + ".csv").toFile())
