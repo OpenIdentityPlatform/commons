@@ -821,9 +821,11 @@ public class CsvAuditEventHandlerTest {
                     .failedWithException()
                     .isInstanceOf(InternalServerErrorException.class);
             writers.put("access", notRotatingWriter);
+            // Not wrapped into the failure of forceRotation(): a ResourceException is an IOException.
             AssertJPromiseAssert.assertThat(csvHandler.handleAction(context, "access", rotateRequest))
                     .failedWithException()
-                    .isInstanceOf(InternalServerErrorException.class);
+                    .isInstanceOf(InternalServerErrorException.class)
+                    .hasMessage("Unable to rotate file for topic: access");
         } finally {
             csvHandler.shutdown();
         }

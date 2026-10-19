@@ -478,7 +478,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
                     throw new ServiceUnavailableException("Unable to rotate file for topic: " + topic
                             + ", the handler is shut down");
                 }
-                // the writer of the topic could not be opened
+                // no writer: it could not be opened, or a default rotation could not rename the file
                 throw new InternalServerErrorException("Unable to rotate file for topic: " + topic);
             }
             if (rotationEnabled) {
