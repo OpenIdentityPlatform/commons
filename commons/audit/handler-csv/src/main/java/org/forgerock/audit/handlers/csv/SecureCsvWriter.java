@@ -83,14 +83,18 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
     private HmacCalculator hmacCalculator;
     private final ScheduledExecutorService scheduler;
     private final ReentrantLock signatureLock = new ReentrantLock();
-    private final Runnable signatureTask;
     private KeyStoreSecureStorage secureStorage;
     private final Duration signatureInterval;
     private ScheduledFuture<?> scheduledSignature;
+    /** The scheduled signature task until it starts, as it signs the events written until then. */
+    private SignatureTask pendingSignature;
 
     private String lastHMAC;
     private byte[] lastSignature;
+    /** Whether events were written since the last signature. */
+    private boolean unsignedEvents = false;
     private boolean headerWritten = false;
+    private boolean closed = false;
     private final Random random;
     private File keyStoreFile;
     private String keyStorePassword;
@@ -198,16 +202,6 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
 
             this.signatureInterval = securityConfiguration.getSignatureIntervalDuration();
             this.scheduler = Executors.newScheduledThreadPool(1);
-            this.signatureTask = new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        writeSignature(csvWriter);
-                    } catch (Exception ex) {
-                        logger.error("An error occurred while writing the signature", ex);
-                    }
-                }
-            };
         } catch (Exception e) {
             // Nothing else closes a writer that fails to construct: the file would stay open, and with rotation the
             // rotator thread, which is not a daemon thread, would keep running.
@@ -275,6 +269,11 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
 
     @Override
     public void close() throws IOException {
+        // The final signature flushes the writer, which throws once it is closed.
+        if (closed) {
+            return;
+        }
+        closed = true;
         try {
             signatureLock.lock();
             try {
@@ -300,9 +299,11 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
 
     private void forceWriteSignature(Writer writer) throws IOException {
         if (scheduledSignature != null && scheduledSignature.cancel(false)) {
-            // We were able to cancel it before it starts, so let's generate the signature now.
-            writeSignature(writer);
+            pendingSignature = null;
         }
+        // Sign the events written since the last signature now, whether the scheduled signature has run or not:
+        // a rotation on write can come before any signature is scheduled for the event that triggers it.
+        writeSignature(writer);
     }
 
     public void writeHeader(String... header) throws IOException {
@@ -322,7 +323,13 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
         // and the signature's row write, as the calculation uses the lastHMAC.
         signatureLock.lock();
         try {
+            if (!unsignedEvents) {
+                logger.trace("No event to sign");
+                return;
+            }
             lastSignature = secureStorage.sign(dataToSign(lastSignature, lastHMAC));
+            // Before the row is written: writing it may rotate the file, and the rotation signs the unsigned events.
+            unsignedEvents = false;
             logger.trace("Calculated new Signature");
             Map<String, String> values = singletonMap(HEADER_SIGNATURE, Base64.encode(lastSignature));
             writeEvent(writer, values);
@@ -372,9 +379,6 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
     public void writeEvent(Writer writer, Map<String, String> values) throws IOException {
         signatureLock.lock();
         try {
-            if (!headerWritten) {
-                writeHeader(headers);
-            }
             String[] extendedHeaders = addExtraColumns(headers);
 
             Map<String, String> extendedValues = new HashMap<>(values);
@@ -382,18 +386,27 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
                 insertHMACSignature(extendedValues, headers);
             }
 
-            writer.write(csvFormatter.formatEvent(extendedValues, extendedHeaders));
+            String row = csvFormatter.formatEvent(extendedValues, extendedHeaders);
+            if (!headerWritten) {
+                // The header and the first event in one write, so that a rotation this write triggers archives both
+                // and signs the event; set first, as the signature that this rotation writes comes from inside it.
+                row = csvFormatter.formatHeader(extendedHeaders) + row;
+                headerWritten = true;
+            }
+            writer.write(row);
             writer.flush();
             // Store the current key
             secureStorage.writeCurrentKey(hmacCalculator.getCurrentKey());
 
-            // Schedule a signature task only if needed.
-            if (!values.containsKey(HEADER_SIGNATURE)
-                    && (scheduledSignature == null || scheduledSignature.isDone())) {
+            // Schedule a signature task only if needed: a rotation during the write signed the event already, and
+            // a task that has started may have signed already, while it is not done yet.
+            if (unsignedEvents && pendingSignature == null) {
                 logger.trace("Triggering a new signature task to be executed in {}", signatureInterval);
                 try {
+                    final SignatureTask signatureTask = new SignatureTask();
                     scheduledSignature = scheduler.schedule(signatureTask, signatureInterval.getValue(),
                             signatureInterval.getUnit());
+                    pendingSignature = signatureTask;
                 } catch (RejectedExecutionException e) {
                     logger.error(e.getMessage(), e);
                 }
@@ -409,6 +422,7 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
         try {
             lastHMAC = hmacCalculator.calculate(dataToSign(logger, values, nameMapping));
             values.put(CsvSecureConstants.HEADER_HMAC, lastHMAC);
+            unsignedEvents = true;
         } catch (SignatureException ex) {
             logger.error(ex.getMessage(), ex);
             throw new IOException(ex);
@@ -473,12 +487,40 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
                 throw new IOException(ex);
             }
 
+            if (lastSignature == null) {
+                // Nothing was signed yet, so there is nothing to chain: the new file stays empty, as a new file does,
+                // and its header is written along with its first event.
+                headerWritten = false;
+                return;
+            }
             Writer writer = context.getWriter();
             writeHeader(writer, headers);
             // ensure the signature chaining along the files
             writeLastSignature(writer);
             // In case of low traffic we still want the headers to be written into the file
             writer.flush();
+        }
+    }
+
+    private class SignatureTask implements Runnable {
+
+        @Override
+        public void run() {
+            signatureLock.lock();
+            try {
+                // The events written from now on come after this signature, so they schedule the next one, even
+                // before this task is done. A rotation or close() may have cancelled this task while it waited for
+                // the lock, as cancel(false) does not stop a started task, and an event may have scheduled another
+                // one since: that one stays pending.
+                if (pendingSignature == this) {
+                    pendingSignature = null;
+                }
+                writeSignature(csvWriter);
+            } catch (Exception ex) {
+                logger.error("An error occurred while writing the signature", ex);
+            } finally {
+                signatureLock.unlock();
+            }
         }
     }
 }

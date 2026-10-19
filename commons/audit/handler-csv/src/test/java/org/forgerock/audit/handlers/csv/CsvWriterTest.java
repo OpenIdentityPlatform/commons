@@ -285,21 +285,22 @@ public class CsvWriterTest {
             writeNRows(header, writer, 12);
         }
 
-        // TODO - Commenting this test part out until the verifier can verify a rotated log file.
-        // verify the new audit file that was created after the rotation
-        //try (CsvMapReader reader = new CsvMapReader(new BufferedReader(new FileReader(csvFile)), csvPreference)) {
-        //    CsvSecureVerifier verifier = new CsvSecureVerifier(reader, SecureCsvWriterTest.TRUSTSTORE_FILENAME,
-        //            SecureCsvWriterTest.TRUSTSTORE_PASSWORD);
-        //    assertThat(verifier.verify()).isTrue();
-        //}
+        String password = Base64.encode(
+                keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded());
+
+        // Verify the new audit file that was created after the rotation.
+        KeyStoreHandler liveKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE,
+                csvFile.getPath() + ".keystore", password);
+        SecureStorage liveSecureStorage = new KeyStoreSecureStorage(liveKeyStoreHandler,
+                keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE));
+        CsvSecureVerifier liveVerifier = new CsvSecureVerifier(csvFile, csvPreference, liveSecureStorage);
+        assertThat(liveVerifier.verify().hasPassedVerification()).as("File " + csvFile.getPath()).isTrue();
 
         // Verify the archived audit file.
         final TimestampFilenameFilter timestampFilenameFilter =
                 new TimestampFilenameFilter(csvFile, PREFIX, DateTimeFormat.forPattern(TIME_STAMP_FORMAT));
         final File[] files = csvFile.getParentFile().listFiles(timestampFilenameFilter);
         assertThat(files).isNotEmpty();
-        String password = Base64.encode(
-                keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded());
         KeyStoreHandler csvKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE,
                 files[0].getPath() + ".keystore", password);
         SecureStorage secureStorage = new KeyStoreSecureStorage(csvKeyStoreHandler,

@@ -156,7 +156,7 @@ public class CsvSecureVerifierTest {
 
     @Test
     public void shouldNotVerifyEmptyFile() throws Exception {
-        // the rotate action archives an audit file that has no event, so its header was never written
+        // a file truncated to nothing: the current key of its keystore moved on with the rows that were removed
         File csvFile = Files.createTempFile("CsvSecureVerifierTest", ".csv").toFile();
         csvFile.deleteOnExit();
         KeyStoreHandlerDecorator keyStoreHandler = new KeyStoreHandlerDecorator(
@@ -166,7 +166,7 @@ public class CsvSecureVerifierTest {
                         keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE)));
         CsvSecureVerifier.VerificationResult verificationResult = csvVerifier.verify();
         assertThat(verificationResult.hasPassedVerification()).isFalse();
-        assertThat(verificationResult.getFailureReason()).isNotEmpty();
+        assertThat(verificationResult.getFailureReason()).isEqualTo("Final HMAC key doesn't match expected value");
     }
 
     @DataProvider
