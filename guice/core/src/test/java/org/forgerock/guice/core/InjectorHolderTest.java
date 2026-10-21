@@ -21,7 +21,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
 import jakarta.inject.Inject;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.lang.annotation.Annotation;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -43,9 +46,14 @@ import org.testng.annotations.Test;
 public class InjectorHolderTest {
 
     private GuiceModuleLoader defaultModuleLoader;
+    private PrintStream defaultErr;
+    private ByteArrayOutputStream capturedErr;
 
     @BeforeMethod
-    public void setUp() {
+    public void setUp() throws Exception {
+        defaultErr = System.err;
+        capturedErr = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(capturedErr, true, StandardCharsets.UTF_8.name()));
         defaultModuleLoader = InjectorConfiguration.getGuiceModuleLoader();
         InjectorConfiguration.setGuiceModuleLoader(new TestGuiceModuleLoader());
         InjectorHolder.reset();
@@ -53,6 +61,7 @@ public class InjectorHolderTest {
 
     @AfterMethod(alwaysRun = true)
     public void tearDown() {
+        System.setErr(defaultErr);
         InjectorHolder.reset();
         InjectorConfiguration.setGuiceModuleLoader(defaultModuleLoader);
     }
@@ -158,6 +167,7 @@ public class InjectorHolderTest {
         assertThat(second).isInstanceOf(IllegalStateException.class).isNotSameAs(first);
         assertThat(second.getCause()).isSameAs(first.getCause());
         assertThat(loader.calls()).isEqualTo(1);
+        assertThat(capturedErr()).containsOnlyOnce(first.getCause().toString());
     }
 
     @Test
@@ -179,6 +189,7 @@ public class InjectorHolderTest {
         assertThat(afterUnregister).isInstanceOf(IllegalStateException.class);
         assertThat(afterUnregister.getCause()).isSameAs(failure.getCause());
         assertThat(loader.calls()).isEqualTo(1);
+        assertThat(capturedErr()).containsOnlyOnce(failure.getCause().toString());
     }
 
     @Test
@@ -276,6 +287,11 @@ public class InjectorHolderTest {
         assertThat(second).isInstanceOf(IllegalStateException.class);
         assertThat(second.getCause()).isSameAs(first.getCause());
         assertThat(loader.calls()).isEqualTo(1);
+        assertThat(capturedErr()).containsOnlyOnce(first.getCause().toString());
+    }
+
+    private String capturedErr() {
+        return new String(capturedErr.toByteArray(), StandardCharsets.UTF_8);
     }
 
     private static void awaitUninterruptibly(CountDownLatch latch) {

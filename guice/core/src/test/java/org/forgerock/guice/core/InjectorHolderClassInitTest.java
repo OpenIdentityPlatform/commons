@@ -18,9 +18,12 @@ package org.forgerock.guice.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.PrintStream;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 
 import org.testng.annotations.Test;
@@ -32,12 +35,22 @@ public class InjectorHolderClassInitTest {
         try (URLClassLoader isolated = new URLClassLoader(testClassPath(), ClassLoader.getPlatformClassLoader())) {
             Class<?> probe = Class.forName(InjectorHolderClassInitProbe.class.getName(), true, isolated);
 
-            Object result = probe.getMethod("run").invoke(null);
+            PrintStream defaultErr = System.err;
+            ByteArrayOutputStream capturedErr = new ByteArrayOutputStream();
+            Object result;
+            System.setErr(new PrintStream(capturedErr, true, StandardCharsets.UTF_8.name()));
+            try {
+                result = probe.getMethod("run").invoke(null);
+            } finally {
+                System.setErr(defaultErr);
+            }
 
             assertThat(probe).isNotSameAs(InjectorHolderClassInitProbe.class);
             assertThat(result).isEqualTo("init: ok, loader calls 0"
                     + "; first use: IllegalStateException caused by UnsupportedOperationException"
                     + "; second use: IllegalStateException caused by UnsupportedOperationException, loader calls 1");
+            assertThat(new String(capturedErr.toByteArray(), StandardCharsets.UTF_8))
+                    .containsOnlyOnce("java.lang.UnsupportedOperationException: no modules on this class path");
         }
     }
 
