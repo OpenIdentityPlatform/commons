@@ -257,6 +257,28 @@ public class InjectorHolderTest {
         assertThat(second.get()).isSameAs(first.get());
     }
 
+    @Test(timeOut = 10_000)
+    public void shouldNotBuildTheRootInjectorUnderTheMonitorOfInstance() throws Exception {
+
+        //Given
+        AtomicReference<Injector> built = new AtomicReference<>();
+        Thread caller = new Thread(() -> built.set(InjectorHolder.getInjector()));
+        caller.setDaemon(true);
+
+        //When
+        boolean blockedByTheMonitor;
+        synchronized (InjectorHolder.INSTANCE) {
+            caller.start();
+            caller.join(5_000);
+            blockedByTheMonitor = caller.isAlive();
+        }
+        caller.join();
+
+        //Then
+        assertThat(blockedByTheMonitor).isFalse();
+        assertThat(built.get()).isNotNull();
+    }
+
     @Test
     public void shouldBuildTheRootInjectorAgainAfterAnErrorThatIsNotALinkageError() {
 
