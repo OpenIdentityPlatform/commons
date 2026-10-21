@@ -290,6 +290,20 @@ public class InjectorHolderTest {
         assertThat(capturedErr()).containsOnlyOnce(first.getCause().toString());
     }
 
+    @Test
+    public void shouldRejectACallFromAModuleWhileBuildingTheRootInjector() {
+
+        //Given
+        InjectorConfiguration.setGuiceModuleLoader(new CountingModuleLoader(ReentrantModule.class));
+
+        //When
+        Throwable failure = catchThrowable(() -> InjectorHolder.getInstance(TestInterface.class));
+
+        //Then
+        assertThat(failure).isInstanceOf(IllegalStateException.class)
+                .hasStackTraceContaining("while it was building the root injector");
+    }
+
     private String capturedErr() {
         return new String(capturedErr.toByteArray(), StandardCharsets.UTF_8);
     }
@@ -373,6 +387,15 @@ public class InjectorHolderTest {
 
         @Override
         protected void configure() {
+        }
+    }
+
+    /** Calls InjectorHolder from configure(), that is while the root injector is being built. */
+    public static final class ReentrantModule extends AbstractModule {
+
+        @Override
+        protected void configure() {
+            InjectorHolder.getInstance(TestDependency.class);
         }
     }
 
