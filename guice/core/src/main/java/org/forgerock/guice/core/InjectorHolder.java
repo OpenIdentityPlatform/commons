@@ -17,6 +17,8 @@
 
 package org.forgerock.guice.core;
 
+import java.util.ServiceConfigurationError;
+
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
@@ -36,8 +38,11 @@ import com.google.inject.Module;
  *
  * <p>The root injector is built by the first call that needs it, from the {@link GuiceModuleLoader}, the module
  * annotation and the {@link com.google.inject.Stage} that {@link InjectorConfiguration} holds at that moment, and not
- * when this class is initialised. If that build fails, the failure is kept: that call and every later call that needs
- * the root injector throw a new {@link IllegalStateException} caused by the original failure.</p>
+ * when this class is initialised. If that build fails with an exception, a {@link LinkageError} (such as a module class
+ * whose initialisation failed) or a {@link ServiceConfigurationError} (such as a module the
+ * {@link java.util.ServiceLoader} could not instantiate), the failure is kept: that call and every later call that
+ * needs the root injector throw a new {@link IllegalStateException} caused by it. Any other {@link Error} is thrown as
+ * it is and the next call builds again.</p>
  *
  * @see com.google.inject.Injector
  *
@@ -187,7 +192,7 @@ public enum InjectorHolder {
                 try {
                     root = createRoot();
                     return root;
-                } catch (Exception | LinkageError e) {
+                } catch (Exception | LinkageError | ServiceConfigurationError e) {
                     /*
                      * This could occur during application server startup, if there is an error in the Guice module
                      * bindings. The applications debugging framework may not be available at this point.
@@ -200,7 +205,8 @@ public enum InjectorHolder {
                     building = false;
                 }
             }
-            throw new IllegalStateException("Failed to build the root Guice injector", rootFailure);
+            throw new IllegalStateException("Failed to build the root Guice injector: " + rootFailure,
+                    rootFailure);
         }
     }
 

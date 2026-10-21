@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.ServiceConfigurationError;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,6 +40,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 
+import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -60,8 +62,11 @@ public class InjectorHolderTest {
     }
 
     @AfterMethod(alwaysRun = true)
-    public void tearDown() {
+    public void tearDown(ITestResult result) {
         System.setErr(defaultErr);
+        if (!result.isSuccess()) {
+            defaultErr.print(capturedErr());
+        }
         InjectorHolder.reset();
         InjectorConfiguration.setGuiceModuleLoader(defaultModuleLoader);
     }
@@ -230,14 +235,19 @@ public class InjectorHolderTest {
 
         //When
         Thread builder = new Thread(() -> first.set(InjectorHolder.getInjector()));
-        builder.start();
-        loaderEntered.await();
+        builder.setDaemon(true);
         Thread waiter = new Thread(() -> second.set(InjectorHolder.getInjector()));
-        waiter.start();
-        while (waiter.getState() == Thread.State.NEW || waiter.getState() == Thread.State.RUNNABLE) {
-            Thread.sleep(5);
+        waiter.setDaemon(true);
+        try {
+            builder.start();
+            loaderEntered.await();
+            waiter.start();
+            while (waiter.getState() == Thread.State.NEW || waiter.getState() == Thread.State.RUNNABLE) {
+                Thread.sleep(5);
+            }
+        } finally {
+            releaseLoader.countDown();
         }
-        releaseLoader.countDown();
         builder.join();
         waiter.join();
 
@@ -301,7 +311,30 @@ public class InjectorHolderTest {
 
         //Then
         assertThat(failure).isInstanceOf(IllegalStateException.class)
+                .hasMessageStartingWith("Failed to build the root Guice injector")
+                .hasCauseInstanceOf(com.google.inject.CreationException.class)
                 .hasStackTraceContaining("while it was building the root injector");
+        assertThat(capturedErr()).doesNotContain("Failed to build the root Guice injector");
+    }
+
+    @Test
+    public void shouldKeepAModuleTheServiceLoaderCouldNotInstantiateWithItsCause() {
+
+        //Given
+        FailingServiceLoaderWrapper wrapper = new FailingServiceLoaderWrapper();
+        InjectorConfiguration.setGuiceModuleLoader(new GuiceModuleServiceLoader(wrapper));
+
+        //When
+        Throwable first = catchThrowable(() -> InjectorHolder.getInstance(TestInterface.class));
+        Throwable second = catchThrowable(() -> InjectorHolder.getInstance(TestInterface.class));
+
+        //Then
+        assertThat(first).isInstanceOf(IllegalStateException.class)
+                .hasCauseInstanceOf(ServiceConfigurationError.class);
+        assertThat(second).isInstanceOf(IllegalStateException.class);
+        assertThat(second.getCause()).isSameAs(first.getCause());
+        assertThat(wrapper.calls()).isEqualTo(1);
+        assertThat(capturedErr()).containsOnlyOnce(first.getCause().toString());
     }
 
     private String capturedErr() {
@@ -359,6 +392,25 @@ public class InjectorHolderTest {
         public Set<Class<? extends Module>> getGuiceModules(Class<? extends Annotation> moduleAnnotation) {
             calls.incrementAndGet();
             throw new UnsupportedOperationException(MESSAGE);
+        }
+
+        int calls() {
+            return calls.get();
+        }
+    }
+
+    /** Its iterator throws ServiceConfigurationError, as a ServiceLoader does for a module it cannot instantiate. */
+    private static final class FailingServiceLoaderWrapper extends ServiceLoaderWrapper {
+
+        private final AtomicInteger calls = new AtomicInteger();
+
+        @Override
+        <S> Iterable<S> load(Class<S> service) {
+            calls.incrementAndGet();
+            return () -> {
+                throw new ServiceConfigurationError("module could not be instantiated",
+                        new ExceptionInInitializerError("module initialisation failed"));
+            };
         }
 
         int calls() {
