@@ -64,8 +64,6 @@ public enum InjectorHolder {
     private volatile Injector registered;
     /** Guarded by {@code rootLock}. */
     private Throwable rootFailure;
-    /** Guarded by {@code rootLock}: whether the thread holding the lock is building the root injector. */
-    private boolean building;
 
     /**
      * <p>Uses the Guice injector to return the appropriate instance for the given injection type.</p>
@@ -182,17 +180,16 @@ public enum InjectorHolder {
         if (injector != null) {
             return injector;
         }
+        if (Thread.holdsLock(rootLock)) {
+            // Only a build holds rootLock while it calls out, so this call comes from the build, such as from a module
+            throw new IllegalStateException(
+                    "InjectorHolder was called while it was building the root injector, by the building thread");
+        }
         synchronized (rootLock) {
             if (root != null) {
                 return root;
             }
             if (rootFailure == null) {
-                if (building) {
-                    throw new IllegalStateException(
-                            "InjectorHolder was called while it was building the root injector, "
-                                    + "by the building thread");
-                }
-                building = true;
                 try {
                     root = createRoot();
                     return root;
@@ -208,8 +205,6 @@ public enum InjectorHolder {
                      */
                     t.printStackTrace();
                     rootFailure = t;
-                } finally {
-                    building = false;
                 }
             }
             throw new IllegalStateException("Failed to build the root Guice injector: " + rootFailure,
