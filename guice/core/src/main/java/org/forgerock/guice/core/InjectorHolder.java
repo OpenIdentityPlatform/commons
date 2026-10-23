@@ -17,7 +17,10 @@
 
 package org.forgerock.guice.core;
 
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.ServiceConfigurationError;
+import java.util.Set;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -40,9 +43,10 @@ import com.google.inject.Module;
  * annotation and the {@link com.google.inject.Stage} that {@link InjectorConfiguration} holds at that moment, and not
  * when this class is initialised. If that build fails with an exception, a {@link LinkageError} (such as a module class
  * whose initialisation failed) or a {@link ServiceConfigurationError} (such as a module the
- * {@link java.util.ServiceLoader} could not instantiate), the failure is kept: that call and every later call that
- * needs the root injector throw a new {@link IllegalStateException} caused by it. Any other {@link Error} is thrown as
- * it is and the next call builds again.</p>
+ * {@link java.util.ServiceLoader} could not find or instantiate), or with an error caused by one (such as the error in
+ * which Guice wraps a {@link NoClassDefFoundError} for a class missing from the class path), the failure is kept: that
+ * call and every later call that needs the root injector throw a new {@link IllegalStateException} caused by it. Any
+ * other {@link Error} is thrown as it is and the next call builds again.</p>
  *
  * @see com.google.inject.Injector
  *
@@ -192,15 +196,18 @@ public enum InjectorHolder {
                 try {
                     root = createRoot();
                     return root;
-                } catch (Exception | LinkageError | ServiceConfigurationError e) {
+                } catch (Throwable t) {
+                    if (!isKept(t)) {
+                        throw t;
+                    }
                     /*
                      * This could occur during application server startup, if there is an error in the Guice module
                      * bindings. The applications debugging framework may not be available at this point.
                      *
                      * The error gets consumed by the container startup, which is why we are printing the stack trace.
                      */
-                    e.printStackTrace();
-                    rootFailure = e;
+                    t.printStackTrace();
+                    rootFailure = t;
                 } finally {
                     building = false;
                 }
@@ -208,6 +215,22 @@ public enum InjectorHolder {
             throw new IllegalStateException("Failed to build the root Guice injector: " + rootFailure,
                     rootFailure);
         }
+    }
+
+    /**
+     * Whether a failed build of the root injector is kept: whether the failure, or one of its causes, is an exception,
+     * a {@link LinkageError} or a {@link ServiceConfigurationError}. Guice rethrows an error raised in its caches, such
+     * as a {@link NoClassDefFoundError} for a class missing from the class path, wrapped in Guava's
+     * {@code ExecutionError}.
+     */
+    private static boolean isKept(Throwable failure) {
+        Set<Throwable> seen = Collections.newSetFromMap(new IdentityHashMap<>());
+        for (Throwable t = failure; t != null && seen.add(t); t = t.getCause()) {
+            if (t instanceof Exception || t instanceof LinkageError || t instanceof ServiceConfigurationError) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static Injector createRoot() {

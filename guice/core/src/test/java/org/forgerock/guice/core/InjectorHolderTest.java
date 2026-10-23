@@ -34,6 +34,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.google.common.util.concurrent.ExecutionError;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -323,6 +324,31 @@ public class InjectorHolderTest {
     }
 
     @Test
+    public void shouldKeepAnErrorCausedByALinkageErrorWithItsCause() {
+
+        //Given
+        AtomicInteger loaderCalls = new AtomicInteger();
+        InjectorConfiguration.setGuiceModuleLoader(moduleAnnotation -> {
+            loaderCalls.incrementAndGet();
+            // What Guice throws for a bound class with an @Inject field whose type is missing from the class path
+            throw new ExecutionError(new ExecutionError(new NoClassDefFoundError("Missing")));
+        });
+
+        //When
+        Throwable first = catchThrowable(() -> InjectorHolder.getInstance(TestInterface.class));
+        Throwable second = catchThrowable(() -> InjectorHolder.getInstance(TestInterface.class));
+
+        //Then
+        assertThat(first).isInstanceOf(IllegalStateException.class)
+                .hasCauseInstanceOf(ExecutionError.class)
+                .hasRootCauseInstanceOf(NoClassDefFoundError.class);
+        assertThat(second).isInstanceOf(IllegalStateException.class);
+        assertThat(second.getCause()).isSameAs(first.getCause());
+        assertThat(loaderCalls).hasValue(1);
+        assertThat(capturedErr()).containsOnlyOnce(first.getCause().toString());
+    }
+
+    @Test
     public void shouldRejectACallFromAModuleWhileBuildingTheRootInjector() {
 
         //Given
@@ -340,7 +366,7 @@ public class InjectorHolderTest {
     }
 
     @Test
-    public void shouldKeepAModuleTheServiceLoaderCouldNotInstantiateWithItsCause() {
+    public void shouldKeepAModuleTheServiceLoaderCouldNotFindWithItsCause() {
 
         //Given
         FailingServiceLoaderWrapper wrapper = new FailingServiceLoaderWrapper();
@@ -421,7 +447,10 @@ public class InjectorHolderTest {
         }
     }
 
-    /** Its iterator throws ServiceConfigurationError, as a ServiceLoader does for a module it cannot instantiate. */
+    /**
+     * Its iterator throws a ServiceConfigurationError with no cause, as a ServiceLoader does for a module class that
+     * is missing from the class path.
+     */
     private static final class FailingServiceLoaderWrapper extends ServiceLoaderWrapper {
 
         private final AtomicInteger calls = new AtomicInteger();
@@ -430,8 +459,8 @@ public class InjectorHolderTest {
         <S> Iterable<S> load(Class<S> service) {
             calls.incrementAndGet();
             return () -> {
-                throw new ServiceConfigurationError("module could not be instantiated",
-                        new ExceptionInInitializerError("module initialisation failed"));
+                throw new ServiceConfigurationError(
+                        "com.google.inject.Module: Provider org.forgerock.guice.core.MissingModule not found");
             };
         }
 
