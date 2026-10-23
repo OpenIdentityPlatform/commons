@@ -40,7 +40,7 @@ public abstract class GuiceTestCase implements Module {
 
     /**
      * Binds this object and any modules declared from the GuiceModules annotation in an injector, and registers it
-     * in the InjectorHolder.
+     * in the InjectorHolder. It does not build the root injector of the InjectorHolder.
      * @throws Exception Thrown on failure of any type.
      */
     @BeforeMethod
@@ -63,16 +63,17 @@ public abstract class GuiceTestCase implements Module {
             }
         };
 
-        this.oldInjector = InjectorHolder.getInjector();
+        this.oldInjector = InjectorHolder.registeredInjector();
         Injector injector = Guice.createInjector(Modules.override(modules).with(overrideModule));
         InjectorHolder.INSTANCE.register(injector);
     }
 
     /**
-     * After the test method has run, the injector is reset to its old value.
+     * After the test method has run, the injector is reset to its old value, also when a setup failed or the test
+     * method was skipped.
      * @throws Exception Thrown on failure of any type.
      */
-    @AfterMethod
+    @AfterMethod(alwaysRun = true)
     public void teardownGuiceModules() throws Exception {
         InjectorHolder.INSTANCE.register(oldInjector);
     }
