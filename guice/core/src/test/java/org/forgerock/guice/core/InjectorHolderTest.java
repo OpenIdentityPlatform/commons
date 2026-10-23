@@ -24,6 +24,10 @@ import jakarta.inject.Inject;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.lang.annotation.Annotation;
+import java.lang.management.LockInfo;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
@@ -258,7 +262,7 @@ public class InjectorHolderTest {
         assertThat(second.get()).isSameAs(first.get());
     }
 
-    @Test(timeOut = 10_000)
+    @Test
     public void shouldNotBuildTheRootInjectorUnderTheMonitorOfInstance() throws Exception {
 
         //Given
@@ -270,8 +274,7 @@ public class InjectorHolderTest {
         boolean blockedByTheMonitor;
         synchronized (InjectorHolder.INSTANCE) {
             caller.start();
-            caller.join(5_000);
-            blockedByTheMonitor = caller.isAlive();
+            blockedByTheMonitor = blocksOnTheMonitorOf(caller, InjectorHolder.INSTANCE);
         }
         caller.join();
 
@@ -387,6 +390,21 @@ public class InjectorHolderTest {
 
     private String capturedErr() {
         return new String(capturedErr.toByteArray(), StandardCharsets.UTF_8);
+    }
+
+    /** Waits until the thread terminates or blocks on the monitor of the object, and returns whether it blocked. */
+    private static boolean blocksOnTheMonitorOf(Thread thread, Object monitor) throws InterruptedException {
+        ThreadMXBean threads = ManagementFactory.getThreadMXBean();
+        while (thread.getState() != Thread.State.TERMINATED) {
+            ThreadInfo info = threads.getThreadInfo(thread.getId());
+            LockInfo lock = info != null && info.getThreadState() == Thread.State.BLOCKED ? info.getLockInfo() : null;
+            if (lock != null && lock.getIdentityHashCode() == System.identityHashCode(monitor)
+                    && lock.getClassName().equals(monitor.getClass().getName())) {
+                return true;
+            }
+            Thread.sleep(5);
+        }
+        return false;
     }
 
     private static void awaitUninterruptibly(CountDownLatch latch) {
