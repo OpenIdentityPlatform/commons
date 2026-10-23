@@ -69,10 +69,11 @@ public abstract class GuiceTestCase implements Module {
     }
 
     /**
-     * After the test method has run, the injector is reset to its old value.
+     * After the test method has run, the injector is reset to its old value, also when a setup failed or the test
+     * method was skipped.
      * @throws Exception Thrown on failure of any type.
      */
-    @AfterMethod
+    @AfterMethod(alwaysRun = true)
     public void teardownGuiceModules() throws Exception {
         InjectorHolder.INSTANCE.register(oldInjector);
     }
