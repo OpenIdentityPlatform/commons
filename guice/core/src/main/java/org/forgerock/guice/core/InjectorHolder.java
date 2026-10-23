@@ -62,8 +62,11 @@ public enum InjectorHolder {
     private final Object rootLock = new Object();
     private volatile Injector root;
     private volatile Injector registered;
-    /** Guarded by {@code rootLock}. */
-    private Throwable rootFailure;
+    /**
+     * Reports a kept failure to build the root injector, with that failure as its cause. Each call that needs the root
+     * injector throws a new copy of it, so its message is made once. Written under {@code rootLock}.
+     */
+    private volatile IllegalStateException rootFailure;
 
     /**
      * <p>Uses the Guice injector to return the appropriate instance for the given injection type.</p>
@@ -180,6 +183,10 @@ public enum InjectorHolder {
         if (injector != null) {
             return injector;
         }
+        IllegalStateException failure = rootFailure;
+        if (failure != null) {
+            throw new IllegalStateException(failure.getMessage(), failure.getCause());
+        }
         if (Thread.holdsLock(rootLock)) {
             // Only a build holds rootLock while it calls out, so this call comes from the build, such as from a module
             throw new IllegalStateException(
@@ -204,12 +211,12 @@ public enum InjectorHolder {
                      * The error gets consumed by the container startup, which is why we are printing the stack trace.
                      */
                     t.printStackTrace();
-                    rootFailure = t;
+                    rootFailure = new IllegalStateException("Failed to build the root Guice injector: " + t, t);
                 }
             }
-            throw new IllegalStateException("Failed to build the root Guice injector: " + rootFailure,
-                    rootFailure);
+            failure = rootFailure;
         }
+        throw new IllegalStateException(failure.getMessage(), failure.getCause());
     }
 
     /**

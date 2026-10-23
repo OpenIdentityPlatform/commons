@@ -28,6 +28,7 @@ import java.lang.management.LockInfo;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
@@ -284,6 +285,39 @@ public class InjectorHolderTest {
     }
 
     @Test
+    public void shouldReportAKeptFailureWithoutTakingTheLockOrFormattingItAgain() throws Exception {
+
+        //Given
+        CountingToStringException cause = new CountingToStringException();
+        InjectorConfiguration.setGuiceModuleLoader(moduleAnnotation -> {
+            throw cause;
+        });
+        Throwable first = catchThrowable(() -> InjectorHolder.getInstance(TestInterface.class));
+        int toStringCallsBefore = cause.toStringCalls();
+        AtomicReference<Throwable> second = new AtomicReference<>();
+        Thread caller = new Thread(
+                () -> second.set(catchThrowable(() -> InjectorHolder.getInstance(TestInterface.class))));
+        caller.setDaemon(true);
+
+        //When
+        Object rootLock = rootLock();
+        boolean blockedByTheLock;
+        synchronized (rootLock) {
+            caller.start();
+            blockedByTheLock = blocksOnTheMonitorOf(caller, rootLock);
+        }
+        caller.join();
+        int toStringCallsAfter = cause.toStringCalls();
+
+        //Then
+        assertThat(blockedByTheLock).isFalse();
+        assertThat(toStringCallsAfter).isEqualTo(toStringCallsBefore);
+        assertThat(second.get()).isInstanceOf(IllegalStateException.class).isNotSameAs(first)
+                .hasMessage(first.getMessage());
+        assertThat(second.get().getCause()).isSameAs(cause);
+    }
+
+    @Test
     public void shouldBuildTheRootInjectorAgainAfterAnErrorThatIsNotALinkageError() {
 
         //Given
@@ -392,6 +426,12 @@ public class InjectorHolderTest {
         return new String(capturedErr.toByteArray(), StandardCharsets.UTF_8);
     }
 
+    private static Object rootLock() throws ReflectiveOperationException {
+        Field field = InjectorHolder.class.getDeclaredField("rootLock");
+        field.setAccessible(true);
+        return field.get(InjectorHolder.INSTANCE);
+    }
+
     /** Waits until the thread terminates or blocks on the monitor of the object, and returns whether it blocked. */
     private static boolean blocksOnTheMonitorOf(Thread thread, Object monitor) throws InterruptedException {
         ThreadMXBean threads = ManagementFactory.getThreadMXBean();
@@ -462,6 +502,22 @@ public class InjectorHolderTest {
 
         int calls() {
             return calls.get();
+        }
+    }
+
+    /** Counts the calls to its toString(), which a message made with it, such as "..." + exception, makes. */
+    private static final class CountingToStringException extends RuntimeException {
+
+        private final AtomicInteger toStringCalls = new AtomicInteger();
+
+        @Override
+        public String toString() {
+            toStringCalls.incrementAndGet();
+            return super.toString();
+        }
+
+        int toStringCalls() {
+            return toStringCalls.get();
         }
     }
 
