@@ -12,9 +12,15 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.guice.core;
+
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.ServiceConfigurationError;
+import java.util.Set;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -33,41 +39,35 @@ import com.google.inject.Module;
  * <p>As more of the codebase is migrated to use Guice then this logical boundary will expand and the use of the
  * InjectorHolder should be moved further out with the boundary.</p>
  *
+ * <p>The root injector is built by the first call that needs it, from the {@link GuiceModuleLoader}, the module
+ * annotation and the {@link com.google.inject.Stage} that {@link InjectorConfiguration} holds at that moment, and not
+ * when this class is initialised. If that build fails with an exception, a {@link LinkageError} (such as a module class
+ * whose initialisation failed) or a {@link ServiceConfigurationError} (such as a module the
+ * {@link java.util.ServiceLoader} could not find or instantiate), or with an error caused by one (such as the error in
+ * which Guice wraps a {@link NoClassDefFoundError} for a class missing from the class path), the failure is kept: that
+ * call and every later call that needs the root injector throw a new {@link IllegalStateException} caused by it. Any
+ * other {@link Error} is thrown as it is and the next call builds again.</p>
+ *
  * @see com.google.inject.Injector
  *
  * @since 1.0.0
  */
 public enum InjectorHolder {
 
-	/**
+    /**
      * The Singleton instance of the InjectorHolder.
      */
     INSTANCE;
-	
-	private Injector injector;
 
+    private final Object rootLock = new Object();
+    private volatile Injector root;
+    private volatile Injector registered;
     /**
-     * Constructs an instance of the InjectorHolder and initialises the Guice Injector.
+     * Reports a kept failure to build the root injector, with that failure as its cause. Each call that needs the root
+     * injector throws a new copy of it, so its message is made once. Written under {@code rootLock}.
      */
-    private InjectorHolder() {
-        InjectorFactory injectorFactory = new InjectorFactory(new GuiceModuleCreator(),
-                new GuiceInjectorCreator(), InjectorConfiguration.getGuiceModuleLoader());
+    private volatile IllegalStateException rootFailure;
 
-        try {
-            injector = injectorFactory.createInjector(InjectorConfiguration.getModuleAnnotation());
-        } catch (Exception e) {
-            /*
-             * This could occur during application server startup, if there is an error in the Guice module bindings.
-             * The applications debugging framework may not be available at this point.
-             *
-             * The error gets consumed by the container startup, which is why we are printing the stack trace.
-             */
-            e.printStackTrace();
-            throw new IllegalStateException(e);
-        }
-    }
-
-   
     /**
      * <p>Uses the Guice injector to return the appropriate instance for the given injection type.</p>
      *
@@ -78,7 +78,7 @@ public enum InjectorHolder {
      * @return A non-null instance of the class.
      */
     public static <T> T getInstance(Class<T> clazz) {
-        return INSTANCE.injector.getInstance(clazz);
+        return INSTANCE.injector().getInstance(clazz);
     }
 
     /**
@@ -91,7 +91,7 @@ public enum InjectorHolder {
      * @return A non-null instance of the class defined by the key.
      */
     public static <T> T getInstance(Key<T> key) {
-        return INSTANCE.injector.getInstance(key);
+        return INSTANCE.injector().getInstance(key);
     }
 
     /**
@@ -106,7 +106,7 @@ public enum InjectorHolder {
      * @param instance A non-null instance to inject members on.
      */
     public static void injectMembers(Object instance) {
-        INSTANCE.injector.injectMembers(instance);
+        INSTANCE.injector().injectMembers(instance);
     }
 
     /**
@@ -126,21 +126,118 @@ public enum InjectorHolder {
      * @return A non-null child instance of the root injector.
      */
     public static Injector createChildInjector(Module... modules) {
-        return INSTANCE.injector.createChildInjector(modules);
+        return INSTANCE.injector().createChildInjector(modules);
     }
 
     /**
-     * <p>Retrieves the Guice injector.</p>
+     * <p>Retrieves the Guice injector: the injector registered with {@link #register(Injector)} if there is one,
+     * otherwise the root injector, which this call builds if it is not built yet.</p>
      *
      * <p>Use with care! Always prefer using #getInstance(Class).</p>
      *
      * @return The configured Guice injector.
+     * @throws IllegalStateException If the root injector is needed and could not be built, now or earlier.
      */
     static Injector getInjector() {
-        return INSTANCE.injector;
+        return INSTANCE.injector();
     }
 
+    /**
+     * Returns the injector registered with {@link #register(Injector)}, without building the root injector.
+     *
+     * @return The registered injector, or {@code null} if none is registered.
+     */
+    static Injector registeredInjector() {
+        return INSTANCE.registered;
+    }
+
+    /**
+     * Registers an injector to use instead of the root injector. The root injector, or the failure to build it, is
+     * kept, and used again once {@code null} is registered.
+     *
+     * @param injector The injector to use, or {@code null} to use the root injector again.
+     */
     void register(Injector injector) {
-        this.injector = injector;
+        registered = injector;
+    }
+
+    /**
+     * Forgets the registered injector, the root injector and any failure to build it, so that the next call that
+     * needs the root injector builds it again. For tests only.
+     */
+    static void reset() {
+        synchronized (INSTANCE.rootLock) {
+            INSTANCE.registered = null;
+            INSTANCE.root = null;
+            INSTANCE.rootFailure = null;
+        }
+    }
+
+    private Injector injector() {
+        Injector injector = registered;
+        return injector != null ? injector : root();
+    }
+
+    private Injector root() {
+        Injector injector = root;
+        if (injector != null) {
+            return injector;
+        }
+        IllegalStateException failure = rootFailure;
+        if (failure != null) {
+            throw new IllegalStateException(failure.getMessage(), failure.getCause());
+        }
+        if (Thread.holdsLock(rootLock)) {
+            // Only a build holds rootLock while it calls out, so this call comes from the build, such as from a module
+            throw new IllegalStateException(
+                    "InjectorHolder was called while it was building the root injector, by the building thread");
+        }
+        synchronized (rootLock) {
+            if (root != null) {
+                return root;
+            }
+            if (rootFailure == null) {
+                try {
+                    root = createRoot();
+                    return root;
+                } catch (Throwable t) {
+                    if (!isKept(t)) {
+                        throw t;
+                    }
+                    /*
+                     * This could occur during application server startup, if there is an error in the Guice module
+                     * bindings. The applications debugging framework may not be available at this point.
+                     *
+                     * The error gets consumed by the container startup, which is why we are printing the stack trace.
+                     */
+                    t.printStackTrace();
+                    rootFailure = new IllegalStateException("Failed to build the root Guice injector: " + t, t);
+                }
+            }
+            failure = rootFailure;
+        }
+        throw new IllegalStateException(failure.getMessage(), failure.getCause());
+    }
+
+    /**
+     * Whether a failed build of the root injector is kept: whether the failure, or one of its causes, is an exception,
+     * a {@link LinkageError} or a {@link ServiceConfigurationError}. Guice rethrows an error raised in its caches, such
+     * as a {@link NoClassDefFoundError} for a class missing from the class path, wrapped in Guava's
+     * {@code ExecutionError}.
+     */
+    private static boolean isKept(Throwable failure) {
+        Set<Throwable> seen = Collections.newSetFromMap(new IdentityHashMap<>());
+        for (Throwable t = failure; t != null && seen.add(t); t = t.getCause()) {
+            if (t instanceof Exception || t instanceof LinkageError || t instanceof ServiceConfigurationError) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static Injector createRoot() {
+        InjectorFactory injectorFactory = new InjectorFactory(new GuiceModuleCreator(),
+                new GuiceInjectorCreator(), InjectorConfiguration.getGuiceModuleLoader());
+        return injectorFactory.createInjector(InjectorConfiguration.getModuleAnnotation());
     }
 }

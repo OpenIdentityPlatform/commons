@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.guice.core;
@@ -63,10 +64,8 @@ final class InjectorFactory {
      */
     Injector createInjector(Class<? extends Annotation> moduleAnnotation) {
         /*
-         This does not need to by synchronized as it is only ever called from the constructor of the
-         InjectorHolder enum, which is thread-safe so no two threads can create an injector at the same time.
-
-         This does mean that this method MUST not be called/used by another other class!
+         This does not need to be synchronized: InjectorHolder only calls it while holding its root lock, so no two
+         threads can create the root injector at the same time.
          */
         return injectorCreator.createInjector(createModules(moduleAnnotation));
     }
