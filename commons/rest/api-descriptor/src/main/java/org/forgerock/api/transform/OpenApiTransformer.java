@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.api.transform;
 
@@ -82,6 +83,7 @@ import org.forgerock.util.i18n.PreferredLocales;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.swagger.models.AbstractModel;
 import io.swagger.models.Info;
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
@@ -719,7 +721,7 @@ public class OpenApiTransformer {
 
                 final Schema responsePayload;
                 if (resourceSchema.getSchema() != null
-                        && !"array".equals(resourceSchema.getSchema().get("type").asString())) {
+                        && !"array".equals(getType(resourceSchema.getSchema()))) {
                     // make query-response schema an array of values
                     responsePayload = Schema.schema().schema(
                             json(object(
@@ -1190,7 +1192,7 @@ public class OpenApiTransformer {
      */
     @VisibleForTesting
     Model buildModel(final JsonValue schema) {
-        final String type = schema.get("type").asString();
+        final String type = getType(schema);
         if (type == null) {
             if (schema.isDefined("allOf")) {
                 return buildAllOfModel(schema);
@@ -1199,21 +1201,29 @@ public class OpenApiTransformer {
             }
             throw new TransformerException(unsupportedJsonSchema(schema));
         }
+        final AbstractModel model;
         switch (type) {
         case "object":
-            return buildObjectModel(schema);
+            model = buildObjectModel(schema);
+            break;
         case "array":
-            return buildArrayModel(schema);
+            model = buildArrayModel(schema);
+            break;
         case "null":
             return new ModelImpl().type(type);
         case "boolean":
         case "integer":
         case "number":
         case "string":
-            return buildScalarModel(schema, type);
+            model = buildScalarModel(schema, type);
+            break;
         default:
             throw new TransformerException("Unsupported JSON Schema type '" + type + "' in schema " + schema);
         }
+        if (isNullable(schema)) {
+            model.setVendorExtension("x-nullable", true);
+        }
+        return model;
     }
 
     private Model buildAllOfModel(final JsonValue schema) {
@@ -1254,7 +1264,7 @@ public class OpenApiTransformer {
         };
     }
 
-    private Model buildObjectModel(final JsonValue schema) {
+    private LocalizableModelImpl buildObjectModel(final JsonValue schema) {
         final LocalizableModelImpl model = new LocalizableModelImpl();
         model.type("object");
         model.setDiscriminator(schema.get("discriminator").asString());
@@ -1313,7 +1323,7 @@ public class OpenApiTransformer {
      * @param schema JSON schema
      * @return Swagger array-schema model
      */
-    private Model buildArrayModel(final JsonValue schema) {
+    private LocalizableArrayModel buildArrayModel(final JsonValue schema) {
         final LocalizableArrayModel model = new LocalizableArrayModel();
         setTitleAndDescriptionFromSchema(model, schema);
         model.setProperties(buildProperties(schema));
@@ -1349,6 +1359,10 @@ public class OpenApiTransformer {
                         logger.info("Json schema error: " + entry.getValue() + "\n"
                                 + re.getMessage(), re.fillInStackTrace());
                         throw re;
+                    }
+                    if (property == null) {
+                        // a schema whose only type is "null" has no Swagger 2.0 property
+                        continue;
                     }
                     if (!sortByPropertyOrder && property.getVendorExtensions().containsKey("x-propertyOrder")) {
                         sortByPropertyOrder = true;
@@ -1430,6 +1444,10 @@ public class OpenApiTransformer {
         }
         setTitleAndDescriptionFromSchema(abstractProperty, schema);
 
+        if (isNullable(schema)) {
+            abstractProperty.setVendorExtension("x-nullable", true);
+        }
+
         final String readPolicy = schema.get("readPolicy").asString();
         if (!isEmpty(readPolicy)) {
             abstractProperty.setVendorExtension("x-readPolicy", readPolicy);
@@ -1463,7 +1481,7 @@ public class OpenApiTransformer {
     }
 
     private LocalizableProperty toLocalizableProperty(final JsonValue schema, final String format) {
-        final String type = schema.get("type").asString();
+        final String type = getType(schema);
         switch (type) {
         case "object": {
             final LocalizableObjectProperty property = new LocalizableObjectProperty();
@@ -1580,6 +1598,42 @@ public class OpenApiTransformer {
         default:
             throw new TransformerException("Unsupported JSON schema type: " + type);
         }
+    }
+
+    /**
+     * Reads the JSON Schema type of a schema. Swagger 2.0 has no union types, so a type array is accepted only
+     * when it lists a single type besides {@code "null"}, such as {@code ["string", "null"]}, and that type is
+     * returned; {@link #isNullable(JsonValue)} tells whether {@code "null"} was listed with it.
+     *
+     * @param schema JSON schema
+     * @return the type, or {@code null} if the schema has none
+     * @throws TransformerException if the type array is empty, lists more than one type besides {@code "null"}, or
+     *         lists a JSON {@code null}
+     */
+    private static String getType(final JsonValue schema) {
+        final JsonValue type = schema.get("type");
+        if (!type.isList()) {
+            return type.asString();
+        }
+        final List<String> types = new ArrayList<>(type.asList(String.class));
+        types.removeAll(singletonList("null"));
+        if (types.size() == 1 && types.get(0) != null) {
+            return types.get(0);
+        } else if (types.isEmpty() && type.size() > 0) {
+            return "null";
+        }
+        throw new TransformerException("Unsupported JSON Schema type " + type + " in schema " + schema);
+    }
+
+    /**
+     * Tells whether a schema allows {@code null} in addition to the type returned by {@link #getType(JsonValue)}.
+     *
+     * @param schema JSON schema
+     * @return {@code true} if the type is an array that lists {@code "null"} next to another type
+     */
+    private static boolean isNullable(final JsonValue schema) {
+        final JsonValue type = schema.get("type");
+        return type.isList() && type.size() > 1 && type.asList().contains("null");
     }
 
     /**
