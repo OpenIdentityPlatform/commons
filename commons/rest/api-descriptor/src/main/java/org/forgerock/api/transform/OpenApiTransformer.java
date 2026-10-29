@@ -1360,6 +1360,10 @@ public class OpenApiTransformer {
                                 + re.getMessage(), re.fillInStackTrace());
                         throw re;
                     }
+                    if (property == null) {
+                        // a schema whose only type is "null" has no Swagger 2.0 property
+                        continue;
+                    }
                     if (!sortByPropertyOrder && property.getVendorExtensions().containsKey("x-propertyOrder")) {
                         sortByPropertyOrder = true;
                     }

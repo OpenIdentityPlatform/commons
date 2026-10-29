@@ -588,6 +588,17 @@ public class OpenApiTransformerTest {
         assertThat(new OpenApiTransformer().buildProperty(json(object(field("type", array("null")))))).isNull();
     }
 
+    @Test
+    public void testBuildModelSkipsPropertyWithOnlyNullInTypeArray() {
+        final Model model = new OpenApiTransformer().buildModel(json(object(
+                field("type", "object"),
+                field("properties", object(
+                        field("a", object(field("type", "string"))),
+                        field("b", object(field("type", array("null")))))))));
+
+        assertThat(model.getProperties()).containsOnlyKeys("a");
+    }
+
     @Test(expectedExceptions = TransformerException.class)
     public void testBuildPropertyRejectsUnionOfNonNullTypes() {
         new OpenApiTransformer().buildProperty(json(object(field("type", array("string", "integer")))));
@@ -606,6 +617,26 @@ public class OpenApiTransformerTest {
         final ModelImpl expected = new LocalizableModelImpl().type("integer");
         expected.setVendorExtension("x-nullable", true);
         assertThat(model).isEqualTo(expected);
+    }
+
+    @Test
+    public void testBuildModelWithNullableObjectAndArrayTypes() {
+        final OpenApiTransformer transformer = new OpenApiTransformer();
+        final Model objectModel = transformer.buildModel(json(object(
+                field("type", array("object", "null")),
+                field("properties", object(field("a", object(field("type", "string"))))))));
+        final Model arrayModel = transformer.buildModel(json(object(
+                field("type", array("array", "null")),
+                field("items", object(field("type", "string"))))));
+
+        assertThat(objectModel.getVendorExtensions()).containsEntry("x-nullable", true);
+        assertThat(arrayModel.getVendorExtensions()).containsEntry("x-nullable", true);
+    }
+
+    @Test
+    public void testBuildModelWithOnlyNullInTypeArray() {
+        assertThat(new OpenApiTransformer().buildModel(json(object(field("type", array("null"))))))
+                .isEqualTo(new ModelImpl().type("null"));
     }
 
     @Test
