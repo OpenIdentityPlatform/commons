@@ -589,6 +589,17 @@ public class OpenApiTransformerTest {
     }
 
     @Test
+    public void testBuildPropertyLeavesOutItemsWithOnlyNullInTypeArray() {
+        final Property property = new OpenApiTransformer().buildProperty(json(object(
+                field("type", "array"),
+                field("items", object(field("type", array("null")))))));
+
+        // the same output as for an absent "items"
+        assertThat(property).isInstanceOf(LocalizableArrayProperty.class);
+        assertThat(((LocalizableArrayProperty) property).getItems()).isNull();
+    }
+
+    @Test
     public void testBuildModelSkipsPropertyWithOnlyNullInTypeArray() {
         final Model model = new OpenApiTransformer().buildModel(json(object(
                 field("type", "object"),
@@ -599,6 +610,45 @@ public class OpenApiTransformerTest {
         assertThat(model.getProperties()).containsOnlyKeys("a");
     }
 
+    @Test
+    public void testBuildModelSkipsPropertyWithOnlyNullType() {
+        final Model model = new OpenApiTransformer().buildModel(json(object(
+                field("type", "object"),
+                field("properties", object(
+                        field("a", object(field("type", "string"))),
+                        field("b", object(field("type", "null"))))))));
+
+        assertThat(model.getProperties()).containsOnlyKeys("a");
+    }
+
+    @Test
+    public void testBuildModelDropsRequiredEntryOfPropertyWithOnlyNullInTypeArray() {
+        final Model model = new OpenApiTransformer().buildModel(json(object(
+                field("type", "object"),
+                field("properties", object(
+                        field("a", object(field("type", "string"))),
+                        field("b", object(field("type", array("null")))))),
+                field("required", array("a", "b")))));
+
+        // swagger-models derives "required" from the properties, so the entry goes with the left-out property
+        assertThat(((ModelImpl) model).getRequired()).containsExactly("a");
+    }
+
+    @Test
+    public void testBuildModelLeavesOutItemsAndAdditionalPropertiesWithOnlyNullInTypeArray() {
+        final OpenApiTransformer transformer = new OpenApiTransformer();
+        final Model objectModel = transformer.buildModel(json(object(
+                field("type", "object"),
+                field("additionalProperties", object(field("type", array("null")))))));
+        final Model arrayModel = transformer.buildModel(json(object(
+                field("type", "array"),
+                field("items", object(field("type", array("null")))))));
+
+        // the same output as for an absent "additionalProperties" or "items"
+        assertThat(((ModelImpl) objectModel).getAdditionalProperties()).isNull();
+        assertThat(((ArrayModel) arrayModel).getItems()).isNull();
+    }
+
     @Test(expectedExceptions = TransformerException.class)
     public void testBuildPropertyRejectsUnionOfNonNullTypes() {
         new OpenApiTransformer().buildProperty(json(object(field("type", array("string", "integer")))));
@@ -607,6 +657,19 @@ public class OpenApiTransformerTest {
     @Test(expectedExceptions = TransformerException.class)
     public void testBuildPropertyRejectsEmptyTypeArray() {
         new OpenApiTransformer().buildProperty(json(object(field("type", array()))));
+    }
+
+    @Test(expectedExceptions = TransformerException.class)
+    public void testBuildPropertyRejectsJsonNullInTypeArray() {
+        new OpenApiTransformer().buildProperty(json(object(field("type", array((Object) null)))));
+    }
+
+    @Test(expectedExceptions = TransformerException.class)
+    public void testBuildModelRejectsJsonNullInTypeArray() {
+        // a type that reads as absent would let "allOf" through
+        new OpenApiTransformer().buildModel(json(object(
+                field("type", array((Object) null)),
+                field("allOf", array(object(field("type", "object")))))));
     }
 
     @Test
@@ -678,6 +741,28 @@ public class OpenApiTransformerTest {
         final Model response = onlyDefinition(swagger);
         assertThat(response).isInstanceOf(ArrayModel.class);
         assertThat(((ArrayModel) response).getItems().getVendorExtensions()).containsEntry("x-nullable", true);
+    }
+
+    @Test
+    public void testTransformQueryOnResourceWithNullableArraySchema() {
+        final Resource resource = Resource.resource()
+                .title(new LocalizableString("Users"))
+                .mvccSupported(true)
+                .resourceSchema(Schema.schema()
+                        .schema(json(object(
+                                field("type", array("array", "null")),
+                                field("items", object(field("type", "string"))))))
+                        .build())
+                .query(Query.query().type(QueryType.FILTER).queryableFields("*").build())
+                .build();
+
+        final Swagger swagger = OpenApiTransformer.execute(apiDescription(resource));
+
+        // a nullable array schema already is the query response; it is not wrapped into an array of arrays
+        final Model response = onlyDefinition(swagger);
+        assertThat(response).isInstanceOf(ArrayModel.class);
+        assertThat(response.getVendorExtensions()).containsEntry("x-nullable", true);
+        assertThat(((ArrayModel) response).getItems()).isInstanceOf(LocalizableStringProperty.class);
     }
 
     private static ApiDescription apiDescription(final Resource resource) {

@@ -1607,7 +1607,8 @@ public class OpenApiTransformer {
      *
      * @param schema JSON schema
      * @return the type, or {@code null} if the schema has none
-     * @throws TransformerException if the type array is empty or lists more than one type besides {@code "null"}
+     * @throws TransformerException if the type array is empty, lists more than one type besides {@code "null"}, or
+     *         lists a JSON {@code null}
      */
     private static String getType(final JsonValue schema) {
         final JsonValue type = schema.get("type");
@@ -1616,7 +1617,7 @@ public class OpenApiTransformer {
         }
         final List<String> types = new ArrayList<>(type.asList(String.class));
         types.removeAll(singletonList("null"));
-        if (types.size() == 1) {
+        if (types.size() == 1 && types.get(0) != null) {
             return types.get(0);
         } else if (types.isEmpty() && type.size() > 0) {
             return "null";
