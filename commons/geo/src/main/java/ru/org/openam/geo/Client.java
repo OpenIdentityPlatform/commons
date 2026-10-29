@@ -11,16 +11,16 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2020-2024 3A Systems LLC.
+ * Copyright 2020-2026 3A Systems LLC.
  */
 
 package ru.org.openam.geo;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -62,7 +62,7 @@ public class Client {
 	
 	static final Cache<String, Info> cache = CacheBuilder.newBuilder()
 			.maximumSize(64000)
-			.expireAfterAccess(60, TimeUnit.SECONDS)
+			.expireAfterAccess(Duration.ofSeconds(60))
 			.build();
 	
 	public static Info get(final String ipAddress) {
