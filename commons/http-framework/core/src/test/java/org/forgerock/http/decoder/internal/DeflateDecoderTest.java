@@ -19,6 +19,7 @@ package org.forgerock.http.decoder.internal;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -257,6 +258,36 @@ public class DeflateDecoderTest {
             assertThatThrownBy(decoded::read).isInstanceOf(IOException.class).hasCause(failure);
             assertThatThrownBy(() -> decoded.read(new byte[1])).isInstanceOf(IOException.class).hasCause(failure);
             assertThatThrownBy(() -> decoded.skip(1)).isInstanceOf(IOException.class).hasCause(failure);
+            assertThat(reads[0]).isEqualTo(2);
+        }
+    }
+
+    @DataProvider
+    public Object[][] errorHeaderFailures() {
+        return new Object[][] { { false }, { true } };
+    }
+
+    @Test(dataProvider = "errorHeaderFailures")
+    public void errorHeaderFailureCannotBeBypassedByReadingAgain(boolean raw) throws IOException {
+        AssertionError failure = new AssertionError("read failed");
+        final int[] reads = { 0 };
+        InputStream source = new ByteArrayInputStream(compress(CONTENT, raw, Deflater.DEFAULT_COMPRESSION)) {
+            @Override
+            public int read() {
+                if (++reads[0] == 2) {
+                    throw failure;
+                }
+                return super.read();
+            }
+        };
+        try (InputStream decoded = new DeflateDecoder().decode(source)) {
+            assertThatThrownBy(decoded::read).isSameAs(failure);
+            Throwable cached = catchThrowable(decoded::read);
+            assertThat(cached).isInstanceOf(IOException.class).hasCause(failure);
+            assertThat(cached.getCause()).isSameAs(failure);
+            assertThatThrownBy(decoded::read).isSameAs(cached);
+            assertThatThrownBy(() -> decoded.read(new byte[1])).isSameAs(cached);
+            assertThatThrownBy(() -> decoded.skip(1)).isSameAs(cached);
             assertThat(reads[0]).isEqualTo(2);
         }
     }

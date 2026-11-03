@@ -153,9 +153,11 @@ public final class Entity implements Closeable {
      * decode the content according to the {@code Content-Encoding} header if it
      * is present in the message.
      * If constructing the decoder chain fails after a wrapper has been created,
-     * the current stream and its child branches are closed. Without a preceding
-     * {@link #push()}, this closes the entity's content and its child branches;
-     * call {@code push()} before copying and {@link #pop()} in a {@code finally}
+     * {@code close()} is called on the current stream. Depending on the stream
+     * implementation, this may make it and its child branches unreadable. Content
+     * set with {@link #setBytes(byte[])} or {@link #setString(String)} is not closed,
+     * but its position may have advanced. Call {@link #push()} before copying
+     * and {@link #pop()} in a {@code finally}
      * block to preserve the previous state on failure.
      *
      * @param out
@@ -175,9 +177,11 @@ public final class Entity implements Closeable {
      * decode the content according to the {@code Content-Encoding} and
      * {@code Content-Type} headers if they are present in the message.
      * If constructing the decoder chain fails after a wrapper has been created,
-     * the current stream and its child branches are closed. Without a preceding
-     * {@link #push()}, this closes the entity's content and its child branches;
-     * call {@code push()} before copying and {@link #pop()} in a {@code finally}
+     * {@code close()} is called on the current stream. Depending on the stream
+     * implementation, this may make it and its child branches unreadable. Content
+     * set with {@link #setBytes(byte[])} or {@link #setString(String)} is not closed,
+     * but its position may have advanced. Call {@link #push()} before copying
+     * and {@link #pop()} in a {@code finally}
      * block to preserve the previous state on failure.
      *
      * @param out

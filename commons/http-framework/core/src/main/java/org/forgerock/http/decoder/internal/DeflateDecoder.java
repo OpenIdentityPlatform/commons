@@ -67,7 +67,7 @@ public class DeflateDecoder implements Decoder {
                         // The header may already have been consumed. Never retry at a new offset.
                         failure = e;
                         throw e;
-                    } catch (RuntimeException e) {
+                    } catch (RuntimeException | Error e) {
                         failure = new IOException("Deflate header detection failed", e);
                         throw e;
                     }
