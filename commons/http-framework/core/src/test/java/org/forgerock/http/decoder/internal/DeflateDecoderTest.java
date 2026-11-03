@@ -18,16 +18,21 @@ package org.forgerock.http.decoder.internal;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.util.Arrays;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPOutputStream;
+import java.util.zip.Inflater;
+import java.util.zip.ZipException;
 
 import org.forgerock.http.header.ContentEncodingHeader;
 import org.forgerock.http.protocol.Message;
@@ -161,6 +166,165 @@ public class DeflateDecoderTest {
         };
         new DeflateDecoder().decode(source).close();
         assertThat(closed[0]).isTrue();
+    }
+
+    @Test
+    public void openingAndClosingWithoutReadingDoesNotReadTheSource() throws IOException {
+        final boolean[] closed = { false };
+        InputStream source = new InputStream() {
+            @Override
+            public int read() {
+                throw new AssertionError("The source must not be read yet");
+            }
+
+            @Override
+            public void close() {
+                closed[0] = true;
+            }
+        };
+        InputStream decoded = new DeflateDecoder().decode(source);
+        assertThat(decoded.available()).isZero();
+        assertThat(decoded.read(new byte[0])).isZero();
+        assertThat(decoded.skip(0)).isZero();
+        assertThatThrownBy(() -> decoded.read(new byte[1], 1, 1)).isInstanceOf(IndexOutOfBoundsException.class);
+        assertThatThrownBy(() -> decoded.read(null, 0, 0)).isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> decoded.skip(-1)).isInstanceOf(IllegalArgumentException.class);
+        decoded.close();
+        decoded.close();
+        assertThat(closed[0]).isTrue();
+        assertThatThrownBy(decoded::read).isInstanceOf(IOException.class);
+        assertThatThrownBy(decoded::available).isInstanceOf(IOException.class);
+    }
+
+    @DataProvider
+    public Object[][] truncatedHeaders() {
+        return new Object[][] { { new byte[0] }, { new byte[] { 0x78 } } };
+    }
+
+    @Test(dataProvider = "truncatedHeaders")
+    public void entityReportsTruncatedHeaderOnRead(byte[] compressed) throws IOException {
+        try (Response response = new Response()) {
+            response.setEntity(compressed);
+            response.getHeaders().put(ContentEncodingHeader.NAME, "deflate");
+            try (InputStream decoded = response.getEntity().newDecodedContentInputStream()) {
+                assertThatThrownBy(decoded::read).isInstanceOf(EOFException.class)
+                        .hasMessage("Truncated deflate header");
+            }
+            try (Reader decoded = response.getEntity().newDecodedContentReader(UTF_8)) {
+                assertThatThrownBy(decoded::read).isInstanceOf(EOFException.class)
+                        .hasMessage("Truncated deflate header");
+            }
+        }
+    }
+
+    @Test
+    public void initializationFailureCannotBeBypassedByReadingAgain() throws IOException {
+        // A valid zlib header with FDICT, followed by a valid independent zlib stream.
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        bytes.write(new byte[] { 0x78, 0x20 });
+        bytes.write(compress(CONTENT, false, Deflater.DEFAULT_COMPRESSION));
+        try (InputStream decoded = new DeflateDecoder().decode(new ByteArrayInputStream(bytes.toByteArray()))) {
+            for (int attempt = 0; attempt < 2; attempt++) {
+                assertThatThrownBy(decoded::read).isInstanceOf(ZipException.class)
+                        .hasMessage("Preset dictionaries are not supported for deflate content encoding");
+            }
+        }
+    }
+
+    @Test
+    public void skipConsumesDecodedBytes() throws IOException {
+        try (InputStream decoded = new DeflateDecoder().decode(new ByteArrayInputStream(
+                compress(CONTENT, false, Deflater.DEFAULT_COMPRESSION)))) {
+            assertThat(decoded.skip(2)).isEqualTo(2);
+            assertThat(decoded.readAllBytes()).isEqualTo(Arrays.copyOfRange(CONTENT, 2, CONTENT.length));
+            assertThat(decoded.available()).isZero();
+        }
+    }
+
+    @Test
+    public void reportsZlibErrorsWithoutRawRetry() throws IOException {
+        byte[] zlib = compress(CONTENT, false, Deflater.DEFAULT_COMPRESSION);
+        byte[] badChecksum = zlib.clone();
+        badChecksum[badChecksum.length - 1] ^= 1;
+        assertThatThrownBy(() -> decodeFully(badChecksum)).isInstanceOf(ZipException.class)
+                .hasMessage("incorrect data check");
+        assertThatThrownBy(() -> decodeFully(Arrays.copyOf(zlib, zlib.length - 1)))
+                .isInstanceOf(EOFException.class).hasMessage("Unexpected end of ZLIB input stream");
+    }
+
+    @DataProvider
+    public Object[][] rawStreamsWithNonZeroStoredBlockPadding() {
+        return new Object[][] {
+            { 0x08, "hello".getBytes(UTF_8) }, // CM 8 and CINFO 0, but FCHECK fails.
+            { 0x88, Arrays.copyOf(CONTENT, 28) } // CM 8 and valid FCHECK, but CINFO 8.
+        };
+    }
+
+    @Test(dataProvider = "rawStreamsWithNonZeroStoredBlockPadding")
+    public void decodesRawStreamsThatOnlyResembleZlib(int first, byte[] content) throws IOException {
+        ByteArrayOutputStream raw = new ByteArrayOutputStream();
+        raw.write(first); // Non-final stored block; padding bits need not be zero.
+        raw.write(content.length);
+        raw.write(0);
+        raw.write(~content.length);
+        raw.write(0xff);
+        raw.write(content);
+        raw.write(new byte[] { 0x03, 0x00 }); // Final empty fixed-Huffman block.
+        assertThat(decodeFully(raw.toByteArray())).isEqualTo(content);
+    }
+
+    @DataProvider
+    public Object[][] inflaterLifecycles() {
+        return new Object[][] { { false, false }, { true, false }, { false, true }, { true, true } };
+    }
+
+    @Test(dataProvider = "inflaterLifecycles")
+    @SuppressWarnings("try") // Explicit close calls exercise failure and repeated-close behavior.
+    public void closingDecodedStreamEndsInflater(boolean raw, boolean closeFails) throws IOException {
+        final int[] ends = { 0 };
+        Inflater inflater = new Inflater(raw) {
+            @Override
+            public void end() {
+                ends[0]++;
+                super.end();
+            }
+        };
+        DeflateDecoder decoder = new DeflateDecoder() {
+            @Override
+            Inflater newInflater(boolean nowrap) {
+                assertThat(nowrap).isEqualTo(raw);
+                return inflater;
+            }
+        };
+        IOException closeFailure = new IOException("source close failed");
+        InputStream source = new ByteArrayInputStream(compress(CONTENT, raw, Deflater.DEFAULT_COMPRESSION)) {
+            @Override
+            public void close() throws IOException {
+                if (closeFails) {
+                    throw closeFailure;
+                }
+            }
+        };
+        try (InputStream decoded = decoder.decode(source)) {
+            assertThat(decoded.read()).isEqualTo(CONTENT[0]);
+            assertThat(ends[0]).isZero();
+            if (closeFails) {
+                assertThatThrownBy(decoded::close).isSameAs(closeFailure);
+            } else {
+                decoded.close();
+            }
+            decoded.close();
+            assertThat(ends[0]).isEqualTo(1);
+            assertThatThrownBy(decoded::read).isInstanceOf(IOException.class);
+        } finally {
+            inflater.end();
+        }
+    }
+
+    private static byte[] decodeFully(byte[] compressed) throws IOException {
+        try (InputStream decoded = new DeflateDecoder().decode(new ByteArrayInputStream(compressed))) {
+            return decoded.readAllBytes();
+        }
     }
 
     private static byte[] compress(byte[] content, boolean raw, int level) throws IOException {
