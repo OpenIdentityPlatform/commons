@@ -27,6 +27,7 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
@@ -231,6 +232,35 @@ public class DeflateDecoderTest {
         }
     }
 
+    @DataProvider
+    public Object[][] uncheckedHeaderFailures() {
+        return new Object[][] { { false, false }, { false, true }, { true, false }, { true, true } };
+    }
+
+    @Test(dataProvider = "uncheckedHeaderFailures")
+    public void uncheckedHeaderFailureCannotBeBypassedByReadingAgain(boolean raw, boolean uncheckedIo)
+            throws IOException {
+        RuntimeException failure = uncheckedIo ? new UncheckedIOException(new IOException("read failed"))
+                : new IllegalStateException("read failed");
+        final int[] reads = { 0 };
+        InputStream source = new ByteArrayInputStream(compress(CONTENT, raw, Deflater.DEFAULT_COMPRESSION)) {
+            @Override
+            public int read() {
+                if (++reads[0] == 2) {
+                    throw failure;
+                }
+                return super.read();
+            }
+        };
+        try (InputStream decoded = new DeflateDecoder().decode(source)) {
+            assertThatThrownBy(decoded::read).isSameAs(failure);
+            assertThatThrownBy(decoded::read).isInstanceOf(IOException.class).hasCause(failure);
+            assertThatThrownBy(() -> decoded.read(new byte[1])).isInstanceOf(IOException.class).hasCause(failure);
+            assertThatThrownBy(() -> decoded.skip(1)).isInstanceOf(IOException.class).hasCause(failure);
+            assertThat(reads[0]).isEqualTo(2);
+        }
+    }
+
     @Test
     public void skipConsumesDecodedBytes() throws IOException {
         try (InputStream decoded = new DeflateDecoder().decode(new ByteArrayInputStream(
@@ -253,14 +283,16 @@ public class DeflateDecoderTest {
     }
 
     @DataProvider
-    public Object[][] rawStreamsWithNonZeroStoredBlockPadding() {
+    public Object[][] rawStreamsResemblingZlibHeaders() {
         return new Object[][] {
             { 0x08, "hello".getBytes(UTF_8) }, // CM 8 and CINFO 0, but FCHECK fails.
-            { 0x88, Arrays.copyOf(CONTENT, 28) } // CM 8 and valid FCHECK, but CINFO 8.
+            { 0x88, Arrays.copyOf(CONTENT, 28) }, // CM 8 and valid FCHECK, but CINFO 8.
+            { 0x00, Arrays.copyOf(CONTENT, 31) }, // CINFO 0 and valid FCHECK, but CM 0.
+            { 0x00, Arrays.copyOf(CONTENT, 62) } // Also sets the FDICT bit; still a raw stream.
         };
     }
 
-    @Test(dataProvider = "rawStreamsWithNonZeroStoredBlockPadding")
+    @Test(dataProvider = "rawStreamsResemblingZlibHeaders")
     public void decodesRawStreamsThatOnlyResembleZlib(int first, byte[] content) throws IOException {
         ByteArrayOutputStream raw = new ByteArrayOutputStream();
         raw.write(first); // Non-final stored block; padding bits need not be zero.

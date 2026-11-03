@@ -203,13 +203,17 @@ public class ContentEncodingHeaderTest {
 
     @DataProvider
     public Object[][] decodingAndClosingFailures() {
-        return new Object[][] { { false, false }, { false, true }, { true, false }, { true, true } };
+        return new Object[][] {
+            { false, false, false }, { false, true, false }, { true, false, false }, { true, true, false },
+            { false, false, true }, { true, true, true }
+        };
     }
 
     @Test(dataProvider = "decodingAndClosingFailures")
-    public void cleanupPreservesOriginalFailure(boolean runtimeRead, boolean runtimeClose) throws IOException {
+    public void cleanupPreservesOriginalFailure(boolean runtimeRead, boolean runtimeClose, boolean sameFailure)
+            throws IOException {
         Exception readFailure = runtimeRead ? new IllegalStateException("read failed") : new IOException("read failed");
-        Exception closeFailure = runtimeClose ? new IllegalStateException("close failed")
+        Exception closeFailure = sameFailure ? readFailure : runtimeClose ? new IllegalStateException("close failed")
                 : new IOException("close failed");
         CloseTrackingInputStream source = new CloseTrackingInputStream(gzip(new byte[0])) {
             private int headerRemaining = 10;
@@ -241,8 +245,13 @@ public class ContentEncodingHeaderTest {
                 throwFailure(closeFailure);
             }
         };
-        assertThatThrownBy(() -> valueOf("gzip, gzip").decode(source)).isSameAs(readFailure)
-                .hasSuppressedException(closeFailure);
+        if (sameFailure) {
+            assertThatThrownBy(() -> valueOf("gzip, gzip").decode(source)).isSameAs(readFailure)
+                    .hasNoSuppressedExceptions();
+        } else {
+            assertThatThrownBy(() -> valueOf("gzip, gzip").decode(source)).isSameAs(readFailure)
+                    .hasSuppressedException(closeFailure);
+        }
         assertThat(source.closes).isEqualTo(1);
     }
 
