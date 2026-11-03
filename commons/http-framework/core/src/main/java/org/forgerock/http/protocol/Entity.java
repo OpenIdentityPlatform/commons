@@ -12,6 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.http.protocol;
@@ -151,6 +152,13 @@ public final class Entity implements Closeable {
      * entity. This method does not push or pop branches. It does, however,
      * decode the content according to the {@code Content-Encoding} header if it
      * is present in the message.
+     * If constructing the decoder chain fails after a wrapper has been created,
+     * {@code close()} is called on the current stream. Depending on the stream
+     * implementation, this may make it and its child branches unreadable. Content
+     * set with {@link #setBytes(byte[])} or {@link #setString(String)} is not closed,
+     * but its position may have advanced. Call {@link #push()} before copying
+     * and {@link #pop()} in a {@code finally}
+     * block to preserve the previous state on failure.
      *
      * @param out
      *            The destination writer.
@@ -168,6 +176,13 @@ public final class Entity implements Closeable {
      * entity. This method does not push or pop branches. It does, however,
      * decode the content according to the {@code Content-Encoding} and
      * {@code Content-Type} headers if they are present in the message.
+     * If constructing the decoder chain fails after a wrapper has been created,
+     * {@code close()} is called on the current stream. Depending on the stream
+     * implementation, this may make it and its child branches unreadable. Content
+     * set with {@link #setBytes(byte[])} or {@link #setString(String)} is not closed,
+     * but its position may have advanced. Call {@link #push()} before copying
+     * and {@link #pop()} in a {@code finally}
+     * block to preserve the previous state on failure.
      *
      * @param out
      *            The destination writer.

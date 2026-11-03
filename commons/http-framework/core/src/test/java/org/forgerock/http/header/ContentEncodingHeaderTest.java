@@ -12,6 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.http.header;
@@ -23,10 +24,13 @@ import static org.forgerock.util.Utils.closeSilently;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.forgerock.http.protocol.Request;
@@ -164,5 +168,153 @@ public class ContentEncodingHeaderTest {
         final String toDecode = "The 'compress' content encoding header is not supported.";
         final InputStream is = new ByteArrayInputStream(toDecode.getBytes());
         ContentEncodingHeader.valueOf("compress").decode(is);
+    }
+
+    @DataProvider
+    public Object[][] failingDecoderChains() throws IOException {
+        byte[] plain = "not a gzip stream".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        return new Object[][] {
+            { "gzip, gzip", gzip(plain) },
+            { "gzip, gzip, gzip", gzip(gzip(plain)) },
+            { "unsupported, gzip", gzip(plain) },
+            { "gzip, deflate", deflate(plain) },
+            { "unsupported, deflate", deflate(plain) }
+        };
+    }
+
+    @Test(dataProvider = "failingDecoderChains")
+    public void failedDecodeClosesConstructedWrappers(String codings, byte[] body) throws IOException {
+        CloseTrackingInputStream source = new CloseTrackingInputStream(body);
+        assertThatThrownBy(() -> valueOf(codings).decode(source)).isInstanceOf(IOException.class);
+        assertThat(source.closes).isEqualTo(1);
+    }
+
+    @DataProvider
+    public Object[][] failuresBeforeAnyWrapper() {
+        return new Object[][] { { "gzip" }, { "unsupported" } };
+    }
+
+    @Test(dataProvider = "failuresBeforeAnyWrapper")
+    public void failedDecodeWithoutWrapperLeavesSourceOpen(String coding) {
+        CloseTrackingInputStream source = new CloseTrackingInputStream(new byte[0]);
+        assertThatThrownBy(() -> valueOf(coding).decode(source)).isInstanceOf(IOException.class);
+        assertThat(source.closes).isZero();
+    }
+
+    @DataProvider
+    public Object[][] decodingAndClosingFailures() {
+        return new Object[][] {
+            { false, false, false }, { false, true, false }, { true, false, false }, { true, true, false },
+            { false, false, true }, { true, true, true }
+        };
+    }
+
+    @Test(dataProvider = "decodingAndClosingFailures")
+    public void cleanupPreservesOriginalFailure(boolean runtimeRead, boolean runtimeClose, boolean sameFailure)
+            throws IOException {
+        Exception readFailure = runtimeRead ? new IllegalStateException("read failed") : new IOException("read failed");
+        Exception closeFailure = sameFailure ? readFailure : runtimeClose ? new IllegalStateException("close failed")
+                : new IOException("close failed");
+        CloseTrackingInputStream source = new CloseTrackingInputStream(gzip(new byte[0])) {
+            private int headerRemaining = 10;
+
+            @Override
+            public int read() throws IOException {
+                int next = super.read();
+                if (next != -1 && headerRemaining > 0) {
+                    headerRemaining--;
+                }
+                return next;
+            }
+
+            @Override
+            public int read(byte[] bytes, int offset, int length) throws IOException {
+                // Let the first decoder consume its fixed header before failing in its payload.
+                if (headerRemaining > 0) {
+                    int count = super.read(bytes, offset, Math.min(length, headerRemaining));
+                    headerRemaining -= count;
+                    return count;
+                }
+                throwFailure(readFailure);
+                return -1;
+            }
+
+            @Override
+            public void close() throws IOException {
+                super.close();
+                throwFailure(closeFailure);
+            }
+        };
+        if (sameFailure) {
+            assertThatThrownBy(() -> valueOf("gzip, gzip").decode(source)).isSameAs(readFailure)
+                    .hasNoSuppressedExceptions();
+        } else {
+            assertThatThrownBy(() -> valueOf("gzip, gzip").decode(source)).isSameAs(readFailure)
+                    .hasSuppressedException(closeFailure);
+        }
+        assertThat(source.closes).isEqualTo(1);
+    }
+
+    @Test
+    public void successfulDecodeTransfersOwnershipToCaller() throws IOException {
+        CloseTrackingInputStream source = new CloseTrackingInputStream(gzip(new byte[0]));
+        try (InputStream decoded = valueOf("gzip").decode(source)) {
+            assertThat(source.closes).isZero();
+            assertThat(decoded.read()).isEqualTo(-1);
+            assertThat(source.closes).isZero();
+        }
+        assertThat(source.closes).isEqualTo(1);
+    }
+
+    @DataProvider
+    public Object[][] invalidInnerDeflateHeaders() {
+        return new Object[][] { { new byte[] { 0x78 } }, { new byte[] { 0x78, 0x20 } } };
+    }
+
+    @Test(dataProvider = "invalidInnerDeflateHeaders")
+    public void failedLazyDeflateReadStillClosesGzip(byte[] header) throws IOException {
+        CloseTrackingInputStream source = new CloseTrackingInputStream(gzip(header));
+        try (InputStream decoded = valueOf("deflate, gzip").decode(source)) {
+            assertThat(source.closes).isZero();
+            assertThatThrownBy(decoded::read).isInstanceOf(IOException.class);
+        }
+        assertThat(source.closes).isEqualTo(1);
+    }
+
+    private static byte[] gzip(byte[] body) throws IOException {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try (GZIPOutputStream out = new GZIPOutputStream(bytes)) {
+            out.write(body);
+        }
+        return bytes.toByteArray();
+    }
+
+    private static byte[] deflate(byte[] body) throws IOException {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try (DeflaterOutputStream out = new DeflaterOutputStream(bytes)) {
+            out.write(body);
+        }
+        return bytes.toByteArray();
+    }
+
+    private static void throwFailure(Exception failure) throws IOException {
+        if (failure instanceof IOException) {
+            throw (IOException) failure;
+        }
+        throw (RuntimeException) failure;
+    }
+
+    private static class CloseTrackingInputStream extends FilterInputStream {
+        int closes;
+
+        CloseTrackingInputStream(byte[] body) {
+            super(new ByteArrayInputStream(body));
+        }
+
+        @Override
+        public void close() throws IOException {
+            closes++;
+            super.close();
+        }
     }
 }

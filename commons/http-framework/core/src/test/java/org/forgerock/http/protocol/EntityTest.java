@@ -12,11 +12,13 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.http.protocol;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.entry;
 import static org.forgerock.http.io.IO.nullOutputStream;
 import static org.forgerock.http.protocol.Entity.APPLICATION_JSON_CHARSET_UTF_8;
@@ -26,17 +28,21 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.zip.GZIPOutputStream;
 
 import org.forgerock.http.header.ContentLengthHeader;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.io.BranchingInputStream;
 import org.forgerock.http.io.IO;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
@@ -287,6 +293,65 @@ public class EntityTest {
         } finally {
             entity.pop();
         }
+    }
+
+    @DataProvider
+    public Object[][] failedDecodedCopies() {
+        return new Object[][] { { false, false }, { false, true }, { true, false }, { true, true } };
+    }
+
+    @Test(dataProvider = "failedDecodedCopies")
+    public void failedDecodedCopyClosesOnlyTheCurrentBranchAndItsChildren(boolean writer, boolean pushed)
+            throws IOException {
+        ByteArrayOutputStream compressed = new ByteArrayOutputStream();
+        try (GZIPOutputStream out = new GZIPOutputStream(compressed)) {
+            out.write("hello".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        }
+        byte[] body = compressed.toByteArray();
+        final int[] closes = { 0 };
+        ByteArrayInputStream source = new ByteArrayInputStream(body) {
+            @Override
+            public void close() {
+                closes[0]++;
+            }
+        };
+        try (BranchingInputStream trunk = IO.newBranchingInputStream(source, () -> IO.newMemoryBuffer(64, 4096));
+                BranchingInputStream saved = trunk.branch()) {
+            entity.setRawContentInputStream(trunk);
+            message.getHeaders().put("Content-Encoding", "unsupported, gzip");
+            if (pushed) {
+                entity.push();
+            }
+            try (BranchingInputStream child = ((BranchingInputStream) entity.getRawContentInputStream()).branch()) {
+                assertThatThrownBy(() -> {
+                    if (writer) {
+                        entity.copyDecodedContentTo(new StringWriter());
+                    } else {
+                        entity.copyDecodedContentTo(new ByteArrayOutputStream());
+                    }
+                }).isInstanceOf(UnsupportedEncodingException.class);
+                assertThatThrownBy(child::read).isInstanceOf(IOException.class);
+                if (pushed) {
+                    entity.pop();
+                    assertThat(closes[0]).isZero();
+                    assertThat(entity.isDecodedContentEmpty()).isFalse();
+                    assertThat(saved.readAllBytes()).isEqualTo(body);
+                    ByteArrayOutputStream raw = new ByteArrayOutputStream();
+                    entity.copyRawContentTo(raw);
+                    assertThat(raw.toByteArray()).isEqualTo(body);
+                    entity.push();
+                    entity.pop();
+                } else {
+                    assertThat(closes[0]).isEqualTo(1);
+                    assertThatThrownBy(saved::read).isInstanceOf(IOException.class);
+                    assertThatThrownBy(() -> entity.copyRawContentTo(new ByteArrayOutputStream()))
+                            .isInstanceOf(IOException.class);
+                    assertThatThrownBy(entity::push).isInstanceOf(IOException.class);
+                    assertThat(entity.isDecodedContentEmpty()).isTrue();
+                }
+            }
+        }
+        assertThat(closes[0]).isEqualTo(1);
     }
 
     @Test

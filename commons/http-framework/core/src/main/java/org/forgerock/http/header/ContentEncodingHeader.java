@@ -13,6 +13,7 @@
  *
  * Copyright 2010–2011 ApexIdentity Inc.
  * Portions Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.http.header;
@@ -86,6 +87,11 @@ public class ContentEncodingHeader extends Header {
     /**
      * Returns an input stream that decodes the specified input stream, given
      * the content-codings that are specified in the {@code codings} list.
+     * The caller must close the returned stream, which also closes {@code in}.
+     * If constructing the decoder chain fails after a wrapper has been created,
+     * the wrappers and {@code in} are closed. If no wrapper has been created,
+     * {@code in} remains the caller's responsibility. Failures during cleanup
+     * are suppressed on the original exception.
      *
      * @param in
      *            the input stream to decode.
@@ -96,16 +102,30 @@ public class ContentEncodingHeader extends Header {
      *             if an unsupported content-encoding is specified.
      */
     public InputStream decode(InputStream in) throws IOException {
-        // decode in the reverse order that encoding was applied
-        for (ListIterator<String> i = codings.listIterator(codings.size()); i.hasPrevious();) {
-            String name = i.previous();
-            Decoder decoder = Decoder.SERVICES.get(name);
-            if (decoder == null) {
-                throw new UnsupportedEncodingException(name);
+        InputStream decoded = in;
+        try {
+            // decode in the reverse order that encoding was applied
+            for (ListIterator<String> i = codings.listIterator(codings.size()); i.hasPrevious();) {
+                String name = i.previous();
+                Decoder decoder = Decoder.SERVICES.get(name);
+                if (decoder == null) {
+                    throw new UnsupportedEncodingException(name);
+                }
+                decoded = decoder.decode(decoded);
             }
-            in = decoder.decode(in);
+            return decoded;
+        } catch (IOException | RuntimeException e) {
+            if (decoded != in) {
+                try {
+                    decoded.close();
+                } catch (IOException | RuntimeException closeFailure) {
+                    if (closeFailure != e) {
+                        e.addSuppressed(closeFailure);
+                    }
+                }
+            }
+            throw e;
         }
-        return in;
     }
 
     /**
