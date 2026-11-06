@@ -11,8 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2024-2026 3A Systems LLC.
- * Portions Copyright 2026 3A Systems, LLC.
+ * Copyright 2024-2026 3A Systems, LLC.
  */
 
 package org.openidentityplatform.doc.maven;
@@ -35,8 +34,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -79,6 +80,21 @@ public class AsciidocToPdfMojo extends AbstractAsciidocMojo {
     @Parameter(property = "antoraComponent")
     private String antoraComponent;
 
+    /**
+     * Site version path for this component, such as {@code 15.2}. Empty means the
+     * unversioned current documentation. This is independent of the Maven project version.
+     */
+    @Parameter(property = "docVersion")
+    private String docVersion;
+
+    /**
+     * Site version paths by Antora component name. Entries override {@code docVersion}
+     * for that component; other components never inherit this project's version.
+     * An empty entry selects the unversioned current documentation.
+     */
+    @Parameter
+    private Map<String, String> componentDocVersions = Collections.emptyMap();
+
     public File getPdfOutputDirectory() {
         return new File(buildDirectory, "/pdf");
     }
@@ -93,7 +109,8 @@ public class AsciidocToPdfMojo extends AbstractAsciidocMojo {
         String component = antoraComponent != null && !antoraComponent.isEmpty()
                 ? antoraComponent : projectName.toLowerCase(Locale.ROOT);
         try {
-            preparePdfSource(getAsciidocBuildSourceDirectory(), getPdfSourceDirectory(), siteUrl, component);
+            preparePdfSource(getAsciidocBuildSourceDirectory(), getPdfSourceDirectory(), siteUrl, component,
+                    docVersion, componentDocVersions);
         } catch (IOException e) {
             throw new MojoExecutionException("error preparing PDF sources", e);
         }
@@ -151,6 +168,11 @@ public class AsciidocToPdfMojo extends AbstractAsciidocMojo {
      * so that the sources the {@code antora} goal reads stay as they are.
      */
     static void preparePdfSource(File source, File target, String siteUrl, String component) throws IOException {
+        preparePdfSource(source, target, siteUrl, component, null, Collections.emptyMap());
+    }
+
+    static void preparePdfSource(File source, File target, String siteUrl, String component,
+            String docVersion, Map<String, String> componentDocVersions) throws IOException {
         if (target.exists()) {
             FileUtils.deleteDirectory(target);
         }
@@ -158,7 +180,7 @@ public class AsciidocToPdfMojo extends AbstractAsciidocMojo {
         for (File adocFile : FileUtils.listFiles(target, new String[] {"adoc"}, true)) {
             String module = adocFile.getParentFile().getName();
             String adoc = FileUtils.readFileToString(adocFile, StandardCharsets.UTF_8);
-            String converted = convertXrefsForPdf(adoc, siteUrl, component, module);
+            String converted = convertXrefsForPdf(adoc, siteUrl, component, module, docVersion, componentDocVersions);
             if (!converted.equals(adoc)) {
                 FileUtils.writeStringToFile(adocFile, converted, StandardCharsets.UTF_8);
             }
@@ -166,7 +188,8 @@ public class AsciidocToPdfMojo extends AbstractAsciidocMojo {
     }
 
     private static final Pattern XREF_PATTERN = Pattern.compile("xref:([^\\[\\s]+)\\[");
-    private static final Pattern RESOURCE_ID_PATTERN = Pattern.compile("(?:([^:/@$]+):)?([^:/@$]*):([^:@$]+)");
+    private static final Pattern RESOURCE_ID_PATTERN =
+            Pattern.compile("(?:([^:/@$]+)@)?(?:([^:/@$]+):)?([^:/@$]*):([^:@$]+)");
 
     /**
      * Plain Asciidoctor knows neither the other guides nor the other Antora components, so it
@@ -176,27 +199,38 @@ public class AsciidocToPdfMojo extends AbstractAsciidocMojo {
      * <li>{@code xref:component:module:page.adoc#anchor[text]} and {@code xref:module:page.adoc#anchor[text]}</li>
      * <li>{@code xref:../module/page.adoc#anchor[text]}</li>
      * </ul>
+     * Explicit {@code version@component:module:page.adoc} resource IDs override configured
+     * component versions; an explicit {@code _} version selects the unversioned site.
+     * Resource IDs without a module coordinate, such as {@code version@page.adoc}, are left unchanged.
      * A relative xref into {@code currentModule} becomes a same-guide xref. Other xrefs are left as they are.
      */
     static String convertXrefsForPdf(String adoc, String siteUrl, String component, String currentModule) {
+        return convertXrefsForPdf(adoc, siteUrl, component, currentModule, null, Collections.emptyMap());
+    }
+
+    static String convertXrefsForPdf(String adoc, String siteUrl, String component, String currentModule,
+            String docVersion, Map<String, String> componentDocVersions) {
         String site = siteUrl.replaceAll("/+$", "");
         Matcher m = XREF_PATTERN.matcher(adoc);
         StringBuilder builder = new StringBuilder();
         int i = 0;
         while (m.find()) {
             builder.append(adoc, i, m.start());
-            builder.append(convertXrefForPdf(m.group(1), site, component, currentModule)).append("[");
+            builder.append(convertXrefForPdf(m.group(1), site, component, currentModule,
+                    docVersion, componentDocVersions)).append("[");
             i = m.end();
         }
         builder.append(adoc.substring(i));
         return builder.toString();
     }
 
-    private static String convertXrefForPdf(String target, String site, String component, String currentModule) {
+    private static String convertXrefForPdf(String target, String site, String component, String currentModule,
+            String docVersion, Map<String, String> componentDocVersions) {
         int hash = target.indexOf('#');
         String path = hash < 0 ? target : target.substring(0, hash);
         String fragment = hash < 0 ? "" : target.substring(hash);
 
+        String explicitVersion = null;
         String targetComponent;
         String module;
         String page;
@@ -217,16 +251,28 @@ public class AsciidocToPdfMojo extends AbstractAsciidocMojo {
             if (!id.matches()) {
                 return "xref:" + target;
             }
-            targetComponent = id.group(1) != null ? id.group(1) : component;
-            module = id.group(2).isEmpty() ? "ROOT" : id.group(2);
-            page = id.group(3);
+            explicitVersion = id.group(1);
+            // Antora uses _ to explicitly select the versionless component version.
+            if ("_".equals(explicitVersion)) {
+                explicitVersion = "";
+            }
+            targetComponent = id.group(2) != null ? id.group(2) : component;
+            module = id.group(3).isEmpty() ? "ROOT" : id.group(3);
+            page = id.group(4);
         }
         if (page.isEmpty()) {
             return "xref:" + target;
         }
+        String version = explicitVersion;
+        if (version == null) {
+            version = componentDocVersions.containsKey(targetComponent)
+                    ? componentDocVersions.get(targetComponent)
+                    : targetComponent.equals(component) ? docVersion : null;
+        }
+        String versionPrefix = version == null || version.isEmpty() ? "" : version + "/";
         page = page.replaceAll("\\.adoc$", "");
         // Antora publishes the pages of the ROOT module directly under the component
         String modulePrefix = module.equals("ROOT") ? "" : module + "/";
-        return "link:" + site + "/" + targetComponent + "/" + modulePrefix + page + ".html" + fragment;
+        return "link:" + site + "/" + targetComponent + "/" + versionPrefix + modulePrefix + page + ".html" + fragment;
     }
 }
