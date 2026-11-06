@@ -757,3 +757,60 @@ Header, with the fields enclosed by brackets [] replaced by your own identifying
 information: "Portions copyright [year] [name of copyright owner]".
 
 Copyright 2012-2015 ForgeRock AS.
+
+
+## Documentation site versions in AsciiDoc PDF links
+
+The `asciidoc-to-pdf` goal converts cross-guide and cross-component xrefs to
+links on `siteUrl` (default `https://doc.openidentityplatform.org`). By default,
+these links use the unversioned current documentation. To build a PDF for
+archived documentation, configure the published site version paths explicitly:
+
+```xml
+<configuration>
+  <antoraComponent>openam</antoraComponent>
+  <docVersion>15.2</docVersion>
+  <componentDocVersions>
+    <opendj>4.10</opendj>
+  </componentDocVersions>
+</configuration>
+```
+
+`docVersion` is also available as the Maven property `-DdocVersion=15.2`.
+Omit it for current documentation. `componentDocVersions` is a Maven map keyed
+by Antora component name; configure it in the POM. Each value is the exact
+version directory published by the site, not a release tag or Maven version.
+For example, the site's `versions-from-tags.js` maps `OpenAM-15.2.2` to `15.2`
+and `OpenDJ-4.10.2` to `4.10`; its branch sources have no version directory.
+Neither `projectVersion` nor `releaseVersion` determines the site path.
+
+For `xref:reference:chap-auth-modules.adoc#data-store-module-ref[Data Store]`,
+the configuration above produces
+`https://doc.openidentityplatform.org/openam/15.2/reference/chap-auth-modules.html#data-store-module-ref`.
+For `xref:opendj::index.adoc[OpenDJ]`, it produces
+`https://doc.openidentityplatform.org/opendj/4.10/index.html`.
+The `ROOT` module has no module directory. Relative cross-guide xrefs also use
+the current component's configured version; fragments and same-guide xrefs are
+preserved. Only the PDF source copy is rewritten; Antora sources are unchanged.
+
+Version selection, in order:
+
+1. An explicit Antora version in the xref, such as
+   `xref:4.9@opendj:install-guide:index.adoc[Install]`.
+2. An entry for the target component in `componentDocVersions`.
+3. `docVersion`, only when the target is this project's component.
+4. The unversioned current documentation.
+
+An empty map entry or an explicit empty version (`xref:@opendj::index.adoc[Current]`)
+selects the unversioned site. A component without an entry never inherits
+another component's version.
+
+When a release moves from current to archived documentation, first publish and
+verify its historical site paths, then rebuild its PDF from the immutable
+release sources using the corresponding `docVersion` and independently chosen
+component versions. For a POM with the AsciiDoc preprocessing and PDF goals
+bound to the site lifecycle, use `mvn -DdocVersion=15.2 site`; otherwise run the
+project's normal PDF build with that property. Replace the archived PDF with
+the rebuilt artifact. Previously distributed PDFs retain their original links;
+this converter cannot update them. Do not select a historical version path
+before that version is published on the site.
