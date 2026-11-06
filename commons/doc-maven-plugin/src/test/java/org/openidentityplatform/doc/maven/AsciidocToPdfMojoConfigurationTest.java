@@ -77,6 +77,26 @@ public class AsciidocToPdfMojoConfigurationTest extends AbstractMojoTestCase {
         assertPreparedLinks(mojo, "15.2/");
     }
 
+    public void testComponentDocVersionsIsADescriptorParameter() throws Exception {
+        assertTrue(newMojoExecution("asciidoc-to-pdf").getMojoDescriptor()
+                .getParameterMap().containsKey("componentDocVersions"));
+    }
+
+    public void testAbsentMapKeepsOtherComponentsUnversioned() throws Exception {
+        MavenProject project = readProject();
+        Xpp3Dom configuration = (Xpp3Dom) project.getBuildPlugins().get(0).getConfiguration();
+        configuration.removeChild(configuration.getChild("componentDocVersions"));
+        AsciidocToPdfMojo mojo = (AsciidocToPdfMojo) lookupConfiguredMojo(project, "asciidoc-to-pdf");
+        FileUtils.writeStringToFile(new File(mojo.getAsciidocBuildSourceDirectory(), "how-to/page.adoc"),
+                "xref:reference:page.adoc[A] xref:opendj::index.adoc[B]", StandardCharsets.UTF_8);
+
+        mojo.execute();
+
+        assertThat(new File(mojo.getPdfSourceDirectory(), "how-to/page.adoc")).hasContent(
+                "link:https://doc.openidentityplatform.org/openam/15.2/reference/page.html[A] "
+                        + "link:https://doc.openidentityplatform.org/opendj/index.html[B]");
+    }
+
     private MavenProject readProject() throws Exception {
         File pom = getTestFile("src/test/resources/asciidoc-to-pdf/pom.xml");
         try (Reader reader = Files.newBufferedReader(pom.toPath(), StandardCharsets.UTF_8)) {

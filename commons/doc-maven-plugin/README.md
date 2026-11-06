@@ -759,7 +759,8 @@ archived documentation, configure the published site version paths explicitly:
 </configuration>
 ```
 
-`docVersion` is also available as the Maven property `-DdocVersion=15.2`.
+`docVersion` is also available as the Maven property `-DdocVersion=15.2`; a
+`docVersion` project property, including one inherited from a parent POM, sets it too.
 Omit it for current documentation. `componentDocVersions` is a Maven map keyed
 by Antora component name; configure it in the POM. Each value is the exact
 version directory published by the site, not a release tag or Maven version.
@@ -779,10 +780,16 @@ preserved. Only the PDF source copy is rewritten; Antora sources are unchanged.
 Version selection, in order:
 
 1. An explicit Antora version in an xref that names a module, such as
-   `xref:4.9@opendj:install-guide:index.adoc[Install]`.
+   `xref:4.10@opendj:install-guide:index.adoc[Install]`.
 2. An entry for the target component in `componentDocVersions`.
 3. `docVersion`, only when the target is this project's component.
 4. The unversioned current documentation.
+
+Rule 3 also applies when the xref explicitly names this project's component,
+such as `xref:openam:ROOT:index.adoc[OpenAM]` in an OpenAM PDF. With
+`docVersion=15.2`, the PDF deliberately links to `/openam/15.2/index.html`.
+Antora instead resolves a component-qualified xref without an explicit version
+to the latest version of that component, so the HTML link can differ.
 
 An empty map entry or Antora's versionless token `_` (`xref:_@opendj::index.adoc[Current]`)
 selects the unversioned site. The empty version form `xref:@opendj::index.adoc[Current]`
@@ -793,6 +800,13 @@ Version-only resource IDs such as `xref:15.1@page.adoc[Older]` are left unchange
 To generate a site link in the PDF, name the target module explicitly, for example
 `xref:15.1@how-to:page.adoc[Older]`. This also avoids depending on the including
 page's module when the xref occurs in a shared partial.
+
+Rebuilding requires a doc-maven-plugin release that supports `docVersion` and
+`componentDocVersions`; these options are unavailable in 3.2.2 and earlier.
+Release POMs that pin the plugin version, such as OpenDJ 4.10.2 and 5.2.0 through
+`${commons.version}`, must select a supporting plugin version for the rebuild.
+Passing `-DdocVersion` alone does not upgrade the plugin; an older plugin ignores
+the property and keeps unversioned links.
 
 When a release moves from current to archived documentation, first publish and
 verify its historical site paths, then rebuild its PDF from the immutable
