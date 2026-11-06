@@ -742,24 +742,7 @@ The following example shows the full configuration to use the 2.1.3 version.
 If you need to create your own shared content artifact,
 see the `forgerock-doc-common-content` project as an example.
 
-* * *
-
-The contents of this file are subject to the terms of the Common Development and
-Distribution License (the License). You may not use this file except in compliance with the
-License.
-
-You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
-specific language governing permission and limitations under the License.
-
-When distributing Covered Software, include this CDDL Header Notice in each file and include
-the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
-Header, with the fields enclosed by brackets [] replaced by your own identifying
-information: "Portions copyright [year] [name of copyright owner]".
-
-Copyright 2012-2015 ForgeRock AS.
-
-
-## Documentation site versions in AsciiDoc PDF links
+# Documentation site versions in AsciiDoc PDF links
 
 The `asciidoc-to-pdf` goal converts cross-guide and cross-component xrefs to
 links on `siteUrl` (default `https://doc.openidentityplatform.org`). By default,
@@ -795,15 +778,21 @@ preserved. Only the PDF source copy is rewritten; Antora sources are unchanged.
 
 Version selection, in order:
 
-1. An explicit Antora version in the xref, such as
+1. An explicit Antora version in an xref that names a module, such as
    `xref:4.9@opendj:install-guide:index.adoc[Install]`.
 2. An entry for the target component in `componentDocVersions`.
 3. `docVersion`, only when the target is this project's component.
 4. The unversioned current documentation.
 
-An empty map entry or an explicit empty version (`xref:@opendj::index.adoc[Current]`)
-selects the unversioned site. A component without an entry never inherits
+An empty map entry or Antora's versionless token `_` (`xref:_@opendj::index.adoc[Current]`)
+selects the unversioned site. The empty version form `xref:@opendj::index.adoc[Current]`
+is not a valid Antora resource ID and is not converted. A component without an entry never inherits
 another component's version.
+
+Version-only resource IDs such as `xref:15.1@page.adoc[Older]` are left unchanged.
+To generate a site link in the PDF, name the target module explicitly, for example
+`xref:15.1@how-to:page.adoc[Older]`. This also avoids depending on the including
+page's module when the xref occurs in a shared partial.
 
 When a release moves from current to archived documentation, first publish and
 verify its historical site paths, then rebuild its PDF from the immutable
@@ -814,3 +803,20 @@ project's normal PDF build with that property. Replace the archived PDF with
 the rebuilt artifact. Previously distributed PDFs retain their original links;
 this converter cannot update them. Do not select a historical version path
 before that version is published on the site.
+
+* * *
+
+The contents of this file are subject to the terms of the Common Development and
+Distribution License (the License). You may not use this file except in compliance with the
+License.
+
+You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+specific language governing permission and limitations under the License.
+
+When distributing Covered Software, include this CDDL Header Notice in each file and include
+the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+Header, with the fields enclosed by brackets [] replaced by your own identifying
+information: "Portions copyright [year] [name of copyright owner]".
+
+Copyright 2012-2015 ForgeRock AS.
+Portions copyright 2026 3A Systems, LLC.

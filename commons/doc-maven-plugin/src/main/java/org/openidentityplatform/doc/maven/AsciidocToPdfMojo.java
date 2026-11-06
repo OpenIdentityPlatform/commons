@@ -188,7 +188,8 @@ public class AsciidocToPdfMojo extends AbstractAsciidocMojo {
     }
 
     private static final Pattern XREF_PATTERN = Pattern.compile("xref:([^\\[\\s]+)\\[");
-    private static final Pattern RESOURCE_ID_PATTERN = Pattern.compile("(?:([^:/@$]*)@)?(?:([^:/@$]+):)?([^:/@$]*):([^:@$]+)");
+    private static final Pattern RESOURCE_ID_PATTERN =
+            Pattern.compile("(?:([^:/@$]+)@)?(?:([^:/@$]+):)?([^:/@$]*):([^:@$]+)");
 
     /**
      * Plain Asciidoctor knows neither the other guides nor the other Antora components, so it
@@ -199,7 +200,8 @@ public class AsciidocToPdfMojo extends AbstractAsciidocMojo {
      * <li>{@code xref:../module/page.adoc#anchor[text]}</li>
      * </ul>
      * Explicit {@code version@component:module:page.adoc} resource IDs override configured
-     * component versions; an empty explicit version selects the unversioned site.
+     * component versions; an explicit {@code _} version selects the unversioned site.
+     * Resource IDs without a module coordinate, such as {@code version@page.adoc}, are left unchanged.
      * A relative xref into {@code currentModule} becomes a same-guide xref. Other xrefs are left as they are.
      */
     static String convertXrefsForPdf(String adoc, String siteUrl, String component, String currentModule) {
@@ -250,6 +252,10 @@ public class AsciidocToPdfMojo extends AbstractAsciidocMojo {
                 return "xref:" + target;
             }
             explicitVersion = id.group(1);
+            // Antora uses _ to explicitly select the versionless component version.
+            if ("_".equals(explicitVersion)) {
+                explicitVersion = "";
+            }
             targetComponent = id.group(2) != null ? id.group(2) : component;
             module = id.group(3).isEmpty() ? "ROOT" : id.group(3);
             page = id.group(4);

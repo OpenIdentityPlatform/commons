@@ -84,12 +84,49 @@ public class AsciidocToPdfMojoTest {
         versions.put("openam", "15.1");
         assertThat(AsciidocToPdfMojo.convertXrefsForPdf(
                 "xref:4.7@opendj:ROOT:index.adoc[Older] xref:15.0@reference:page.adoc#a[Reference] "
-                        + "xref:reference:page.adoc[Configured] xref:@opendj::index.adoc[Current]",
+                        + "xref:reference:page.adoc[Configured] xref:_@opendj::index.adoc[Current]",
                 SITE, "openam", "how-to", "15.2", versions)).isEqualTo(
                 "link:" + SITE + "/opendj/4.7/index.html[Older] "
                         + "link:" + SITE + "/openam/15.0/reference/page.html#a[Reference] "
                         + "link:" + SITE + "/openam/15.1/reference/page.html[Configured] "
                         + "link:" + SITE + "/opendj/index.html[Current]");
+    }
+
+    @Test
+    public void testEmptyExplicitVersionIsNotAnAntoraResourceId() {
+        String adoc = "xref:@opendj::index.adoc[Current] xref:@reference:page.adoc[A] xref:@page.adoc[B]";
+        assertThat(AsciidocToPdfMojo.convertXrefsForPdf(adoc, SITE, "openam", "how-to", "15.2",
+                Collections.emptyMap())).isEqualTo(adoc);
+    }
+
+    @Test
+    public void testExplicitVersionWithoutModuleIsUnchanged() {
+        String adoc = "xref:15.1@page.adoc#a[Older] xref:_@page.adoc#b[Current]";
+        assertThat(AsciidocToPdfMojo.convertXrefsForPdf(adoc, SITE, "openam", "how-to", "15.2",
+                Collections.singletonMap("openam", "15.0"))).isEqualTo(adoc);
+    }
+
+    @Test
+    public void testEmptyComponentEntriesOverrideProjectVersion() {
+        Map<String, String> versions = new HashMap<>();
+        for (String empty : new String[] {null, ""}) {
+            versions.put("openam", empty);
+            versions.put("opendj", empty);
+            assertThat(AsciidocToPdfMojo.convertXrefsForPdf(
+                    "xref:reference:page.adoc[A] xref:opendj::index.adoc[B]",
+                    SITE, "openam", "how-to", "15.2", versions)).isEqualTo(
+                    "link:" + SITE + "/openam/reference/page.html[A] "
+                            + "link:" + SITE + "/opendj/index.html[B]");
+        }
+    }
+
+    @Test
+    public void testConfiguredVersionsAreLiteralSitePaths() {
+        assertThat(AsciidocToPdfMojo.convertXrefsForPdf(
+                "xref:reference:page.adoc[A] xref:opendj::index.adoc[B]",
+                SITE, "openam", "how-to", "_", Collections.singletonMap("opendj", "_"))).isEqualTo(
+                "link:" + SITE + "/openam/_/reference/page.html[A] "
+                        + "link:" + SITE + "/opendj/_/index.html[B]");
     }
 
     @Test
