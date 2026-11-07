@@ -11,8 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2024 3A Systems LLC.
- * Portions Copyright 2026 3A Systems, LLC.
+ * Copyright 2024-2026 3A Systems, LLC.
  */
 
 package org.openidentityplatform.doc.maven;
@@ -24,6 +23,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,12 +34,21 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Mojo(name = "antora", defaultPhase = LifecyclePhase.SITE)
 public class AntoraMojo extends AbstractAsciidocMojo {
+
+    /** Antora component name, when it differs from the lowercased project name. */
+    @Parameter(property = "antoraComponentName")
+    private String antoraComponentName;
+
+    /** Optional URL of the product's API reference. */
+    @Parameter(property = "javadocUrl")
+    private String javadocUrl;
 
     Set<String> copyToRootFolders = new HashSet<>();
     public AntoraMojo() {
@@ -196,16 +205,39 @@ public class AntoraMojo extends AbstractAsciidocMojo {
         if(!Files.exists(pagesPath)) {
             Files.createDirectory(pagesPath);
         }
-        Path indexFilePath = Paths.get(pagesPath.toString(), "index.adoc");
+        Path partialsPath = rootPath.resolve("partials");
+        Files.createDirectories(partialsPath);
+        String component = antoraComponentName == null || antoraComponentName.trim().isEmpty()
+                ? projectName.toLowerCase(Locale.ROOT) : antoraComponentName;
         TextStringBuilder builder = new TextStringBuilder();
-        builder.append("= ").append(projectName).appendln(" Documentation");
+        // An explicit component selects its latest version, even on an older version's page.
+        // Omit it on pages of this component so their links stay within the current version.
+        builder.append(":generated-documentation-component: ").append(component).appendln(":");
+        builder.append("ifeval::[\"{page-component-name}\" == \"").append(component).appendln("\"]");
+        builder.appendln(":generated-documentation-component:");
+        builder.appendln("endif::[]");
         builder.appendNewLine();
         for(String doc : getDocuments()) {
-            builder.append("* xref:").append(doc).appendln(":index.adoc[]");
+            builder.append("* xref:{generated-documentation-component}").append(doc).appendln(":index.adoc[]");
+        }
+        if (javadocUrl != null && !javadocUrl.trim().isEmpty()) {
+            builder.append("* link:").append(javadocUrl).appendln("[API Reference (Javadoc)]");
         }
         builder.appendNewLine();
+        builder.appendln(":generated-documentation-component!:");
+        Path listPath = partialsPath.resolve("documentation-list.adoc");
+        if (Files.exists(listPath)) {
+            throw new MojoExecutionException("Cannot generate documentation-list.adoc: a source partial already uses this name");
+        }
+        FileUtils.writeStringToFile(listPath.toFile(), builder.toString(), StandardCharsets.UTF_8);
 
-        FileUtils.writeStringToFile(indexFilePath.toFile(), builder.toString(), StandardCharsets.UTF_8);
+        builder = new TextStringBuilder();
+        builder.append("= ").append(projectName).appendln(" Documentation");
+        builder.appendNewLine();
+        builder.appendln("include::partial$documentation-list.adoc[]");
+        builder.appendNewLine();
+
+        FileUtils.writeStringToFile(pagesPath.resolve("index.adoc").toFile(), builder.toString(), StandardCharsets.UTF_8);
 
     }
 
