@@ -77,8 +77,9 @@ public class AntoraMojoTest extends AbstractMojoTestCase {
             mojo.execute();
 
             Path root = build.resolve("antora/modules/ROOT");
-            assertThat(Files.readString(root.resolve("pages/index.adoc"), StandardCharsets.UTF_8))
-                    .contains("include::partial$documentation-list.adoc[]");
+            assertThat(Files.readString(root.resolve("pages/index.adoc"), StandardCharsets.UTF_8)
+                    .replace("\r\n", "\n"))
+                    .isEqualTo("= OpenDJ Documentation\n\ninclude::partial$documentation-list.adoc[]\n\n");
             assertThat(Files.readString(root.resolve("partials/documentation-list.adoc"), StandardCharsets.UTF_8)
                     .replace("\r\n", "\n"))
                     .isEqualTo("\n:generated-documentation-component: opendj:\n"
@@ -91,10 +92,15 @@ public class AntoraMojoTest extends AbstractMojoTestCase {
             setVariableValueToObject(mojo, "antoraComponent", " directory-service ");
             setVariableValueToObject(mojo, "javadocUrl", " /opendj/apidocs/index.html ");
             mojo.execute();
-            assertThat(Files.readString(root.resolve("partials/documentation-list.adoc"), StandardCharsets.UTF_8))
-                    .contains(":generated-documentation-component: directory-service:",
-                            "ifeval::[\"{page-component-name}\" == \"directory-service\"]",
-                            "link:/opendj/apidocs/index.html[API Reference (Javadoc)]");
+            assertThat(Files.readString(root.resolve("partials/documentation-list.adoc"), StandardCharsets.UTF_8)
+                    .replace("\r\n", "\n"))
+                    .isEqualTo("\n:generated-documentation-component: directory-service:\n"
+                            + "ifeval::[\"{page-component-name}\" == \"directory-service\"]\n"
+                            + ":generated-documentation-component:\nendif::[]\n\n"
+                            + "* xref:{generated-documentation-component}reference:index.adoc[]\n"
+                            + "* xref:{generated-documentation-component}admin-guide:index.adoc[]\n"
+                            + "* link:/opendj/apidocs/index.html[API Reference (Javadoc)]\n\n"
+                            + ":generated-documentation-component!:\n");
 
             setVariableValueToObject(mojo, "antoraComponent", "   ");
             setVariableValueToObject(mojo, "javadocUrl", "   ");
