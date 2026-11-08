@@ -17,6 +17,10 @@
 package org.openidentityplatform.doc.maven;
 
 import org.apache.maven.plugin.logging.SystemStreamLog;
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.commons.io.FileUtils;
@@ -25,11 +29,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -75,19 +81,34 @@ public class AntoraMojoTest extends AbstractMojoTestCase {
                     .contains("include::partial$documentation-list.adoc[]");
             assertThat(Files.readString(root.resolve("partials/documentation-list.adoc"), StandardCharsets.UTF_8)
                     .replace("\r\n", "\n"))
-                    .contains(":generated-documentation-component: opendj:",
-                            "ifeval::[\"{page-component-name}\" == \"opendj\"]",
-                            "* xref:{generated-documentation-component}reference:index.adoc[]\n"
-                                    + "* xref:{generated-documentation-component}admin-guide:index.adoc[]")
-                    .doesNotContain("API Reference");
+                    .isEqualTo("\n:generated-documentation-component: opendj:\n"
+                            + "ifeval::[\"{page-component-name}\" == \"opendj\"]\n"
+                            + ":generated-documentation-component:\nendif::[]\n\n"
+                            + "* xref:{generated-documentation-component}reference:index.adoc[]\n"
+                            + "* xref:{generated-documentation-component}admin-guide:index.adoc[]\n\n"
+                            + ":generated-documentation-component!:\n");
 
-            setVariableValueToObject(mojo, "antoraComponentName", "directory-service");
-            setVariableValueToObject(mojo, "javadocUrl", "/opendj/apidocs/index.html");
+            setVariableValueToObject(mojo, "antoraComponent", " directory-service ");
+            setVariableValueToObject(mojo, "javadocUrl", " /opendj/apidocs/index.html ");
             mojo.execute();
             assertThat(Files.readString(root.resolve("partials/documentation-list.adoc"), StandardCharsets.UTF_8))
                     .contains(":generated-documentation-component: directory-service:",
                             "ifeval::[\"{page-component-name}\" == \"directory-service\"]",
                             "link:/opendj/apidocs/index.html[API Reference (Javadoc)]");
+
+            setVariableValueToObject(mojo, "antoraComponent", "   ");
+            setVariableValueToObject(mojo, "javadocUrl", "   ");
+            mojo.projectName = "OpenIDM";
+            Locale previous = Locale.getDefault();
+            try {
+                Locale.setDefault(Locale.forLanguageTag("tr-TR"));
+                mojo.execute();
+            } finally {
+                Locale.setDefault(previous);
+            }
+            assertThat(Files.readString(root.resolve("partials/documentation-list.adoc"), StandardCharsets.UTF_8))
+                    .contains(":generated-documentation-component: openidm:")
+                    .doesNotContain("API Reference");
 
             Path sourcePartials = build.resolve("source/partials");
             Files.createDirectories(sourcePartials);
@@ -97,6 +118,79 @@ public class AntoraMojoTest extends AbstractMojoTestCase {
         } finally {
             FileUtils.deleteDirectory(build.toFile());
         }
+    }
+
+    @Test
+    public void testMavenUserPropertiesConfigureDocumentationList() throws Exception {
+        File pom = getTestFile("src/test/resources/antora/pom.xml");
+        MavenProject project;
+        try (Reader reader = Files.newBufferedReader(pom.toPath(), StandardCharsets.UTF_8)) {
+            project = new MavenProject(new MavenXpp3Reader().read(reader));
+        }
+        project.setFile(pom);
+        MavenSession session = newMavenSession(project);
+        session.getUserProperties().setProperty("antoraComponent", " directory-service ");
+        session.getUserProperties().setProperty("javadocUrl", " /api/index.html ");
+        AntoraMojo mojo = (AntoraMojo) lookupConfiguredMojo(session, newMojoExecution("antora"));
+        Path build = Files.createTempDirectory("antora-properties-test");
+        try {
+            FileUtils.copyDirectory(getTestFile("src/test/resources/asciidoc"), build.resolve("source").toFile());
+            mojo.buildDirectory = build.toFile();
+            Files.writeString(build.resolve("source/reference/index.adoc"), "= Reference\n\ninclude::./chapter.adoc[]\n");
+            Files.writeString(build.resolve("source/admin-guide/index.adoc"), "= Administration\n\ninclude::./chapter.adoc[]\n");
+            mojo.projectName = "OpenDJ";
+            setVariableValueToObject(mojo, "documents", List.of("reference", "admin-guide"));
+            mojo.execute();
+            assertThat(Files.readString(build.resolve("antora/modules/ROOT/partials/documentation-list.adoc")))
+                    .contains(":generated-documentation-component: directory-service:",
+                            "link:/api/index.html[API Reference (Javadoc)]");
+        } finally {
+            FileUtils.deleteDirectory(build.toFile());
+        }
+    }
+
+    @Test
+    public void testPomOptionsConfigureDocumentationList() throws Exception {
+        File pom = getTestFile("src/test/resources/antora/pom.xml");
+        MavenProject project;
+        try (Reader reader = Files.newBufferedReader(pom.toPath(), StandardCharsets.UTF_8)) {
+            project = new MavenProject(new MavenXpp3Reader().read(reader));
+        }
+        project.setFile(pom);
+        project.getBuildPlugins().get(0).setGroupId("org.openidentityplatform.commons");
+        Xpp3Dom configuration = (Xpp3Dom) project.getBuildPlugins().get(0).getConfiguration();
+        Xpp3Dom component = new Xpp3Dom("antoraComponent");
+        component.setValue(" directory-service ");
+        configuration.addChild(component);
+        Xpp3Dom url = new Xpp3Dom("javadocUrl");
+        url.setValue(" /api/index.html ");
+        configuration.addChild(url);
+        AntoraMojo mojo = (AntoraMojo) lookupConfiguredMojo(project, "antora");
+        Path build = Files.createTempDirectory("antora-properties-test");
+        try {
+            FileUtils.copyDirectory(getTestFile("src/test/resources/asciidoc"), build.resolve("source").toFile());
+            mojo.buildDirectory = build.toFile();
+            Files.writeString(build.resolve("source/reference/index.adoc"), "= Reference\n\ninclude::./chapter.adoc[]\n");
+            Files.writeString(build.resolve("source/admin-guide/index.adoc"), "= Administration\n\ninclude::./chapter.adoc[]\n");
+            mojo.projectName = "OpenDJ";
+            setVariableValueToObject(mojo, "documents", List.of("reference", "admin-guide"));
+            mojo.execute();
+            assertThat(Files.readString(build.resolve("antora/modules/ROOT/partials/documentation-list.adoc")))
+                    .contains(":generated-documentation-component: directory-service:",
+                            "link:/api/index.html[API Reference (Javadoc)]");
+        } finally {
+            FileUtils.deleteDirectory(build.toFile());
+        }
+    }
+
+    @Test
+    public void testDocumentationListOptionsAreDescriptorParameters() throws Exception {
+        assertThat(newMojoExecution("antora").getMojoDescriptor().getParameterMap().get("antoraComponent")
+                .getExpression()).isEqualTo("${antoraComponent}");
+        assertThat(newMojoExecution("antora").getMojoDescriptor().getParameterMap().get("javadocUrl")
+                .getExpression()).isEqualTo("${javadocUrl}");
+        assertThat(newMojoExecution("asciidoc-to-pdf").getMojoDescriptor().getParameterMap().get("antoraComponent")
+                .getExpression()).isEqualTo("${antoraComponent}");
     }
 
     @Test

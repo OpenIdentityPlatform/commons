@@ -77,6 +77,20 @@ public class AsciidocToPdfMojoConfigurationTest extends AbstractMojoTestCase {
         assertPreparedLinks(mojo, "15.2/");
     }
 
+    public void testPomComponentIsUsedInPdfLinks() throws Exception {
+        MavenProject project = readProject();
+        Xpp3Dom configuration = (Xpp3Dom) project.getBuildPlugins().get(0).getConfiguration();
+        Xpp3Dom component = new Xpp3Dom("antoraComponent");
+        component.setValue(" directory-service ");
+        configuration.addChild(component);
+        AsciidocToPdfMojo mojo = (AsciidocToPdfMojo) lookupConfiguredMojo(project, "asciidoc-to-pdf");
+        FileUtils.writeStringToFile(new File(mojo.getAsciidocBuildSourceDirectory(), "how-to/page.adoc"),
+                "xref:reference:page.adoc[A]", StandardCharsets.UTF_8);
+        mojo.execute();
+        assertThat(new File(mojo.getPdfSourceDirectory(), "how-to/page.adoc"))
+                .hasContent("link:https://doc.openidentityplatform.org/directory-service/15.2/reference/page.html[A]");
+    }
+
     public void testComponentDocVersionsIsADescriptorParameter() throws Exception {
         assertTrue(newMojoExecution("asciidoc-to-pdf").getMojoDescriptor()
                 .getParameterMap().containsKey("componentDocVersions"));

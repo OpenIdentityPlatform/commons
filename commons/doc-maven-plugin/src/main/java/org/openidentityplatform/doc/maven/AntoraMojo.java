@@ -34,17 +34,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Mojo(name = "antora", defaultPhase = LifecyclePhase.SITE)
 public class AntoraMojo extends AbstractAsciidocMojo {
-
-    /** Antora component name, when it differs from the lowercased project name. */
-    @Parameter(property = "antoraComponentName")
-    private String antoraComponentName;
 
     /** Optional URL of the product's API reference. */
     @Parameter(property = "javadocUrl")
@@ -207,9 +202,9 @@ public class AntoraMojo extends AbstractAsciidocMojo {
         }
         Path partialsPath = rootPath.resolve("partials");
         Files.createDirectories(partialsPath);
-        String component = antoraComponentName == null || antoraComponentName.trim().isEmpty()
-                ? projectName.toLowerCase(Locale.ROOT) : antoraComponentName;
+        String component = getAntoraComponent();
         TextStringBuilder builder = new TextStringBuilder();
+        builder.appendNewLine();
         // An explicit component selects its latest version, even on an older version's page.
         // Omit it on pages of this component so their links stay within the current version.
         builder.append(":generated-documentation-component: ").append(component).appendln(":");
@@ -220,8 +215,9 @@ public class AntoraMojo extends AbstractAsciidocMojo {
         for(String doc : getDocuments()) {
             builder.append("* xref:{generated-documentation-component}").append(doc).appendln(":index.adoc[]");
         }
-        if (javadocUrl != null && !javadocUrl.trim().isEmpty()) {
-            builder.append("* link:").append(javadocUrl).appendln("[API Reference (Javadoc)]");
+        String url = javadocUrl == null ? "" : javadocUrl.trim();
+        if (!url.isEmpty()) {
+            builder.append("* link:").append(url).appendln("[API Reference (Javadoc)]");
         }
         builder.appendNewLine();
         builder.appendln(":generated-documentation-component!:");
