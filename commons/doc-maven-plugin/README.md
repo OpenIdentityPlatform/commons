@@ -34,6 +34,41 @@ the overall configuration requires at least these arguments:
 
 Other features are described in this README.
 
+## Antora documentation list
+
+Available in an upcoming release (unreleased).
+
+The `antora` goal generates `ROOT/partials/documentation-list.adoc` from
+`<documents>` and includes it in the product's index page. Another component
+can include the same list, for example:
+
+    include::opendj:ROOT:partial$documentation-list.adoc[]
+
+Here `opendj` is the component name: `<antoraComponent>` when set, otherwise
+the lowercased `<projectName>`. Set `<antoraComponent>` to match the component
+name on the site when it differs from the default; otherwise, guide links on
+the product's own index may not resolve. Set `<javadocUrl>` to include an API
+reference in the list; the URL is omitted when this option is not set. For
+example:
+
+    <antoraComponent>directory-service</antoraComponent>
+    <javadocUrl>/opendj/apidocs/index.html</javadocUrl>
+
+Links on a product page target that page's own version. Links from another
+component target the latest version. The Javadoc URL is written into the list
+without surrounding whitespace and is not adjusted for the documentation
+version. Use a root-relative or absolute URL: a page-relative URL resolves
+against the page that includes the list.
+
+The goal fails if the sources already contain
+`partials/documentation-list.adoc`.
+
+Before adding the include to the site, publish the generated partial and ensure
+that every branch which can publish this product's documentation either provides
+the partial or cannot overwrite the published modules. In particular, an older
+sustaining branch may otherwise remove the partial on its next deployment.
+Check the build's Java requirements before upgrading the plugin on such a branch.
+
 
 ## Plugin Configuration
 

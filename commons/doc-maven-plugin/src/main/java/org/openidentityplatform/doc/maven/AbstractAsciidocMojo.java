@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2024 3A Systems LLC.
+ * Copyright 2024-2026 3A Systems, LLC.
  */
 
 package org.openidentityplatform.doc.maven;
@@ -28,6 +28,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -51,6 +52,15 @@ public abstract class AbstractAsciidocMojo extends AbstractMojo {
      */
     @Parameter(property = "projectName", required = true)
     protected String projectName;
+
+    /** Antora component name; defaults to the lowercased project name. */
+    @Parameter(property = "antoraComponent")
+    private String antoraComponent;
+
+    protected String getAntoraComponent() {
+        String component = antoraComponent == null ? "" : antoraComponent.trim();
+        return component.isEmpty() ? projectName.toLowerCase(Locale.ROOT) : component;
+    }
 
     /**
      * Project version.

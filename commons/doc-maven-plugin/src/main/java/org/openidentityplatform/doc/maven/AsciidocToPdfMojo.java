@@ -36,7 +36,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -71,16 +70,6 @@ public class AsciidocToPdfMojo extends AbstractAsciidocMojo {
     private String siteUrl;
 
     /**
-     * Antora component of this project on the documentation site, such as {@code openidm}.
-     *
-     * <br>
-     *
-     * Default: {@code projectName} in lower case.
-     */
-    @Parameter(property = "antoraComponent")
-    private String antoraComponent;
-
-    /**
      * Site version path for this component, such as {@code 15.2}. Empty means the
      * unversioned current documentation. This is independent of the Maven project version.
      */
@@ -106,8 +95,7 @@ public class AsciidocToPdfMojo extends AbstractAsciidocMojo {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         String pdfPath = getPdfOutputDirectory().getPath();
-        String component = antoraComponent != null && !antoraComponent.isEmpty()
-                ? antoraComponent : projectName.toLowerCase(Locale.ROOT);
+        String component = getAntoraComponent();
         try {
             preparePdfSource(getAsciidocBuildSourceDirectory(), getPdfSourceDirectory(), siteUrl, component,
                     docVersion, componentDocVersions);
