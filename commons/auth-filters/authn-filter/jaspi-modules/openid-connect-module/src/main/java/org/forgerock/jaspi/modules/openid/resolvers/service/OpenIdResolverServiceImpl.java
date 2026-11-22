@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
- * Portions Copyrighted 2026 3A Systems, LLC
+* Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.jaspi.modules.openid.resolvers.service;
@@ -23,6 +23,8 @@ import java.io.FileNotFoundException;
 import java.net.URL;
 import java.security.KeyStore;
 import java.security.PublicKey;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -89,6 +91,15 @@ public class OpenIdResolverServiceImpl implements OpenIdResolverService {
     @Override
     public OpenIdResolver getResolverForIssuer(final String issuer) {
         return openIdResolvers.get(issuer);
+    }
+
+    /**
+     * Returns a snapshot of the configured resolvers, including those whose issuer was discovered.
+     *
+     * @return the configured resolvers
+     */
+    public Collection<OpenIdResolver> getConfiguredResolvers() {
+        return List.copyOf(openIdResolvers.values());
     }
 
     /**

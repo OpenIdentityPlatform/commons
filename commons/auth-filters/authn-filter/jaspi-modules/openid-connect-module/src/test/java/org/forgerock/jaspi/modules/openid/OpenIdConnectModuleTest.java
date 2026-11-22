@@ -12,7 +12,7 @@
 * information: "Portions copyright [year] [name of copyright owner]".
 *
 * Copyright 2014-2015 ForgeRock AS.
-* Portions copyright 2020-2026 3A Systems, LLC
+* Portions Copyright 2020-2026 3A Systems, LLC.
 */
 
 package org.forgerock.jaspi.modules.openid;
@@ -33,6 +33,7 @@ import javax.security.auth.message.MessagePolicy;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,36 +46,46 @@ import org.forgerock.jaspi.modules.openid.exceptions.OpenIdConnectVerificationEx
 import org.forgerock.jaspi.modules.openid.resolvers.OpenIdResolver;
 import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverService;
 import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverServiceConfigurator;
+import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverServiceConfiguratorImpl;
 import org.forgerock.json.jose.common.JwtReconstruction;
 import org.forgerock.json.jose.exceptions.InvalidJwtException;
 import org.forgerock.json.jose.exceptions.JwtReconstructionException;
 import org.forgerock.json.jose.jws.SignedJwt;
+import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class OpenIdConnectModuleTest {
 
+    private static final String ISSUER = "https://issuer.example";
+    private static final String SECOND_ISSUER = "https://second-issuer.example";
+    private static final String CLIENT_ID = "client-one";
+    private static final String SECOND_CLIENT_ID = "client-two";
+    private static final String TEST_SECRET = "unit-test-secret-32-bytes-or-more";
+
     OpenIdConnectModule testModule;
     OpenIdResolverServiceConfigurator mockConfigurator;
     JwtReconstruction mockReconstruction;
-    OpenIdResolverService mockService;
+    Map<String, OpenIdResolver> resolvers;
     CallbackHandler mockCallback;
 
     @BeforeMethod
     public void setUp() {
         mockConfigurator = mock(OpenIdResolverServiceConfigurator.class);
         mockReconstruction = mock(JwtReconstruction.class);
-        mockService = mock(OpenIdResolverService.class);
+        resolvers = new HashMap<>();
         mockCallback = mock(CallbackHandler.class);
-        testModule = new OpenIdConnectModule(mockConfigurator, mockReconstruction, mockService, mockCallback,
+        testModule = new OpenIdConnectModule(mockConfigurator, mockReconstruction, resolvers, mockCallback,
                 OpenIdConnectModule.HEADER_KEY);
     }
 
     private Map<String, Object> getConfig() throws UnsupportedEncodingException {
 
         Map<String, Object> options = new HashMap<>();
-        options.put(OpenIdConnectModule.HEADER_KEY, "openam-openid-connect-header");
+        options.put(OpenIdConnectModule.HEADER_KEY, OpenIdConnectModule.HEADER_KEY);
+        options.put(OpenIdConnectModule.RESOLVERS_KEY, List.of(resolverConfig(ISSUER, CLIENT_ID)));
 
         return options;
     }
@@ -244,6 +255,7 @@ public class OpenIdConnectModuleTest {
         given(mockReconstruction.reconstructJwt(anyString(), any(Class.class))).willReturn(jws);
         given(claimSet.getIssuer()).willReturn("");
 
+        resolvers.put("", mockResolver);
         doThrow(new OpenIdConnectVerificationException()).when(mockResolver).validateIdentity(jws);
 
         //when
@@ -273,7 +285,7 @@ public class OpenIdConnectModuleTest {
         request.getHeaders().put(OpenIdConnectModule.HEADER_KEY, jwtInRequest);
         given(mockReconstruction.reconstructJwt(anyString(), any(Class.class))).willReturn(jws);
         given(claimSet.getIssuer()).willReturn("");
-        given(mockService.getResolverForIssuer(anyString())).willReturn(mockResolver);
+        resolvers.put("", mockResolver);
 
         doThrow(new IOException()).when(mockCallback).handle(any(Callback[].class));
 
@@ -291,6 +303,83 @@ public class OpenIdConnectModuleTest {
         assertTrue(errored);
         verify(mockResolver, times(1)).validateIdentity(jws);
         assertNull(res);
+    }
+
+    @DataProvider
+    public Object[][] audienceClaims() {
+        return new Object[][] {
+            {ISSUER, CLIENT_ID, Map.of(), AuthStatus.SUCCESS},
+            {ISSUER, List.of(CLIENT_ID), Map.of("azp", CLIENT_ID), AuthStatus.SUCCESS},
+            {SECOND_ISSUER, SECOND_CLIENT_ID, Map.of(), AuthStatus.SUCCESS},
+            {ISSUER, SECOND_CLIENT_ID, Map.of(), AuthStatus.SEND_FAILURE},
+            {SECOND_ISSUER, CLIENT_ID, Map.of(), AuthStatus.SEND_FAILURE},
+            {ISSUER, null, Map.of(), AuthStatus.SEND_FAILURE},
+            {ISSUER, "", Map.of(), AuthStatus.SEND_FAILURE},
+            {ISSUER, List.of(), Map.of(), AuthStatus.SEND_FAILURE},
+            {ISSUER, 42, Map.of(), AuthStatus.SEND_FAILURE},
+            {ISSUER, List.of(CLIENT_ID, 42), Map.of(), AuthStatus.SEND_FAILURE},
+            {ISSUER, List.of(CLIENT_ID, SECOND_CLIENT_ID), Map.of("azp", CLIENT_ID), AuthStatus.SEND_FAILURE},
+            {ISSUER, CLIENT_ID, Map.of("azp", SECOND_CLIENT_ID), AuthStatus.SEND_FAILURE},
+            {ISSUER, CLIENT_ID, Map.of("azp", 42), AuthStatus.SEND_FAILURE}
+        };
+    }
+
+    @Test(dataProvider = "audienceClaims")
+    public void shouldValidateAudienceForTheConfiguredIssuer(String issuer, Object audience,
+            Map<String, Object> additionalClaims, AuthStatus expectedStatus) throws Exception {
+        Map<String, Object> config = getConfig();
+        config.put(OpenIdConnectModule.RESOLVERS_KEY,
+                List.of(resolverConfig(ISSUER, CLIENT_ID), resolverConfig(SECOND_ISSUER, SECOND_CLIENT_ID)));
+        OpenIdConnectModule module = newModule();
+        module.initialize(null, null, mockCallback, config).getOrThrowUninterruptibly();
+
+        JwtClaimsSet claims = new JwtClaimsSet(additionalClaims);
+        claims.setIssuer(issuer);
+        claims.setSubject("test-subject");
+        claims.setExpirationTime(new Date(System.currentTimeMillis() + 60_000));
+        if (audience != null) {
+            claims.put("aud", audience);
+        }
+        SignedJwt jwt = mock(SignedJwt.class);
+        given(jwt.getClaimsSet()).willReturn(claims);
+        given(jwt.verify(any(SigningHandler.class))).willReturn(true);
+        given(mockReconstruction.reconstructJwt("test-jwt", SignedJwt.class)).willReturn(jwt);
+        Request request = new Request();
+        request.getHeaders().put(OpenIdConnectModule.HEADER_KEY, "test-jwt");
+        MessageInfoContext message = mock(MessageInfoContext.class);
+        given(message.getRequest()).willReturn(request);
+
+        AuthStatus result = module.validateRequest(message, new Subject(), null).getOrThrowUninterruptibly();
+
+        assertEquals(result, expectedStatus);
+        if (expectedStatus == AuthStatus.SEND_FAILURE) {
+            verifyZeroInteractions(mockCallback);
+        }
+    }
+
+    @DataProvider
+    public Object[][] invalidClientIds() {
+        return new Object[][] {{null}, {""}, {"  "}, {42}};
+    }
+
+    @Test(dataProvider = "invalidClientIds", expectedExceptions = AuthenticationException.class)
+    public void shouldRejectResolverWithoutAClientId(Object clientId) throws Exception {
+        Map<String, Object> config = getConfig();
+        Map<String, Object> resolver = new HashMap<>(resolverConfig(ISSUER, CLIENT_ID));
+        resolver.put(OpenIdConnectModule.CLIENT_ID_KEY, clientId);
+        config.put(OpenIdConnectModule.RESOLVERS_KEY, List.of(resolver));
+
+        newModule().initialize(null, null, mockCallback, config).getOrThrowUninterruptibly();
+    }
+
+    private OpenIdConnectModule newModule() {
+        return new OpenIdConnectModule(new OpenIdResolverServiceConfiguratorImpl(), mockReconstruction,
+                Map.of(), mockCallback, OpenIdConnectModule.HEADER_KEY);
+    }
+
+    private Map<String, String> resolverConfig(String issuer, String clientId) {
+        return Map.of(OpenIdResolver.ISSUER_KEY, issuer, OpenIdResolver.CLIENT_SECRET_KEY, TEST_SECRET,
+                OpenIdConnectModule.CLIENT_ID_KEY, clientId);
     }
 
     @Test
