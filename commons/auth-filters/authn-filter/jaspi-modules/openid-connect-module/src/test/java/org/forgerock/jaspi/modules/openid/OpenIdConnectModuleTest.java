@@ -30,13 +30,22 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessagePolicy;
+import javax.security.auth.message.callback.CallerPrincipalCallback;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpServer;
 
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageInfoContext;
@@ -47,12 +56,19 @@ import org.forgerock.jaspi.modules.openid.resolvers.OpenIdResolver;
 import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverService;
 import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverServiceConfigurator;
 import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverServiceConfiguratorImpl;
+import org.forgerock.json.jose.builders.JwtBuilderFactory;
 import org.forgerock.json.jose.common.JwtReconstruction;
 import org.forgerock.json.jose.exceptions.InvalidJwtException;
 import org.forgerock.json.jose.exceptions.JwtReconstructionException;
+import org.forgerock.json.jose.jwk.KeyUse;
+import org.forgerock.json.jose.jwk.RsaJWK;
+import org.forgerock.json.jose.jws.JwsAlgorithm;
 import org.forgerock.json.jose.jws.SignedJwt;
+import org.forgerock.json.jose.jws.SigningManager;
 import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
+import org.forgerock.json.jose.utils.Utils;
+import org.mockito.ArgumentCaptor;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -354,6 +370,71 @@ public class OpenIdConnectModuleTest {
         assertEquals(result, expectedStatus);
         if (expectedStatus == AuthStatus.SEND_FAILURE) {
             verifyZeroInteractions(mockCallback);
+        }
+    }
+
+    @Test
+    public void shouldValidateAudienceForDiscoveredIssuer() throws Exception {
+        String keyId = "discovery-key";
+        String subjectName = "discovery-subject";
+        String discoveryPath = "/.well-known/openid-configuration";
+        String jwksPath = "/jwks";
+        KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance("RSA");
+        keyGenerator.initialize(2048);
+        KeyPair keyPair = keyGenerator.generateKeyPair();
+        JwsAlgorithm algorithm = JwsAlgorithm.RS256;
+        RsaJWK publicKey = new RsaJWK((RSAPublicKey) keyPair.getPublic(), KeyUse.SIG, algorithm.toString(),
+                keyId, null, null, null);
+        String jwks = "{\"keys\":[" + publicKey.toJsonString() + "]}";
+
+        String loopback = "127.0.0.1";
+        HttpServer server = HttpServer.create(new InetSocketAddress(loopback, 0), 0);
+        try {
+            String baseUrl = "http://" + loopback + ":" + server.getAddress().getPort();
+            String discovery = Utils.writeJsonObject(Map.of("issuer", ISSUER, "jwks_uri", baseUrl + jwksPath));
+            server.createContext(discoveryPath, exchange -> serveJson(exchange, discovery));
+            server.createContext(jwksPath, exchange -> serveJson(exchange, jwks));
+            server.start();
+
+            OpenIdConnectModule module = new OpenIdConnectModule();
+            Map<String, Object> config = Map.of(
+                    OpenIdConnectModule.HEADER_KEY, OpenIdConnectModule.HEADER_KEY,
+                    OpenIdConnectModule.RESOLVERS_KEY, List.of(Map.of(
+                            OpenIdResolver.WELL_KNOWN_CONFIGURATION, baseUrl + discoveryPath,
+                            OpenIdConnectModule.CLIENT_ID_KEY, CLIENT_ID)));
+            module.initialize(null, null, mockCallback, config).getOrThrowUninterruptibly();
+
+            JwtBuilderFactory jwtBuilder = new JwtBuilderFactory();
+            JwtClaimsSet claims = jwtBuilder.claims().iss(ISSUER).sub(subjectName).aud(List.of(CLIENT_ID))
+                    .exp(new Date(System.currentTimeMillis() + 60_000)).build();
+            SigningHandler signer = new SigningManager().newRsaSigningHandler(keyPair.getPrivate());
+            String jwt = jwtBuilder.jws(signer).headers().alg(algorithm).kid(keyId).done().claims(claims).build();
+            Request request = new Request();
+            request.getHeaders().put(OpenIdConnectModule.HEADER_KEY, jwt);
+            MessageInfoContext message = mock(MessageInfoContext.class);
+            given(message.getRequest()).willReturn(request);
+            Subject subject = new Subject();
+
+            assertEquals(module.validateRequest(message, subject, null).getOrThrowUninterruptibly(), AuthStatus.SUCCESS);
+            ArgumentCaptor<Callback[]> callbacks = ArgumentCaptor.forClass(Callback[].class);
+            verify(mockCallback).handle(callbacks.capture());
+            assertEquals(callbacks.getValue().length, 1);
+            CallerPrincipalCallback principal = (CallerPrincipalCallback) callbacks.getValue()[0];
+            assertSame(principal.getSubject(), subject);
+            assertEquals(principal.getName(), subjectName);
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    private static void serveJson(HttpExchange exchange, String json) throws IOException {
+        byte[] body = json.getBytes(StandardCharsets.UTF_8);
+        try {
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, body.length);
+            exchange.getResponseBody().write(body);
+        } finally {
+            exchange.close();
         }
     }
 
