@@ -12,7 +12,7 @@
 * information: "Portions copyright [year] [name of copyright owner]".
 *
 * Copyright 2014-2015 ForgeRock AS.
- * Portions Copyrighted 2026 3A Systems, LLC
+* Portions Copyright 2026 3A Systems, LLC.
 */
 
 package org.forgerock.jaspi.modules.openid;
@@ -34,6 +34,7 @@ import javax.security.auth.message.callback.CallerPrincipalCallback;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,9 +43,9 @@ import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
+import org.forgerock.jaspi.modules.openid.exceptions.InvalidAudException;
 import org.forgerock.jaspi.modules.openid.exceptions.OpenIdConnectVerificationException;
 import org.forgerock.jaspi.modules.openid.resolvers.OpenIdResolver;
-import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverService;
 import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverServiceConfigurator;
 import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverServiceConfiguratorImpl;
 import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverServiceImpl;
@@ -91,12 +92,15 @@ public class OpenIdConnectModule implements AsyncServerAuthModule {
      */
     public static final String RESOLVERS_KEY = "resolvers";
 
+    /** Expected OpenID Connect client identifier in each resolver configuration. */
+    public static final String CLIENT_ID_KEY = "client_id";
+
     private final JwtReconstruction constructor;
     private final OpenIdResolverServiceConfigurator serviceConfigurator;
 
     private String openIdConnectHeader;
 
-    private OpenIdResolverService resolverService;
+    private Map<String, OpenIdResolver> resolvers = Map.of();
 
     private CallbackHandler callbackHandler;
 
@@ -113,15 +117,18 @@ public class OpenIdConnectModule implements AsyncServerAuthModule {
      *
      * @param serviceConfigurator Configurator device for setting up our resolver service
      * @param constructor Builder for creating our JWTs out of their representation
+     * @param resolvers Resolvers indexed by issuer
+     * @param callback Callback handler for publishing the principal
+     * @param openIdConnectHeader Name of the header containing the token
      */
     OpenIdConnectModule(final OpenIdResolverServiceConfigurator serviceConfigurator,
                         final JwtReconstruction constructor,
-                        final OpenIdResolverService service,
+                        final Map<String, OpenIdResolver> resolvers,
                         final CallbackHandler callback,
                         final String openIdConnectHeader) {
         this.serviceConfigurator = serviceConfigurator;
         this.constructor = constructor;
-        this.resolverService = service;
+        this.resolvers = resolvers;
         this.callbackHandler = callback;
         this.openIdConnectHeader = openIdConnectHeader;
     }
@@ -159,19 +166,43 @@ public class OpenIdConnectModule implements AsyncServerAuthModule {
             connTimeout = DEFAULT_CONN_TIMEOUT;
         }
 
-        final List<Map<String, String>> resolvers =
-                (List<Map<String, String>>) config.get(OpenIdConnectModule.RESOLVERS_KEY);
+        final List<Map<String, String>> resolverConfigs =
+                (List<Map<String, String>>) config.get(RESOLVERS_KEY);
 
-        resolverService = new OpenIdResolverServiceImpl(readTimeout, connTimeout);
-
-        //if we weren't able to set up the service, or any one of the supplied resolver configs was invalid,
-        //error out here
-        if (!serviceConfigurator.configureService(resolverService, resolvers)) {
-            LOG.debug("OpenIdConnectModule config is invalid. You must configure at least one valid resolver.");
-            return newExceptionPromise(new AuthenticationException("OpenIdConnectModule configuration is invalid."));
+        try {
+            resolvers = configureResolvers(resolverConfigs, readTimeout, connTimeout);
+        } catch (AuthenticationException e) {
+            return newExceptionPromise(e);
         }
 
         return newResultPromise(null);
+    }
+
+    private Map<String, OpenIdResolver> configureResolvers(List<Map<String, String>> resolverConfigs,
+            int readTimeout, int connTimeout) throws AuthenticationException {
+        if (resolverConfigs == null || resolverConfigs.isEmpty()) {
+            throw new AuthenticationException("OpenIdConnectModule requires at least one resolver.");
+        }
+
+        Map<String, OpenIdResolver> configuredResolvers = new HashMap<>();
+        for (Map<String, String> resolverConfig : resolverConfigs) {
+            Object clientId = resolverConfig == null ? null : resolverConfig.get(CLIENT_ID_KEY);
+            if (!(clientId instanceof String) || ((String) clientId).isBlank()) {
+                throw new AuthenticationException("Each OpenIdConnectModule resolver requires a nonblank client_id.");
+            }
+
+            OpenIdResolverServiceImpl service = new OpenIdResolverServiceImpl(readTimeout, connTimeout);
+            if (!serviceConfigurator.configureService(service, List.of(resolverConfig))) {
+                throw new AuthenticationException("OpenIdConnectModule resolver configuration is invalid.");
+            }
+
+            // Discovery can supply the issuer. Bind the client ID to the issuer of the actual resolver.
+            for (OpenIdResolver resolver : service.getConfiguredResolvers()) {
+                configuredResolvers.put(resolver.getIssuer(), new ClientBoundResolver(resolver, (String) clientId));
+            }
+        }
+
+        return Map.copyOf(configuredResolvers);
     }
 
     /**
@@ -214,11 +245,12 @@ public class OpenIdConnectModule implements AsyncServerAuthModule {
 
         final JwtClaimsSet jwtClaimSet = retrievedJwt.getClaimsSet();
 
-        OpenIdResolver resolver = resolverService.getResolverForIssuer(jwtClaimSet.getIssuer());
+        final String issuer = jwtClaimSet.getIssuer();
+        final OpenIdResolver resolver = issuer == null ? null : resolvers.get(issuer);
 
         //if no resolver for this issuer found, abort
         if (resolver == null) {
-            LOG.debug("No resolver found for the issuer: {}", jwtClaimSet.getIssuer());
+            LOG.debug("No resolver found for the issuer: {}", issuer);
             return newResultPromise(SEND_FAILURE);
         }
 
@@ -238,6 +270,37 @@ public class OpenIdConnectModule implements AsyncServerAuthModule {
         }
 
         return newResultPromise(AuthStatus.SUCCESS);
+    }
+
+    private static final class ClientBoundResolver implements OpenIdResolver {
+
+        private final OpenIdResolver resolver;
+        private final String clientId;
+
+        private ClientBoundResolver(OpenIdResolver resolver, String clientId) {
+            this.resolver = resolver;
+            this.clientId = clientId;
+        }
+
+        @Override
+        public String getIssuer() {
+            return resolver.getIssuer();
+        }
+
+        @Override
+        public void validateIdentity(SignedJwt token) throws OpenIdConnectVerificationException {
+            resolver.validateIdentity(token);
+
+            JwtClaimsSet claims = token.getClaimsSet();
+            Object audience = claims.get("aud").getObject();
+            // This resolver trusts only its configured client ID as an audience.
+            if (!clientId.equals(audience) && !List.of(clientId).equals(audience)) {
+                throw new InvalidAudException("ID token audience does not match the configured client_id.");
+            }
+            if (claims.isDefined("azp") && !clientId.equals(claims.getClaim("azp"))) {
+                throw new InvalidAudException("ID token authorized party does not match the configured client_id.");
+            }
+        }
     }
 
     /**
