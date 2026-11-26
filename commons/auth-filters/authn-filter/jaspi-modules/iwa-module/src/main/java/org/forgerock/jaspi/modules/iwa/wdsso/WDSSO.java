@@ -39,11 +39,14 @@ import java.security.Principal;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.security.auth.Subject;
-import javax.security.auth.login.Configuration;
+import javax.security.auth.kerberos.KerberosPrincipal;
 import javax.security.auth.login.LoginContext;
+import javax.security.auth.login.LoginException;
 
 import org.forgerock.http.protocol.Request;
 import org.forgerock.services.context.AttributesContext;
@@ -53,7 +56,6 @@ import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSManager;
-import org.ietf.jgss.GSSName;
 
 /**
  * Windows Desktop Single Sign On implementation, extracted from OpenAM.
@@ -64,8 +66,6 @@ public class WDSSO {
     private Subject serviceSubject = null;
     private String servicePrincipalName = null;
     private String keyTabFile = null;
-    private String kdcRealm   = null;
-    private String kdcServer  = null;
     private boolean returnRealm = false;
 
     /**
@@ -94,8 +94,6 @@ public class WDSSO {
         return userPrincipal;
     }
 
-    private static String user;
-
     /**
      * Process the login attempt.
      * @param options The options.
@@ -106,12 +104,8 @@ public class WDSSO {
      */
     public String process(Map<String, String> options, Context context, Request request) throws Exception {
         // Check to see if the Rest Auth Endpoint has signified that IWA has failed.
-        if (hasWDSSOFailed(context)) {                 //TODO this is not required in the context of IB/IDM
-            return "SEND_CONTINUE";
-        }
-
-        if (!getConfigParams(options)) {
-            initWindowsDesktopSSOAuth(options);
+        if (hasWDSSOFailed(context)) {
+            throw new IllegalStateException("IWA already failed for this request");
         }
 
         // retrieve the spnego token
@@ -123,24 +117,29 @@ public class WDSSO {
 
         // parse the spnego token and extract the kerberos mech token from it
         final byte[] kerberosToken = parseToken(spnegoToken);
-        if (kerberosToken == null) {
+        if (kerberosToken == null || kerberosToken.length == 0) {
             LOG.error("IWA WDSSO: kerberos token is not valid.");
             throw new RuntimeException();
         }
 
+        String principal = getServicePrincipalName(options);
+        String keytab = options.get("keytabFileName");
+        Subject subject = getServiceSubject(principal, keytab, null);
+
         // authenticate the user with the kerberos token
         try {
-            authenticateToken(kerberosToken);
+            return authenticateToken(subject, kerberosToken);
         } catch (PrivilegedActionException pe) {
             Exception e = extractException(pe);
             if (e instanceof GSSException) {
                 int major = ((GSSException) e).getMajor();
                 if (major == GSSException.CREDENTIALS_EXPIRED) {
                     LOG.debug("IWA WDSSO: Credential expired. Re-establish credential... {}", e.getMessage());
-                    serviceLogin();
+                    Subject refreshed = getServiceSubject(principal, keytab, subject);
                     try {
-                        authenticateToken(kerberosToken);
+                        String username = authenticateToken(refreshed, kerberosToken);
                         LOG.debug("IWA WDSSO: Authentication succeeded with new cred.");
+                        return username;
                     } catch (Exception ee) {
                         LOG.error("IWA WDSSO: Authentication failed with new cred. {}", e.getMessage(), e);
                         throw ee;
@@ -150,14 +149,16 @@ public class WDSSO {
                     throw new RuntimeException();
                 }
             }
+            throw e;
         } catch (GSSException e) {
             int major = e.getMajor();
             if (major == GSSException.CREDENTIALS_EXPIRED) {
                 LOG.debug("IWA WDSSO: Credential expired. Re-establish credential... {}", e.getMessage());
-                serviceLogin();
+                Subject refreshed = getServiceSubject(principal, keytab, subject);
                 try {
-                    authenticateToken(kerberosToken);
+                    String username = authenticateToken(refreshed, kerberosToken);
                     LOG.debug("IWA WDSSO: Authentication succeeded with new cred.");
+                    return username;
                 } catch (Exception ee) {
                     LOG.debug("IWA WDSSO: Authentication failed with new cred. {}", e.getMessage());
                     throw ee;
@@ -170,34 +171,50 @@ public class WDSSO {
             LOG.error("IWA WDSSO: Authentication failed with generic exception. {}", e.getMessage(), e);
             throw e;
         }
-        return user;
     }
 
-    private void authenticateToken(final byte[] kerberosToken) throws Exception {
-        Subject.doAs(serviceSubject, new PrivilegedExceptionAction() {
+    private String authenticateToken(Subject subject, final byte[] kerberosToken) throws Exception {
+        return Subject.doAs(subject, new PrivilegedExceptionAction<String>() {
             @Override
-            public Object run() throws Exception {
-                GSSContext context = GSSManager.getInstance().createContext((GSSCredential) null);
-                LOG.debug("IWA WDSSO: GSSContext created");
-                byte[] outToken = context.acceptSecContext(
-                        kerberosToken, 0, kerberosToken.length);
-                if (outToken != null) {
-                    LOG.debug("IWA WDSSO: Token returned from acceptSecContext: {}",
-                            DerValue.printByteArray(outToken, 0, outToken.length));
-                }
-                if (!context.isEstablished()) {
-                    LOG.debug("IWA WDSSO: Cannot establish context!");
-                    throw new RuntimeException();
-                } else {
+            public String run() throws GSSException {
+                GSSContext context = createGssContext();
+                Throwable failure = null;
+                try {
+                    LOG.debug("IWA WDSSO: GSSContext created");
+                    byte[] outToken = context.acceptSecContext(kerberosToken, 0, kerberosToken.length);
+                    if (outToken != null) {
+                        LOG.debug("IWA WDSSO: Token returned from acceptSecContext: {}",
+                                DerValue.printByteArray(outToken, 0, outToken.length));
+                    }
+                    if (!context.isEstablished()) {
+                        LOG.debug("IWA WDSSO: Cannot establish context!");
+                        throw new RuntimeException();
+                    }
                     LOG.debug("IWA WDSSO: Context established");
-                    GSSName user = context.getSrcName();
-                    WDSSO.user = getUserName(user.toString());
-                    LOG.debug("IWA WDSSO: Found user! {}", WDSSO.user);
+                    String username = getUserName(context.getSrcName().toString());
+                    LOG.debug("IWA WDSSO: Found user! {}", username);
+                    return username;
+                } catch (GSSException | RuntimeException | Error e) {
+                    failure = e;
+                    throw e;
+                } finally {
+                    try {
+                        context.dispose();
+                    } catch (GSSException | RuntimeException | Error cleanupFailure) {
+                        if (failure == null) {
+                            throw cleanupFailure;
+                        }
+                        if (cleanupFailure != failure) {
+                            failure.addSuppressed(cleanupFailure);
+                        }
+                    }
                 }
-                context.dispose();
-                return null;
             }
         });
+    }
+
+    GSSContext createGssContext() throws GSSException {
+        return GSSManager.getInstance().createContext((GSSCredential) null);
     }
 
     /**
@@ -221,12 +238,10 @@ public class WDSSO {
     /**
      * Nullify any variables that might have been set.
      */
-    public void nullifyUsedVars() {
+    public synchronized void nullifyUsedVars() {
         serviceSubject = null;
         servicePrincipalName = null;
         keyTabFile = null;
-        kdcRealm = null;
-        kdcServer = null;
     }
 
     private String getUserName(String user) {
@@ -280,7 +295,7 @@ public class WDSSO {
     }
 
     private byte[] parseToken(byte[] rawToken) {
-        byte[] token = rawToken;
+        byte[] token = null;
         DerValue tmpToken = new DerValue(rawToken);
         if (tmpToken.getTag() != (byte) 0x60) {
             return null;
@@ -318,7 +333,9 @@ public class WDSSO {
                     if (tmpToken.getTag() != (byte) -1) {
                         // retrieve octet string
                         tmpToken = new DerValue(tmpToken.getData());
-                        token = tmpToken.getData();
+                        if (tmpToken.getTag() == (byte) 0x04) {
+                            token = tmpToken.getData();
+                        }
                     }
                 }
             }
@@ -332,85 +349,77 @@ public class WDSSO {
             final int krb5Read = tmpInput.read(krb5Oid, i, krb5Oid.length - i);
             if (krb5Read != krb5Oid.length - i || !Arrays.equals(krb5Oid, KERBEROS_V5_OID)) {
                 LOG.debug("IWA WDSSO: Kerberos V5 OID not found in the Auth Token");
-                token = null;
             } else {
                 LOG.debug("IWA WDSSO: Kerberos V5 OID found in the Auth Token");
+                token = rawToken;
             }
         }
         return token;
     }
 
-    private boolean getConfigParams(Map<String, String> options) {
-        // KDC realm in service principal must be uppercase.
-        servicePrincipalName = options.get("servicePrincipal");
-        keyTabFile = options.get("keytabFileName");
-        kdcRealm = options.get("kerberosRealm");
-        kdcServer = options.get("kerberosServerName");
-        LOG.debug("IWA WDSSO: WindowsDesktopSSO params: principal: {}, keytab file: {}, realm : {}, kdc server: {}",
-                servicePrincipalName, keyTabFile, kdcRealm, kdcServer);
-        return serviceSubject != null;
+    private static String getServicePrincipalName(Map<String, String> options) {
+        String principal = options.get("servicePrincipal");
+        if (principal == null || principal.isEmpty() || "*".equals(principal)) {
+            throw new IllegalArgumentException("A specific IWA service principal is required");
+        }
+        int realmSeparator = principal.indexOf('@');
+        while (realmSeparator > 0 && principal.charAt(realmSeparator - 1) == '\\') {
+            realmSeparator = principal.indexOf('@', realmSeparator + 1);
+        }
+        if (realmSeparator >= 0) {
+            return principal;
+        }
+        String realm = options.get("kerberosRealm");
+        if (realm == null || realm.isEmpty()) {
+            throw new IllegalArgumentException("An IWA Kerberos realm is required for an unqualified service principal");
+        }
+        return principal + "@" + realm;
     }
 
-    private void initWindowsDesktopSSOAuth(Map options) throws Exception {
-        verifyAttributes();
-        serviceLogin();
+    private synchronized Subject getServiceSubject(String principal, String keytab, Subject expired)
+            throws LoginException {
+        boolean sameConfiguration = principal.equals(servicePrincipalName) && Objects.equals(keytab, keyTabFile);
+        if (sameConfiguration && serviceSubject == null && expired != null) {
+            throw new LoginException("The IWA credentials could not be refreshed");
+        }
+        // A refresh can reuse credentials that another request has already replaced.
+        if (!sameConfiguration || serviceSubject == null || serviceSubject == expired) {
+            servicePrincipalName = principal;
+            keyTabFile = keytab;
+            serviceSubject = null;
+            serviceSubject = serviceLogin(principal, keytab);
+        }
+        return serviceSubject;
     }
 
-    private synchronized void serviceLogin() throws Exception {
-        System.setProperty("java.security.krb5.realm", kdcRealm);
-        System.setProperty("java.security.krb5.kdc", kdcServer);
-
-        try {
-            Configuration config = Configuration.getConfiguration();
-            WindowsDesktopSSOConfig wtc = null;
-            if (config instanceof WindowsDesktopSSOConfig) {
-                wtc = (WindowsDesktopSSOConfig) config;
-                wtc.setRefreshConfig("true");
-            } else {
-                wtc = new WindowsDesktopSSOConfig(config);
-            }
-            wtc.setPrincipalName(servicePrincipalName);
-            wtc.setKeyTab(keyTabFile);
-            Configuration.setConfiguration(wtc);
-
-            // perform service authentication using JDK Kerberos module
-            LoginContext lc = new LoginContext(WindowsDesktopSSOConfig.DEFAULT_APP_NAME);
-            LOG.debug("IWA WDSSO: Attempting to run login() on the LoginContext");
-            lc.login();
-            LOG.debug("IWA WDSSO: LoginContext.login() successful");
-
-            serviceSubject = lc.getSubject();
-        } catch (Exception e) {
-            LOG.error("IWA WDSSO: Service Login Error: {}", e.getMessage(), e);
-            throw e;
+    Subject serviceLogin(String principal, String keytab) throws LoginException {
+        if (keytab == null || keytab.isEmpty()) {
+            throw new IllegalArgumentException("An IWA keytab is required");
         }
+        if (!new File(keytabPath(keytab)).exists()) {
+            throw new IllegalArgumentException("The IWA keytab does not exist");
+        }
+
+        WindowsDesktopSSOConfig config = new WindowsDesktopSSOConfig(null);
+        config.setPrincipalName(principal);
+        config.setKeyTab(keytab);
+
+        LoginContext login = new LoginContext(WindowsDesktopSSOConfig.DEFAULT_APP_NAME, null, null, config);
+        login.login();
+        Subject subject = login.getSubject();
+        if (!subject.getPrincipals(KerberosPrincipal.class).contains(new KerberosPrincipal(principal))) {
+            throw new LoginException("The IWA credentials do not match the configured service principal");
+        }
+        return subject;
     }
 
-    private void verifyAttributes() throws RuntimeException {
-        if (servicePrincipalName == null || servicePrincipalName.length() == 0) {
-            LOG.error("IWA WDSSO: Service Principal Name not set");
-            throw new RuntimeException();
-        }
-        if (keyTabFile == null || keyTabFile.length() == 0) {
-            LOG.error("IWA WDSSO: Key Tab File not set");
-            throw new RuntimeException();
-        }
-        if (kdcRealm == null || kdcRealm.length() == 0) {
-            LOG.error("IWA WDSSO: Kerberos Realm not set");
-            throw new RuntimeException();
-        }
-        if (kdcServer == null || kdcServer.length() == 0) {
-            LOG.error("IWA WDSSO: Kerberos Server Name not set");
-            throw new RuntimeException();
-        }
-
-        if (!(new File(keyTabFile)).exists()) {
-            // ibm jdk needs to skip "file://" part in parameter
-            if (!(new File(keyTabFile.substring(7))).exists()) {
-                LOG.error("IWA WDSSO: Key Tab File does not exist");
-                throw new RuntimeException();
+    private static String keytabPath(String keytab) {
+        for (String prefix : List.of("FILE:", "ANY:FILE:", "SRVTAB:")) {
+            if (keytab.regionMatches(true, 0, prefix, 0, prefix.length())) {
+                return keytab.substring(prefix.length());
             }
         }
+        return keytab;
     }
 
 }

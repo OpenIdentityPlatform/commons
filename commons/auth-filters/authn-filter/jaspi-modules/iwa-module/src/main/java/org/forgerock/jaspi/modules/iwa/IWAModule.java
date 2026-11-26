@@ -51,6 +51,7 @@ public class IWAModule implements AsyncServerAuthModule {
 
     private static final String IWA_FAILED = "iwa-failed";
 
+    private final WDSSO wdsso = new WDSSO();
     private CallbackHandler handler;
     private Map options;
 
@@ -113,7 +114,7 @@ public class IWAModule implements AsyncServerAuthModule {
             } else {
                 LOG.debug("IWAModule: Authorization Header set in request.");
                 try {
-                    final String username = new WDSSO().process(options, messageInfo, request);
+                    final String username = wdsso.process(options, messageInfo, request);
                     LOG.debug("IWAModule: IWA successful with username, {}", username);
 
                     clientSubject.getPrincipals().add(new Principal() {

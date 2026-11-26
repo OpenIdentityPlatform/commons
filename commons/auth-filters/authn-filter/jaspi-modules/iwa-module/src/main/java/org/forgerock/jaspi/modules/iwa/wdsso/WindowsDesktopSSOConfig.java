@@ -111,6 +111,7 @@ public class WindowsDesktopSSOConfig extends Configuration {
                 hashmap.put("useKeyTab", "true");
                 hashmap.put("keyTab", keytab);
                 hashmap.put("doNotPrompt", "true");
+                hashmap.put("isInitiator", "false");
                 hashmap.put("refreshKrb5Config", refreshConf);
             }
 
@@ -121,7 +122,7 @@ public class WindowsDesktopSSOConfig extends Configuration {
                     hashmap);
             return new AppConfigurationEntry[]{ appConfigurationEntry };
         }
-        return config.getAppConfigurationEntry(appName);
+        return config == null ? null : config.getAppConfigurationEntry(appName);
     }
 
     /**
@@ -129,7 +130,9 @@ public class WindowsDesktopSSOConfig extends Configuration {
      */
     @Override
     public void refresh() {
-        config.refresh();
+        if (config != null) {
+            config.refresh();
+        }
     }
 }
 
