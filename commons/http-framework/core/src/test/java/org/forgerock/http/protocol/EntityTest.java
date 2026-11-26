@@ -17,6 +17,7 @@
 
 package org.forgerock.http.protocol;
 
+import static java.util.stream.Collectors.joining;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.entry;
@@ -30,13 +31,17 @@ import static org.mockito.Mockito.verify;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 import java.util.zip.GZIPOutputStream;
 
+import org.forgerock.http.decoder.ContentDecodingLimits;
 import org.forgerock.http.header.ContentLengthHeader;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.io.BranchingInputStream;
@@ -118,6 +123,92 @@ public class EntityTest {
     @Test(expectedExceptions = IOException.class)
     public void getJsonWhenEntityIsEmpty() throws Exception {
         entity.getJson();
+    }
+
+    @DataProvider
+    public Object[][] requestContentEncodings() {
+        return new Object[][] { { false }, { true } };
+    }
+
+    @Test(dataProvider = "requestContentEncodings")
+    public void appliesRequestByteLimitOnlyWhenDecodingBody(boolean gzip) throws IOException {
+        String property = "org.openidentityplatform.http.maxRequestContentBytes";
+        String previous = System.setProperty(property, "4");
+        try (Request request = new Request(); Response response = new Response(Status.OK)) {
+            byte[] atLimit = bytes("abcd");
+            byte[] overLimit = bytes("abcde");
+            setBody(request, atLimit, gzip);
+            assertThat(request.getEntity().getBytes()).isEqualTo(atLimit);
+
+            setBody(request, overLimit, gzip);
+            if (gzip) {
+                assertThatThrownBy(() -> request.getEntity().getBytes())
+                        .isInstanceOf(IOException.class)
+                        .hasMessageContaining("Request content exceeds 4 bytes");
+            } else {
+                assertThat(request.getEntity().getBytes()).isEqualTo(overLimit);
+                assertThat(request.getEntity().getString()).isEqualTo("abcde");
+            }
+
+            setBody(response, overLimit, gzip);
+            assertThat(response.getEntity().getBytes()).isEqualTo(overLimit);
+        } finally {
+            restoreProperty(property, previous);
+        }
+    }
+
+    @Test(dataProvider = "requestContentEncodings")
+    public void enforcesByteLimitWhenParsingRequestJson(boolean gzip) throws IOException {
+        String property = "org.openidentityplatform.http.maxRequestContentBytes";
+        String previous = System.setProperty(property, "4");
+        try (Request request = new Request()) {
+            setBody(request, bytes("[12]"), gzip);
+            assertThat(request.getEntity().getJson()).isEqualTo(List.of(12));
+
+            setBody(request, bytes("[123]"), gzip);
+            assertThatThrownBy(() -> request.getEntity().getJson())
+                    .isInstanceOf(IOException.class)
+                    .hasMessageContaining("Request content exceeds 4 bytes");
+        } finally {
+            restoreProperty(property, previous);
+        }
+    }
+
+    @Test
+    public void resetsMarkedRequestStreamToTheOriginalByteBudget() throws IOException {
+        String property = "org.openidentityplatform.http.maxRequestContentBytes";
+        String previous = System.setProperty(property, "4");
+        try (InputStream in = ContentDecodingLimits.limitRequestContent(new ByteArrayInputStream(bytes("abcde")))) {
+            assertThat(in.markSupported()).isTrue();
+            assertThat(in.read()).isEqualTo('a');
+            in.mark(4);
+            assertThat(in.readNBytes(3)).isEqualTo(bytes("bcd"));
+            assertThatThrownBy(in::read).isInstanceOf(IOException.class);
+
+            in.reset();
+            assertThat(in.readNBytes(3)).isEqualTo(bytes("bcd"));
+            assertThatThrownBy(in::read).isInstanceOf(IOException.class);
+        } finally {
+            restoreProperty(property, previous);
+        }
+    }
+
+    @Test(dataProvider = "requestContentEncodings")
+    public void enforcesJsonTokenLimitForRequests(boolean gzip) throws IOException {
+        int atLimit = 65_534; // Include the two array delimiters in the token count.
+        try (Request request = new Request(); Response response = new Response(Status.OK)) {
+            setBody(request, jsonArray(atLimit), gzip);
+            assertThat((List<?>) request.getEntity().getJson()).hasSize(atLimit);
+
+            byte[] overLimit = jsonArray(atLimit + 1);
+            setBody(request, overLimit, gzip);
+            assertThatThrownBy(() -> request.getEntity().getJson())
+                    .isInstanceOf(IOException.class)
+                    .hasMessageContaining("Token count");
+
+            setBody(response, overLimit, gzip);
+            assertThat((List<?>) response.getEntity().getJson()).hasSize(atLimit + 1);
+        }
     }
 
     @Test
@@ -403,6 +494,30 @@ public class EntityTest {
         copy.close();
 
         assertThat(entity.getString()).isEqualTo("Hello");
+    }
+
+    private byte[] jsonArray(int size) throws UnsupportedEncodingException {
+        return bytes(IntStream.range(0, size).mapToObj(Integer::toString).collect(joining(",", "[", "]")));
+    }
+
+    private static void restoreProperty(String property, String value) {
+        if (value == null) {
+            System.clearProperty(property);
+        } else {
+            System.setProperty(property, value);
+        }
+    }
+
+    private static void setBody(Message message, byte[] body, boolean gzip) throws IOException {
+        if (gzip) {
+            ByteArrayOutputStream compressed = new ByteArrayOutputStream();
+            try (GZIPOutputStream out = new GZIPOutputStream(compressed)) {
+                out.write(body);
+            }
+            message.getHeaders().put("Content-Encoding", "gzip");
+            body = compressed.toByteArray();
+        }
+        message.getEntity().setBytes(body);
     }
 
     private static BranchingInputStream branchingStream(final byte[] bytes) throws UnsupportedEncodingException {

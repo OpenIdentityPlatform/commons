@@ -14,7 +14,7 @@
  * Copyright 2009 Sun Microsystems Inc.
  * Portions Copyright 2010–2011 ApexIdentity Inc.
  * Portions Copyright 2011-2015 ForgeRock AS.
- * Portions Copyrighted 2026 3A Systems, LLC
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.http.apache.sync;
@@ -36,21 +36,38 @@ import static org.forgerock.http.handler.HttpClientHandler.OPTION_TEMPORARY_STOR
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_TRUST_MANAGERS;
 import static org.forgerock.http.util.Lists.asArrayOrNull;
 
+import java.io.IOException;
 import java.net.ProxySelector;
 import java.net.URI;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 
+import org.apache.http.Header;
+import org.apache.http.HeaderElement;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.ProtocolException;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthenticationStrategy;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.DecompressingEntity;
+import org.apache.http.client.entity.DeflateInputStreamFactory;
+import org.apache.http.client.entity.GZIPInputStreamFactory;
+import org.apache.http.client.entity.InputStreamFactory;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.client.protocol.RequestAcceptEncoding;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.routing.HttpRoutePlanner;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
@@ -60,8 +77,10 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.ProxyAuthenticationStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
+import org.apache.http.protocol.HttpContext;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.apache.NoAuthenticationStrategy;
+import org.forgerock.http.decoder.ContentDecodingLimits;
 import org.forgerock.http.handler.HttpClientHandler;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.spi.HttpClient;
@@ -80,6 +99,7 @@ public final class SyncHttpClientProvider implements HttpClientProvider {
         final Factory<Buffer> storage = options.get(OPTION_TEMPORARY_STORAGE);
 
         final HttpClientBuilder builder = HttpClientBuilder.create();
+        configureContentCompression(builder);
 
         // Connection pooling.
         final int maxConnections = options.get(OPTION_MAX_CONNECTIONS);
@@ -164,5 +184,66 @@ public final class SyncHttpClientProvider implements HttpClientProvider {
         builder.setTargetAuthenticationStrategy(NoAuthenticationStrategy.INSTANCE);
 
         return new SyncHttpClient(builder.build(), storage);
+    }
+
+    private static void configureContentCompression(HttpClientBuilder builder) {
+        // Use Apache's decoders with a byte limit on each layer.
+        InputStreamFactory gzip = in -> ContentDecodingLimits.limitDecodedStream(
+                GZIPInputStreamFactory.getInstance().create(in));
+        InputStreamFactory deflate = in -> ContentDecodingLimits.limitDecodedStream(
+                DeflateInputStreamFactory.getInstance().create(in));
+        Registry<InputStreamFactory> decoders = RegistryBuilder.<InputStreamFactory>create()
+                .register("gzip", gzip)
+                .register("x-gzip", gzip)
+                .register("deflate", deflate)
+                .build();
+
+        builder.disableContentCompression();
+        builder.addInterceptorLast(new RequestAcceptEncoding());
+        builder.addInterceptorLast((HttpResponse response, HttpContext context) -> {
+            HttpEntity entity = response.getEntity();
+            Header[] encodings = response.getHeaders(HttpHeaders.CONTENT_ENCODING);
+            if (encodings.length == 0 || entity == null || entity.getContentLength() == 0
+                    || !HttpClientContext.adapt(context).getRequestConfig().isContentCompressionEnabled()) {
+                return;
+            }
+
+            List<HeaderElement> codings = parseContentCodings(encodings);
+
+            // The header values list codings in the order they were applied.
+            HttpEntity decoded = entity;
+            for (int i = codings.size() - 1; i >= 0; i--) {
+                String coding = codings.get(i).getName();
+                if ("identity".equalsIgnoreCase(coding)) {
+                    continue;
+                }
+                InputStreamFactory decoder = decoders.lookup(coding);
+                if (decoder == null) {
+                    // Preserve the encoded entity and headers when the full stack cannot be decoded.
+                    return;
+                }
+                decoded = new DecompressingEntity(decoded, decoder);
+            }
+            if (decoded != entity) {
+                response.setEntity(decoded);
+                response.removeHeaders(HttpHeaders.CONTENT_LENGTH);
+                response.removeHeaders(HttpHeaders.CONTENT_ENCODING);
+                response.removeHeaders(HttpHeaders.CONTENT_MD5);
+            }
+        });
+    }
+
+    static List<HeaderElement> parseContentCodings(Header[] encodings) throws ProtocolException {
+        List<HeaderElement> codings = new ArrayList<>();
+        try {
+            for (Header encoding : encodings) {
+                HeaderElement[] elements = encoding.getElements();
+                ContentDecodingLimits.checkLayerCount((long) codings.size() + elements.length);
+                Collections.addAll(codings, elements);
+            }
+        } catch (IOException e) {
+            throw new ProtocolException(e.getMessage(), e);
+        }
+        return codings;
     }
 }

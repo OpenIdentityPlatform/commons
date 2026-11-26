@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.forgerock.http.decoder.ContentDecodingLimits;
 import org.forgerock.http.decoder.Decoder;
 import org.forgerock.http.protocol.Header;
 import org.forgerock.http.protocol.Message;
@@ -92,6 +93,8 @@ public class ContentEncodingHeader extends Header {
      * the wrappers and {@code in} are closed. If no wrapper has been created,
      * {@code in} remains the caller's responsibility. Failures during cleanup
      * are suppressed on the original exception.
+     * The number of codings and the output of each decoder are subject to
+     * the limits in {@link ContentDecodingLimits}.
      *
      * @param in
      *            the input stream to decode.
@@ -102,6 +105,11 @@ public class ContentEncodingHeader extends Header {
      *             if an unsupported content-encoding is specified.
      */
     public InputStream decode(InputStream in) throws IOException {
+        if (codings.isEmpty()) {
+            return in;
+        }
+        ContentDecodingLimits.checkLayerCount(codings.size());
+
         InputStream decoded = in;
         try {
             // decode in the reverse order that encoding was applied
@@ -111,7 +119,7 @@ public class ContentEncodingHeader extends Header {
                 if (decoder == null) {
                     throw new UnsupportedEncodingException(name);
                 }
-                decoded = decoder.decode(decoded);
+                decoded = ContentDecodingLimits.limitDecodedStream(decoder.decode(decoded));
             }
             return decoded;
         } catch (IOException | RuntimeException e) {

@@ -18,6 +18,7 @@
 package org.forgerock.http.protocol;
 
 import static org.forgerock.http.util.Json.readJson;
+import static org.forgerock.http.util.Json.readRequestJson;
 import static org.forgerock.http.util.Json.writeJson;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -35,6 +36,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
 
+import org.forgerock.http.decoder.ContentDecodingLimits;
 import org.forgerock.http.header.ContentEncodingHeader;
 import org.forgerock.http.header.ContentLengthHeader;
 import org.forgerock.http.header.ContentTypeHeader;
@@ -57,6 +59,8 @@ import org.forgerock.http.io.IO;
  * Several convenience methods are provided for accessing the entity as either
  * {@link #getBytes() byte}, {@link #getString() string}, or {@link #getJson()
  * JSON} content.
+ * Reads that decode a request body and reads through {@link #getJson()} on a request
+ * are subject to the byte limit in {@link ContentDecodingLimits}.
  */
 public final class Entity implements Closeable {
 
@@ -166,7 +170,7 @@ public final class Entity implements Closeable {
      *             If an IO error occurred while copying the decoded content.
      */
     public void copyDecodedContentTo(final OutputStream out) throws IOException {
-        IO.stream(getDecodedInputStream(head), out);
+        IO.stream(getDecodedInputStream(head, false), out);
         out.flush();
     }
 
@@ -190,7 +194,7 @@ public final class Entity implements Closeable {
      *             If an IO error occurred while copying the decoded content.
      */
     public void copyDecodedContentTo(final Writer out) throws IOException {
-        IO.stream(getBufferedReader(head, null), out);
+        IO.stream(getBufferedReader(head, null, false), out);
         out.flush();
     }
 
@@ -223,13 +227,10 @@ public final class Entity implements Closeable {
      *             If an IO error occurred while reading the content.
      */
     public byte[] getBytes() throws IOException {
-        push();
-        try {
+        try (InputStream decoded = newDecodedContentInputStream()) {
             final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            copyDecodedContentTo(bytes);
+            IO.stream(decoded, bytes);
             return bytes.toByteArray();
-        } finally {
-            pop();
         }
     }
 
@@ -249,8 +250,8 @@ public final class Entity implements Closeable {
      */
     public Object getJson() throws IOException {
         if (json == null) {
-            try (BufferedReader reader = newDecodedContentReader(UTF_8) /* RFC 7159 */) {
-                json = readJson(reader);
+            try (BufferedReader reader = newDecodedContentReader(UTF_8, true) /* RFC 7159 */) {
+                json = message instanceof Request ? readRequestJson(reader) : readJson(reader);
             }
         }
         return json;
@@ -280,14 +281,11 @@ public final class Entity implements Closeable {
      */
     public String getString() throws IOException {
         if (string == null) {
-            push();
-            try {
-                final StringWriter writer = new StringWriter();
-                copyDecodedContentTo(writer);
-                string = writer.toString();
-            } finally {
-                pop();
+            final StringWriter writer = new StringWriter();
+            try (BufferedReader reader = newDecodedContentReader(null)) {
+                IO.stream(reader, writer);
             }
+            string = writer.toString();
         }
         return string;
     }
@@ -312,8 +310,8 @@ public final class Entity implements Closeable {
     public InputStream newDecodedContentInputStream() throws IOException {
         final BranchingInputStream headBranch = head.branch();
         try {
-            return getDecodedInputStream(headBranch);
-        } catch (final IOException e) {
+            return getDecodedInputStream(headBranch, false);
+        } catch (IOException | RuntimeException e) {
             closeSilently(headBranch);
             throw e;
         }
@@ -346,10 +344,15 @@ public final class Entity implements Closeable {
      */
     public BufferedReader newDecodedContentReader(final Charset charset)
             throws IOException {
+        return newDecodedContentReader(charset, false);
+    }
+
+    private BufferedReader newDecodedContentReader(final Charset charset, final boolean limitUnencodedRequest)
+            throws IOException {
         final BranchingInputStream headBranch = head.branch();
         try {
-            return getBufferedReader(headBranch, charset);
-        } catch (final IOException e) {
+            return getBufferedReader(headBranch, charset, limitUnencodedRequest);
+        } catch (IOException | RuntimeException e) {
             closeSilently(headBranch);
             throw e;
         }
@@ -491,13 +494,18 @@ public final class Entity implements Closeable {
         return ISO_8859_1;
     }
 
-    private BufferedReader getBufferedReader(final InputStream is, final Charset charset)
-            throws IOException {
-        return new BufferedReader(new InputStreamReader(getDecodedInputStream(is), cs(charset)));
+    private BufferedReader getBufferedReader(final InputStream is, final Charset charset,
+                                             final boolean limitUnencodedRequest) throws IOException {
+        return new BufferedReader(new InputStreamReader(getDecodedInputStream(is, limitUnencodedRequest),
+                                                        cs(charset)));
     }
 
-    private InputStream getDecodedInputStream(final InputStream is)
+    private InputStream getDecodedInputStream(final InputStream is, final boolean limitUnencodedRequest)
             throws IOException {
-        return ContentEncodingHeader.valueOf(message).decode(is);
+        InputStream content = ContentEncodingHeader.valueOf(message).decode(is);
+        if (message instanceof Request && (content != is || limitUnencodedRequest)) {
+            return ContentDecodingLimits.limitRequestContent(content);
+        }
+        return content;
     }
 }

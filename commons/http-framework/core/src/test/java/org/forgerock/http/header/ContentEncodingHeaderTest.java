@@ -33,6 +33,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPOutputStream;
 
+import org.forgerock.http.io.IO;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.testng.annotations.DataProvider;
@@ -147,6 +148,77 @@ public class ContentEncodingHeaderTest {
             while ((line = br.readLine()) != null) {
                 assertThat(line).isEqualTo(STRING_TO_DECODE);
             }
+        }
+    }
+
+    @Test
+    public void rejectsTooManyCodingsBeforeReadingTheEntity() throws Exception {
+        String property = "org.openidentityplatform.http.maxContentEncodingLayers";
+        String previous = System.setProperty(property, "1");
+        try (InputStream raw = new ByteArrayInputStream(new byte[0])) {
+            assertThatThrownBy(() -> ContentEncodingHeader.valueOf("gzip, deflate").decode(raw))
+                    .isInstanceOf(IOException.class)
+                    .hasMessageContaining("Too many content encodings");
+        } finally {
+            restoreProperty(property, previous);
+        }
+    }
+
+    @Test
+    public void readsAnEntityAtTheDecodedByteLimit() throws Exception {
+        String property = "org.openidentityplatform.http.maxDecodedContentBytes";
+        String previous = System.setProperty(property, "5");
+        try (Request request = new Request()) {
+            request.setEntity(gzip(new byte[] { 'h', 'e', 'l', 'l', 'o' }));
+            request.getHeaders().put(NAME, "gzip");
+
+            assertThat(request.getEntity().getString()).isEqualTo("hello");
+        } finally {
+            restoreProperty(property, previous);
+        }
+    }
+
+    @Test
+    public void rejectsAnEntityExceedingTheDecodedByteLimit() throws Exception {
+        String property = "org.openidentityplatform.http.maxDecodedContentBytes";
+        String previous = System.setProperty(property, "4");
+        try (Request request = new Request()) {
+            byte[] encoded = gzip(new byte[] { 'h', 'e', 'l', 'l', 'o' });
+            request.setEntity(IO.newBranchingInputStream(new ByteArrayInputStream(encoded),
+                    () -> IO.newMemoryBuffer(64, 4096)));
+            request.getHeaders().put(NAME, "gzip");
+
+            assertThatThrownBy(() -> request.getEntity().getBytes())
+                    .isInstanceOf(IOException.class)
+                    .hasMessageContaining("Decoded content exceeds");
+            assertThat(request.getEntity().getRawContentInputStream().readAllBytes()).isEqualTo(encoded);
+        } finally {
+            restoreProperty(property, previous);
+        }
+    }
+
+    @Test
+    public void limitsIntermediateOutputEvenWhenTheFinalBodyFits() throws Exception {
+        String property = "org.openidentityplatform.http.maxDecodedContentBytes";
+        String previous = System.setProperty(property, "5");
+        try (Request request = new Request()) {
+            byte[] gzippedText = gzip(new byte[] { 'h', 'e', 'l', 'l', 'o' });
+            request.setEntity(deflate(gzippedText));
+            request.getHeaders().put(NAME, "gzip, deflate");
+
+            assertThatThrownBy(() -> request.getEntity().getBytes())
+                    .isInstanceOf(IOException.class)
+                    .hasMessageContaining("Decoded content exceeds");
+        } finally {
+            restoreProperty(property, previous);
+        }
+    }
+
+    private static void restoreProperty(String name, String value) {
+        if (value == null) {
+            System.clearProperty(name);
+        } else {
+            System.setProperty(name, value);
         }
     }
 

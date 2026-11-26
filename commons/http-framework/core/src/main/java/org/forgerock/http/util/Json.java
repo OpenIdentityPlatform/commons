@@ -13,6 +13,7 @@
  *
  * Copyright 2010–2011 ApexIdentity Inc.
  * Portions Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.http.util;
@@ -38,9 +39,12 @@ import org.forgerock.util.i18n.LocalizableString;
 import org.forgerock.util.i18n.PreferredLocales;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -210,6 +214,38 @@ public final class Json {
      */
     public static Object readJson(final Reader reader) throws IOException {
         return parse(STRICT_MAPPER, reader);
+    }
+
+    /**
+     * Parses an HTTP request body with a limit of 65,536 JSON tokens by default.
+     * Set {@code org.openidentityplatform.http.maxRequestJsonTokens} to a positive value at JVM startup to override it.
+     *
+     * @param reader the request body
+     * @return the parsed JSON value
+     * @throws IOException if the body is invalid or a read limit is exceeded
+     */
+    public static Object readRequestJson(final Reader reader) throws IOException {
+        return RequestJsonReader.READER.readValue(reader);
+    }
+
+    private static final class RequestJsonReader {
+        private static final long DEFAULT_MAX_TOKENS = 65_536;
+        private static final ObjectReader READER = createReader();
+
+        private static ObjectReader createReader() {
+            long limit = Long.getLong("org.openidentityplatform.http.maxRequestJsonTokens", DEFAULT_MAX_TOKENS);
+            if (limit <= 0) {
+                limit = DEFAULT_MAX_TOKENS;
+            }
+            ObjectMapper mapper = STRICT_MAPPER.copy();
+            JsonFactory factory = mapper.getFactory();
+            StreamReadConstraints constraints = factory.streamReadConstraints();
+            if (constraints.hasMaxTokenCount()) {
+                limit = Math.min(limit, constraints.getMaxTokenCount());
+            }
+            factory.setStreamReadConstraints(constraints.rebuild().maxTokenCount(limit).build());
+            return mapper.readerFor(Object.class);
+        }
     }
 
     /**
