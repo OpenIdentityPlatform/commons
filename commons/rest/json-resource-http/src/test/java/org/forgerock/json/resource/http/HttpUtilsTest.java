@@ -18,17 +18,28 @@
 package org.forgerock.json.resource.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.data.MapEntry.entry;
 import static org.forgerock.http.routing.Version.version;
+import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.http.HttpUtils.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.internet.MimeMultipart;
 
 import org.forgerock.http.header.AcceptApiVersionHeader;
 import org.forgerock.http.header.ContentTypeHeader;
@@ -142,20 +153,11 @@ public class HttpUtilsTest {
     }
 
     private void testMultiPartResult(JsonValue result) {
-        assertThat(result != null);
-
-        assertThat(result.get(UID).asString() != null);
-        assertThat(result.get(UID).asString().equalsIgnoreCase(ALICE));
-
-        assertThat(result.get(PROFILE_FILENAME_KEY).asString() != null);
-        assertThat(result.get(PROFILE_FILENAME_KEY).asString().equalsIgnoreCase(JPEG_PART_FILENAME));
-
-        assertThat(result.get(PROFILE_CONTENT_KEY).asString() != null);
-        assertThat(result.get(PROFILE_CONTENT_KEY).asString().equalsIgnoreCase(
-                Base64url.encode(JPEG_CONTENT.getBytes())));
-
-        assertThat(result.get(PROFILE_MIMETYPE_KEY).asString() != null);
-        assertThat(result.get(PROFILE_MIMETYPE_KEY).asString().equalsIgnoreCase(JPEG_CONTENT_TYPE));
+        assertThat(result.get(UID).asString()).isEqualTo(ALICE);
+        assertThat(result.get(PROFILE_FILENAME_KEY).asString()).isEqualTo(JPEG_PART_FILENAME);
+        assertThat(result.get(PROFILE_CONTENT_KEY).asString()).isEqualTo(
+                Base64url.encode(JPEG_CONTENT.getBytes(StandardCharsets.US_ASCII)));
+        assertThat(result.get(PROFILE_MIMETYPE_KEY).asString()).isEqualTo(JPEG_CONTENT_TYPE);
     }
 
     private void testNonMultiPartResult(JsonValue result) {
@@ -175,6 +177,103 @@ public class HttpUtilsTest {
         assertThat(result.get(PROFILE_MIMETYPE_KEY) != null);
         assertThat(result.get(PROFILE_MIMETYPE_KEY).get("$ref").asString().equalsIgnoreCase(
                 "cid:" + JPEG_PART_NAME + "#mimetype"));
+    }
+
+    @Test
+    public void shouldRejectMultipartBodyAboveSizeLimit() throws IOException {
+        Request multipart = multipartRequest("{\"uid\":\"alice\"}", new byte[8 * 1024 * 1024]);
+
+        assertThatThrownBy(() -> getJsonContent(multipart))
+                .isInstanceOfSatisfying(ResourceException.class, e -> assertThat(e.getCode()).isEqualTo(413));
+    }
+
+    @Test
+    public void shouldRejectResolvedContentAboveSizeLimit() throws IOException {
+        Request multipart = multipartRequest("{\"photo\":{\"$ref\":\"cid:profile#content\"}}",
+                new byte[6 * 1024 * 1024 + 1]);
+
+        assertThatThrownBy(() -> getJsonContent(multipart))
+                .isInstanceOfSatisfying(ResourceException.class, e -> assertThat(e.getCode()).isEqualTo(413));
+    }
+
+    @Test
+    public void shouldCountResolvedContentAndMetadataTogether() throws IOException {
+        Request multipart = multipartRequest("{\"photo\":{\"$ref\":\"cid:profile#content\"},"
+                + "\"filename\":{\"$ref\":\"cid:profile#filename\"}}", new byte[6 * 1024 * 1024]);
+
+        assertThatThrownBy(() -> getJsonContent(multipart))
+                .isInstanceOfSatisfying(ResourceException.class, e -> assertThat(e.getCode()).isEqualTo(413));
+    }
+
+    @Test
+    public void shouldRejectMultipartWithTooManyReferences() throws IOException {
+        String reference = "{\"$ref\":\"cid:profile#filename\"}";
+        String entries = String.join(",", Collections.nCopies(1025, reference));
+        Request multipart = multipartRequest("{\"filenames\":[" + entries + "]}", new byte[0]);
+
+        assertThatThrownBy(() -> getJsonContent(multipart))
+                .isInstanceOfSatisfying(ResourceException.class, e -> assertThat(e.getCode()).isEqualTo(413));
+    }
+
+    @Test
+    public void shouldAllowResolvedContentAtSizeLimit() throws ResourceException, IOException {
+        Request multipart = multipartRequest("{\"photo\":{\"$ref\":\"cid:profile#content\"}}",
+                new byte[6 * 1024 * 1024]);
+
+        assertThat(getJsonContent(multipart).get("photo").asString()).hasSize(8 * 1024 * 1024);
+    }
+
+    @Test
+    public void shouldRejectReferenceToMissingPart() throws IOException {
+        Request multipart = multipartRequest("{\"photo\":{\"$ref\":\"cid:missing#content\"}}", new byte[0]);
+
+        assertThatThrownBy(() -> getJsonContent(multipart)).isInstanceOf(BadRequestException.class);
+    }
+
+    @Test
+    public void shouldResolveBothReferencesToTheSamePart() throws ResourceException, IOException {
+        Request multipart = multipartRequest("{\"photo\":{\"$ref\":\"cid:profile#content\"},"
+                + "\"thumbnail\":{\"$ref\":\"cid:PROFILE#content\"}}", new byte[] { 1, 2, 3 });
+
+        JsonValue result = getJsonContent(multipart);
+
+        assertThat(result.get("photo").asString()).isEqualTo("AQID");
+        assertThat(result.get("thumbnail").asString()).isEqualTo("AQID");
+    }
+
+    @Test
+    public void shouldChargeEachCachedAttachmentReferenceAgainstTheExpansionLimit()
+            throws IOException, MessagingException {
+        MimeBodyPart attachment = new MimeBodyPart();
+        attachment.setText("abc", StandardCharsets.US_ASCII.name());
+        attachment.setHeader("Content-Disposition", "form-data; name=\"profile\"");
+        MimeMultipart multipart = new MimeMultipart();
+        multipart.addBodyPart(attachment);
+        JsonValue references = json(array(object(field("$ref", "cid:profile#content")),
+                object(field("$ref", "cid:profile#content"))));
+
+        JsonValue atLimit = references.copy();
+        swapRequestPartsIntoContent(multipart, atLimit.getObject(), 8);
+        assertThat(atLimit.asList(String.class)).containsExactly("YWJj", "YWJj");
+
+        assertThatThrownBy(() -> swapRequestPartsIntoContent(multipart, references.getObject(), 7))
+                .isInstanceOfSatisfying(ResourceException.class, e -> assertThat(e.getCode()).isEqualTo(413));
+    }
+
+    private Request multipartRequest(String json, byte[] content) throws IOException {
+        String boundary = "attachment-boundary";
+        String introduction = "--" + boundary + "\r\nContent-Type: application/json\r\n"
+                + "Content-Disposition: form-data; name=\"json\"\r\n\r\n"
+                + json + "\r\n--" + boundary + "\r\nContent-Type: image/jpeg\r\n"
+                + "Content-Disposition: form-data; name=\"profile\"; filename=\"file.jpg\"\r\n\r\n";
+        ByteArrayOutputStream body = new ByteArrayOutputStream();
+        body.write(introduction.getBytes(StandardCharsets.US_ASCII));
+        body.write(content);
+        body.write(("\r\n--" + boundary + "--\r\n").getBytes(StandardCharsets.US_ASCII));
+
+        Request multipart = newRequest();
+        multipart.getHeaders().put(ContentTypeHeader.NAME, "multipart/form-data; boundary=" + boundary);
+        return multipart.setEntity(body.toByteArray());
     }
 
     @Test

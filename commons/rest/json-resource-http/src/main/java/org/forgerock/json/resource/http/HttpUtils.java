@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2016 ForgeRock AS.
- * Portions copyright 2024-2026 3A Systems LLC.
+ * Portions Copyright 2024-2026 3A Systems, LLC.
  */
 
 package org.forgerock.json.resource.http;
@@ -23,23 +23,24 @@ import static org.forgerock.json.resource.ActionRequest.ACTION_ID_CREATE;
 import static org.forgerock.util.Utils.closeSilently;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jakarta.activation.DataSource;
 import jakarta.mail.BodyPart;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.ContentDisposition;
@@ -47,6 +48,7 @@ import jakarta.mail.internet.ContentType;
 import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMultipart;
 import jakarta.mail.internet.ParseException;
+import jakarta.mail.util.ByteArrayDataSource;
 
 import org.forgerock.http.header.AcceptApiVersionHeader;
 import org.forgerock.http.header.ContentTypeHeader;
@@ -68,7 +70,6 @@ import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.services.context.Context;
-import org.forgerock.util.encode.Base64url;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 
@@ -189,8 +190,10 @@ public final class HttpUtils {
     private static final int PART_DATA_TYPE = 2;
     private static final String REFERENCE_TAG = "$ref";
 
-    private static final int BUFFER_SIZE = 1_024;
-    private static final int EOF = -1;
+    private static final int MAX_MULTIPART_BODY_BYTES = 8 * 1024 * 1024;
+    private static final int MAX_MULTIPART_EXPANDED_CHARS = 8 * 1024 * 1024;
+    private static final int MAX_MULTIPART_REFERENCES = 1024;
+    private static final Base64.Encoder MULTIPART_ENCODER = Base64.getUrlEncoder().withoutPadding();
 
     /**
      * Adapts an {@code Exception} to a {@code ResourceException}.
@@ -769,88 +772,105 @@ public final class HttpUtils {
 
     }
 
-    private static String getRequestPartData(final MimeMultipart mimeMultiparts,
-            final String partName, final String partDataType) throws IOException, MessagingException {
-        if (mimeMultiparts == null) {
-            throw new BadRequestException(
-                    "The request parameter is null when retrieving part data for part name: "
-                            + partName);
-        }
-
-        if (partDataType == null || partDataType.isEmpty()) {
-            throw new BadRequestException("The request is requesting an unknown part field");
-        }
-        MimeBodyPart part = null;
-        for (int i = 0; i < mimeMultiparts.getCount(); i++) {
-            part = (MimeBodyPart) mimeMultiparts.getBodyPart(i);
-            ContentDisposition disposition =
-                    new ContentDisposition(part.getHeader(CONTENT_DISPOSITION, null));
-            if (disposition.getParameter(NAME).equalsIgnoreCase(partName)) {
-                break;
-            }
-        }
-
-        if (part == null) {
-            throw new BadRequestException(
-                    "The request is missing a referenced part for part name: " + partName);
-        }
-
-        if (MIME_TYPE.equalsIgnoreCase(partDataType)) {
-            return new ContentType(part.getContentType()).toString();
-        } else if (FILENAME.equalsIgnoreCase(partDataType)) {
-            return part.getFileName();
-        } else if (CONTENT.equalsIgnoreCase(partDataType)) {
-            return Base64url.encode(toByteArray(part.getInputStream()));
-        } else {
-            throw new BadRequestException(
-                    "The request could not be processed because the multipart request "
-                            + "requests data from the part that isn't supported. Data requested: "
-                            + partDataType);
-        }
-    }
-
-    private static boolean isAReferenceJsonObject(JsonValue node) {
-        return node.keys() != null && node.keys().size() == 1
-                && REFERENCE_TAG.equalsIgnoreCase(node.keys().iterator().next());
-    }
-
-    private static Object swapRequestPartsIntoContent(final MimeMultipart mimeMultiparts,
-            Object content) throws ResourceException {
-        try {
-            JsonValue root = new JsonValue(content);
-
-            ArrayDeque<JsonValue> stack = new ArrayDeque<>();
-            stack.push(root);
-
-            while (!stack.isEmpty()) {
-                JsonValue node = stack.pop();
-                if (isAReferenceJsonObject(node)) {
-                    Matcher matcher =
-                            MULTIPART_FIELD_REGEX.matcher(node.get(REFERENCE_TAG).asString());
-                    if (matcher.matches()) {
-                        String partName = matcher.group(PART_NAME);
-                        String requestPartData =
-                                getRequestPartData(mimeMultiparts, partName, matcher
-                                        .group(PART_DATA_TYPE));
-                        root.put(node.getPointer(), requestPartData);
-                    } else {
-                        throw new BadRequestException("Invalid reference tag '" + node.toString()
-                                + "'");
-                    }
-                } else {
-                    Iterator<JsonValue> iter = node.iterator();
-                    while (iter.hasNext()) {
-                        stack.push(iter.next());
-                    }
+    private static Map<String, MimeBodyPart> getNamedRequestParts(MimeMultipart multipart)
+            throws MessagingException {
+        Map<String, MimeBodyPart> namedParts = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        for (int i = 0; i < multipart.getCount(); i++) {
+            MimeBodyPart part = (MimeBodyPart) multipart.getBodyPart(i);
+            String header = part.getHeader(CONTENT_DISPOSITION, null);
+            if (header != null) {
+                String name = new ContentDisposition(header).getParameter(NAME);
+                if (name != null) {
+                    namedParts.putIfAbsent(name, part);
                 }
             }
-            return root;
-        } catch (final IOException e) {
-            throw adapt(e);
-        } catch (final MessagingException e) {
-            throw new BadRequestException(
-                    "The request could not be processed because the request is not a valid multipart request");
         }
+        return namedParts;
+    }
+
+    private static String getRequestPartData(MimeBodyPart part, String partDataType,
+            Map<MimeBodyPart, String> encodedParts, int remainingChars) throws IOException, MessagingException {
+        if (MIME_TYPE.equalsIgnoreCase(partDataType)) {
+            return new ContentType(part.getContentType()).toString();
+        }
+        if (FILENAME.equalsIgnoreCase(partDataType)) {
+            return part.getFileName();
+        }
+
+        String encoded = encodedParts.get(part);
+        if (encoded == null) {
+            try (InputStream input = part.getInputStream()) {
+                // Unpadded base64url uses ceil(4 * bytes / 3) characters.
+                int remainingBytes = remainingChars * 3 / 4;
+                byte[] data = input.readNBytes(remainingBytes + 1);
+                if (data.length > remainingBytes) {
+                    throw multipartTooLarge("Resolved multipart content exceeds the size limit");
+                }
+                encoded = MULTIPART_ENCODER.encodeToString(data);
+                encodedParts.put(part, encoded);
+            }
+        }
+        return encoded;
+    }
+
+    static void swapRequestPartsIntoContent(MimeMultipart multipart, Object content, int maxExpandedChars)
+            throws IOException, MessagingException {
+        JsonValue root = new JsonValue(content);
+        Map<String, MimeBodyPart> namedParts = null;
+        Map<MimeBodyPart, String> encodedParts = new HashMap<>();
+        int remainingChars = maxExpandedChars;
+        int remainingReferences = MAX_MULTIPART_REFERENCES;
+
+        ArrayDeque<Iterator<JsonValue>> stack = new ArrayDeque<>();
+        stack.push(Collections.singleton(root).iterator());
+        while (!stack.isEmpty()) {
+            Iterator<JsonValue> nodes = stack.peek();
+            if (!nodes.hasNext()) {
+                stack.pop();
+                continue;
+            }
+
+            JsonValue node = nodes.next();
+            String referenceKey = node.isMap() && node.size() == 1 ? node.asMap().keySet().iterator().next() : null;
+            if (!REFERENCE_TAG.equalsIgnoreCase(referenceKey)) {
+                if (node.isMap() || node.isList()) {
+                    stack.push(node.iterator());
+                }
+                continue;
+            }
+
+            if (remainingReferences-- == 0) {
+                throw multipartTooLarge("Multipart request contains too many references");
+            }
+            JsonValue reference = node.get(referenceKey);
+            if (!reference.isString() || node.getPointer().isEmpty()) {
+                throw new BadRequestException("Invalid multipart reference");
+            }
+            Matcher matcher = MULTIPART_FIELD_REGEX.matcher(reference.asString());
+            if (!matcher.matches()) {
+                throw new BadRequestException("Invalid multipart reference");
+            }
+            if (namedParts == null) {
+                namedParts = getNamedRequestParts(multipart);
+            }
+            MimeBodyPart part = namedParts.get(matcher.group(PART_NAME));
+            if (part == null) {
+                throw new BadRequestException("Multipart request is missing a referenced part");
+            }
+            String value = getRequestPartData(part, matcher.group(PART_DATA_TYPE), encodedParts, remainingChars);
+            if (value != null) {
+                // Charge repeated references too, since downstream serializers write each occurrence.
+                remainingChars -= value.length();
+                if (remainingChars < 0) {
+                    throw multipartTooLarge("Resolved multipart content exceeds the size limit");
+                }
+            }
+            root.put(node.getPointer(), value);
+        }
+    }
+
+    private static ResourceException multipartTooLarge(String message) {
+        return ResourceException.newResourceException(Status.PAYLOAD_TOO_LARGE.getCode(), message);
     }
 
     static boolean isMultiPartRequest(final String unknownContentType) throws BadRequestException {
@@ -877,7 +897,7 @@ public final class HttpUtils {
             MimeMultipart mimeMultiparts = null;
             JsonParser jsonParser;
             if (isMultiPartRequest) {
-                mimeMultiparts = new MimeMultipart(new HttpServletRequestDataSource(req));
+                mimeMultiparts = readMultipart(req, contentType);
                 BodyPart jsonPart = getJsonRequestPart(mimeMultiparts);
                 jsonParser = JSON_MAPPER.getFactory().createParser(jsonPart.getInputStream());
             } else {
@@ -900,7 +920,7 @@ public final class HttpUtils {
                 }
 
                 if (isMultiPartRequest) {
-                    swapRequestPartsIntoContent(mimeMultiparts, content);
+                    swapRequestPartsIntoContent(mimeMultiparts, content, MAX_MULTIPART_EXPANDED_CHARS);
                 }
 
                 return content;
@@ -933,43 +953,16 @@ public final class HttpUtils {
         // Prevent instantiation.
     }
 
-    private static class HttpServletRequestDataSource implements DataSource {
-        private org.forgerock.http.protocol.Request request;
-
-        HttpServletRequestDataSource(org.forgerock.http.protocol.Request request) {
-            this.request = request;
+    private static MimeMultipart readMultipart(org.forgerock.http.protocol.Request request, String contentType)
+            throws IOException, MessagingException {
+        try (InputStream input = request.getEntity().getRawContentInputStream()) {
+            byte[] body = input.readNBytes(MAX_MULTIPART_BODY_BYTES + 1);
+            if (body.length > MAX_MULTIPART_BODY_BYTES) {
+                throw multipartTooLarge("Multipart request body exceeds the size limit");
+            }
+            // Jakarta Mail can parse parts as slices of the bounded request body.
+            return new MimeMultipart(new ByteArrayDataSource(body, contentType));
         }
-
-        @Override
-        public InputStream getInputStream() throws IOException {
-            return request.getEntity().getRawContentInputStream();
-        }
-
-        @Override
-        public OutputStream getOutputStream() throws IOException {
-            return null;
-        }
-
-        @Override
-        public String getContentType() {
-            return request.getHeaders().getFirst(ContentTypeHeader.class);
-        }
-
-        @Override
-        public String getName() {
-            return "HttpServletRequestDataSource";
-        }
-    }
-
-    private static byte[] toByteArray(final InputStream inputStream) throws IOException {
-        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        final byte[] data = new byte[BUFFER_SIZE];
-        int size;
-        while ((size = inputStream.read(data)) != EOF) {
-            byteArrayOutputStream.write(data, 0, size);
-        }
-        byteArrayOutputStream.flush();
-        return byteArrayOutputStream.toByteArray();
     }
 
     static HttpContextFactory staticContextFactory(final Context parentContext) {
