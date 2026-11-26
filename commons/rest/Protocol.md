@@ -1,3 +1,5 @@
+<!-- Portions Copyright 2026 3A Systems, LLC. -->
+
 # Specification of the CREST HTTP protocol
 
 CREST defines 6 core operations, Create, Read, Update, Delete, Patch, and Query, as well
@@ -134,9 +136,7 @@ the resource to be read.
             <tt>_mimeType=<i>mimeType</i></tt>
         </td>
         <td>
-            <p>A string that identifies the media type for the response content.
-            When this parameter is used only 1 field value may be returned using the <tt>_fields</tt>
-            parameter.</p>
+            <p>Requests a response media type for a single field selected with <tt>_fields</tt>.</p>
         </td>
     </tr>
     <tr>
@@ -148,9 +148,13 @@ the resource to be read.
     <tr>
         <th>Returns</th>
         <td>
-            <p>The JSON representation of the resource that was read if the <tt>_mimeType</tt> parameter
-            is not used. Otherwise the requested resource field is returned with the content type specified in the
-                <tt>_mimeType</tt> parameter</p>
+            <p>Without <tt>_mimeType</tt>, the response is the JSON representation of the resource.</p>
+            <p>For reads that request a media type, CREST serves <tt>application/json</tt>, <tt>text/plain</tt>,
+            <tt>image/gif</tt>, <tt>image/jpeg</tt>, <tt>image/png</tt>, and <tt>image/webp</tt> inline.</p>
+            <p>For other valid media types, CREST returns the selected field as an
+            <tt>application/octet-stream</tt> download with
+            <tt>Content-Disposition: attachment; filename="download.bin"</tt>.</p>
+            <p>CREST read responses also include the <tt>Content-Security-Policy: sandbox</tt> policy.</p>
         </td>
     </tr>
 </table>

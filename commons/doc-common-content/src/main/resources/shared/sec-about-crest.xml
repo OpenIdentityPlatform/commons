@@ -19,7 +19,7 @@
   ! CCPL HEADER END
   !
   !      Copyright 2015 ForgeRock AS.
-  !      Portions Copyright 2024 3A Systems LLC
+  !      Portions Copyright 2024-2026 3A Systems, LLC.
   !
 -->
  <section xml:id="sec-about-crest"
@@ -381,9 +381,9 @@ Accept: application/json
      </para>
 
      <para>
-      In this case, the content type of the field value returned
-      matches the <replaceable>mime-type</replaceable> that you specify,
-      and the body of the response is the multi-media resource.
+      CREST supports inline JSON, plain text, and GIF, JPEG, PNG, and WebP images.
+      Other media types return the field as an
+      <literal>application/octet-stream</literal> download.
      </para>
     </listitem>
    </varlistentry>

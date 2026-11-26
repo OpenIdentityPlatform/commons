@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.json.resource.http;
@@ -25,7 +26,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.forgerock.http.header.AcceptApiVersionHeader;
@@ -33,6 +35,7 @@ import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.header.GenericHeader;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.Status;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
@@ -300,10 +303,11 @@ public class HttpUtilsTest {
 
     private void setupPrepareResponseMocks(org.forgerock.http.protocol.Request httpRequest,
                                            final String method,
-                                           final String contentType) throws URISyntaxException {
+                                           final String contentType) {
         httpRequest.setMethod(method);
         httpRequest.getHeaders().put(HttpUtils.HEADER_X_HTTP_METHOD_OVERRIDE, method);
-        httpRequest.getUri().setQuery(HttpUtils.PARAM_MIME_TYPE + "=" + contentType);
+        httpRequest.setUri(URI.create("?" + HttpUtils.PARAM_MIME_TYPE + "="
+                + URLEncoder.encode(contentType, StandardCharsets.UTF_8)));
     }
 
     @Test(dataProvider = "validGetMethodContentTypeCombination")
@@ -323,6 +327,49 @@ public class HttpUtilsTest {
                         entry(ContentTypeHeader.NAME,
                                 new ContentTypeHeader(result, CHARACTER_ENCODING, null)),
                         entry(HEADER_CACHE_CONTROL, new GenericHeader(HEADER_CACHE_CONTROL, CACHE_CONTROL)));
+    }
+
+    @DataProvider
+    public Object[][] requestedResponseTypes() {
+        String downloadDisposition = "attachment; filename=\"download.bin\"";
+        return new Object[][] {
+            { "application/json", "application/json", null },
+            { "text/plain", "text/plain", null },
+            { "IMAGE/PNG; name=photo.png", "image/png", null },
+            { "image/jpeg", "image/jpeg", null },
+            { "application/octet-stream", "application/octet-stream", downloadDisposition },
+            { "application/example", "application/octet-stream", downloadDisposition },
+            { "text/html", "application/octet-stream", downloadDisposition },
+            { "image/svg+xml", "application/octet-stream", downloadDisposition }
+        };
+    }
+
+    @Test(dataProvider = "requestedResponseTypes")
+    public void testShouldUseSafeResponseContentType(String requestedType, String responseType, String disposition)
+            throws Exception {
+        Request request = newRequest();
+        setupPrepareResponseMocks(request, "GET", requestedType);
+
+        Response response = HttpUtils.prepareResponse(request);
+
+        assertThat(ContentTypeHeader.valueOf(response).getType()).isEqualTo(responseType);
+        assertThat(response.getHeaders().getFirst("Content-Disposition")).isEqualTo(disposition);
+        assertThat(response.getHeaders().getFirst("X-Content-Type-Options")).isEqualTo("nosniff");
+    }
+
+    @Test
+    public void testShouldUseJsonForReadError() throws Exception {
+        Request request = newRequest();
+        setupPrepareResponseMocks(request, "GET", "application/octet-stream");
+        Response response = HttpUtils.prepareResponse(request);
+
+        Response error = HttpUtils.fail(request, response, new BadRequestException("Invalid read"))
+                .getOrThrowUninterruptibly();
+
+        assertThat(error.getStatus()).isEqualTo(Status.BAD_REQUEST);
+        assertThat(ContentTypeHeader.valueOf(error).getType()).isEqualTo("application/json");
+        assertThat(error.getHeaders().getFirst("Content-Disposition")).isNull();
+        assertThat(JsonValue.json(error.getEntity().getJson()).get("code").asInteger()).isEqualTo(400);
     }
 
     @Test(expectedExceptions = BadRequestException.class)

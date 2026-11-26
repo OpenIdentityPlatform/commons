@@ -13,6 +13,7 @@
   information: "Portions Copyrighted [year] [name of copyright owner]".
 
   Copyright 2015-2016 ForgeRock AS.
+  Portions Copyright 2026 3A Systems, LLC.
 -->
  <section xml:id="sec-about-crest"
           xmlns="http://docbook.org/ns/docbook" version="5.0" xml:lang="en"
@@ -364,9 +365,9 @@ Accept: application/json
      </para>
 
      <para>
-      In this case, the content type of the field value returned
-      matches the <replaceable>mime-type</replaceable> that you specify,
-      and the body of the response is the multi-media resource.
+      CREST supports inline JSON, plain text, and GIF, JPEG, PNG, and WebP images.
+      Other media types return the field as an
+      <literal>application/octet-stream</literal> download.
      </para>
 
      <para>

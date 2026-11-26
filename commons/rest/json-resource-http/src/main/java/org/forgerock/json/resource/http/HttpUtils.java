@@ -33,7 +33,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -88,8 +90,13 @@ public final class HttpUtils {
     static final String ETAG_ANY = "*";
 
     static final String MIME_TYPE_APPLICATION_JSON = "application/json";
+    private static final String MIME_TYPE_APPLICATION_OCTET_STREAM = "application/octet-stream";
     static final String MIME_TYPE_MULTIPART_FORM_DATA = "multipart/form-data";
     static final String MIME_TYPE_TEXT_PLAIN = "text/plain";
+
+    private static final Set<String> INLINE_RESPONSE_TYPES = Set.of(
+            MIME_TYPE_APPLICATION_JSON, MIME_TYPE_TEXT_PLAIN,
+            "image/gif", "image/jpeg", "image/png", "image/webp");
 
     static final String HEADER_CACHE_CONTROL = "Cache-Control";
     static final String HEADER_ETAG = "ETag";
@@ -99,6 +106,7 @@ public final class HttpUtils {
     static final String HEADER_IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
     static final String HEADER_LOCATION = "Location";
     static final String HEADER_X_HTTP_METHOD_OVERRIDE = "X-HTTP-Method-Override";
+    private static final String HEADER_X_CONTENT_TYPE_OPTIONS = "X-Content-Type-Options";
     /** the HTTP header for {@literal Content-Disposition}. */
     public static final String CONTENT_DISPOSITION = "Content-Disposition";
     static final Collection<String> RESTRICTED_HEADER_NAMES = Arrays.asList(
@@ -295,11 +303,10 @@ public final class HttpUtils {
         final ResourceException re = adapt(t);
         try {
             if (resp == null) {
-                resp = prepareResponse(req);
-            } else {
-                resp = prepareResponse(req, resp);
+                resp = new Response();
             }
             resp.setStatus(Status.valueOf(re.getCode()));
+            setResponseHeaders(resp, MIME_TYPE_APPLICATION_JSON);
             final JsonGenerator writer = getJsonGenerator(req, resp);
             Json.makeLocalizingObjectWriter(JSON_MAPPER, req).writeValue(writer, re.toJsonValue().getObject());
             closeSilently(writer);
@@ -679,28 +686,35 @@ public final class HttpUtils {
     }
 
     static Response prepareResponse(org.forgerock.http.protocol.Request req) throws ResourceException {
-        return prepareResponse(req, new Response(Status.OK));
+        String responseType = MIME_TYPE_APPLICATION_JSON;
+        String mimeType = req.getForm().getFirst(PARAM_MIME_TYPE);
+        if (METHOD_GET.equalsIgnoreCase(getMethod(req)) && mimeType != null && !mimeType.isEmpty()) {
+            try {
+                String requestedType = new ContentType(mimeType).getBaseType().toLowerCase(Locale.ROOT);
+                // Only emit server-approved media types for caller-selected resource fields.
+                responseType = INLINE_RESPONSE_TYPES.contains(requestedType)
+                        ? requestedType
+                        : MIME_TYPE_APPLICATION_OCTET_STREAM;
+            } catch (ParseException e) {
+                throw new BadRequestException("The mime type parameter '" + mimeType + "' can't be parsed", e);
+            }
+        }
+
+        Response response = new Response(Status.OK);
+        setResponseHeaders(response, responseType);
+        return response;
     }
 
-    static Response prepareResponse(org.forgerock.http.protocol.Request req, org.forgerock.http.protocol.Response resp)
-            throws ResourceException {
-        //get content type from req path
-        try {
-            resp.setStatus(Status.OK);
-            String mimeType = req.getForm().getFirst(PARAM_MIME_TYPE);
-            if (METHOD_GET.equalsIgnoreCase(getMethod(req)) && mimeType != null && !mimeType.isEmpty()) {
-                ContentType contentType = new ContentType(mimeType);
-                resp.getHeaders().put(new ContentTypeHeader(contentType.toString(), CHARACTER_ENCODING, null));
-            } else {
-                resp.getHeaders().put(new ContentTypeHeader(MIME_TYPE_APPLICATION_JSON, CHARACTER_ENCODING, null));
-            }
-
-            resp.getHeaders().put(HEADER_CACHE_CONTROL, CACHE_CONTROL);
-            return resp;
-        } catch (ParseException e) {
-            throw new BadRequestException("The mime type parameter '" + req.getForm().getFirst(PARAM_MIME_TYPE)
-                    + "' can't be parsed", e);
-        }
+    private static void setResponseHeaders(Response response, String contentType) {
+        String charset = MIME_TYPE_APPLICATION_JSON.equals(contentType) || MIME_TYPE_TEXT_PLAIN.equals(contentType)
+                ? CHARACTER_ENCODING
+                : null;
+        response.getHeaders().put(new ContentTypeHeader(contentType, charset, null));
+        response.getHeaders().put(CONTENT_DISPOSITION, MIME_TYPE_APPLICATION_OCTET_STREAM.equals(contentType)
+                ? "attachment; filename=\"download.bin\""
+                : null);
+        response.getHeaders().put(HEADER_X_CONTENT_TYPE_OPTIONS, "nosniff");
+        response.getHeaders().put(HEADER_CACHE_CONTROL, CACHE_CONTROL);
     }
 
     static void rejectIfMatch(org.forgerock.http.protocol.Request req) throws ResourceException {

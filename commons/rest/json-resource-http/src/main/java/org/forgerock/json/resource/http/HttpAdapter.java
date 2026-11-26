@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.json.resource.http;
 
@@ -258,6 +259,15 @@ final class HttpAdapter implements Handler, Describable<Swagger, org.forgerock.h
      */
     @Override
     public Promise<Response, NeverThrowsException> handle(Context context,
+            org.forgerock.http.protocol.Request request) {
+        return handleRequest(context, request).then(response -> {
+            // Append the sandbox policy after the resource has supplied any response headers.
+            response.getHeaders().add("Content-Security-Policy", "sandbox");
+            return response;
+        });
+    }
+
+    private Promise<Response, NeverThrowsException> handleRequest(Context context,
             org.forgerock.http.protocol.Request request) {
         try {
             RequestType requestType = determineRequestType(request);

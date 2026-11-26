@@ -21,6 +21,7 @@
   ! CCPL HEADER END
   !
   !      Copyright 2012-2015 ForgeRock AS.
+  !      Portions Copyright 2026 3A Systems, LLC.
   !    
 -->
 <document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -283,9 +284,9 @@ If-None-Match: *
                     <tr>
                         <th>Returns</th>
                         <td>
-                            <p>The JSON representation of the resource that was read if the <tt>_mimeType</tt> parameter
-                            is not used. Otherwise the requested resource field is returned with the content type specified in the
-                                <tt>_mimeType</tt> parameter</p>
+                            <p>The response defaults to JSON. For a single field, CREST supports inline JSON, plain
+                            text, and GIF, JPEG, PNG, and WebP images. Other media types return the field as an
+                            <tt>application/octet-stream</tt> download.</p>
                         </td>
                     </tr>
                 </table>
