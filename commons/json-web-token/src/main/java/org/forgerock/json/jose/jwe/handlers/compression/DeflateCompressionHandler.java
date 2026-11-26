@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2015 ForgeRock AS.
- * Portions Copyrighted 2026 3A Systems, LLC
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.json.jose.jwe.handlers.compression;
@@ -34,6 +34,19 @@ import org.forgerock.json.jose.exceptions.JweCompressionException;
  */
 public class DeflateCompressionHandler implements CompressionHandler {
 
+    private static final int DEFAULT_MAX_DECOMPRESSED_BYTES = 1024 * 1024;
+    private static final int MAX_DECOMPRESSED_BYTES = getMaxDecompressedBytes();
+
+    private static int getMaxDecompressedBytes() {
+        try {
+            int limit = Integer.getInteger("org.openidentityplatform.jwt.maxDecompressedBytes",
+                    DEFAULT_MAX_DECOMPRESSED_BYTES);
+            return limit > 0 ? limit : DEFAULT_MAX_DECOMPRESSED_BYTES;
+        } catch (SecurityException e) {
+            return DEFAULT_MAX_DECOMPRESSED_BYTES;
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -52,22 +65,29 @@ public class DeflateCompressionHandler implements CompressionHandler {
 
     /**
      * {@inheritDoc}
+     *
+     * @throws JweCompressionException If decompression fails or the output exceeds the configured byte limit.
      */
     @Override
     public byte[] decompress(byte[] bytes) {
-        ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
-        try (InflaterInputStream inflaterInputStream = new InflaterInputStream(new ByteArrayInputStream(bytes),
-                new Inflater(true));
-             ByteArrayOutputStream out = byteOutputStream) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Inflater inflater = new Inflater(true);
+        try (InflaterInputStream inflaterInputStream =
+                     new InflaterInputStream(new ByteArrayInputStream(bytes), inflater)) {
             byte[] buffer = new byte[1024];
-            int l;
-            while ((l = inflaterInputStream.read(buffer)) > 0) {
-                out.write(buffer, 0, l);
+            int length;
+            while ((length = inflaterInputStream.read(buffer)) != -1) {
+                if (length > MAX_DECOMPRESSED_BYTES - out.size()) {
+                    throw new JweCompressionException("Decompressed data exceeds the maximum size of "
+                            + MAX_DECOMPRESSED_BYTES + " bytes.");
+                }
+                out.write(buffer, 0, length);
             }
+            return out.toByteArray();
         } catch (IOException e) {
             throw new JweCompressionException("Failed to apply de-compression algorithm.", e);
+        } finally {
+            inflater.end();
         }
-
-        return byteOutputStream.toByteArray();
     }
 }

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.json.jose.common;
@@ -60,6 +61,7 @@ public class JwtReconstruction {
      * @return The reconstructed JWT object.
      * @throws InvalidJwtException If the jwt does not consist of the correct number of parts.
      * @throws JwtReconstructionException If the jwt does not consist of the correct number of parts.
+     * @throws ClassCastException If the JWT type is incompatible with the requested class.
      */
     public <T extends Jwt> T reconstructJwt(String jwtString, Class<T> jwtClass) {
 
@@ -87,24 +89,27 @@ public class JwtReconstruction {
         if (headerJson.isDefined(ENCRYPTION_METHOD)) {
             //is encrypted jwt
             verifyNumberOfParts(jwtParts, JWE_NUM_PARTS);
-            jwt = reconstructEncryptedJwt(jwtParts);
+            jwt = reconstructEncryptedJwt(jwtParts, jwtClass);
         } else if (JwtType.JWE == contentType || JwtType.JWT == contentType || JwtType.JWE == jwtType) {
             verifyNumberOfParts(jwtParts, JWS_NUM_PARTS);
+            verifyJwtClass(jwtClass, SignedEncryptedJwt.class);
             jwt = reconstructSignedEncryptedJwt(jwtParts);
-        } else if (headerJson.isDefined(ALGORITHM)) {
-            //is signed jwt
-            verifyNumberOfParts(jwtParts, JWS_NUM_PARTS);
-            jwt = reconstructSignedJwt(jwtParts);
         } else {
-            //plaintext jwt
             verifyNumberOfParts(jwtParts, JWS_NUM_PARTS);
-            if (!jwtParts[2].isEmpty()) {
+            if (!headerJson.isDefined(ALGORITHM) && !jwtParts[2].isEmpty()) {
                 throw new InvalidJwtException("Third part of Plaintext JWT not empty.");
             }
+            verifyJwtClass(jwtClass, SignedJwt.class);
             jwt = reconstructSignedJwt(jwtParts);
         }
 
         return jwtClass.cast(jwt);
+    }
+
+    private void verifyJwtClass(Class<? extends Jwt> requestedClass, Class<? extends Jwt> actualClass) {
+        if (!requestedClass.isAssignableFrom(actualClass)) {
+            throw new ClassCastException("Cannot cast " + actualClass.getName() + " to " + requestedClass.getName());
+        }
     }
 
     /**
@@ -153,9 +158,10 @@ public class JwtReconstruction {
      * Reconstructs an encrypted JWT from the given JWT string parts.
      *
      * @param jwtParts The five base64url UTF-8 encoded string parts of an encrypted JWT.
+     * @param jwtClass The requested JWT class.
      * @return An EncryptedJwt object.
      */
-    private EncryptedJwt reconstructEncryptedJwt(String[] jwtParts) {
+    private EncryptedJwt reconstructEncryptedJwt(String[] jwtParts, Class<? extends Jwt> jwtClass) {
 
         String encodedHeader = jwtParts[0];
         String encodedEncryptedKey = jwtParts[1];
@@ -163,17 +169,17 @@ public class JwtReconstruction {
         String encodedCiphertext = jwtParts[3];
         String encodedAuthenticationTag = jwtParts[4];
 
-
         String header = Utils.base64urlDecode(encodedHeader);
+        JweHeader jweHeader = new JweHeader(Utils.parseJson(header));
+        boolean hasNestedJwt = jweHeader.getContentType() != null;
+        verifyJwtClass(jwtClass, hasNestedJwt ? SignedThenEncryptedJwt.class : EncryptedJwt.class);
+
         byte[] encryptedContentEncryptionKey = Base64url.decode(encodedEncryptedKey);
         byte[] initialisationVector = Base64url.decode(encodedInitialisationVector);
         byte[] ciphertext = Base64url.decode(encodedCiphertext);
         byte[] authenticationTag = Base64url.decode(encodedAuthenticationTag);
 
-
-        JweHeader jweHeader = new JweHeader(Utils.parseJson(header));
-
-        if (jweHeader.getContentType() != null) {
+        if (hasNestedJwt) {
             return new SignedThenEncryptedJwt(jweHeader, encodedHeader, encryptedContentEncryptionKey,
                     initialisationVector, ciphertext, authenticationTag);
         } else {
@@ -205,7 +211,7 @@ public class JwtReconstruction {
         //split into parts
         String[] encryptedJwtParts = payloadString.split("\\.", -1);
         verifyNumberOfParts(encryptedJwtParts, JWE_NUM_PARTS);
-        EncryptedJwt encryptedJwt = reconstructEncryptedJwt(encryptedJwtParts);
+        EncryptedJwt encryptedJwt = reconstructEncryptedJwt(encryptedJwtParts, EncryptedJwt.class);
 
         Map<String, Object> combinedHeader = new HashMap<>(encryptedJwt.getHeader().getParameters());
         combinedHeader.putAll(Utils.parseJson(header));

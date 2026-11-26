@@ -12,21 +12,18 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright 2013-2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.json.jose.jwk;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.jose.jwt.JWObject;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Holds a Set of JWKs.
@@ -98,22 +95,18 @@ public class JWKSet extends JWObject {
     /**
      * Converts a json string to a jsonValue.
      * @param json a json jwk set object string
-     * @return a json value of the son string
+     * @return a JsonValue representing the JSON object
      * @throws JsonException if unable to parse
      */
     protected static JsonValue toJsonValue(String json) {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            return new JsonValue(mapper.readValue(json, Map.class));
-        } catch (IOException e) {
-            throw new JsonException("Failed to parse json", e);
-        }
+        return JWK.toJsonValue(json);
     }
 
     /**
      * Parses a JWKSet object from a string json object.
      * @param json string json object
      * @return a JWKSet
+     * @throws JsonException if the JSON cannot be parsed or exceeds the configured read limit
      */
     public static JWKSet parse(String json) {
         JsonValue jwkSet = new JsonValue(toJsonValue(json));

@@ -12,7 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
- * Portions Copyrighted 2026 3A Systems, LLC.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.json.jose.jwk;
@@ -24,6 +24,7 @@ import java.util.Map;
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.jose.jwt.JWObject;
+import org.forgerock.json.jose.utils.Utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -194,7 +195,7 @@ public abstract class JWK extends JWObject {
      * @throws org.forgerock.json.JsonException If there is a problem parsing the json String.
      */
     protected static JsonValue toJsonValue(String json) {
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = Utils.newObjectMapperWithReadLimits();
         try {
             return new JsonValue(mapper.readValue(json, Map.class));
         } catch (IOException e) {

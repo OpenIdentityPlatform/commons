@@ -28,6 +28,31 @@ The following JWE key wrapping/encryption modes are supported:
 * `A192KW`: AES KeyWrap with 192-bit key.
 * `A256KW`: AES KeyWrap with 256-bit key.
 
+## JWT Reading Limits
+
+The library limits `DEF` decompression to 1 MiB (1,048,576 bytes) by default when reconstructing a JWS whose payload is
+a JWT claims set or when decrypting a JWE, including a nested JWE. Larger decompressed payloads cause a
+`JweCompressionException`.
+
+The library also limits JSON headers and claims sets to 65,536 JSON tokens per document by default, whether or not the
+JWT uses compression. Exceeding this limit causes an `InvalidJwtException`.
+The same JSON token limit applies when parsing a JWK or an entire JWKS from a string.
+These parsers report limit violations as `JsonException`.
+
+You can set these limits with JVM system properties.
+
+| Property | Default |
+| --- | --- |
+| `org.openidentityplatform.jwt.maxDecompressedBytes` | 1,048,576 bytes |
+| `org.openidentityplatform.jwt.maxJsonTokens` | 65,536 JSON tokens |
+
+Set a positive integer at JVM startup to override a default. Missing, unreadable, malformed, or non-positive
+values use the default. A stricter Jackson token limit already in effect also applies.
+
+Both limits apply when reading previously issued tokens. Token builders can emit tokens that exceed either limit.
+Keep the serialized payload within the configured byte limit before compression, and the header and claims set
+within the configured JSON token limit.
+
 ## Encryption Performance
 
 Here are some figures on the space and time usage of the supported JWE encryption algorithms. All symmetric keys used

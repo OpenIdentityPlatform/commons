@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.json.jose.utils;
@@ -25,8 +26,10 @@ import java.util.Map;
 import org.forgerock.json.jose.exceptions.InvalidJwtException;
 import org.forgerock.util.encode.Base64url;
 
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -37,8 +40,11 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  */
 public final class Utils {
 
+    private static final long DEFAULT_MAX_JSON_TOKENS = 65_536;
+    private static final long MAX_JSON_TOKENS = getMaxJsonTokens();
+
     /** Cached JSON object mapper for parsing tokens. */
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+    private static final ObjectMapper OBJECT_MAPPER = newObjectMapperWithReadLimits()
             .configure(JsonParser.Feature.STRICT_DUPLICATE_DETECTION, true)
             .configure(SerializationFeature.INDENT_OUTPUT, false);
 
@@ -48,6 +54,32 @@ public final class Utils {
     /** Private constructor. */
     private Utils() {
         // Utility class
+    }
+
+    /**
+     * Creates a Jackson mapper with the configured JSON token limit for JWT and JWK documents.
+     *
+     * @return A mapper that also honors any stricter Jackson read constraints.
+     */
+    public static ObjectMapper newObjectMapperWithReadLimits() {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonFactory factory = mapper.getFactory();
+        StreamReadConstraints constraints = factory.streamReadConstraints();
+        long maxTokens = MAX_JSON_TOKENS;
+        if (constraints.hasMaxTokenCount()) {
+            maxTokens = Math.min(maxTokens, constraints.getMaxTokenCount());
+        }
+        factory.setStreamReadConstraints(constraints.rebuild().maxTokenCount(maxTokens).build());
+        return mapper;
+    }
+
+    private static long getMaxJsonTokens() {
+        try {
+            long limit = Long.getLong("org.openidentityplatform.jwt.maxJsonTokens", DEFAULT_MAX_JSON_TOKENS);
+            return limit > 0 ? limit : DEFAULT_MAX_JSON_TOKENS;
+        } catch (SecurityException e) {
+            return DEFAULT_MAX_JSON_TOKENS;
+        }
     }
 
     /**
@@ -103,7 +135,7 @@ public final class Utils {
      *
      * @param json The JSON string to parse.
      * @return A Map of the JSON properties.
-     * @throws InvalidJwtException if the json value is not well formed or contains duplicate keys.
+     * @throws InvalidJwtException if the JSON is not well formed, contains duplicate keys, or exceeds a read limit.
      */
     @SuppressWarnings("unchecked")
     public static Map<String, Object> parseJson(String json) {

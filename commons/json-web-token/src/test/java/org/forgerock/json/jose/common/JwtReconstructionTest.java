@@ -12,14 +12,21 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.json.jose.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.util.Collections;
+import java.util.List;
 
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
+import org.forgerock.json.jose.exceptions.InvalidJwtException;
 import org.forgerock.json.jose.helper.KeysHelper;
+import org.forgerock.json.jose.jwe.CompressionAlgorithm;
 import org.forgerock.json.jose.jwe.EncryptedJwt;
 import org.forgerock.json.jose.jwe.EncryptionMethod;
 import org.forgerock.json.jose.jwe.JweAlgorithm;
@@ -32,8 +39,12 @@ import org.forgerock.json.jose.jws.SigningManager;
 import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.json.jose.jwt.Jwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
+import org.forgerock.json.jose.utils.Utils;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import com.fasterxml.jackson.core.exc.StreamConstraintsException;
 
 public class JwtReconstructionTest {
 
@@ -41,6 +52,7 @@ public class JwtReconstructionTest {
     private static final String HEADER_VALUE = "header-value";
     private static final String CLAIM_KEY = "claim-key";
     private static final String CLAIM_VALUE = "claim-value";
+    private static final int MAX_JSON_TOKENS = 65_536;
 
     private JwtBuilderFactory jwtBuilderFactory;
 
@@ -92,6 +104,54 @@ public class JwtReconstructionTest {
         assertThat(signatureVerified).isTrue();
         assertThat(signedJwt.getHeader().getParameter(HEADER_KEY)).isEqualTo(HEADER_VALUE);
         assertThat(signedJwt.getClaimsSet().getClaim(CLAIM_KEY)).isEqualTo(CLAIM_VALUE);
+    }
+
+    @DataProvider
+    public Object[][] jwsCompressionAlgorithms() {
+        return new Object[][] {{CompressionAlgorithm.NONE}, {CompressionAlgorithm.DEF}};
+    }
+
+    @Test(dataProvider = "jwsCompressionAlgorithms")
+    public void acceptsSignedClaimsAtJsonTokenLimit(CompressionAlgorithm compression) {
+        // The object delimiters, field name and array delimiters take five tokens.
+        List<String> roles = Collections.nCopies(MAX_JSON_TOKENS - 5, "member");
+        String jwt = signedJwtWithRoles(roles, compression);
+
+        SignedJwt signedJwt = jwtBuilderFactory.reconstruct(jwt, SignedJwt.class);
+
+        assertThat(signedJwt.getClaimsSet().getClaim("roles")).isEqualTo(roles);
+    }
+
+    @Test(dataProvider = "jwsCompressionAlgorithms")
+    public void rejectsSignedClaimsOverJsonTokenLimit(CompressionAlgorithm compression) {
+        List<String> roles = Collections.nCopies(MAX_JSON_TOKENS - 4, "member");
+        String jwt = signedJwtWithRoles(roles, compression);
+
+        assertThatThrownBy(() -> jwtBuilderFactory.reconstruct(jwt, SignedJwt.class))
+                .isInstanceOf(InvalidJwtException.class)
+                .hasCauseInstanceOf(StreamConstraintsException.class);
+    }
+
+    @Test
+    public void rejectsIncompatibleJwtTypeBeforeParsingClaims() {
+        String header = Utils.base64urlEncode("{\"alg\":\"HS256\"}");
+        String malformedClaims = Utils.base64urlEncode("invalid JSON");
+        String jwt = header + "." + malformedClaims + ".";
+
+        assertThatThrownBy(() -> jwtBuilderFactory.reconstruct(jwt, EncryptedThenSignedJwt.class))
+                .isInstanceOf(ClassCastException.class);
+    }
+
+    private String signedJwtWithRoles(List<String> roles, CompressionAlgorithm compression) {
+        SigningHandler signingHandler = new SigningManager().newHmacSigningHandler(new byte[32]);
+        JwtClaimsSet claims = jwtBuilderFactory.claims().claim("roles", roles).build();
+        return jwtBuilderFactory.jws(signingHandler)
+                .headers()
+                    .alg(JwsAlgorithm.HS256)
+                    .zip(compression)
+                .done()
+                .claims(claims)
+                .build();
     }
 
     @Test
