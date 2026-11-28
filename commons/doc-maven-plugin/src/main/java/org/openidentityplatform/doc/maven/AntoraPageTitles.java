@@ -21,6 +21,7 @@ import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.Options;
 import org.asciidoctor.SafeMode;
 import org.asciidoctor.ast.Document;
+import org.asciidoctor.ast.Section;
 import org.asciidoctor.extension.IncludeProcessor;
 import org.asciidoctor.extension.PreprocessorReader;
 
@@ -56,8 +57,6 @@ final class AntoraPageTitles {
         // Parsing the full page can fall back to the first section heading.
         Options siteHeader = Options.builder().safe(SafeMode.SAFE)
                 .attributes(Map.of("env-site", "")).parseHeaderOnly(true).build();
-        Options siteHeaderWithoutTitleOverride = Options.builder().safe(SafeMode.SAFE)
-                .attributes(Map.of("env-site", "", "title!", "")).parseHeaderOnly(true).build();
         List<String> untitledPages = new ArrayList<>();
         try (Asciidoctor asciidoctor = Asciidoctor.Factory.create()) {
             asciidoctor.javaExtensionRegistry().includeProcessor(
@@ -65,9 +64,7 @@ final class AntoraPageTitles {
             for (Path page : pages) {
                 Path input = modulesDirectory.resolve(page);
                 Document document = asciidoctor.loadFile(input.toFile(), siteHeader);
-                // A :title: attribute can supply a title when the document header is missing.
-                if (!hasTitle(document) || (document.hasAttribute("title")
-                        && !hasTitle(asciidoctor.loadFile(input.toFile(), siteHeaderWithoutTitleOverride)))) {
+                if (!hasDocumentTitle(document)) {
                     untitledPages.add(page.toString());
                 }
             }
@@ -78,9 +75,13 @@ final class AntoraPageTitles {
         }
     }
 
-    private static boolean hasTitle(Document document) {
+    private static boolean hasDocumentTitle(Document document) {
         String title = document.getDoctitle();
-        return title != null && !title.isBlank();
+        // A :title: attribute can supply a resolved title even when the header is missing.
+        return title != null && !title.isBlank() && document.findBy(Map.of()).stream()
+                .filter(Section.class::isInstance)
+                .map(Section.class::cast)
+                .anyMatch(section -> "header".equals(section.getSectionName()));
     }
 
     private static final class RootPartialIncludeProcessor extends IncludeProcessor {

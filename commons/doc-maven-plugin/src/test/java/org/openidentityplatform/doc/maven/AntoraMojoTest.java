@@ -136,11 +136,14 @@ public class AntoraMojoTest extends AbstractMojoTestCase {
             Path reference = build.resolve("source/reference");
             Files.writeString(reference.resolve("section-only.adoc"), "== Section heading\n");
             Files.writeString(reference.resolve("title-only.adoc"), ":title: Title override\n\n== Section heading\n");
+            Files.writeString(reference.resolve("conditional-title.adoc"),
+                    ":title: Browser Title\nifdef::title[]\n= Heading\nendif::[]\n");
             mojo.buildDirectory = build.toFile();
 
             assertThatThrownBy(mojo::execute).isInstanceOf(MojoFailureException.class)
                     .hasMessageContaining(Path.of("reference/pages/section-only.adoc").toString())
                     .hasMessageContaining(Path.of("reference/pages/title-only.adoc").toString())
+                    .hasMessageNotContaining("conditional-title.adoc")
                     .hasMessageNotContaining("ch02.adoc");
             assertThat(build.resolve("antora/modules/ROOT/pages/index.adoc")).isRegularFile();
         } finally {
