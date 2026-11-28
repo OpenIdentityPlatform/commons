@@ -63,6 +63,10 @@ against the page that includes the list.
 The goal fails if the sources already contain
 `partials/documentation-list.adoc`.
 
+After generating the Antora modules, the `antora` goal checks the AsciiDoc
+header of every page with `env-site` set. A page without a document title fails
+the build, and Maven lists the affected paths relative to `modules`.
+
 Before adding the include to the site, publish the generated partial and ensure
 that every branch which can publish this product's documentation either provides
 the partial or cannot overwrite the published modules. In particular, an older

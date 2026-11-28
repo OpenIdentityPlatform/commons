@@ -27,6 +27,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -82,8 +83,9 @@ public class AntoraMojo extends AbstractAsciidocMojo {
                 convertDocForAntora(productPath, docDir);
             }
             createIndexForRoot();
-        } catch (IOException e) {
-            throw new MojoExecutionException("Error converting to antora: " + e);
+            AntoraPageTitles.validate(productPath);
+        } catch (IOException | UncheckedIOException e) {
+            throw new MojoExecutionException("Error converting to antora: " + e, e);
         }
     }
 
