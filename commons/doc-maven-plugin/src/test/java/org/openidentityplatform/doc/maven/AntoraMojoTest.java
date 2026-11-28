@@ -22,6 +22,7 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -69,9 +70,7 @@ public class AntoraMojoTest extends AbstractMojoTestCase {
         configureMojo(mojo, "doc-maven-plugin", getTestFile("src/test/resources/antora/pom.xml"));
         Path build = Files.createTempDirectory("antora-index-test");
         try {
-            FileUtils.copyDirectory(getTestFile("src/test/resources/asciidoc"), build.resolve("source").toFile());
-            Files.writeString(build.resolve("source/reference/index.adoc"), "= Reference\n\ninclude::./chapter.adoc[]\n");
-            Files.writeString(build.resolve("source/admin-guide/index.adoc"), "= Administration\n\ninclude::./chapter.adoc[]\n");
+            copyAntoraSource(build);
             mojo.buildDirectory = build.toFile();
             mojo.projectName = "OpenDJ";
             mojo.execute();
@@ -127,6 +126,40 @@ public class AntoraMojoTest extends AbstractMojoTestCase {
     }
 
     @Test
+    public void testExecuteRejectsGeneratedPagesWithoutDocumentTitles() throws Exception {
+        File pom = getTestFile("src/test/resources/antora/pom.xml");
+        AntoraMojo mojo = (AntoraMojo) lookupMojo("antora", pom);
+        configureMojo(mojo, "doc-maven-plugin", pom);
+        Path build = Files.createTempDirectory("antora-page-titles-test");
+        try {
+            copyAntoraSource(build);
+            Path reference = build.resolve("source/reference");
+            Files.writeString(reference.resolve("section-only.adoc"), "== Section heading\n");
+            Files.writeString(reference.resolve("title-only.adoc"), ":title: Title override\n\n== Section heading\n");
+            mojo.buildDirectory = build.toFile();
+
+            assertThatThrownBy(mojo::execute).isInstanceOf(MojoFailureException.class)
+                    .hasMessageContaining(Path.of("reference/pages/section-only.adoc").toString())
+                    .hasMessageContaining(Path.of("reference/pages/title-only.adoc").toString())
+                    .hasMessageNotContaining("ch02.adoc");
+            assertThat(build.resolve("antora/modules/ROOT/pages/index.adoc")).isRegularFile();
+        } finally {
+            FileUtils.deleteDirectory(build.toFile());
+        }
+    }
+
+    private void copyAntoraSource(Path build) throws Exception {
+        Path source = build.resolve("source");
+        FileUtils.copyDirectory(getTestFile("src/test/resources/asciidoc"), source.toFile());
+        Files.writeString(source.resolve("reference/index.adoc"), "= Reference\n\ninclude::./ch02.adoc[]\n");
+        Files.writeString(source.resolve("admin-guide/index.adoc"), "= Administration\n\ninclude::./chapter.adoc[]\n");
+        Files.writeString(source.resolve("reference/ch02.adoc"), "include::../partials/chapter-title.adoc[]\n"
+                + ":title: Chapter title override\n\n== A section\n");
+        Path partials = Files.createDirectory(source.resolve("partials"));
+        Files.writeString(partials.resolve("chapter-title.adoc"), "ifdef::env-site[]\n= Chapter 2\nendif::[]\n");
+    }
+
+    @Test
     public void testMavenUserPropertiesConfigureDocumentationList() throws Exception {
         File pom = getTestFile("src/test/resources/antora/pom.xml");
         MavenProject project;
@@ -140,10 +173,8 @@ public class AntoraMojoTest extends AbstractMojoTestCase {
         AntoraMojo mojo = (AntoraMojo) lookupConfiguredMojo(session, newMojoExecution("antora"));
         Path build = Files.createTempDirectory("antora-properties-test");
         try {
-            FileUtils.copyDirectory(getTestFile("src/test/resources/asciidoc"), build.resolve("source").toFile());
+            copyAntoraSource(build);
             mojo.buildDirectory = build.toFile();
-            Files.writeString(build.resolve("source/reference/index.adoc"), "= Reference\n\ninclude::./chapter.adoc[]\n");
-            Files.writeString(build.resolve("source/admin-guide/index.adoc"), "= Administration\n\ninclude::./chapter.adoc[]\n");
             mojo.projectName = "OpenDJ";
             setVariableValueToObject(mojo, "documents", List.of("reference", "admin-guide"));
             mojo.execute();
@@ -174,10 +205,8 @@ public class AntoraMojoTest extends AbstractMojoTestCase {
         AntoraMojo mojo = (AntoraMojo) lookupConfiguredMojo(project, "antora");
         Path build = Files.createTempDirectory("antora-properties-test");
         try {
-            FileUtils.copyDirectory(getTestFile("src/test/resources/asciidoc"), build.resolve("source").toFile());
+            copyAntoraSource(build);
             mojo.buildDirectory = build.toFile();
-            Files.writeString(build.resolve("source/reference/index.adoc"), "= Reference\n\ninclude::./chapter.adoc[]\n");
-            Files.writeString(build.resolve("source/admin-guide/index.adoc"), "= Administration\n\ninclude::./chapter.adoc[]\n");
             mojo.projectName = "OpenDJ";
             setVariableValueToObject(mojo, "documents", List.of("reference", "admin-guide"));
             mojo.execute();
